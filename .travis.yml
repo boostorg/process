@@ -1,85 +1,16 @@
-# Use, modification, and distribution are
-# subject to the Boost Software License, Version 1.0. (See accompanying
-# file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-#
-# Copyright Antony Polukhin 2014.
+language:
+    - cpp
 
-#
-# See https://svn.boost.org/trac/boost/wiki/TravisCoverals for description of this file
-# and how it can be used with Boost libraries.
-#
-
-os:
-    - linux
-
-env:
-    - CXX_STANDARD=c++98
-    - CXX_STANDARD=c++0x
+compiler:
+    - gcc
 
 before_install:
-    # Set this to the name of your Boost library
-    # Autodetect library name by using the following code: - PROJECT_TO_TEST=$(basename $(pwd))
-    - PROJECT_TO_TEST=$(basename $(pwd))
-
-    # Autodetect Boost branch by using the following code: - BRANCH_TO_TEST=`git rev-parse --abbrev-ref HEAD`
-    # or by - BRANCH_TO_TEST=$TRAVIS_BRANCH or just directly specify it
-    - BRANCH_TO_TEST=$TRAVIS_BRANCH
-
-    # Files, which coverage results must be ignored (files from other projects). Example: - IGNORE_COVERAGE='*/boost/progress.hpp */filesystem/src/path.cpp'
-    - IGNORE_COVERAGE=
-
-
-    # From this point and below code is same for all the Boost libs
-    # Cloning Boost libraries (fast nondeep cloning)
-    - PROJECT_DIR=`pwd`
-    - BOOST=$HOME/boost-local
-    - git init $BOOST
-    - cd $BOOST
-    - git remote add --no-tags -t $BRANCH_TO_TEST origin https://github.com/boostorg/boost.git
-    - git fetch --depth=1
-    - git checkout $BRANCH_TO_TEST
-    - git submodule update --init --merge
-    - git remote set-branches --add origin $BRANCH_TO_TEST
-    - git pull --recurse-submodules
-    - git submodule update --init
-    - git checkout $BRANCH_TO_TEST
-    - git submodule foreach "git reset --quiet --hard; git clean -fxd"
-    - git reset --hard; git clean -fxd
-    - git status
-    - rm -rf $BOOST/libs/$PROJECT_TO_TEST
-    - mv $PROJECT_DIR/../$PROJECT_TO_TEST/ $BOOST/libs/$PROJECT_TO_TEST
-    - PROJECT_DIR=$BOOST/libs/$PROJECT_TO_TEST
+    - wget -O boost_1_57_0.7z http://sourceforge.net/projects/boost/files/boost/1.57.0/boost_1_57_0.7z/download
+    - 7z x boost_1_57_0.7z
+    - cd boost_1_57_0
     - ./bootstrap.sh
-    - ./b2 headers
+    - cp -R ../boost/* boost
+    - cp -R ../libs/* libs
 
 script:
-    - if [ "$CCFLAGS" != "" ]; then FLAGS="cxxflags=\"$CCFLAGS\" linkflags=\"$LINKFLAGS\""; else FLAGS=""; fi
-    - cd $BOOST/libs/$PROJECT_TO_TEST/test/
-    # `--coverage` flags required to generate coverage info for Coveralls
-    - ../../../b2 cxxflags="--coverage -std=$CXX_STANDARD" linkflags="--coverage"
-
-after_success:
-    # Copying Coveralls data to a separate folder
-    - mkdir -p $PROJECT_DIR/coverals
-    - find ../../../bin.v2/ -name "*.gcda" -exec cp "{}" $PROJECT_DIR/coverals/ \;
-    - find ../../../bin.v2/ -name "*.gcno" -exec cp "{}" $PROJECT_DIR/coverals/ \;
-
-    # Preparing Coveralls data by
-    # ... installing the tools
-    - sudo apt-get install -qq python-yaml lcov
-    # ... changind data format to a readable one
-    - lcov --directory $PROJECT_DIR/coverals --base-directory ./ --capture --output-file $PROJECT_DIR/coverals/coverage.info
-
-    # ... erasing /test/ /example/ folder data
-    - cd $BOOST
-    - lcov --remove $PROJECT_DIR/coverals/coverage.info "/usr*" "*/$PROJECT_TO_TEST/test/*" $IGNORE_COVERAGE "*/$PROJECT_TO_TEST/tests/*" "*/$PROJECT_TO_TEST/examples/*" "*/$PROJECT_TO_TEST/example/*" -o $PROJECT_DIR/coverals/coverage.info
-
-    # ... erasing data that is not related to this project directly
-    - OTHER_LIBS=`grep "submodule .*" .gitmodules | sed 's/\[submodule\ "\(.*\)"\]/"\*\/boost\/\1\.hpp" "\*\/boost\/\1\/\*"/g'| sed "/\"\*\/boost\/$PROJECT_TO_TEST\/\*\"/d" | sed ':a;N;$!ba;s/\n/ /g'`
-    - echo $OTHER_LIBS
-    - eval "lcov --remove $PROJECT_DIR/coverals/coverage.info $OTHER_LIBS -o $PROJECT_DIR/coverals/coverage.info"
-
-    # Sending data to Coveralls
-    - cd $PROJECT_DIR
-    - gem install coveralls-lcov
-    - coveralls-lcov coverals/coverage.info
+    - cd boost_1_57_0/libs/process/test && ../../../b2
