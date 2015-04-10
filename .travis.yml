@@ -5,6 +5,7 @@ compiler:
     - gcc
 
 before_install:
+    - sudo apt-get install p7zip-full
     - wget -O boost_1_57_0.7z http://sourceforge.net/projects/boost/files/boost/1.57.0/boost_1_57_0.7z/download
     - 7z x boost_1_57_0.7z
     - cd boost_1_57_0
