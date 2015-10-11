@@ -13,21 +13,21 @@
 #include <boost/process/config.hpp>
 #include <boost/system/error_code.hpp>
 #include <cstdlib>
-#include <Windows.h>
+#include <boost/detail/winapi/process_api.hpp>
 
 namespace boost { namespace process { namespace windows {
 
 template <class Process>
 void terminate(const Process &p)
 {
-    if (!::TerminateProcess(p.process_handle(), EXIT_FAILURE))
+    if (!::boost::detail::winapi::TerminateProcess(p.process_handle(), EXIT_FAILURE))
         BOOST_PROCESS_THROW_LAST_SYSTEM_ERROR("TerminateProcess() failed");
 }
 
 template <class Process>
 void terminate(const Process &p, boost::system::error_code &ec)
 {
-    if (!::TerminateProcess(p.process_handle(), EXIT_FAILURE))
+    if (!::boost::detail::winapi::TerminateProcess(p.process_handle(), EXIT_FAILURE))
         BOOST_PROCESS_RETURN_LAST_SYSTEM_ERROR(ec);
     else
         ec.clear();

@@ -81,7 +81,6 @@ struct STARTUPINFOW_ {
   HANDLE_ hStdError;
 } ;
 
-#endif
 
 #if defined(UNICODE) || defined(_UNICODE)
 typedef STARTUPINFOW_ STARTUPINFO_;
@@ -102,6 +101,7 @@ struct STARTUPINFOEX_ {
   PROC_THREAD_ATTRIBUTE_LIST_* lpAttributeList;
 };
 
+#endif
 #endif
 }
 }}}

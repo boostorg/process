@@ -19,10 +19,11 @@ struct pipe
     boost::detail::winapi::HANDLE_ source;
     boost::detail::winapi::HANDLE_ sink;
 
-    pipe(HANDLE source, HANDLE sink) : source(source), sink(sink) {}
+    pipe(boost::detail::winapi::HANDLE_ source, boost::detail::winapi::HANDLE_ sink) : source(source), sink(sink) {}
 };
 
-inline pipe make_pipe(HANDLE source, HANDLE sink)
+inline pipe make_pipe(boost::detail::winapi::HANDLE_ source,
+					  boost::detail::winapi::HANDLE_ sink)
 {
     return pipe(source, sink);
 }

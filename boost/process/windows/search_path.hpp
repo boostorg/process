@@ -18,7 +18,9 @@
 #include <string>
 #include <stdexcept>
 #include <stdlib.h>
-#include <Shellapi.h>
+#include <boost/detail/winapi/shell_api.hpp>
+
+
 
 namespace boost { namespace process { namespace windows {
 
@@ -52,7 +54,7 @@ inline std::wstring search_path(const std::wstring &filename,
             boost::system::error_code ec;
             bool file = boost::filesystem::is_regular_file(p2, ec);
             if (!ec && file &&
-                SHGetFileInfoW(p2.c_str(), 0, 0, 0, SHGFI_EXETYPE))
+            		::boost::detail::winapi::SHGetFileInfoW(p2.c_str(), 0, 0, 0, ::boost::detail::winapi::shgfi_exetype))
             {
                 return p2.wstring();
             }
@@ -89,7 +91,7 @@ inline std::string search_path(const std::string &filename,
             boost::system::error_code ec;
             bool file = boost::filesystem::is_regular_file(p2, ec);
             if (!ec && file &&
-                SHGetFileInfoA(p2.string().c_str(), 0, 0, 0, SHGFI_EXETYPE))
+            	::boost::detail::winapi::SHGetFileInfoA(p2.string().c_str(), 0, 0, 0, ::boost::detail::winapi::shgfi_exetype))
             {
                 return p2.string();
             }

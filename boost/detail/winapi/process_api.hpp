@@ -34,7 +34,7 @@ using ::CreateProcessW;
 #else
 
 __declspec(dllimport) __declspec (noreturn) void WINAPI ExitProcess (unsigned int uExitCode);
-__declspec(dllimport) int WINAPI TerminateProcess (HANDLE_ hProcess, unsigned int uExitCode);
+__declspec(dllimport) int WINAPI TerminateProcess 	(HANDLE_ hProcess, unsigned int uExitCode);
 __declspec(dllimport) int WINAPI GetExitCodeProcess (HANDLE_ hProcess, DWORD_* lpExitCode);
 
 __declspec(dllimport) int WINAPI CreateProcessA (LPCSTR_ lpApplicationName,  LPSTR_ lpCommandLine, LPSECURITY_ATTRIBUTES_ lpProcessAttributes, LPSECURITY_ATTRIBUTES_ lpThreadAttributes, int bInheritHandles, DWORD_ dwCreationFlags, LPVOID_ lpEnvironment, LPCSTR_ lpCurrentDirectory,   STARTUPINFOA_* lpStartupInfo, PROCESS_INFORMATION_* lpProcessInformation);
@@ -42,7 +42,6 @@ __declspec(dllimport) int WINAPI CreateProcessW (LPCWSTR_ lpApplicationName, LPW
 
 }
 
-#endif
 
 #if defined(UNICODE) || defined(_UNICODE)
 inline int CreateProcess (LPCWSTR_ lpApplicationName, LPWSTR_ lpCommandLine, LPSECURITY_ATTRIBUTES_ lpProcessAttributes, LPSECURITY_ATTRIBUTES_ lpThreadAttributes, int bInheritHandles, DWORD_ dwCreationFlags, LPVOID_ lpEnvironment, LPCWSTR_ lpCurrentDirectory, STARTUPINFOW_* lpStartupInfo, PROCESS_INFORMATION_* lpProcessInformation)
@@ -54,6 +53,7 @@ inline int CreateProcess (LPCSTR_ lpApplicationName,  LPSTR_ lpCommandLine, LPSE
 {
 	return CreateProcessA (lpApplicationName, lpCommandLine, lpProcessAttributes, lpThreadAttributes, bInheritHandles, dwCreationFlags, lpEnvironment, lpCurrentDirectory,  lpStartupInfo,  lpProcessInformation);
 }
+#endif
 #endif
 
 }

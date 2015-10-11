@@ -26,8 +26,8 @@
 #   define BOOST_PROCESS_LAST_ERROR errno
 #   define BOOST_PROCESS_PLATFORM posix
 #elif defined(BOOST_WINDOWS_API)
-#   include <Windows.h>
-#   define BOOST_PROCESS_LAST_ERROR GetLastError()
+#   include <boost/detail/winapi/GetLastError.hpp>
+#   define BOOST_PROCESS_LAST_ERROR ::boost::detail::winapi::GetLastError()
 #   define BOOST_PROCESS_PLATFORM windows
 #endif
 
