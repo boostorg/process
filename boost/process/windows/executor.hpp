@@ -10,19 +10,23 @@
 #ifndef BOOST_PROCESS_WINDOWS_EXECUTOR_HPP
 #define BOOST_PROCESS_WINDOWS_EXECUTOR_HPP
 
+
+#include <cstring>
 #include <boost/process/windows/child.hpp>
 #include <boost/fusion/algorithm/iteration/for_each.hpp>
 #include <boost/detail/winapi/handles.hpp>
 #include <boost/detail/winapi/process_api.hpp>
+#include <boost/detail/winapi/tchar.hpp>
+#include <boost/detail/winapi/environment.hpp>
 
 namespace boost { namespace process { namespace windows {
 
 struct executor
 {
     executor() : exe(0), cmd_line(0), proc_attrs(0), thread_attrs(0),
-        inherit_handles(FALSE),
+        inherit_handles(false),
 #if (_WIN32_WINNT >= 0x0600)
-        creation_flags(EXTENDED_STARTUPINFO_PRESENT),
+        creation_flags(::boost::detail::winapi::extended_startupinfo_present),
 #else
         creation_flags(0),
 #endif
@@ -32,10 +36,10 @@ struct executor
 #endif
     {
 #if (_WIN32_WINNT >= 0x0600)
-        ZeroMemory(&startup_info_ex, sizeof(STARTUPINFOEX));
-        startup_info.cb = sizeof(STARTUPINFOEX);
+    	std::memset(&startup_info_ex, 0, sizeof(::boost::detail::winapi::STARTUPINFOEX_));
+        startup_info.cb = sizeof(::boost::detail::winapi::STARTUPINFOEX_);
 #else
-        ZeroMemory(&startup_info, sizeof(::boost::detail::winapi::STARTUPINFO_));
+        std::memset(&startup_info, 0, sizeof(::boost::detail::winapi::STARTUPINFO_));
         startup_info.cb = sizeof(::boost::detail::winapi::STARTUPINFO_);
 #endif
         startup_info.hStdInput  = ::boost::detail::winapi::invalid_handle_value;
@@ -109,14 +113,14 @@ struct executor
         return child(proc_info);
     }
 
-    ::boost::detail::winapi::LPCSTR_ exe;
-    ::boost::detail::winapi::LPSTR_ cmd_line;
+    const ::boost::detail::winapi::TCHAR_* exe;
+    ::boost::detail::winapi::TCHAR_* cmd_line;
     ::boost::detail::winapi::LPSECURITY_ATTRIBUTES_ proc_attrs;
     ::boost::detail::winapi::LPSECURITY_ATTRIBUTES_ thread_attrs;
     ::boost::detail::winapi::BOOL_ inherit_handles;
     ::boost::detail::winapi::DWORD_ creation_flags;
     ::boost::detail::winapi::LPVOID_ env;
-    ::boost::detail::winapi::LPCSTR_ work_dir;
+    const ::boost::detail::winapi::TCHAR_* work_dir;
 #if (_WIN32_WINNT >= 0x0600)
     ::boost::detail::winapi::STARTUPINFOEX_ startup_info_ex;
     ::boost::detail::winapi::STARTUPINFO_  &startup_info;

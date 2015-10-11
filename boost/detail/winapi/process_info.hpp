@@ -39,7 +39,7 @@ struct PROCESS_INFORMATION_
  };
 
 
-typedef struct STARTUPINFOA_ {
+struct STARTUPINFOA_ {
   DWORD_ cb;
   LPSTR_ lpReserved;
   LPSTR_ lpDesktop;
@@ -58,13 +58,13 @@ typedef struct STARTUPINFOA_ {
   HANDLE_ hStdInput;
   HANDLE_ hStdOutput;
   HANDLE_ hStdError;
-} ;
+};
 
 struct STARTUPINFOW_ {
   DWORD cb;
-  LPWSTR lpReserved;
-  LPWSTR lpDesktop;
-  LPWSTR lpTitle;
+  LPWSTR_ lpReserved;
+  LPWSTR_ lpDesktop;
+  LPWSTR_ lpTitle;
   DWORD_ dwX;
   DWORD_ dwY;
   DWORD_ dwXSize;

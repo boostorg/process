@@ -105,7 +105,7 @@ __declspec(dllimport) DWORD_* WINAPI SHGetFileInfoW (LPCWSTR_ pszPath, DWORD_ dw
 #endif
 
 
-#if defined(UNICODE) || definde(_UNICODE)
+#if defined(UNICODE) || defined(_UNICODE)
 typedef SHFILEINFOW_ SHFILEINFO_;
 inline DWORD_* SHGetFileInfo (LPCWSTR_ pszPath, DWORD_ dwFileAttributes, SHFILEINFOW_ *psfinsigned, unsigned int cbFileInfons, unsigned int uFlags)
 {

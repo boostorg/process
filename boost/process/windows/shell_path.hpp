@@ -20,8 +20,7 @@ namespace boost { namespace process { namespace windows {
 
 inline boost::filesystem::path shell_path()
 {
-	//260 is MAX_PATH but should be sufficient anyway.
-    char sysdir[260];
+    ::boost::detail::winapi::TCHAR_ sysdir[260];
     unsigned int size = ::boost::detail::winapi::GetSystemDirectory(sysdir, sizeof(sysdir));
     if (!size)
         BOOST_PROCESS_THROW_LAST_SYSTEM_ERROR("GetSystemDirectory() failed");
@@ -31,7 +30,8 @@ inline boost::filesystem::path shell_path()
 
 inline boost::filesystem::path shell_path(boost::system::error_code &ec)
 {
-	char sysdir[260];
+
+	::boost::detail::winapi::TCHAR_ sysdir[260];
     unsigned int size = ::boost::detail::winapi::GetSystemDirectory(sysdir, sizeof(sysdir));
     boost::filesystem::path p;
     if (!size)

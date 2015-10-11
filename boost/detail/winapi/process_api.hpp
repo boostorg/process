@@ -13,9 +13,6 @@
 #include <boost/detail/winapi/security.hpp>
 #include <boost/detail/winapi/process_info.hpp>
 
-//HANDLE_FLAG_INHERIT HANDLE_FLAG_INHERIT
-
-
 namespace boost
 {
 namespace detail
@@ -42,8 +39,7 @@ __declspec(dllimport) int WINAPI CreateProcessW (LPCWSTR_ lpApplicationName, LPW
 
 }
 
-
-#if defined(UNICODE) || defined(_UNICODE)
+#if defined(UNICODE)
 inline int CreateProcess (LPCWSTR_ lpApplicationName, LPWSTR_ lpCommandLine, LPSECURITY_ATTRIBUTES_ lpProcessAttributes, LPSECURITY_ATTRIBUTES_ lpThreadAttributes, int bInheritHandles, DWORD_ dwCreationFlags, LPVOID_ lpEnvironment, LPCWSTR_ lpCurrentDirectory, STARTUPINFOW_* lpStartupInfo, PROCESS_INFORMATION_* lpProcessInformation)
 {
 	return CreateProcessW (lpApplicationName, lpCommandLine, lpProcessAttributes, lpThreadAttributes, bInheritHandles, dwCreationFlags, lpEnvironment, lpCurrentDirectory,  lpStartupInfo,  lpProcessInformation);
@@ -53,8 +49,10 @@ inline int CreateProcess (LPCSTR_ lpApplicationName,  LPSTR_ lpCommandLine, LPSE
 {
 	return CreateProcessA (lpApplicationName, lpCommandLine, lpProcessAttributes, lpThreadAttributes, bInheritHandles, dwCreationFlags, lpEnvironment, lpCurrentDirectory,  lpStartupInfo,  lpProcessInformation);
 }
-#endif
-#endif
+
+#endif //UNICODE
+#endif //BOOST_USE_WINDOWS_H
+
 
 }
 

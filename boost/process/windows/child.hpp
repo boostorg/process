@@ -25,8 +25,8 @@ public:
 
     ~child()
     {
-        ::boots::detail::winapi::CloseHandle(proc_info.hProcess);
-        ::boots::detail::winapi::CloseHandle(proc_info.hThread);
+        ::boost::detail::winapi::CloseHandle(proc_info.hProcess);
+        ::boost::detail::winapi::CloseHandle(proc_info.hThread);
     }
 
     child(BOOST_RV_REF(child) c) : proc_info(c.proc_info)
@@ -37,15 +37,15 @@ public:
 
     child &operator=(BOOST_RV_REF(child) c)
     {
-        ::boots::detail::winapi::CloseHandle(proc_info.hProcess);
-        ::boots::detail::winapi::CloseHandle(proc_info.hThread);
+        ::boost::detail::winapi::CloseHandle(proc_info.hProcess);
+        ::boost::detail::winapi::CloseHandle(proc_info.hThread);
         proc_info = c.proc_info;
         c.proc_info.hProcess = ::boost::detail::winapi::invalid_handle_value;
         c.proc_info.hThread  = ::boost::detail::winapi::invalid_handle_value;
         return *this;
     }
 
-    HANDLE_ process_handle() const { return proc_info.hProcess; }
+    ::boost::detail::winapi::HANDLE_ process_handle() const { return proc_info.hProcess; }
 
 private:
     BOOST_MOVABLE_BUT_NOT_COPYABLE(child);

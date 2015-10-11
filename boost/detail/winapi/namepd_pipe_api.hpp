@@ -11,7 +11,6 @@
 #include <boost/detail/winapi/basic_types.hpp>
 #include <boost/detail/winapi/config.hpp>
 #include <boost/detail/winapi/security.hpp>
-#include <boost/detail/winapi/file_management.hpp>
 
 //HANDLE_FLAG_INHERIT HANDLE_FLAG_INHERIT
 
@@ -37,9 +36,24 @@ using ::WaitNamedPipeW;
 #if BOOST_USE_WINAPI_VERSION >= BOOST_WINAPI_VERSION_WIN6
 using ::GetNamedPipeClientComputerNameW;
 #endif
+using ::OVERLAPPED_;
+using ::LPOVERLAPPED_;
 #else
 
-typedef ::boost::detail::winapi::LPOVERLAPPED LPOVERLAPPED_;
+typedef struct OVERLAPPED_ {
+  ULONG_PTR_ Internal;
+  ULONG_PTR_ InternalHigh;
+  union {
+    struct {
+      DWORD_ Offset;
+      DWORD_ OffsetHigh;
+    } ;
+    PVOID_  Pointer;
+  } ;
+  HANDLE_    hEvent;
+};
+
+typedef OVERLAPPED_ *LPOVERLAPPED_;
 
 __declspec(import) int     WINAPI ImpersonateNamedPipeClient (HANDLE_ hNamedPipe);
 __declspec(import) int     WINAPI CreatePipe (HANDLE_* hReadPipe, HANDLE_* hWritePipe, LPSECURITY_ATTRIBUTES_ lpPipeAttributes, DWORD_ nSize);
@@ -78,7 +92,6 @@ inline int GetNamedPipeClientComputerName(HANDLE_ Pipe, LPWSTR ClientComputerNam
 }
 
 
-#endif
 
 }
 

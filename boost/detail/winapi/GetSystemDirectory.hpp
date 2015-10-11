@@ -23,18 +23,19 @@ extern "C" {
 
 using ::GetSystemDirectoryA;
 using ::GetSystemDirectoryW;
-
+typedef ::TCHAR TCHAR_;
 #else
 
 __declspec(dllimport) unsigned int WINAPI GetSystemDirectoryA (LPSTR_ lpBuffer,  unsigned int uSize);
 __declspec(dllimport) unsigned int WINAPI GetSystemDirectoryW (LPWSTR_ lpBuffer, unsigned int uSize);
 
 
-#if defined(UNICODE) || defined(_UNICODE)
+#if defined(UNICODE)
 inline unsigned int GetSystemDirectory (LPWSTR_ lpBuffer,  unsigned int uSize)
 {
 	return GetSystemDirectoryW(lpBuffer, uSize);
 }
+
 
 #else
 inline unsigned int GetSystemDirectory (LPSTR_ lpBuffer,  unsigned int uSize)
@@ -42,6 +43,7 @@ inline unsigned int GetSystemDirectory (LPSTR_ lpBuffer,  unsigned int uSize)
 	return GetSystemDirectoryA(lpBuffer, uSize);
 }
 
+#endif
 #endif
 }
 

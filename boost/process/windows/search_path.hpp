@@ -17,7 +17,7 @@
 #include <boost/system/error_code.hpp>
 #include <string>
 #include <stdexcept>
-#include <stdlib.h>
+#include <cstdlib>
 #include <boost/detail/winapi/shell_api.hpp>
 
 
