@@ -30,14 +30,14 @@ __declspec(dllimport) unsigned int WINAPI GetSystemDirectoryA (LPSTR_ lpBuffer, 
 __declspec(dllimport) unsigned int WINAPI GetSystemDirectoryW (LPWSTR_ lpBuffer, unsigned int uSize);
 
 
-#if defined(UNICODE)
+#if defined(UNICODE) && !defined(GetSystemDirectory)
 inline unsigned int GetSystemDirectory (LPWSTR_ lpBuffer,  unsigned int uSize)
 {
 	return GetSystemDirectoryW(lpBuffer, uSize);
 }
 
 
-#else
+#elif !defined(GetSystemDirectory)
 inline unsigned int GetSystemDirectory (LPSTR_ lpBuffer,  unsigned int uSize)
 {
 	return GetSystemDirectoryA(lpBuffer, uSize);

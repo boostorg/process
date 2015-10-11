@@ -25,7 +25,7 @@ extern "C" {
 typedef ::PROCESS_INFORMATION PROCESS_INFORMATION_;
 typedef ::STARTUPINFOA STARTUPINFOA_;
 typedef ::STARTUPINFOW STARTUPINFOW_;
-
+typedef ::STARTUPINFOEX STARTUPINFOEX;
 #else
 
 struct PROCESS_INFORMATION_
@@ -34,7 +34,7 @@ struct PROCESS_INFORMATION_
     HANDLE_ hThread;
     DWORD_ dwProcessId;
     DWORD_ dwThreadId;
- };
+};
 
 
 struct STARTUPINFOA_ {

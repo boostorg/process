@@ -19,7 +19,7 @@ namespace winapi
 {
 extern "C" {
 
-#if defined( BOOST_USE_WINDOWS_H )
+#if defined(BOOST_USE_WINDOWS_H)
 
 const DWORD_ debug_process                    = DEBUG_PROCESS                   ;
 const DWORD_ debug_only_this_process          = DEBUG_ONLY_THIS_PROCESS         ;
