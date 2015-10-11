@@ -11,7 +11,8 @@
 #define BOOST_PROCESS_WINDOWS_INITIALIZERS_CLOSE_STDOUT_HPP
 
 #include <boost/process/windows/initializers/initializer_base.hpp>
-#include <Windows.h>
+#include <boost/detail/winapi/startf.hpp>
+#include <boost/detail/winapi/handles.hpp>
 
 namespace boost { namespace process { namespace windows { namespace initializers {
 
@@ -21,8 +22,8 @@ public:
     template <class WindowsExecutor>
     void on_CreateProcess_setup(WindowsExecutor &e) const
     {
-        e.startup_info.hStdOutput = INVALID_HANDLE_VALUE;
-        e.startup_info.dwFlags |= STARTF_USESTDHANDLES;
+        e.startup_info.hStdOutput = boost::detail::winapi::invalid_handle_value;
+        e.startup_info.dwFlags 	 |= boost::detail::winapi::startf_usestdhandles;
     }
 };
 

@@ -20,7 +20,7 @@ namespace boost { namespace process { namespace windows {
 inline pipe create_pipe()
 {
     HANDLE handles[2];
-    if (!::CreatePipe(&handles[0], &handles[1], NULL, 0))
+    if (!::boost::detail::winapi::CreatePipe(&handles[0], &handles[1], nullptr, 0))
         BOOST_PROCESS_THROW_LAST_SYSTEM_ERROR("CreatePipe() failed");
     return make_pipe(handles[0], handles[1]);
 }
@@ -28,7 +28,7 @@ inline pipe create_pipe()
 inline pipe create_pipe(boost::system::error_code &ec)
 {
     HANDLE handles[2];
-    if (!::CreatePipe(&handles[0], &handles[1], NULL, 0))
+    if (!::boost::detail::winapi::CreatePipe(&handles[0], &handles[1], nullptr, 0))
         BOOST_PROCESS_RETURN_LAST_SYSTEM_ERROR(ec);
     else
         ec.clear();

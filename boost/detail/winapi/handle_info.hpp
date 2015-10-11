@@ -2,7 +2,7 @@
  * handleapi.hpp
  *
  *  Created on: 11.10.2015
- *      Author: Klemens
+ *      Author: Klemens Morgenstern
  */
 
 #ifndef BOOST_DETAIL_HANDLEAPI_HPP_

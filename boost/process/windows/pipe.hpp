@@ -10,14 +10,14 @@
 #ifndef BOOST_PROCESS_WINDOWS_PIPE_HPP
 #define BOOST_PROCESS_WINDOWS_PIPE_HPP
 
-#include <Windows.h>
+#include <boost/detail/winapi/basic_types.hpp>
 
 namespace boost { namespace process { namespace windows {
 
 struct pipe
 {
-    HANDLE source;
-    HANDLE sink;
+    boost::detail::winapi::HANDLE_ source;
+    boost::detail::winapi::HANDLE_ sink;
 
     pipe(HANDLE source, HANDLE sink) : source(source), sink(sink) {}
 };

@@ -10,7 +10,7 @@
 #ifndef BOOST_PROCESS_WINDOWS_INITIALIZERS_SET_ENV_HPP
 #define BOOST_PROCESS_WINDOWS_INITIALIZERS_SET_ENV_HPP
 
-#include <Windows.h>
+#include <boost/detail/winapi/environment.hpp>
 #include <boost/process/windows/initializers/initializer_base.hpp>
 #include <boost/range/numeric.hpp>
 #include <boost/range/algorithm/copy.hpp>
@@ -61,7 +61,7 @@ public:
     {
         e.env = env_.get();
         if (Unicode)
-            e.creation_flags |= CREATE_UNICODE_ENVIRONMENT;
+            e.creation_flags |= ::boost::detail::winapi::create_unicode_environment;
     }
 
 private:

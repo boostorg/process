@@ -11,40 +11,41 @@
 #define BOOST_PROCESS_WINDOWS_CHILD_HPP
 
 #include <boost/move/move.hpp>
-#include <Windows.h>
+#include <boost/detail/winapi/handles.hpp>
+#include <boost/detail/winapi/process_info.hpp>>
 
 namespace boost { namespace process { namespace windows {
 
 class child
 {
 public:
-    PROCESS_INFORMATION proc_info;
+    ::boost::detail::winapi::PROCESS_INFORMATION_ proc_info;
 
-    explicit child(const PROCESS_INFORMATION &pi) : proc_info(pi) {}
+    explicit child(const ::boost::detail::winapi::PROCESS_INFORMATION_ &pi) : proc_info(pi) {}
 
     ~child()
     {
-        ::CloseHandle(proc_info.hProcess);
-        ::CloseHandle(proc_info.hThread);
+        ::boots::detail::winapi::CloseHandle(proc_info.hProcess);
+        ::boots::detail::winapi::CloseHandle(proc_info.hThread);
     }
 
     child(BOOST_RV_REF(child) c) : proc_info(c.proc_info)
     {
-        c.proc_info.hProcess = INVALID_HANDLE_VALUE;
-        c.proc_info.hThread = INVALID_HANDLE_VALUE;
+        c.proc_info.hProcess = ::boost::detail::winapi::invalid_handle_value;
+        c.proc_info.hThread  = ::boost::detail::winapi::invalid_handle_value;
     }
 
     child &operator=(BOOST_RV_REF(child) c)
     {
-        ::CloseHandle(proc_info.hProcess);
-        ::CloseHandle(proc_info.hThread);
+        ::boots::detail::winapi::CloseHandle(proc_info.hProcess);
+        ::boots::detail::winapi::CloseHandle(proc_info.hThread);
         proc_info = c.proc_info;
-        c.proc_info.hProcess = INVALID_HANDLE_VALUE;
-        c.proc_info.hThread = INVALID_HANDLE_VALUE;
+        c.proc_info.hProcess = ::boost::detail::winapi::invalid_handle_value;
+        c.proc_info.hThread  = ::boost::detail::winapi::invalid_handle_value;
         return *this;
     }
 
-    HANDLE process_handle() const { return proc_info.hProcess; }
+    HANDLE_ process_handle() const { return proc_info.hProcess; }
 
 private:
     BOOST_MOVABLE_BUT_NOT_COPYABLE(child);

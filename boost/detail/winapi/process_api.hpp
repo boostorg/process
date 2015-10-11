@@ -2,14 +2,16 @@
  * HANDLE_api.hpp
  *
  *  Created on: 11.10.2015
- *      Author: Klemens
+ *      Author: Klemens Morgenstern
  */
 
-#ifndef BOOST_DETAIL_HANDLE_API_HPP_
-#define BOOST_DETAIL_HANDLE_API_HPP_
+#ifndef BOOST_DETAIL_PROCESS_API_HPP_
+#define BOOST_DETAIL_PROCESS_API_HPP_
 
 #include <boost/detail/winapi/basic_types.hpp>
 #include <boost/detail/winapi/config.hpp>
+#include <boost/detail/winapi/security.hpp>
+#include <boost/detail/winapi/process_info.hpp>
 
 //HANDLE_FLAG_INHERIT HANDLE_FLAG_INHERIT
 
@@ -26,16 +28,32 @@ extern "C" {
 using ::GetExitCodeProcess;
 using ::ExitProcess;
 using ::TerminateProcess;
+using ::CreateProcessA;
+using ::CreateProcessW;
 
 #else
 
-__declspec(dllimport) __declspec (noreturn) void WINAPI ExitProcess (UINT_ uExitCode);
-__declspec(dllimport) int WINAPI TerminateProcess (HANDLE_ hProcess, UINT_ uExitCode);
-__declspec(dllimport) int WINAPI GetExitCodeProcess (HANDLE_ hProcess, LPDWORD_ lpExitCode);
+__declspec(dllimport) __declspec (noreturn) void WINAPI ExitProcess (unsigned int uExitCode);
+__declspec(dllimport) int WINAPI TerminateProcess (HANDLE_ hProcess, unsigned int uExitCode);
+__declspec(dllimport) int WINAPI GetExitCodeProcess (HANDLE_ hProcess, DWORD_* lpExitCode);
+
+__declspec(dllimport) int WINAPI CreateProcessA (LPCSTR_ lpApplicationName,  LPSTR_ lpCommandLine, LPSECURITY_ATTRIBUTES_ lpProcessAttributes, LPSECURITY_ATTRIBUTES_ lpThreadAttributes, int bInheritHandles, DWORD_ dwCreationFlags, LPVOID_ lpEnvironment, LPCSTR_ lpCurrentDirectory,   STARTUPINFOA_* lpStartupInfo, PROCESS_INFORMATION_* lpProcessInformation);
+__declspec(dllimport) int WINAPI CreateProcessW (LPCWSTR_ lpApplicationName, LPWSTR_ lpCommandLine, LPSECURITY_ATTRIBUTES_ lpProcessAttributes, LPSECURITY_ATTRIBUTES_ lpThreadAttributes, int bInheritHandles, DWORD_ dwCreationFlags, LPVOID_ lpEnvironment, LPCWSTR_ lpCurrentDirectory, STARTUPINFOW_* lpStartupInfo, PROCESS_INFORMATION_* lpProcessInformation);
 
 }
 
+#endif
 
+#if defined(UNICODE) || defined(_UNICODE)
+inline int CreateProcess (LPCWSTR_ lpApplicationName, LPWSTR_ lpCommandLine, LPSECURITY_ATTRIBUTES_ lpProcessAttributes, LPSECURITY_ATTRIBUTES_ lpThreadAttributes, int bInheritHandles, DWORD_ dwCreationFlags, LPVOID_ lpEnvironment, LPCWSTR_ lpCurrentDirectory, STARTUPINFOW_* lpStartupInfo, PROCESS_INFORMATION_* lpProcessInformation)
+{
+	return CreateProcessW (lpApplicationName, lpCommandLine, lpProcessAttributes, lpThreadAttributes, bInheritHandles, dwCreationFlags, lpEnvironment, lpCurrentDirectory,  lpStartupInfo,  lpProcessInformation);
+}
+#else
+inline int CreateProcess (LPCSTR_ lpApplicationName,  LPSTR_ lpCommandLine, LPSECURITY_ATTRIBUTES_ lpProcessAttributes, LPSECURITY_ATTRIBUTES_ lpThreadAttributes, int bInheritHandles, DWORD_ dwCreationFlags, LPVOID_ lpEnvironment, LPCSTR_ lpCurrentDirectory,   STARTUPINFOA_* lpStartupInfo, PROCESS_INFORMATION_* lpProcessInformation)
+{
+	return CreateProcessA (lpApplicationName, lpCommandLine, lpProcessAttributes, lpThreadAttributes, bInheritHandles, dwCreationFlags, lpEnvironment, lpCurrentDirectory,  lpStartupInfo,  lpProcessInformation);
+}
 #endif
 
 }

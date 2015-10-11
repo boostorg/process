@@ -2,13 +2,14 @@
  * startf.hpp
  *
  *  Created on: 11.10.2015
- *      Author: Klemens
+ *      Author: Klemens Morgenstern
  */
 
 #ifndef BOOST_DETAIL_WINAPI_STARTF_HPP_
 #define BOOST_DETAIL_WINAPI_STARTF_HPP_
 
 #include <boost/detail/winapi/basic_types.hpp>
+#include <boost/detail/winapi/config.hpp>
 
 
 namespace boost
