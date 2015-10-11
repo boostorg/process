@@ -10,10 +10,10 @@
 #ifndef BOOST_PROCESS_WINDOWS_CREATE_PIPE_HPP
 #define BOOST_PROCESS_WINDOWS_CREATE_PIPE_HPP
 
+#include <boost/detail/winapi/named_pipe_api.hpp>
 #include <boost/process/config.hpp>
 #include <boost/process/windows/pipe.hpp>
 #include <boost/system/error_code.hpp>
-#include <boost/detail/winapi/namepd_pipe_api.hpp>
 
 namespace boost { namespace process { namespace windows {
 

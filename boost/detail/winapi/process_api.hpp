@@ -8,8 +8,8 @@
 #ifndef BOOST_DETAIL_PROCESS_API_HPP_
 #define BOOST_DETAIL_PROCESS_API_HPP_
 
-#include <boost/detail/winapi/basic_types.hpp>
 #include <boost/detail/winapi/config.hpp>
+#include <boost/detail/winapi/basic_types.hpp>
 #include <boost/detail/winapi/security.hpp>
 #include <boost/detail/winapi/process_info.hpp>
 

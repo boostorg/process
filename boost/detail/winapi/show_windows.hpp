@@ -8,8 +8,6 @@
 #ifndef BOOST_DETAIL_WINAPI_SHOW_WINDOWS_HPP_
 #define BOOST_DETAIL_WINAPI_SHOW_WINDOWS_HPP_
 
-
-
 #include <boost/detail/winapi/basic_types.hpp>
 #include <boost/detail/winapi/config.hpp>
 

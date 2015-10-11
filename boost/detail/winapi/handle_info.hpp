@@ -12,8 +12,6 @@
 #include <boost/detail/winapi/config.hpp>
 #include <boost/detail/winapi/handles.hpp>
 
-//HANDLE_FLAG_INHERIT HANDLE_FLAG_INHERIT
-
 
 namespace boost
 {

@@ -15,7 +15,6 @@
 #include <boost/iostreams/device/file_descriptor.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <string>
-#include <Windows.h>
 
 namespace bp = boost::process;
 namespace bpi = boost::process::initializers;

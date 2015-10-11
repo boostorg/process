@@ -7,6 +7,8 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
+#define BOOST_USE_WINDOWS_H
+
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string/join.hpp>
@@ -27,6 +29,7 @@
 #elif defined(BOOST_WINDOWS_API)
 #   include <Windows.h>
 #endif
+
 
 using namespace boost::program_options;
 

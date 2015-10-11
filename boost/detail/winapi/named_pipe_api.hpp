@@ -5,14 +5,12 @@
  *      Author: Klemens Morgenstern
  */
 
-#ifndef BOOST_DETAIL_WINAPI_NAMEPD_PIPE_API_HPP_
-#define BOOST_DETAIL_WINAPI_NAMEPD_PIPE_API_HPP_
+#ifndef BOOST_DETAIL_WINAPI_NAMED_PIPE_API_HPP_
+#define BOOST_DETAIL_WINAPI_NAMED_PIPE_API_HPP_
 
 #include <boost/detail/winapi/basic_types.hpp>
 #include <boost/detail/winapi/config.hpp>
 #include <boost/detail/winapi/security.hpp>
-
-//HANDLE_FLAG_INHERIT HANDLE_FLAG_INHERIT
 
 
 namespace boost
@@ -40,7 +38,7 @@ using ::OVERLAPPED_;
 using ::LPOVERLAPPED_;
 #else
 
-typedef struct OVERLAPPED_ {
+struct OVERLAPPED_ {
   ULONG_PTR_ Internal;
   ULONG_PTR_ InternalHigh;
   union {
@@ -55,15 +53,16 @@ typedef struct OVERLAPPED_ {
 
 typedef OVERLAPPED_ *LPOVERLAPPED_;
 
-__declspec(import) int     WINAPI ImpersonateNamedPipeClient (HANDLE_ hNamedPipe);
-__declspec(import) int     WINAPI CreatePipe (HANDLE_* hReadPipe, HANDLE_* hWritePipe, LPSECURITY_ATTRIBUTES_ lpPipeAttributes, DWORD_ nSize);
-__declspec(import) int     WINAPI ConnectNamedPipe (HANDLE_ hNamedPipe, LPOVERLAPPED_ lpOverlapped);
-__declspec(import) int     WINAPI DisconnectNamedPipe (HANDLE_ hNamedPipe);
-__declspec(import) int     WINAPI SetNamedPipeHandleState (HANDLE_ hNamedPipe, DWORD_* lpMode, DWORD_* lpMaxCollectionCount, DWORD_* lpCollectDataTimeout);
-__declspec(import) int     WINAPI PeekNamedPipe (HANDLE_ hNamedPipe, LPVOID_ lpBuffer, DWORD_ nBufferSize, DWORD_* lpBytesRead, DWORD_* lpTotalBytesAvail, DWORD_* lpBytesLeftThisMessage);
-__declspec(import) int     WINAPI TransactNamedPipe (HANDLE_ hNamedPipe, LPVOID_ lpInBuffer, DWORD_ nInBufferSize, LPVOID_ lpOutBuffer, DWORD_ nOutBufferSize, DWORD_* lpBytesRead, LPOVERLAPPED_ lpOverlapped);
-__declspec(import) HANDLE_ WINAPI CreateNamedPipeW (LPCWSTR_ lpName, DWORD_ dwOpenMode, DWORD_ dwPipeMode, DWORD_ nMaxInstances, DWORD_ nOutBufferSize, DWORD_ nInBufferSize, DWORD_ nDefaultTimeOut, LPSECURITY_ATTRIBUTES_ lpSecurityAttributes);
-__declspec(import) int 	   WINAPI WaitNamedPipeW (LPCWSTR_ lpNamedPipeName, DWORD_ nTimeOut);
+__declspec(dllimport) int     WINAPI ImpersonateNamedPipeClient (HANDLE_ hNamedPipe);
+__declspec(dllimport) int     WINAPI CreatePipe (HANDLE_* hReadPipe, HANDLE_* hWritePipe, LPSECURITY_ATTRIBUTES_ lpPipeAttributes, DWORD_ nSize);
+__declspec(dllimport) int     WINAPI ConnectNamedPipe (HANDLE_ hNamedPipe, LPOVERLAPPED_ lpOverlapped);
+__declspec(dllimport) int     WINAPI DisconnectNamedPipe (HANDLE_ hNamedPipe);
+__declspec(dllimport) int     WINAPI SetNamedPipeHandleState (HANDLE_ hNamedPipe, DWORD_* lpMode, DWORD_* lpMaxCollectionCount, DWORD_* lpCollectDataTimeout);
+__declspec(dllimport) int     WINAPI PeekNamedPipe (HANDLE_ hNamedPipe, LPVOID_ lpBuffer, DWORD_ nBufferSize, DWORD_* lpBytesRead, DWORD_* lpTotalBytesAvail, DWORD_* lpBytesLeftThisMessage);
+__declspec(dllimport) int     WINAPI TransactNamedPipe (HANDLE_ hNamedPipe, LPVOID_ lpInBuffer, DWORD_ nInBufferSize, LPVOID_ lpOutBuffer, DWORD_ nOutBufferSize, DWORD_* lpBytesRead, LPOVERLAPPED_ lpOverlapped);
+__declspec(dllimport) HANDLE_ WINAPI CreateNamedPipeW (LPCWSTR_ lpName, DWORD_ dwOpenMode, DWORD_ dwPipeMode, DWORD_ nMaxInstances, DWORD_ nOutBufferSize, DWORD_ nInBufferSize, DWORD_ nDefaultTimeOut, LPSECURITY_ATTRIBUTES_ lpSecurityAttributes);
+__declspec(dllimport) int 	   WINAPI WaitNamedPipeW (LPCWSTR_ lpNamedPipeName, DWORD_ nTimeOut);
+
 #if BOOST_USE_WINAPI_VERSION >= BOOST_WINAPI_VERSION_WIN6
   WINBASEAPI int WINAPI GetNamedPipeClientComputerNameW (HANDLE_ Pipe, LPWSTR ClientComputerName, ULONG ClientComputerNameLength);
 #endif
@@ -99,4 +98,4 @@ inline int GetNamedPipeClientComputerName(HANDLE_ Pipe, LPWSTR ClientComputerNam
 }
 
 
-#endif /* BOOST_DETAIL_WINAPI_NAMEPD_PIPE_API_HPP_ */
+#endif /* BOOST_DETAIL_WINAPI_NAMED_PIPE_API_HPP_ */
