@@ -34,8 +34,8 @@ using ::WaitNamedPipeW;
 #if BOOST_USE_WINAPI_VERSION >= BOOST_WINAPI_VERSION_WIN6
 using ::GetNamedPipeClientComputerNameW;
 #endif
-using ::OVERLAPPED_;
-using ::LPOVERLAPPED_;
+typedef ::OVERLAPPED   OVERLAPPED_;
+typedef ::LPOVERLAPPED LPOVERLAPPED_;
 #else
 
 struct OVERLAPPED_ {
@@ -64,7 +64,7 @@ __declspec(dllimport) HANDLE_ WINAPI CreateNamedPipeW (LPCWSTR_ lpName, DWORD_ d
 __declspec(dllimport) int 	  WINAPI WaitNamedPipeW (LPCWSTR_ lpNamedPipeName, DWORD_ nTimeOut);
 
 #if BOOST_USE_WINAPI_VERSION >= BOOST_WINAPI_VERSION_WIN6
-  WINBASEAPI int WINAPI GetNamedPipeClientComputerNameW (HANDLE_ Pipe, LPWSTR ClientComputerName, ULONG ClientComputerNameLength);
+  WINBASEAPI int WINAPI GetNamedPipeClientComputerNameW (HANDLE_ Pipe, LPWSTR_ ClientComputerName, ULONG_ ClientComputerNameLength);
 #endif
 
 #if defined(UNICODE) && !defined(CreateNamedPipe) && !defined(WaitNamedPipe)

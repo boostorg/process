@@ -9,7 +9,7 @@
 #define BOOST_DETAIL_WINAPI_GETSYSTEMDIRECTORY_HPP_
 
 #include <boost/detail/winapi/basic_types.hpp>
-
+#include <boost/detail/winapi/tchar.hpp>
 
 namespace boost
 {
@@ -23,7 +23,6 @@ extern "C" {
 
 using ::GetSystemDirectoryA;
 using ::GetSystemDirectoryW;
-typedef ::TCHAR TCHAR_;
 #else
 
 __declspec(dllimport) unsigned int WINAPI GetSystemDirectoryA (LPSTR_ lpBuffer,  unsigned int uSize);

@@ -80,7 +80,7 @@ struct STARTUPINFOW_ {
 } ;
 
 
-#if defined(UNICODE) || defined(_UNICODE)
+#if defined(UNICODE)
 typedef STARTUPINFOW_ STARTUPINFO_;
 #else
 typedef STARTUPINFOA_ STARTUPINFO_;
@@ -91,12 +91,12 @@ typedef ::STARTUPINFOEX STARTUPINFOEX_;
 
 #else
 
-struct PROC_THREAD_ATTRIBUTE_LIST_ {};
+typedef struct PROC_THREAD_ATTRIBUTE_LIST_ *PPROC_THREAD_ATTRIBUTE_LIST_;
 
 
 struct STARTUPINFOEX_ {
   STARTUPINFO_                 StartupInfo;
-  PROC_THREAD_ATTRIBUTE_LIST_* lpAttributeList;
+  PPROC_THREAD_ATTRIBUTE_LIST_ lpAttributeList;
 };
 
 #endif

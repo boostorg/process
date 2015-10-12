@@ -48,7 +48,8 @@ using ::SHGetFileInfoW;
 
 typedef ::SHFILEINFOA SHFILEINFOA_;
 typedef ::SHFILEINFOW SHFILEINFOW_;
-
+typedef ::ICON   ICON_;
+typedef ::HICON HICON_;
 #else
 
 struct ICON_ {};
