@@ -20,7 +20,7 @@ namespace boost { namespace process { namespace posix {
 
 struct executor
 {
-    executor() : exe(0), cmd_line(0), env(0) {}
+    executor() : exe(0), cmd_line(0), env(0), pid(-1) {}
 
     struct call_on_fork_setup
     {
@@ -92,7 +92,7 @@ struct executor
     {
         boost::fusion::for_each(seq, call_on_fork_setup(*this));
 
-        pid_t pid = ::fork();
+        pid = ::fork();
         if (pid == -1)
         {
             boost::fusion::for_each(seq, call_on_fork_error(*this));
@@ -113,6 +113,7 @@ struct executor
     const char *exe;
     char **cmd_line;
     char **env;
+    pid_t pid;
 };
 
 }}}
