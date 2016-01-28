@@ -13,7 +13,7 @@
 #include <boost/process/windows/initializers/initializer_base.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
 #include <boost/detail/winapi/handle_info.hpp>
-#include <boost/detail/winapi/startf.hpp>
+#include <boost/detail/winapi/process.hpp>
 
 namespace boost { namespace process { namespace windows { namespace initializers {
 
@@ -26,10 +26,10 @@ public:
     void on_CreateProcess_setup(WindowsExecutor &e) const
     {
         ::boost::detail::winapi::SetHandleInformation(source_.handle(),
-        		::boost::detail::winapi::handle_flag_inherit,
-				::boost::detail::winapi::handle_flag_inherit);
+        		::boost::detail::winapi::HANDLE_FLAG_INHERIT_,
+				::boost::detail::winapi::HANDLE_FLAG_INHERIT_);
         e.startup_info.hStdInput = source_.handle();
-        e.startup_info.dwFlags |= ::boost::detail::winapi::startf_usestdhandles;
+        e.startup_info.dwFlags |= ::boost::detail::winapi::STARTF_USESTDHANDLES_;
         e.inherit_handles = true;
     }
 

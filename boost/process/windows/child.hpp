@@ -12,7 +12,7 @@
 
 #include <boost/move/move.hpp>
 #include <boost/detail/winapi/handles.hpp>
-#include <boost/detail/winapi/process_info.hpp>>
+#include <boost/detail/winapi/process.hpp>
 
 namespace boost { namespace process { namespace windows {
 

@@ -13,7 +13,7 @@
 #include <boost/process/config.hpp>
 #include <boost/system/error_code.hpp>
 #include <boost/detail/winapi/synchronization.hpp>
-#include <boost/detail/winapi/process_api.hpp>
+#include <boost/detail/winapi/process.hpp>
 
 namespace boost { namespace process { namespace windows {
 

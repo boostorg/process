@@ -11,8 +11,8 @@
 #define BOOST_PROCESS_WINDOWS_INITIALIZERS_HIDE_CONSOLE_HPP
 
 #include <boost/process/windows/initializers/initializer_base.hpp>
-#include <boost/detail/winapi/startf.hpp>
-#include <boost/detail/winapi/show_windows.hpp>
+#include <boost/detail/winapi/process.hpp>
+#include <boost/detail/winapi/ShowWindow.hpp>
 
 namespace boost { namespace process { namespace windows { namespace initializers {
 
@@ -22,8 +22,8 @@ public:
     template <class WindowsExecutor>
     void on_CreateProcess_setup(WindowsExecutor &e) const
     {
-        e.startup_info.dwFlags |= ::boost::detail::winapi::startf_useshowwindow;
-        e.startup_info.wShowWindow |= ::boost::detail::winapi::sw_hide;
+        e.startup_info.dwFlags |= ::boost::detail::winapi::STARTF_USESHOWWINDOW_;
+        e.startup_info.wShowWindow |= ::boost::detail::winapi::SW_HIDE_;
     }
 };
 

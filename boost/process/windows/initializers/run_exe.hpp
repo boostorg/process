@@ -32,7 +32,6 @@ private:
     String s_;
 };
 
-#if defined(_UNICODE) || defined(UNICODE)
 inline run_exe_<std::wstring> run_exe(const wchar_t *ws)
 {
     return run_exe_<std::wstring>(ws);
@@ -47,7 +46,7 @@ inline run_exe_<std::wstring> run_exe(const boost::filesystem::path &p)
 {
     return run_exe_<std::wstring>(p.wstring());
 }
-#else
+#if !defined(BOOST_NO_ANSI_APIS)
 inline run_exe_<std::string> run_exe(const char *s)
 {
     return run_exe_<std::string>(s);
@@ -62,7 +61,7 @@ inline run_exe_<std::string> run_exe(const boost::filesystem::path &p)
 {
     return run_exe_<std::string>(p.string());
 }
-#endif
+#endif // BOOST_NO_ANSI_APIS
 
 }}}}
 

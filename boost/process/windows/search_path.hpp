@@ -18,15 +18,15 @@
 #include <string>
 #include <stdexcept>
 #include <cstdlib>
-#include <boost/detail/winapi/shell_api.hpp>
+#include <boost/detail/winapi/shell.hpp>
 
 
 
 namespace boost { namespace process { namespace windows {
 
-#if defined(_UNICODE) || defined(UNICODE)
-inline std::wstring search_path(const std::wstring &filename,
-    std::wstring path = L"")
+inline std::wstring search_path(
+        const std::wstring &filename,
+        std::wstring path = L"")
 {
     if (path.empty())
     {
@@ -54,7 +54,7 @@ inline std::wstring search_path(const std::wstring &filename,
             boost::system::error_code ec;
             bool file = boost::filesystem::is_regular_file(p2, ec);
             if (!ec && file &&
-            		::boost::detail::winapi::SHGetFileInfoW(p2.c_str(), 0, 0, 0, ::boost::detail::winapi::shgfi_exetype))
+            		::boost::detail::winapi::sh_get_file_info(p2.c_str(), 0, 0, 0, ::boost::detail::winapi::SHGFI_EXETYPE_))
             {
                 return p2.wstring();
             }
@@ -62,9 +62,11 @@ inline std::wstring search_path(const std::wstring &filename,
     }
     return L"";
 }
-#else
-inline std::string search_path(const std::string &filename,
-    std::string path = "")
+
+#if !defined( BOOST_NO_ANSI_APIS )
+inline std::string search_path(
+        const std::string &filename,
+        std::string path = "")
 {
     if (path.empty())
     {
@@ -91,7 +93,7 @@ inline std::string search_path(const std::string &filename,
             boost::system::error_code ec;
             bool file = boost::filesystem::is_regular_file(p2, ec);
             if (!ec && file &&
-            	::boost::detail::winapi::SHGetFileInfoA(p2.string().c_str(), 0, 0, 0, ::boost::detail::winapi::shgfi_exetype))
+            	::boost::detail::winapi::sh_get_file_info(p2.string().c_str(), 0, 0, 0, ::boost::detail::winapi::SHGFI_EXETYPE_))
             {
                 return p2.string();
             }
@@ -99,7 +101,7 @@ inline std::string search_path(const std::string &filename,
     }
     return "";
 }
-#endif
+#endif //BOOST_NO_ANSI_APIS
 
 }}}
 

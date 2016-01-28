@@ -10,6 +10,7 @@
 #ifndef BOOST_PROCESS_WINDOWS_INITIALIZERS_SET_CMD_LINE_HPP
 #define BOOST_PROCESS_WINDOWS_INITIALIZERS_SET_CMD_LINE_HPP
 
+#include <boost/detail/winapi/config.hpp>
 #include <boost/process/windows/initializers/initializer_base.hpp>
 #include <boost/range/algorithm/copy.hpp>
 #include <boost/shared_array.hpp>
@@ -41,7 +42,6 @@ private:
     boost::shared_array<Char> cmd_line_;
 };
 
-#if defined(_UNICODE) || defined(UNICODE)
 inline set_cmd_line_<std::wstring> set_cmd_line(const wchar_t *ws)
 {
     return set_cmd_line_<std::wstring>(ws);
@@ -51,7 +51,7 @@ inline set_cmd_line_<std::wstring> set_cmd_line(const std::wstring &ws)
 {
     return set_cmd_line_<std::wstring>(ws);
 }
-#else
+#if !defined( BOOST_NO_ANSI_APIS )
 inline set_cmd_line_<std::string> set_cmd_line(const char *s)
 {
     return set_cmd_line_<std::string>(s);
@@ -61,7 +61,7 @@ inline set_cmd_line_<std::string> set_cmd_line(const std::string &s)
 {
     return set_cmd_line_<std::string>(s);
 }
-#endif
+#endif //BOOST_NO_ANSI_APIS
 
 }}}}
 

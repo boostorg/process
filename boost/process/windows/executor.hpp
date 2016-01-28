@@ -15,8 +15,7 @@
 #include <boost/process/windows/child.hpp>
 #include <boost/fusion/algorithm/iteration/for_each.hpp>
 #include <boost/detail/winapi/handles.hpp>
-#include <boost/detail/winapi/process_api.hpp>
-#include <boost/detail/winapi/tchar.hpp>
+#include <boost/detail/winapi/process.hpp>
 #include <boost/detail/winapi/environment.hpp>
 
 namespace boost { namespace process { namespace windows {
@@ -36,11 +35,11 @@ struct executor
 #endif
     {
 #if (_WIN32_WINNT >= 0x0600)
-    	std::memset(&startup_info_ex, 0, sizeof(::boost::detail::winapi::STARTUPINFOEX_));
-        startup_info.cb = sizeof(::boost::detail::winapi::STARTUPINFOEX_);
+    	std::memset(&startup_info_ex, 0, sizeof(::boost::detail::winapi::STARTUPINFOEXW_));
+        startup_info.cb = sizeof(::boost::detail::winapi::STARTUPINFOEXW_);
 #else
-        std::memset(&startup_info, 0, sizeof(::boost::detail::winapi::STARTUPINFO_));
-        startup_info.cb = sizeof(::boost::detail::winapi::STARTUPINFO_);
+        std::memset(&startup_info, 0, sizeof(::boost::detail::winapi::STARTUPINFOW_));
+        startup_info.cb = sizeof(::boost::detail::winapi::STARTUPINFOW_);
 #endif
         startup_info.hStdInput  = ::boost::detail::winapi::invalid_handle_value;
         startup_info.hStdOutput = ::boost::detail::winapi::invalid_handle_value;
@@ -91,7 +90,7 @@ struct executor
     {
         boost::fusion::for_each(seq, call_on_CreateProcess_setup(*this));
 
-        if (!::boost::detail::winapi::CreateProcess(
+        if (!::boost::detail::winapi::create_process(
             exe,
             cmd_line,
             proc_attrs,
@@ -113,19 +112,19 @@ struct executor
         return child(proc_info);
     }
 
-    const ::boost::detail::winapi::TCHAR_* exe;
-    ::boost::detail::winapi::TCHAR_* cmd_line;
+    const ::boost::detail::winapi::WCHAR_* exe;
+    ::boost::detail::winapi::WCHAR_* cmd_line;
     ::boost::detail::winapi::LPSECURITY_ATTRIBUTES_ proc_attrs;
     ::boost::detail::winapi::LPSECURITY_ATTRIBUTES_ thread_attrs;
     ::boost::detail::winapi::BOOL_ inherit_handles;
     ::boost::detail::winapi::DWORD_ creation_flags;
     ::boost::detail::winapi::LPVOID_ env;
-    const ::boost::detail::winapi::TCHAR_* work_dir;
+    const ::boost::detail::winapi::WCHAR_* work_dir;
 #if (_WIN32_WINNT >= 0x0600)
     ::boost::detail::winapi::STARTUPINFOEX_ startup_info_ex;
-    ::boost::detail::winapi::STARTUPINFO_  &startup_info;
+    ::boost::detail::winapi::STARTUPINFOW_  &startup_info;
 #else
-    ::boost::detail::winapi::STARTUPINFO_ startup_info;
+    ::boost::detail::winapi::STARTUPINFOW_ startup_info;
 #endif
     ::boost::detail::winapi::PROCESS_INFORMATION_ proc_info;
 };

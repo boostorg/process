@@ -21,7 +21,7 @@
 
 namespace boost { namespace process { namespace windows { namespace initializers {
 
-template <class Range, bool Unicode>
+template <class Range>
 class set_env_ : public initializer_base
 {
 private:
@@ -47,6 +47,16 @@ private:
         }
     };
 
+    static BOOST_CONSTEXPR ::boost::detail::winapi::DWORD_ unicode_flag(wchar_t)
+    {
+        return ::boost::detail::winapi::CREATE_UNICODE_ENVIRONMENT_;
+    }
+
+    static BOOST_CONSTEXPR ::boost::detail::winapi::DWORD_ unicode_flag(char)
+    {
+        return static_cast<::boost::detail::winapi::DWORD_>(0);
+    }
+
 public:
     set_env_(const Range &envs)
         : size_(boost::accumulate(envs, 0, add_size) + 1),
@@ -56,12 +66,13 @@ public:
         env_[size_ - 1] = 0;
     }
 
+
     template <class WindowsExecutor>
     void on_CreateProcess_setup(WindowsExecutor &e) const
     {
         e.env = env_.get();
-        if (Unicode)
-            e.creation_flags |= ::boost::detail::winapi::create_unicode_environment;
+
+        e.creation_flags |= unicode_flag(Char());
     }
 
 private:
@@ -69,19 +80,11 @@ private:
     boost::shared_array<Char> env_;
 };
 
-#if defined(_UNICODE) || defined(UNICODE)
 template <class Range>
-set_env_<Range, true> set_env(const Range &envs)
+set_env_<Range> set_env(const Range &envs)
 {
-    return set_env_<Range, true>(envs);
+    return set_env_<Range>(envs);
 }
-#else
-template <class Range>
-set_env_<Range, false> set_env(const Range &envs)
-{
-    return set_env_<Range, false>(envs);
-}
-#endif
 
 }}}}
 

@@ -10,6 +10,7 @@
 #ifndef BOOST_PROCESS_WINDOWS_INITIALIZERS_START_IN_DIR_HPP
 #define BOOST_PROCESS_WINDOWS_INITIALIZERS_START_IN_DIR_HPP
 
+#include <boost/detail/winapi/config.hpp>
 #include <boost/process/windows/initializers/initializer_base.hpp>
 #include <boost/filesystem/path.hpp>
 #include <string>
@@ -32,7 +33,6 @@ private:
     String s_;
 };
 
-#if defined(_UNICODE) || defined(UNICODE)
 inline start_in_dir_<std::wstring> start_in_dir(const wchar_t *ws)
 {
     return start_in_dir_<std::wstring>(ws);
@@ -47,7 +47,9 @@ inline start_in_dir_<std::wstring> start_in_dir(const boost::filesystem::path &p
 {
     return start_in_dir_<std::wstring>(p.wstring());
 }
-#else
+
+
+#if !defined( BOOST_NO_ANSI_APIS )
 inline start_in_dir_<std::string> start_in_dir(const char *s)
 {
     return start_in_dir_<std::string>(s);
@@ -62,7 +64,7 @@ inline start_in_dir_<std::string> start_in_dir(const boost::filesystem::path &p)
 {
     return start_in_dir_<std::string>(p.string());
 }
-#endif
+#endif //BOOST_NO_ANSI_APIS
 
 }}}}
 
