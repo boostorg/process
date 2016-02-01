@@ -12,7 +12,7 @@
 
 #include <boost/process/windows/initializers/initializer_base.hpp>
 #include <boost/detail/winapi/process.hpp>
-#include <boost/detail/winapi/ShowWindow.hpp>
+#include <boost/detail/winapi/show_window.hpp>
 
 namespace boost { namespace process { namespace windows { namespace initializers {
 

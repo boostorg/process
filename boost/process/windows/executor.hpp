@@ -16,30 +16,67 @@
 #include <boost/fusion/algorithm/iteration/for_each.hpp>
 #include <boost/detail/winapi/handles.hpp>
 #include <boost/detail/winapi/process.hpp>
-#include <boost/detail/winapi/environment.hpp>
 
 namespace boost { namespace process { namespace windows {
 
-struct executor
+namespace detail
 {
-    executor() : exe(0), cmd_line(0), proc_attrs(0), thread_attrs(0),
+template<typename CharType> struct startup_info;
+
+template<> struct startup_info<char>
+{
+    typedef ::boost::detail::winapi::STARTUPINFOA_ type;
+};
+
+template<> struct startup_info<wchar_t>
+{
+    typedef ::boost::detail::winapi::STARTUPINFOW_ type;
+};
+#if BOOST_USE_WINAPI_VERSION >= BOOST_WINAPI_VERSION_WIN6
+
+template<typename CharType> struct select_startup_info_ex;
+
+template<> struct startup_info_ex<char>
+{
+    typedef ::boost::detail::winapi::STARTUPINFOEXA_ type;
+};
+
+template<> struct sstartup_info_ex<wchar_t>
+{
+    typedef ::boost::detail::winapi::STARTUPINFOEXW_ type;
+};
+
+
+#endif
+}
+
+template<typename CharT>
+struct basic_executor
+{
+    //define the underlying startupinfo structures. THis is done here, to avoid c++11 using.
+    typedef typename ::boost::process::windows::detail::startup_info<CharT>::type    startup_info_t;
+#if BOOST_USE_WINAPI_VERSION >= BOOST_WINAPI_VERSION_WIN6
+    typedef typename ::boost::process::windows::detail::startup_info_ex<CharT>::type startup_info_ex_t;
+#endif
+
+    basic_executor() : exe(0), cmd_line(0), proc_attrs(0), thread_attrs(0),
         inherit_handles(false),
-#if (_WIN32_WINNT >= 0x0600)
+#if BOOST_USE_WINAPI_VERSION >= BOOST_WINAPI_VERSION_WIN6
         creation_flags(::boost::detail::winapi::extended_startupinfo_present),
 #else
         creation_flags(0),
 #endif
         env(0), work_dir(0)
-#if (_WIN32_WINNT >= 0x0600)
+#if BOOST_USE_WINAPI_VERSION >= BOOST_WINAPI_VERSION_WIN6
         ,startup_info(startup_info_ex.StartupInfo)
 #endif
     {
-#if (_WIN32_WINNT >= 0x0600)
-    	std::memset(&startup_info_ex, 0, sizeof(::boost::detail::winapi::STARTUPINFOEXW_));
-        startup_info.cb = sizeof(::boost::detail::winapi::STARTUPINFOEXW_);
+#if BOOST_USE_WINAPI_VERSION >= BOOST_WINAPI_VERSION_WIN6
+    	std::memset(&startup_info_ex, 0, sizeof(startup_info_ex_t));
+        startup_info.cb = sizeof(startup_info_ex_t);
 #else
-        std::memset(&startup_info, 0, sizeof(::boost::detail::winapi::STARTUPINFOW_));
-        startup_info.cb = sizeof(::boost::detail::winapi::STARTUPINFOW_);
+        std::memset(&startup_info, 0, sizeof(startup_info_t));
+        startup_info.cb = sizeof(startup_info_t);
 #endif
         startup_info.hStdInput  = ::boost::detail::winapi::invalid_handle_value;
         startup_info.hStdOutput = ::boost::detail::winapi::invalid_handle_value;
@@ -48,9 +85,9 @@ struct executor
 
     struct call_on_CreateProcess_setup
     {
-        executor &e_;
+        basic_executor &e_;
 
-        call_on_CreateProcess_setup(executor &e) : e_(e) {}
+        call_on_CreateProcess_setup(basic_executor &e) : e_(e) {}
 
         template <class Arg>
         void operator()(Arg &arg) const
@@ -61,9 +98,9 @@ struct executor
 
     struct call_on_CreateProcess_error
     {
-        executor &e_;
+        basic_executor &e_;
 
-        call_on_CreateProcess_error(executor &e) : e_(e) {}
+        call_on_CreateProcess_error(basic_executor &e) : e_(e) {}
 
         template <class Arg>
         void operator()(Arg &arg) const
@@ -74,9 +111,9 @@ struct executor
 
     struct call_on_CreateProcess_success
     {
-        executor &e_;
+        basic_executor &e_;
 
-        call_on_CreateProcess_success(executor &e) : e_(e) {}
+        call_on_CreateProcess_success(basic_executor &e) : e_(e) {}
 
         template <class Arg>
         void operator()(Arg &arg) const
@@ -112,22 +149,26 @@ struct executor
         return child(proc_info);
     }
 
-    const ::boost::detail::winapi::WCHAR_* exe;
-    ::boost::detail::winapi::WCHAR_* cmd_line;
+    const CharT* exe;
+    CharT* cmd_line;
     ::boost::detail::winapi::LPSECURITY_ATTRIBUTES_ proc_attrs;
     ::boost::detail::winapi::LPSECURITY_ATTRIBUTES_ thread_attrs;
     ::boost::detail::winapi::BOOL_ inherit_handles;
     ::boost::detail::winapi::DWORD_ creation_flags;
     ::boost::detail::winapi::LPVOID_ env;
-    const ::boost::detail::winapi::WCHAR_* work_dir;
-#if (_WIN32_WINNT >= 0x0600)
-    ::boost::detail::winapi::STARTUPINFOEX_ startup_info_ex;
-    ::boost::detail::winapi::STARTUPINFOW_  &startup_info;
+    const CharT* work_dir;
+#if BOOST_USE_WINAPI_VERSION >= BOOST_WINAPI_VERSION_WIN6
+    startup_info_ex_t startup_info_ex;
+    startup_info_t   &startup_info;
 #else
-    ::boost::detail::winapi::STARTUPINFOW_ startup_info;
+    startup_info_t startup_info;
 #endif
     ::boost::detail::winapi::PROCESS_INFORMATION_ proc_info;
 };
+
+typedef basic_executor<char>     executor;
+typedef basic_executor<wchar_t> wexecutor;
+
 
 }}}
 

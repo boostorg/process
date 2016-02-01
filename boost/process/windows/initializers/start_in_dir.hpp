@@ -59,11 +59,11 @@ inline start_in_dir_<std::string> start_in_dir(const std::string &s)
 {
     return start_in_dir_<std::string>(s);
 }
-
+/* Disabled, because boost::filesystem::path uses wchar_t internally.
 inline start_in_dir_<std::string> start_in_dir(const boost::filesystem::path &p)
 {
     return start_in_dir_<std::string>(p.string());
-}
+}*/
 #endif //BOOST_NO_ANSI_APIS
 
 }}}}

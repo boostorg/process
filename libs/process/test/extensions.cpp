@@ -14,7 +14,8 @@
 #include <boost/system/error_code.hpp>
 #include <boost/bind.hpp>
 #include <boost/ref.hpp>
-#if defined(BOOST_WINDOWS_API)
+
+#if defined(BOOST_WINDOWS_API) && !defined(BOOST_USE_WINDOWS_H)
 #   include <Windows.h>
 #elif defined(BOOST_POSIX_API)
 #   include <errno.h>

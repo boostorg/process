@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(start_in_dir)
     bio::file_descriptor_sink sink(p.sink, bio::close_handle);
     boost::system::error_code ec;
     bp::child c = bp::execute(
-        bpi::run_exe(boost::filesystem::absolute(master_test_suite().argv[1])),
+        bpi::run_exe(boost::filesystem::absolute(master_test_suite().argv[1]).string()),
         bpi::set_cmd_line("test --pwd"),
         bpi::start_in_dir(dir.s_),
         bpi::bind_stdout(sink),

@@ -10,7 +10,7 @@
 #ifndef BOOST_PROCESS_WINDOWS_INITIALIZERS_SET_ENV_HPP
 #define BOOST_PROCESS_WINDOWS_INITIALIZERS_SET_ENV_HPP
 
-#include <boost/detail/winapi/environment.hpp>
+#include <boost/detail/winapi/process.hpp>
 #include <boost/process/windows/initializers/initializer_base.hpp>
 #include <boost/range/numeric.hpp>
 #include <boost/range/algorithm/copy.hpp>

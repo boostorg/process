@@ -46,6 +46,7 @@ inline run_exe_<std::wstring> run_exe(const boost::filesystem::path &p)
 {
     return run_exe_<std::wstring>(p.wstring());
 }
+
 #if !defined(BOOST_NO_ANSI_APIS)
 inline run_exe_<std::string> run_exe(const char *s)
 {
@@ -56,11 +57,12 @@ inline run_exe_<std::string> run_exe(const std::string &s)
 {
     return run_exe_<std::string>(s);
 }
-
+/* Disabled because windows uses wchar_t underneath.
 inline run_exe_<std::string> run_exe(const boost::filesystem::path &p)
 {
     return run_exe_<std::string>(p.string());
 }
+*/
 #endif // BOOST_NO_ANSI_APIS
 
 }}}}
