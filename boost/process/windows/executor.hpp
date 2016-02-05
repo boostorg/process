@@ -22,11 +22,13 @@ namespace boost { namespace process { namespace windows {
 namespace detail
 {
 template<typename CharType> struct startup_info;
+#if !defined( BOOST_NO_ANSI_APIS )
 
 template<> struct startup_info<char>
 {
     typedef ::boost::detail::winapi::STARTUPINFOA_ type;
 };
+#endif
 
 template<> struct startup_info<wchar_t>
 {
@@ -36,10 +38,12 @@ template<> struct startup_info<wchar_t>
 
 template<typename CharType> struct select_startup_info_ex;
 
+#if !defined( BOOST_NO_ANSI_APIS )
 template<> struct startup_info_ex<char>
 {
     typedef ::boost::detail::winapi::STARTUPINFOEXA_ type;
 };
+#endif
 
 template<> struct sstartup_info_ex<wchar_t>
 {
@@ -166,7 +170,9 @@ struct basic_executor
     ::boost::detail::winapi::PROCESS_INFORMATION_ proc_info;
 };
 
+#if !defined( BOOST_NO_ANSI_APIS )
 typedef basic_executor<char>     executor;
+#endif
 typedef basic_executor<wchar_t> wexecutor;
 
 

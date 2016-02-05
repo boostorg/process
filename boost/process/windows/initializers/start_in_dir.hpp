@@ -18,9 +18,10 @@
 namespace boost { namespace process { namespace windows { namespace initializers {
 
 template <class String>
-class start_in_dir_ : public initializer_base
+struct start_in_dir_ : initializer_base
 {
-public:
+    typedef String string_type;
+    typedef typename string_type::value_type char_type;
     explicit start_in_dir_(const String &s) : s_(s) {}
 
     template <class WindowsExecutor>

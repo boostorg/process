@@ -21,45 +21,43 @@
 namespace boost { namespace process { namespace windows { namespace initializers {
 
 template <class Range>
-class set_args_ : public initializer_base
+struct set_args_ : initializer_base
 {
-private:
-    typedef typename Range::const_iterator ConstIterator;
-    typedef typename Range::value_type String;
-    typedef typename String::value_type Char;
-    typedef std::basic_ostringstream<Char> OStringStream;
+    typedef typename Range::const_iterator const_iterator;
+    typedef typename Range::value_type string_type;
+    typedef typename string_type::value_type char_type;
+    typedef std::basic_ostringstream<char_type> ostringstream;
 
-public:
     explicit set_args_(const Range &args)
     {
-        ConstIterator it = boost::const_begin(args);
-        ConstIterator end = boost::const_end(args);
+        const_iterator it = boost::const_begin(args);
+        const_iterator end = boost::const_end(args);
         if (it != end)
         {
             exe_ = *it;
-            OStringStream os;
+            ostringstream os;
             for (; it != end; ++it)
             {
                 if (boost::algorithm::contains(*it,
-                    String(1, static_cast<Char>(' '))))
+                    string_type(1, static_cast<char_type>(' '))))
                 {
-                    os << static_cast<Char>('"') << *it <<
-                        static_cast<Char>('"');
+                    os << static_cast<char_type>('"') << *it <<
+                        static_cast<char_type>('"');
                 }
                 else
                 {
                     os << *it;
                 }
-                os << static_cast<Char>(' ');
+                os << static_cast<char_type>(' ');
             }
-            String s = os.str();
-            cmd_line_.reset(new Char[s.size() + 1]);
+            string_type s = os.str();
+            cmd_line_.reset(new char_type[s.size() + 1]);
             boost::copy(s, cmd_line_.get());
             cmd_line_[s.size()] = 0;
         }
         else
         {
-            cmd_line_.reset(new Char[1]());
+            cmd_line_.reset(new char_type[1]());
         }
     }
 
@@ -72,8 +70,8 @@ public:
     }
 
 private:
-    boost::shared_array<Char> cmd_line_;
-    String exe_;
+    boost::shared_array<char_type> cmd_line_;
+    string_type exe_;
 };
 
 template <class Range>

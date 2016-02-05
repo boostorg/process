@@ -15,9 +15,8 @@
 
 namespace boost { namespace process { namespace windows { namespace initializers {
 
-class throw_on_error : public initializer_base
+struct throw_on_error : initializer_base
 {
-public:
     template <class WindowsExecutor>
     void on_CreateProcess_error(WindowsExecutor&) const
     {

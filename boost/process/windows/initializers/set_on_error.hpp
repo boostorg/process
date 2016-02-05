@@ -16,9 +16,8 @@
 
 namespace boost { namespace process { namespace windows { namespace initializers {
 
-class set_on_error : public initializer_base
+struct set_on_error : initializer_base
 {
-public:
     explicit set_on_error(boost::system::error_code &ec) : ec_(ec) {}
 
     template <class WindowsExecutor>

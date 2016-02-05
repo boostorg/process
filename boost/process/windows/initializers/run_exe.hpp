@@ -17,9 +17,10 @@
 namespace boost { namespace process { namespace windows { namespace initializers {
 
 template <class String>
-class run_exe_ : public initializer_base
+struct run_exe_ : initializer_base
 {
-public:
+    typedef String string_type;
+    typedef typename string_type::value_type char_type;
     explicit run_exe_(const String &s) : s_(s) {}
 
     template <class WindowsExecutor>
@@ -57,12 +58,7 @@ inline run_exe_<std::string> run_exe(const std::string &s)
 {
     return run_exe_<std::string>(s);
 }
-/* Disabled because windows uses wchar_t underneath.
-inline run_exe_<std::string> run_exe(const boost::filesystem::path &p)
-{
-    return run_exe_<std::string>(p.string());
-}
-*/
+
 #endif // BOOST_NO_ANSI_APIS
 
 }}}}

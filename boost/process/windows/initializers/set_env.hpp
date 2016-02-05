@@ -22,24 +22,24 @@
 namespace boost { namespace process { namespace windows { namespace initializers {
 
 template <class Range>
-class set_env_ : public initializer_base
+struct set_env_ : initializer_base
 {
+    typedef typename Range::value_type string_type;
+    typedef typename string_type::value_type char_type;
 private:
-    typedef typename Range::value_type String;
-    typedef typename String::value_type Char;
 
-    static std::size_t add_size(std::size_t size, const String &s)
+    static std::size_t add_size(std::size_t size, const string_type &s)
     {
         return size + s.size() + 1u;
     }
 
     struct copy
     {
-        Char *it_;
+        char_type *it_;
 
-        copy(Char *it) : it_(it) {}
+        copy(char_type *it) : it_(it) {}
 
-        void operator()(const String &s)
+        void operator()(const string_type &s)
         {
             it_ = boost::copy(s, it_);
             *it_ = 0;
@@ -60,7 +60,7 @@ private:
 public:
     set_env_(const Range &envs)
         : size_(boost::accumulate(envs, 0, add_size) + 1),
-        env_(new Char[size_])
+        env_(new char_type[size_])
     {
         boost::for_each(envs, copy(env_.get()));
         env_[size_ - 1] = 0;
@@ -72,12 +72,12 @@ public:
     {
         e.env = env_.get();
 
-        e.creation_flags |= unicode_flag(Char());
+        e.creation_flags |= unicode_flag(char_type());
     }
 
 private:
     std::size_t size_;
-    boost::shared_array<Char> env_;
+    boost::shared_array<char_type> env_;
 };
 
 template <class Range>

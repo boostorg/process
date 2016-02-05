@@ -14,6 +14,8 @@ namespace boost { namespace process { namespace windows { namespace initializers
 
 struct initializer_base
 {
+    typedef void char_type;
+
     template <class WindowsExecutor>
     void on_CreateProcess_setup(WindowsExecutor&) const {}
 

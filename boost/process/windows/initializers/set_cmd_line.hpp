@@ -19,14 +19,13 @@
 namespace boost { namespace process { namespace windows { namespace initializers {
 
 template <class String>
-class set_cmd_line_ : public initializer_base
+struct set_cmd_line_
 {
-private:
-    typedef typename String::value_type Char;
+    typedef String string_type;
+    typedef typename String::value_type char_type;
 
-public:
     explicit set_cmd_line_(const String &s)
-        : cmd_line_(new Char[s.size() + 1])
+        : cmd_line_(new char_type[s.size() + 1])
     {
         boost::copy(s, cmd_line_.get());
         cmd_line_[s.size()] = 0;
@@ -39,7 +38,7 @@ public:
     }
 
 private:
-    boost::shared_array<Char> cmd_line_;
+    boost::shared_array<char_type> cmd_line_;
 };
 
 inline set_cmd_line_<std::wstring> set_cmd_line(const wchar_t *ws)

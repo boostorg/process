@@ -16,9 +16,8 @@
 
 namespace boost { namespace process { namespace windows { namespace initializers {
 
-class show_window : public initializer_base
+struct show_window : initializer_base
 {
-public:
     explicit show_window(WORD flags) : flags_(flags) {}
 
     template <class WindowsExecutor>
