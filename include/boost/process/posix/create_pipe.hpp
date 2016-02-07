@@ -76,7 +76,7 @@ inline pipe create_pipe(int source_flags, int sink_flags, boost::system::error_c
         if (::fcntl(fds[0], F_SETFD,
             ::fcntl(fds[0], F_GETFD) | source_flags))
         {
-            BOOST_PROCESS_RETURN_LAST_SYSTEM_ERROR
+            BOOST_PROCESS_RETURN_LAST_SYSTEM_ERROR("pipe(2) source-flags failed")
         }
     }
     if (sink_flags != 0)
@@ -84,7 +84,7 @@ inline pipe create_pipe(int source_flags, int sink_flags, boost::system::error_c
         if (::fcntl(fds[1], F_SETFD,
             ::fcntl(fds[1], F_GETFD) | sink_flags))
         {
-            BOOST_PROCESS_RETURN_LAST_SYSTEM_ERROR
+            BOOST_PROCESS_RETURN_LAST_SYSTEM_ERROR("pipe(2) sink-flags failed")
         }
     }
 

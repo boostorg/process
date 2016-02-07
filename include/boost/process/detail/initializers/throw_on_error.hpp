@@ -23,7 +23,7 @@ struct throw_on_error_ : ::boost::process::detail::initializers::base
     {
         boost::throw_exception(
                         boost::system::system_error(
-                            ec, "CreateProcess() failed"
+                            ec, "process creation failed"
                         )
                     );
     }
