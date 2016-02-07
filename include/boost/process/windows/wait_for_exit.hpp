@@ -20,7 +20,8 @@ namespace boost { namespace process { namespace windows {
 template <class Process>
 inline ::boost::detail::winapi::DWORD_ wait_for_exit(const Process &p)
 {
-    if (::boost::detail::winapi::WaitForSingleObject(p.process_handle(), ::boost::detail::winapi::infinite) == ::boost::detail::winapi::wait_failed)
+    if (::boost::detail::winapi::WaitForSingleObject(p.process_handle(),
+            ::boost::detail::winapi::infinite) == ::boost::detail::winapi::wait_failed)
         BOOST_PROCESS_THROW_LAST_SYSTEM_ERROR("WaitForSingleObject() failed");
 
     ::boost::detail::winapi::DWORD_ exit_code;
@@ -35,7 +36,8 @@ inline ::boost::detail::winapi::DWORD_ wait_for_exit(const Process &p, boost::sy
 {
 	::boost::detail::winapi::DWORD_ exit_code = 1;
 
-    if (::boost::detail::winapi::WaitForSingleObject(p.process_handle(), ::boost::detail::winapi::infinite) == ::boost::detail::winapi::wait_failed)
+    if (::boost::detail::winapi::WaitForSingleObject(p.process_handle(),
+            ::boost::detail::winapi::infinite) == ::boost::detail::winapi::wait_failed)
         BOOST_PROCESS_RETURN_LAST_SYSTEM_ERROR(ec);
     else if (!::boost::detail::winapi::GetExitCodeProcess(p.process_handle(), &exit_code))
         BOOST_PROCESS_RETURN_LAST_SYSTEM_ERROR(ec);

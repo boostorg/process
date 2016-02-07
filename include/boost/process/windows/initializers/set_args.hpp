@@ -10,7 +10,7 @@
 #ifndef BOOST_PROCESS_WINDOWS_INITIALIZERS_SET_ARGS_HPP
 #define BOOST_PROCESS_WINDOWS_INITIALIZERS_SET_ARGS_HPP
 
-#include <boost/process/windows/initializers/initializer_base.hpp>
+#include <boost/process/detail/initializers/base.hpp>
 #include <boost/range/begin.hpp>
 #include <boost/range/end.hpp>
 #include <boost/range/algorithm/copy.hpp>
@@ -21,7 +21,7 @@
 namespace boost { namespace process { namespace windows { namespace initializers {
 
 template <class Range>
-struct set_args_ : initializer_base
+struct set_args_ : ::boost::process::detail::initializers::base
 {
     typedef typename Range::const_iterator const_iterator;
     typedef typename Range::value_type string_type;
@@ -62,7 +62,7 @@ struct set_args_ : initializer_base
     }
 
     template <class WindowsExecutor>
-    void on_CreateProcess_setup(WindowsExecutor &e) const
+    void on_setup(WindowsExecutor &e) const
     {
         e.cmd_line = cmd_line_.get();
         if (!e.exe && !exe_.empty())
@@ -74,11 +74,28 @@ private:
     string_type exe_;
 };
 
-template <class Range>
-set_args_<Range> set_args(const Range &range)
+struct args_
 {
-    return set_args_<Range>(range);
-}
+    template <class Range>
+    set_args_<Range> operator()(const Range &range) const
+    {
+        return set_args_<Range>(range);
+    }
+    template <class Range>
+    set_args_<Range> operator+=(const Range &range) const
+    {
+        return set_args_<Range>(range);
+    }
+    template <class Range>
+    set_args_<Range> operator= (const Range &range) const
+    {
+        return set_args_<Range>(range);
+    }
+};
+
+constexpr args_ args;
+
+
 
 }}}}
 

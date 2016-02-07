@@ -10,20 +10,20 @@
 #ifndef BOOST_PROCESS_WINDOWS_INITIALIZERS_BIND_STDOUT_HPP
 #define BOOST_PROCESS_WINDOWS_INITIALIZERS_BIND_STDOUT_HPP
 
-#include <boost/process/windows/initializers/initializer_base.hpp>
+#include <boost/process/detail/initializers/base.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
 #include <boost/detail/winapi/handle_info.hpp>
 #include <boost/detail/winapi/process.hpp>
 
 namespace boost { namespace process { namespace windows { namespace initializers {
 
-class bind_stdout : public initializer_base
+struct bind_stdout : ::boost::process::detail::initializers::base
 {
 public:
     explicit bind_stdout(const boost::iostreams::file_descriptor_sink &sink) : sink_(sink) {}
 
     template <class WindowsExecutor>
-    void on_CreateProcess_setup(WindowsExecutor &e) const
+    void on_setup(WindowsExecutor &e) const
     {
         ::boost::detail::winapi::SetHandleInformation(
         		sink_.handle(),

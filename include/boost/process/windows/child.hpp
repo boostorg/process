@@ -28,14 +28,14 @@ public:
         ::boost::detail::winapi::CloseHandle(proc_info.hProcess);
         ::boost::detail::winapi::CloseHandle(proc_info.hThread);
     }
-
-    child(BOOST_RV_REF(child) c) : proc_info(c.proc_info)
+    child(const child & c) = delete;
+    child(child && c) : proc_info(c.proc_info)
     {
         c.proc_info.hProcess = ::boost::detail::winapi::invalid_handle_value;
         c.proc_info.hThread  = ::boost::detail::winapi::invalid_handle_value;
     }
-
-    child &operator=(BOOST_RV_REF(child) c)
+    child &operator=(const child & c) = delete;
+    child &operator=(child && c)
     {
         ::boost::detail::winapi::CloseHandle(proc_info.hProcess);
         ::boost::detail::winapi::CloseHandle(proc_info.hThread);

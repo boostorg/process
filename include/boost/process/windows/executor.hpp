@@ -3,6 +3,7 @@
 // Copyright (c) 2009 Boris Schaeling
 // Copyright (c) 2010 Felipe Tanus, Boris Schaeling
 // Copyright (c) 2011, 2012 Jeff Flinn, Boris Schaeling
+// Copyright (c) 2016 Klemens D. Morgenstern
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -87,51 +88,12 @@ struct basic_executor
         startup_info.hStdError  = ::boost::detail::winapi::invalid_handle_value;
     }
 
-    struct call_on_CreateProcess_setup
-    {
-        basic_executor &e_;
-
-        call_on_CreateProcess_setup(basic_executor &e) : e_(e) {}
-
-        template <class Arg>
-        void operator()(Arg &arg) const
-        {
-            arg.on_CreateProcess_setup(e_);
-        }
-    };
-
-    struct call_on_CreateProcess_error
-    {
-        basic_executor &e_;
-
-        call_on_CreateProcess_error(basic_executor &e) : e_(e) {}
-
-        template <class Arg>
-        void operator()(Arg &arg) const
-        {
-            arg.on_CreateProcess_error(e_);
-        }
-    };
-
-    struct call_on_CreateProcess_success
-    {
-        basic_executor &e_;
-
-        call_on_CreateProcess_success(basic_executor &e) : e_(e) {}
-
-        template <class Arg>
-        void operator()(Arg &arg) const
-        {
-            arg.on_CreateProcess_success(e_);
-        }
-    };
-
     template <class InitializerSequence>
     child operator()(const InitializerSequence &seq)
     {
-        boost::fusion::for_each(seq, call_on_CreateProcess_setup(*this));
+        boost::fusion::for_each(seq, [this](auto &elem){elem.on_setup(*this);});
 
-        if (!::boost::detail::winapi::create_process(
+        int err_code = ::boost::detail::winapi::create_process(
             exe,
             cmd_line,
             proc_attrs,
@@ -141,13 +103,17 @@ struct basic_executor
             env,
             work_dir,
             &startup_info,
-            &proc_info))
+            &proc_info);
+
+        if (err_code != 0)
         {
-            boost::fusion::for_each(seq, call_on_CreateProcess_error(*this));
+            auto error = boost::system::error_code(err_code, boost::system::system_category());
+            boost::fusion::for_each(seq,
+                    [this, error](auto &elem){elem.on_error(*this, error);});
         }
         else
         {
-            boost::fusion::for_each(seq, call_on_CreateProcess_success(*this));
+            boost::fusion::for_each(seq, [this](auto &elem){elem.on_success(*this);});
         }
 
         return child(proc_info);

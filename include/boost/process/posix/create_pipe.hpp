@@ -35,6 +35,66 @@ inline pipe create_pipe(boost::system::error_code &ec)
     return pipe(fds[0], fds[1]);
 }
 
+
+
+inline pipe create_pipe(int source_flags, int sink_flags)
+{
+    int fds[2];
+    if (::pipe(fds) == -1)
+        BOOST_PROCESS_THROW_LAST_SYSTEM_ERROR("pipe(2) failed");
+
+    if (source_flags != 0)
+    {
+        if (::fcntl(fds[0], F_SETFD,
+            ::fcntl(fds[0], F_GETFD) | source_flags))
+        {
+            BOOST_PROCESS_THROW_LAST_SYSTEM_ERROR("pipe(2) source-flags failed");
+        }
+    }
+    if (sink_flags != 0)
+    {
+        if (::fcntl(fds[1], F_SETFD,
+            ::fcntl(fds[1], F_GETFD) | sink_flags))
+        {
+            BOOST_PROCESS_THROW_LAST_SYSTEM_ERROR("pipe(2) sink-flags failed");
+        }
+    }
+
+    return pipe(fds[0], fds[1]);
+}
+
+inline pipe create_pipe(int source_flags, int sink_flags, boost::system::error_code &ec)
+{
+    int fds[2];
+    if (::pipe(fds) == -1)
+        BOOST_PROCESS_RETURN_LAST_SYSTEM_ERROR(ec);
+    else
+        ec.clear();
+
+    if (source_flags != 0)
+    {
+        if (::fcntl(fds[0], F_SETFD,
+            ::fcntl(fds[0], F_GETFD) | source_flags))
+        {
+            BOOST_PROCESS_RETURN_LAST_SYSTEM_ERROR
+        }
+    }
+    if (sink_flags != 0)
+    {
+        if (::fcntl(fds[1], F_SETFD,
+            ::fcntl(fds[1], F_GETFD) | sink_flags))
+        {
+            BOOST_PROCESS_RETURN_LAST_SYSTEM_ERROR
+        }
+    }
+
+    return pipe(fds[0], fds[1]);
+}
+
+
+
+
+
 }}}
 
 #endif

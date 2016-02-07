@@ -27,7 +27,7 @@
 #include <boost/process/windows/initializers/set_env.hpp>
 #include <boost/process/windows/initializers/set_on_error.hpp>
 #include <boost/process/windows/initializers/show_window.hpp>
-#include <boost/process/windows/initializers/start_in_dir.hpp>
+#include <boost/process/windows/initializers/start_dir.hpp>
 #include <boost/process/windows/initializers/throw_on_error.hpp>
 
 #endif

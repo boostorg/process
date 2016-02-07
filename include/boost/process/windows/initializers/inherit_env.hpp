@@ -10,11 +10,11 @@
 #ifndef BOOST_PROCESS_WINDOWS_INITIALIZERS_INHERIT_ENV_HPP
 #define BOOST_PROCESS_WINDOWS_INITIALIZERS_INHERIT_ENV_HPP
 
-#include <boost/process/windows/initializers/initializer_base.hpp>
+#include <boost/process/detail/initializers/base.hpp>
 
 namespace boost { namespace process { namespace windows { namespace initializers {
 
-class inherit_env : public initializer_base
+class inherit_env : public ::boost::process::detail::initializers::base
 {
 public:
 };

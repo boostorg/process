@@ -10,20 +10,19 @@
 #ifndef BOOST_PROCESS_WINDOWS_INITIALIZERS_BIND_STDIN_HPP
 #define BOOST_PROCESS_WINDOWS_INITIALIZERS_BIND_STDIN_HPP
 
-#include <boost/process/windows/initializers/initializer_base.hpp>
+#include <boost/process/detail/initializers/base.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
 #include <boost/detail/winapi/handle_info.hpp>
 #include <boost/detail/winapi/process.hpp>
 
 namespace boost { namespace process { namespace windows { namespace initializers {
 
-class bind_stdin : public initializer_base
+struct bind_stdin : ::boost::process::detail::initializers::base
 {
-public:
     explicit bind_stdin(const boost::iostreams::file_descriptor_source &source) : source_(source) {}
 
     template <class WindowsExecutor>
-    void on_CreateProcess_setup(WindowsExecutor &e) const
+    void on_setup(WindowsExecutor &e) const
     {
         ::boost::detail::winapi::SetHandleInformation(source_.handle(),
         		::boost::detail::winapi::HANDLE_FLAG_INHERIT_,

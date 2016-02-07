@@ -3,6 +3,7 @@
 // Copyright (c) 2009 Boris Schaeling
 // Copyright (c) 2010 Felipe Tanus, Boris Schaeling
 // Copyright (c) 2011, 2012 Jeff Flinn, Boris Schaeling
+// Copyright (c) 2016 Klemens D. Morgenstern
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -11,7 +12,7 @@
 #define BOOST_PROCESS_WINDOWS_INITIALIZERS_SET_ENV_HPP
 
 #include <boost/detail/winapi/process.hpp>
-#include <boost/process/windows/initializers/initializer_base.hpp>
+#include <boost/process/detail/initializers/base.hpp>
 #include <boost/range/numeric.hpp>
 #include <boost/range/algorithm/copy.hpp>
 #include <boost/range/algorithm/for_each.hpp>
@@ -22,7 +23,7 @@
 namespace boost { namespace process { namespace windows { namespace initializers {
 
 template <class Range>
-struct set_env_ : initializer_base
+struct set_env_t : ::boost::process::detail::initializers::base
 {
     typedef typename Range::value_type string_type;
     typedef typename string_type::value_type char_type;
@@ -58,7 +59,7 @@ private:
     }
 
 public:
-    set_env_(const Range &envs)
+    set_env_t(const Range &envs)
         : size_(boost::accumulate(envs, 0, add_size) + 1),
         env_(new char_type[size_])
     {
@@ -68,7 +69,7 @@ public:
 
 
     template <class WindowsExecutor>
-    void on_CreateProcess_setup(WindowsExecutor &e) const
+    void on_setup(WindowsExecutor &e) const
     {
         e.env = env_.get();
 
@@ -80,11 +81,20 @@ private:
     boost::shared_array<char_type> env_;
 };
 
-template <class Range>
-set_env_<Range> set_env(const Range &envs)
+struct set_env_
 {
-    return set_env_<Range>(envs);
-}
+    template <class Range>
+    set_env_t<Range> operator()(const Range &envs) const
+    {
+        return set_env_t<Range>(envs);
+    }
+    template <class Range>
+    set_env_t<Range> operator= (const Range &envs) const
+    {
+        return set_env_t<Range>(envs);
+    }
+};
+
 
 }}}}
 
