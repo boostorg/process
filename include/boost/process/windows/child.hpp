@@ -16,26 +16,25 @@
 
 namespace boost { namespace process { namespace windows {
 
-class child
+struct child_handle
 {
-public:
     ::boost::detail::winapi::PROCESS_INFORMATION_ proc_info;
 
-    explicit child(const ::boost::detail::winapi::PROCESS_INFORMATION_ &pi) : proc_info(pi) {}
+    explicit child_handle(const ::boost::detail::winapi::PROCESS_INFORMATION_ &pi) : proc_info(pi) {}
 
-    ~child()
+    ~child_handle()
     {
         ::boost::detail::winapi::CloseHandle(proc_info.hProcess);
         ::boost::detail::winapi::CloseHandle(proc_info.hThread);
     }
-    child(const child & c) = delete;
-    child(child && c) : proc_info(c.proc_info)
+    child_handle(const child_handle & c) = delete;
+    child_handle(child_handle && c) : proc_info(c.proc_info)
     {
         c.proc_info.hProcess = ::boost::detail::winapi::invalid_handle_value;
         c.proc_info.hThread  = ::boost::detail::winapi::invalid_handle_value;
     }
-    child &operator=(const child & c) = delete;
-    child &operator=(child && c)
+    child_handle &operator=(const child_handle & c) = delete;
+    child_handle &operator=(child_handle && c)
     {
         ::boost::detail::winapi::CloseHandle(proc_info.hProcess);
         ::boost::detail::winapi::CloseHandle(proc_info.hThread);
@@ -45,10 +44,14 @@ public:
         return *this;
     }
 
-    ::boost::detail::winapi::HANDLE_ process_handle() const { return proc_info.hProcess; }
+    int get_pid() const
+    {
+        return static_cast<int>(proc_info.dwProcessId);
+    }
 
-private:
-    BOOST_MOVABLE_BUT_NOT_COPYABLE(child);
+    typedef ::boost::detail::winapi::HANDLE_ process_handle_t;
+    process_handle_t process_handle() const { return proc_info.hProcess; }
+
 };
 
 }}}

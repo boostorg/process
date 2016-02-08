@@ -71,8 +71,9 @@ struct std_in_
     async_stdin operator()(std::istream & ostr) const {return async_stdin(ostr);}
     async_stdin operator= (std::istream & ostr) const {return async_stdin(ostr);}
 
-    template<template<class> class Container> async_stdin operator()(Container<char> & buffer) const {return async_stdin(buffer); };
-    template<template<class> class Container> async_stdin operator= (Container<char> & buffer) const {return async_stdin(buffer); };
+    //alright, that may overflow. if it should not do that, use a fixed-size array or a functor.
+    template<template<class> class Container> async_stdin operator()(Container<char> & buffer) const {return async_stdin(buffer);};
+    template<template<class> class Container> async_stdin operator= (Container<char> & buffer) const {return async_stdin(buffer);};
 };
 
 constexpr std_in_ std_in;

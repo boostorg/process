@@ -3,6 +3,7 @@
 // Copyright (c) 2009 Boris Schaeling
 // Copyright (c) 2010 Felipe Tanus, Boris Schaeling
 // Copyright (c) 2011, 2012 Jeff Flinn, Boris Schaeling
+// Copyright (c) 2016 Klemens D. Morgenstern
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -14,38 +15,152 @@
 #include <boost/system/error_code.hpp>
 #include <boost/detail/winapi/synchronization.hpp>
 #include <boost/detail/winapi/process.hpp>
+#include <boost/process/windows/child.hpp>
+#include <chrono>
 
 namespace boost { namespace process { namespace windows {
 
-template <class Process>
-inline ::boost::detail::winapi::DWORD_ wait_for_exit(const Process &p)
+inline void wait(const child_handle &p, int & exit_code)
 {
     if (::boost::detail::winapi::WaitForSingleObject(p.process_handle(),
             ::boost::detail::winapi::infinite) == ::boost::detail::winapi::wait_failed)
+    {
         BOOST_PROCESS_THROW_LAST_SYSTEM_ERROR("WaitForSingleObject() failed");
+    }
 
-    ::boost::detail::winapi::DWORD_ exit_code;
-    if (!::boost::detail::winapi::GetExitCodeProcess(p.process_handle(), &exit_code))
+    ::boost::detail::winapi::DWORD_ _exit_code;
+    if (!::boost::detail::winapi::GetExitCodeProcess(p.process_handle(), &_exit_code))
+    {
         BOOST_PROCESS_THROW_LAST_SYSTEM_ERROR("GetExitCodeProcess() failed");
-
-    return exit_code;
+    }
+    exit_code = static_cast<int>(exit_code);
 }
 
-template <class Process>
-inline ::boost::detail::winapi::DWORD_ wait_for_exit(const Process &p, boost::system::error_code &ec)
+inline void wait(const child_handle &p, int & exit_code, std::error_code &ec)
 {
-	::boost::detail::winapi::DWORD_ exit_code = 1;
+	::boost::detail::winapi::DWORD_ _exit_code = 1;
 
     if (::boost::detail::winapi::WaitForSingleObject(p.process_handle(),
             ::boost::detail::winapi::infinite) == ::boost::detail::winapi::wait_failed)
         BOOST_PROCESS_RETURN_LAST_SYSTEM_ERROR(ec);
-    else if (!::boost::detail::winapi::GetExitCodeProcess(p.process_handle(), &exit_code))
+    else if (!::boost::detail::winapi::GetExitCodeProcess(p.process_handle(), &_exit_code))
         BOOST_PROCESS_RETURN_LAST_SYSTEM_ERROR(ec);
     else
         ec.clear();
 
-    return exit_code;
+    exit_code = static_cast<int>(_exit_code);
 }
+
+
+template< class Rep, class Period >
+inline bool wait_for(
+        const child_handle &p,
+        int & exit_code,
+        const std::chrono::duration<Rep, Period>& rel_time)
+{
+
+    std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(rel_time);
+
+    ::boost::detail::winapi::DWORD_ wait_code;
+    wait_code = ::boost::detail::winapi::WaitForSingleObject(p.process_handle(), ms.count());
+    if (wait_code == ::boost::detail::winapi::wait_failed)
+        BOOST_PROCESS_THROW_LAST_SYSTEM_ERROR("WaitForSingleObject() failed");
+    else if (wait_code == ::boost::detail::winapi::wait_timeout)
+        return false; //
+
+    ::boost::detail::winapi::DWORD_ _exit_code;
+    if (!::boost::detail::winapi::GetExitCodeProcess(p.process_handle(), &_exit_code))
+        BOOST_PROCESS_THROW_LAST_SYSTEM_ERROR("GetExitCodeProcess() failed");
+
+    exit_code = static_cast<int>(_exit_code);
+}
+
+
+template< class Rep, class Period >
+inline bool wait_for(
+        const child_handle &p,
+        int & exit_code,
+        const std::chrono::duration<Rep, Period>& rel_time,
+        std::error_code &ec)
+{
+
+    std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(rel_time);
+
+
+    ::boost::detail::winapi::DWORD_ wait_code;
+    wait_code = ::boost::detail::winapi::WaitForSingleObject(p.process_handle(), ms.count());
+    if (wait_code == ::boost::detail::winapi::wait_failed)
+        BOOST_PROCESS_THROW_LAST_SYSTEM_ERROR("WaitForSingleObject() failed");
+    else if (wait_code == ::boost::detail::winapi::wait_timeout)
+        return false; //
+
+    ::boost::detail::winapi::DWORD_ _exit_code = 1;
+    if (!::boost::detail::winapi::GetExitCodeProcess(p.process_handle(), &_exit_code))
+    {
+        BOOST_PROCESS_RETURN_LAST_SYSTEM_ERROR(ec);
+        return false;
+    }
+    else
+        ec.clear();
+
+    exit_code = static_cast<int>(_exit_code);
+    return true;
+;
+}
+
+template< class Clock, class Duration >
+inline bool wait_until(
+        const child_handle &p,
+        int & exit_code,
+       const std::chrono::time_point<Clock, Duration>& timeout_time)
+{
+    std::chrono::milliseconds ms =
+            std::chrono::duration_cast<std::chrono::milliseconds>(
+                    timeout_time - std::chrono::system_clock::now());
+
+    ::boost::detail::winapi::DWORD_ wait_code;
+    wait_code = ::boost::detail::winapi::WaitForSingleObject(p.process_handle(), ms.count());
+
+    if (wait_code == ::boost::detail::winapi::wait_failed)
+        BOOST_PROCESS_THROW_LAST_SYSTEM_ERROR("WaitForSingleObject() failed");
+    else if (wait_code == ::boost::detail::winapi::wait_timeout)
+        return false;
+
+    ::boost::detail::winapi::DWORD_ _exit_code;
+    if (!::boost::detail::winapi::GetExitCodeProcess(p.process_handle(), &_exit_code))
+        BOOST_PROCESS_THROW_LAST_SYSTEM_ERROR("GetExitCodeProcess() failed");
+
+    exit_code = static_cast<int>(_exit_code);
+
+    return true;
+}
+
+
+template< class Clock, class Duration >
+inline bool wait_until(
+        const child_handle &p,
+        int & exit_code,
+        const std::chrono::time_point<Clock, Duration>& timeout_time,
+        boost::system::error_code &ec)
+{
+    std::chrono::milliseconds ms =
+            std::chrono::duration_cast<std::chrono::milliseconds>(
+                    timeout_time - std::chrono::system_clock::now());
+
+    ::boost::detail::winapi::DWORD_ _exit_code = 1;
+
+    if (::boost::detail::winapi::WaitForSingleObject(p.process_handle(),
+            ms.count()) == ::boost::detail::winapi::wait_failed)
+        BOOST_PROCESS_RETURN_LAST_SYSTEM_ERROR(ec);
+    else if (!::boost::detail::winapi::GetExitCodeProcess(p.process_handle(), &_exit_code))
+        BOOST_PROCESS_RETURN_LAST_SYSTEM_ERROR(ec);
+    else
+        ec.clear();
+
+    return static_cast<int>(exit_code);
+;
+}
+
 
 }}}
 

@@ -17,9 +17,11 @@
 #define BOOST_PROCESS_CONFIG_HPP
 
 #include <boost/config.hpp>
+#include <system_error>
 #include <boost/system/config.hpp>
 #include <boost/system/error_code.hpp>
 #include <boost/system/system_error.hpp>
+
 
 #if defined(BOOST_POSIX_API)
 #   include <errno.h>
