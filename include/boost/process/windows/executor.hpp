@@ -91,8 +91,7 @@ struct basic_executor
     template <class InitializerSequence>
     child operator()(const InitializerSequence &seq)
     {
-        boost::fusion::for_each(seq, [this](auto &elem){elem.on_setup(*this);});
-
+        boost::fusion::for_each(seq, [this](const auto &elem){elem.on_setup(*this);});
         int err_code = ::boost::detail::winapi::create_process(
             exe,
             cmd_line,
@@ -105,18 +104,19 @@ struct basic_executor
             &startup_info,
             &proc_info);
 
-        if (err_code != 0)
+        if (err_code == 0)
         {
-            auto error = boost::system::error_code(err_code, boost::system::system_category());
+            auto error = boost::system::error_code(boost::detail::winapi::GetLastError(), boost::system::system_category());
             boost::fusion::for_each(seq,
-                    [this, error](auto &elem){elem.on_error(*this, error);});
+                    [this, error](const auto &elem){elem.on_error(*this, error);});
         }
         else
         {
-            boost::fusion::for_each(seq, [this](auto &elem){elem.on_success(*this);});
+            boost::fusion::for_each(seq, [this](const auto &elem){elem.on_success(*this);});
         }
 
-        return child(proc_info);
+        return
+                child(child_handle(std::move(proc_info)));
     }
 
     const CharT* exe;

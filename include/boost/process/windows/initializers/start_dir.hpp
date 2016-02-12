@@ -55,11 +55,11 @@ struct start_dir_
     }
     start_dir_handler<std::wstring> operator()(const boost::filesystem::path &s) const
     {
-        return start_dir_handler<std::wstring>(s);
+        return start_dir_handler<std::wstring>(s.native());
     }
     start_dir_handler<std::wstring> operator= (const boost::filesystem::path &s) const
     {
-        return start_dir_handler<std::wstring>(s);
+        return start_dir_handler<std::wstring>(s.native());
     }
 
 #if !defined( BOOST_NO_ANSI_APIS )

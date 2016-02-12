@@ -52,6 +52,10 @@ struct child_handle
     typedef ::boost::detail::winapi::HANDLE_ process_handle_t;
     process_handle_t process_handle() const { return proc_info.hProcess; }
 
+    bool valid() const
+    {
+        return (proc_info.hProcess != nullptr);
+    }
 };
 
 }}}

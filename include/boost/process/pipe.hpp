@@ -16,11 +16,18 @@
 #ifndef BOOST_PROCESS_PIPE_HPP
 #define BOOST_PROCESS_PIPE_HPP
 
-#include <boost/process/config.hpp>
+#include <boost/config.hpp>
 
-#include BOOST_PROCESS_PLATFORM_PROMOTE_PATH(pipe)
-BOOST_PROCESS_PLATFORM_PROMOTE_NAMESPACE(pipe)
-BOOST_PROCESS_PLATFORM_PROMOTE_NAMESPACE(make_pipe)
+
+namespace boost { namespace process {
+
+#if defined(BOOST_POSIX_API)
+using boost::process::posix::pipe;
+#elif defined(BOOST_WINDOWS_API)
+using boost::process::windows::pipe;
+#endif
+
+}}
 
 #if defined(BOOST_PROCESS_DOXYGEN)
 namespace boost { namespace process {
@@ -41,22 +48,22 @@ struct pipe
     pipe_end_type sink;
 
     /**
-     * Constructor.
+     * Default constructor, creates a pipe.
      */
-    pipe(pipe_end_type source, pipe_end_type sink);
+    pipe();
+
+    /**
+     * Copy constructor.
+     */
+    pipe(const pipe& p);
+
+    /**
+     * Create a pipe.
+     */
+    static pipe create();
+
 };
 
-/**
- * Returns a pipe instance.
- *
- * This is a helper function to instantiate boost::process::pipe.
- *
- * \note boost::process::make_pipe does not create a pipe.
- *       You must pass existing pipe ends to this function.
- *       If you want to create an anonymous pipe, call
- *       boost::process::create_pipe.
- */
-pipe make_pipe(pipe_end_type source, pipe_end_type sink);
 
 }}
 #endif

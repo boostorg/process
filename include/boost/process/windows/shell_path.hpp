@@ -23,7 +23,12 @@ inline boost::filesystem::path shell_path()
     ::boost::detail::winapi::WCHAR_ sysdir[260];
     unsigned int size = ::boost::detail::winapi::get_system_directory(sysdir, sizeof(sysdir));
     if (!size)
-        BOOST_PROCESS_THROW_LAST_SYSTEM_ERROR("GetSystemDirectory() failed");
+        throw std::system_error(
+                std::error_code(
+                ::boost::detail::winapi::GetLastError(),
+                boost::system::system_category()),
+                "GetSystemDirectory() failed");
+
     boost::filesystem::path p = sysdir;
     return p / "cmd.exe";
 }
@@ -35,9 +40,9 @@ inline boost::filesystem::path shell_path(boost::system::error_code &ec)
     unsigned int size = ::boost::detail::winapi::get_system_directory(sysdir, sizeof(sysdir));
     boost::filesystem::path p;
     if (!size)
-    {
-        BOOST_PROCESS_RETURN_LAST_SYSTEM_ERROR(ec);
-    }
+        ec = std::error_code(
+                ::boost::detail::winapi::GetLastError(),
+                std::system_category());
     else
     {
         ec.clear();

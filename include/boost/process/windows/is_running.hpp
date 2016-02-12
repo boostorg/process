@@ -21,20 +21,27 @@ bool is_running(const Process &p)
     static constexpr ::boost::detail::winapi::DWORD_ still_active = 259;
 
     if (!::boost::detail::winapi::GetExitCodeProcess(p.process_handle(), &code))
-        BOOST_PROCESS_THROW_LAST_SYSTEM_ERROR("GetExitCodeProcess() failed");
+        throw std::system_error(
+                std::error_code(
+                ::boost::detail::winapi::GetLastError(),
+                boost::system::system_category()),
+                "GetExitCodeProcess() failed");
+
 
     return code == still_active;
 }
 
 template <class Process>
-bool is_running(const Process &p, boost::system::error_code &ec)
+bool is_running(const Process &p, std::error_code &ec)
 {
     ::boost::detail::winapi::DWORD_ code;
     //single value, not needed in the winapi.
     static constexpr ::boost::detail::winapi::DWORD_ still_active = 259;
 
     if (!::boost::detail::winapi::GetExitCodeProcess(p.process_handle(), &code))
-        BOOST_PROCESS_RETURN_LAST_SYSTEM_ERROR(ec);
+        ec = std::error_code(
+                ::boost::detail::winapi::GetLastError(),
+                std::system_category());
     else
         ec.clear();
 

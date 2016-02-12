@@ -18,9 +18,6 @@
 
 #include <boost/process/config.hpp>
 
-#include BOOST_PROCESS_PLATFORM_PROMOTE_PATH(wait_for_exit)
-BOOST_PROCESS_PLATFORM_PROMOTE_NAMESPACE(wait_for_exit)
-
 #if defined(BOOST_PROCESS_DOXYGEN)
 namespace boost { namespace process {
 

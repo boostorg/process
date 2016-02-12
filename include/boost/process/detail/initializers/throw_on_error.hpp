@@ -27,9 +27,11 @@ struct throw_on_error_ : ::boost::process::detail::initializers::base
                         )
                     );
     }
+
+    const throw_on_error_ &operator()() const {return *this;}
 };
 
-constexpr throw_on_error_ throw_on_error;
+constexpr static throw_on_error_ throw_on_error;
 
 }}}}
 

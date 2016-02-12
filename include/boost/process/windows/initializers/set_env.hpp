@@ -95,6 +95,7 @@ struct set_env_
     }
 };
 
+static constexpr set_env_ set_env;
 
 }}}}
 

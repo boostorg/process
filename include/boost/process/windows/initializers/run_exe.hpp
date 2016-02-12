@@ -24,7 +24,7 @@ struct run_exe_ : ::boost::process::detail::initializers::base
     explicit run_exe_(const String &s) : s_(s) {}
 
     template <class WindowsExecutor>
-    void on_CreateProcess_setup(WindowsExecutor &e) const
+    void on_setup(WindowsExecutor &e) const
     {
         e.exe = s_.c_str();
     }
@@ -82,8 +82,8 @@ struct exe_
     }
 };
 
-constexpr exe_ exe;
-constexpr exe_ cmd;
+constexpr static exe_ exe;
+constexpr static exe_ cmd;
 
 
 #endif // BOOST_NO_ANSI_APIS

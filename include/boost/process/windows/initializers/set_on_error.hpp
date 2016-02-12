@@ -25,6 +25,7 @@ struct set_on_error : ::boost::process::detail::initializers::base
     template <class WindowsExecutor>
     void on_error(WindowsExecutor&, const boost::system::error_code & ec) const
     {
+        std::cout << "EC: " << ec.message() << std::endl;
         ec_ = ec;
     }
 
@@ -32,14 +33,14 @@ private:
     boost::system::error_code &ec_;
 };
 
-struct error_ref_
+struct error_
 {
     set_on_error operator()(boost::system::error_code &ec) const {return set_on_error(ec);}
     set_on_error operator= (boost::system::error_code &ec) const {return set_on_error(ec);}
 
 };
 
-constexpr error_ref_ error_ref;
+constexpr static error_ error;
 
 
 }}}}

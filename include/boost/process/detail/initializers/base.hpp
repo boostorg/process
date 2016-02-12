@@ -45,7 +45,7 @@ public:
     explicit on_setup_(Handler handler) : handler_(handler) {}
 
     template <class Executor>
-    void on_setup_(Executor &e) const
+    void on_setup(Executor &e) const
     {
         handler_(e);
     }
@@ -75,7 +75,7 @@ public:
     explicit on_success_(Handler handler) : handler_(handler) {}
 
     template <class Executor>
-    void on_success_(Executor &e) const
+    void on_success(Executor &e) const
     {
         handler_(e);
     }

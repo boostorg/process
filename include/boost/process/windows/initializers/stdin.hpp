@@ -59,14 +59,14 @@ struct std_in_
 {
     close_stdin operator()(std::nullptr_t) const { return close_stdin();}
     close_stdin operator= (std::nullptr_t) const { return close_stdin();}
-    sync_stdin operator()(const boost::iostreams::file_descriptor_source & source) const {return sync_stdin(source);}
-    sync_stdin operator= (const boost::iostreams::file_descriptor_source & source) const {return sync_stdin(source);}
-    sync_stdin operator()(const boost::iostreams::file_descriptor & descr) const {return sync_stdin(descr.handle());}
-    sync_stdin operator= (const boost::iostreams::file_descriptor & descr) const {return sync_stdin(descr.handle());}
-    sync_stdin operator()(boost::iostreams::stream<boost::iostreams::file_descriptor> & strm) const {return sync_stdin(strm->handle());}
-    sync_stdin operator= (boost::iostreams::stream<boost::iostreams::file_descriptor> & strm) const {return sync_stdin(strm->handle());}
-    sync_stdin operator()(boost::process::windows::pipe& pipe_) const {return sync_stdin(boost::iostreams::file_descriptor_source(pipe_.source));}
-    sync_stdin operator= (boost::process::windows::pipe& pipe_) const {return sync_stdin(boost::iostreams::file_descriptor_source(pipe_.source));}
+     sync_stdin operator()(const boost::iostreams::file_descriptor_source & source) const {return sync_stdin(source);}
+     sync_stdin operator= (const boost::iostreams::file_descriptor_source & source) const {return sync_stdin(source);}
+     sync_stdin operator()(const boost::iostreams::file_descriptor & descr) const {return sync_stdin(descr.handle());}
+     sync_stdin operator= (const boost::iostreams::file_descriptor & descr) const {return sync_stdin(descr.handle());}
+     sync_stdin operator()(boost::iostreams::stream<boost::iostreams::file_descriptor> & strm) const {return sync_stdin(strm->handle());}
+     sync_stdin operator= (boost::iostreams::stream<boost::iostreams::file_descriptor> & strm) const {return sync_stdin(strm->handle());}
+     sync_stdin operator()(boost::process::windows::pipe& pipe_) const {return sync_stdin(boost::iostreams::file_descriptor_source(pipe_.source));}
+     sync_stdin operator= (boost::process::windows::pipe& pipe_) const {return sync_stdin(boost::iostreams::file_descriptor_source(pipe_.source));}
 
     async_stdin operator()(std::istream & ostr) const {return async_stdin(ostr);}
     async_stdin operator= (std::istream & ostr) const {return async_stdin(ostr);}

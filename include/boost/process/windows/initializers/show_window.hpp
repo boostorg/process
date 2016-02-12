@@ -18,7 +18,7 @@
 namespace boost { namespace process { namespace windows { namespace initializers { namespace show_window {
 
 template<::boost::detail::winapi::WORD_ Flags>
-struct show_window_flags_ : ::boost::process::detail::initializers::base
+struct show_window : ::boost::process::detail::initializers::base
 {
     template <class WindowsExecutor>
     void on_setup(WindowsExecutor &e) const
@@ -29,12 +29,12 @@ struct show_window_flags_ : ::boost::process::detail::initializers::base
 };
 
 
-constexpr show_window_flags_<::boost::detail::winapi::SW_HIDE_           > hide;
-constexpr show_window_flags_<::boost::detail::winapi::SW_SHOWMAXIMIZED_  > maximized;
-constexpr show_window_flags_<::boost::detail::winapi::SW_SHOWMINIMIZED_  > minimized;
-constexpr show_window_flags_<::boost::detail::winapi::SW_SHOWMINNOACTIVE_> minimized_not_active;
-constexpr show_window_flags_<::boost::detail::winapi::SW_SHOWNOACTIVATE_ > not_active;
-constexpr show_window_flags_<::boost::detail::winapi::SW_SHOWNORMAL_     > show;
+constexpr show_window<::boost::detail::winapi::SW_HIDE_           > hide;
+constexpr show_window<::boost::detail::winapi::SW_SHOWMAXIMIZED_  > maximized;
+constexpr show_window<::boost::detail::winapi::SW_SHOWMINIMIZED_  > minimized;
+constexpr show_window<::boost::detail::winapi::SW_SHOWMINNOACTIVE_> minimized_not_active;
+constexpr show_window<::boost::detail::winapi::SW_SHOWNOACTIVATE_ > not_active;
+constexpr show_window<::boost::detail::winapi::SW_SHOWNORMAL_     > show;
 
 
 }}}}}

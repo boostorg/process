@@ -14,9 +14,8 @@
 
 namespace boost { namespace process { namespace windows { namespace initializers {
 
-class inherit_env : public ::boost::process::detail::initializers::base
+struct inherit_env : public ::boost::process::detail::initializers::base
 {
-public:
 };
 
 }}}}

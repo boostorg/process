@@ -18,9 +18,6 @@
 #include <boost/process/windows/initializers/close_stdout.hpp>
 #include <boost/process/windows/initializers/hide_console.hpp>
 #include <boost/process/windows/initializers/inherit_env.hpp>
-#include <boost/process/windows/initializers/on_CreateProcess_error.hpp>
-#include <boost/process/windows/initializers/on_CreateProcess_setup.hpp>
-#include <boost/process/windows/initializers/on_CreateProcess_success.hpp>
 #include <boost/process/windows/initializers/run_exe.hpp>
 #include <boost/process/windows/initializers/set_args.hpp>
 #include <boost/process/windows/initializers/set_cmd_line.hpp>
@@ -28,6 +25,6 @@
 #include <boost/process/windows/initializers/set_on_error.hpp>
 #include <boost/process/windows/initializers/show_window.hpp>
 #include <boost/process/windows/initializers/start_dir.hpp>
-#include <boost/process/windows/initializers/throw_on_error.hpp>
+#include <boost/process/detail/initializers/throw_on_error.hpp>
 
 #endif
