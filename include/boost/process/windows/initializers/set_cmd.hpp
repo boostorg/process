@@ -42,47 +42,48 @@ private:
     boost::shared_array<char_type> cmd_line_;
 };
 
-struct cmd_line_
+struct cmd_
 {
-    inline set_cmd_line_<std::wstring> operator()(const wchar_t *ws)
+    inline set_cmd_line_<std::wstring> operator()(const wchar_t *ws) const
     {
         return set_cmd_line_<std::wstring>(ws);
     }
-    inline set_cmd_line_<std::wstring> operator= (const wchar_t *ws)
+    inline set_cmd_line_<std::wstring> operator= (const wchar_t *ws) const
     {
         return set_cmd_line_<std::wstring>(ws);
     }
 
-    inline set_cmd_line_<std::wstring> operator()(const std::wstring &ws)
+    inline set_cmd_line_<std::wstring> operator()(const std::wstring &ws) const
     {
         return set_cmd_line_<std::wstring>(ws);
     }
-    inline set_cmd_line_<std::wstring> operator= (const std::wstring &ws)
+    inline set_cmd_line_<std::wstring> operator= (const std::wstring &ws) const
     {
         return set_cmd_line_<std::wstring>(ws);
     }
     #if !defined( BOOST_NO_ANSI_APIS )
-    inline set_cmd_line_<std::string> operator()(const char *s)
+    inline set_cmd_line_<std::string> operator()(const char *s) const
     {
         return set_cmd_line_<std::string>(s);
     }
-    inline set_cmd_line_<std::string> operator= (const char *s)
+    inline set_cmd_line_<std::string> operator= (const char *s) const
     {
         return set_cmd_line_<std::string>(s);
     }
 
-    inline set_cmd_line_<std::string> operator()(const std::string &s)
+    inline set_cmd_line_<std::string> operator()(const std::string &s) const
     {
         return set_cmd_line_<std::string>(s);
     }
-    inline set_cmd_line_<std::string> operator= (const std::string &s)
+    inline set_cmd_line_<std::string> operator= (const std::string &s) const
     {
         return set_cmd_line_<std::string>(s);
     }
     #endif //BOOST_NO_ANSI_APIS
     };
 
-constexpr cmd_line_ cmd_line;
+constexpr static cmd_ cmd;
+constexpr static cmd_ set_cmd;
 
 }}}}
 

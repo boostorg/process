@@ -14,9 +14,11 @@
 
 namespace boost { namespace process { namespace windows { namespace initializers {
 
-struct inherit_env : public ::boost::process::detail::initializers::base
+struct inherit_env_ : public ::boost::process::detail::initializers::base
 {
 };
+
+static constexpr inherit_env_ inherit_env;
 
 }}}}
 

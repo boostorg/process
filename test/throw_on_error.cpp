@@ -7,22 +7,29 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#define BOOST_TEST_MAIN
-#define BOOST_TEST_IGNORE_SIGCHLD
-#include <boost/test/included/unit_test.hpp>
+#include <boost/core/lightweight_test.hpp>
+
 #include <boost/process.hpp>
 #include <boost/system/system_error.hpp>
 
 namespace bp = boost::process;
 namespace bpi = boost::process::initializers;
 
-BOOST_AUTO_TEST_CASE(throw_on_error_test)
+int main(int argc, char* argv[])
 {
-    BOOST_CHECK_THROW(
+    bool thrown = false;
+    try {
         bp::execute(
-            bpi::run_exe("doesnt-exist"),
-            bpi::throw_on_error()
-        ),
-        boost::system::system_error
-    );
+            bpi::cmd="doesnt-exist",
+            bpi::throw_on_error
+        );
+        thrown = false;
+    }
+    catch(boost::system::system_error & )
+    {
+        thrown = true;
+    }
+    BOOST_TEST(thrown);
+    return boost::report_errors();
 }
+

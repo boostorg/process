@@ -11,16 +11,17 @@
 #define BOOST_PROCESS_WINDOWS_INITIALIZERS_SET_ARGS_HPP
 
 #include <boost/process/detail/initializers/base.hpp>
-#include <boost/range/begin.hpp>
-#include <boost/range/end.hpp>
+
 #include <boost/range/algorithm/copy.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/shared_array.hpp>
 #include <sstream>
+#include <initializer_list>
+
 
 namespace boost { namespace process { namespace windows { namespace initializers {
 
-template <class Range>
+template <class Range, bool Append = false>
 struct set_args_ : ::boost::process::detail::initializers::base
 {
     typedef typename Range::const_iterator const_iterator;
@@ -30,8 +31,8 @@ struct set_args_ : ::boost::process::detail::initializers::base
 
     explicit set_args_(const Range &args)
     {
-        const_iterator it = boost::const_begin(args);
-        const_iterator end = boost::const_end(args);
+        const_iterator it  = std::begin(args);
+        const_iterator end = std::end  (args);
         if (it != end)
         {
             exe_ = *it;
@@ -50,50 +51,61 @@ struct set_args_ : ::boost::process::detail::initializers::base
                 }
                 os << static_cast<char_type>(' ');
             }
-            string_type s = os.str();
-            cmd_line_.reset(new char_type[s.size() + 1]);
-            boost::copy(s, cmd_line_.get());
-            cmd_line_[s.size()] = 0;
+            cmd_line_ s = os.str();
         }
         else
-        {
-            cmd_line_.reset(new char_type[1]());
-        }
+            cmd_line_ = "";
     }
 
     template <class WindowsExecutor>
     void on_setup(WindowsExecutor &e) const
     {
-        e.cmd_line = cmd_line_.get();
+        e.cmd_line = cmd_line_.c_str();
         if (!e.exe && !exe_.empty())
             e.exe = exe_.c_str();
     }
 
 private:
-    boost::shared_array<char_type> cmd_line_;
+    string_type cmd_line_;
     string_type exe_;
 };
 
 struct args_
 {
     template <class Range>
-    set_args_<Range> operator()(const Range &range) const
+    set_args_<Range>        operator()(const Range &range) const
     {
         return set_args_<Range>(range);
     }
     template <class Range>
-    set_args_<Range> operator+=(const Range &range) const
+    set_args_<Range, true>  operator+=(const Range &range) const
     {
         return set_args_<Range>(range);
     }
     template <class Range>
-    set_args_<Range> operator= (const Range &range) const
+    set_args_<Range>        operator= (const Range &range) const
     {
         return set_args_<Range>(range);
+    }
+    template <class Char>
+    set_args_<std::vector<Char*>>       operator()(const std::initializer_list<Char*> &range) const
+    {
+        return set_args_<std::vector<Char*>>(range);
+    }
+    template <class Char>
+    set_args_<std::vector<Char*>, true> operator+=(const std::initializer_list<Char*> &range) const
+    {
+        return set_args_<std::vector<Char*>>(range);
+    }
+    template <class Char>
+    set_args_<std::vector<Char*>>       operator= (const std::initializer_list<Char*> &range) const
+    {
+        return set_args_<std::vector<Char*>>(range);
     }
 };
 
 constexpr args_ args;
+constexpr args_ set_args;
 
 
 

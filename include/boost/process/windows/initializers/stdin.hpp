@@ -44,7 +44,7 @@ struct async_stdin : ::boost::process::detail::initializers::base
 
 };
 
-struct close_stdin : public ::boost::process::detail::initializers::base
+struct close_stdin_ : public ::boost::process::detail::initializers::base
 {
     template <class WindowsExecutor>
     void on_setup(WindowsExecutor &e) const
@@ -54,22 +54,24 @@ struct close_stdin : public ::boost::process::detail::initializers::base
     }
 };
 
+static constexpr close_stdin_ close_stdin;
+
 
 struct std_in_
 {
-    close_stdin operator()(std::nullptr_t) const { return close_stdin();}
-    close_stdin operator= (std::nullptr_t) const { return close_stdin();}
-     sync_stdin operator()(const boost::iostreams::file_descriptor_source & source) const {return sync_stdin(source);}
-     sync_stdin operator= (const boost::iostreams::file_descriptor_source & source) const {return sync_stdin(source);}
-     sync_stdin operator()(const boost::iostreams::file_descriptor & descr) const {return sync_stdin(descr.handle());}
-     sync_stdin operator= (const boost::iostreams::file_descriptor & descr) const {return sync_stdin(descr.handle());}
-     sync_stdin operator()(boost::iostreams::stream<boost::iostreams::file_descriptor> & strm) const {return sync_stdin(strm->handle());}
-     sync_stdin operator= (boost::iostreams::stream<boost::iostreams::file_descriptor> & strm) const {return sync_stdin(strm->handle());}
-     sync_stdin operator()(boost::process::windows::pipe& pipe_) const {return sync_stdin(boost::iostreams::file_descriptor_source(pipe_.source));}
-     sync_stdin operator= (boost::process::windows::pipe& pipe_) const {return sync_stdin(boost::iostreams::file_descriptor_source(pipe_.source));}
+    close_stdin_ operator()(std::nullptr_t) const { return close_stdin_();}
+    close_stdin_ operator= (std::nullptr_t) const { return close_stdin_();}
+     sync_stdin  operator()(const boost::iostreams::file_descriptor_source & source) const {return sync_stdin(source);}
+     sync_stdin  operator= (const boost::iostreams::file_descriptor_source & source) const {return sync_stdin(source);}
+     sync_stdin  operator()(const boost::iostreams::file_descriptor & descr) const {return sync_stdin(descr.handle());}
+     sync_stdin  operator= (const boost::iostreams::file_descriptor & descr) const {return sync_stdin(descr.handle());}
+     sync_stdin  operator()(boost::iostreams::stream<boost::iostreams::file_descriptor> & strm) const {return sync_stdin(strm->handle());}
+     sync_stdin  operator= (boost::iostreams::stream<boost::iostreams::file_descriptor> & strm) const {return sync_stdin(strm->handle());}
+     sync_stdin  operator()(boost::process::windows::pipe& pipe_) const {return sync_stdin(boost::iostreams::file_descriptor_source(pipe_.source));}
+     sync_stdin  operator= (boost::process::windows::pipe& pipe_) const {return sync_stdin(boost::iostreams::file_descriptor_source(pipe_.source));}
 
-    async_stdin operator()(std::istream & ostr) const {return async_stdin(ostr);}
-    async_stdin operator= (std::istream & ostr) const {return async_stdin(ostr);}
+    async_stdin  operator()(std::istream & ostr) const {return async_stdin(ostr);}
+    async_stdin  operator= (std::istream & ostr) const {return async_stdin(ostr);}
 
     //alright, that may overflow. if it should not do that, use a fixed-size array or a functor.
     template<template<class> class Container> async_stdin operator()(Container<char> & buffer) const {return async_stdin(buffer);};
