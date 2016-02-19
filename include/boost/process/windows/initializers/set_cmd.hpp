@@ -12,7 +12,7 @@
 #define BOOST_PROCESS_WINDOWS_INITIALIZERS_SET_CMD_LINE_HPP
 
 #include <boost/detail/winapi/config.hpp>
-#include <boost/process/detail/initializers/base.hpp>
+#include <boost/process/detail/initializers/handler_base.hpp>
 #include <boost/range/algorithm/copy.hpp>
 #include <boost/shared_array.hpp>
 #include <memory>
@@ -20,7 +20,7 @@
 namespace boost { namespace process { namespace windows { namespace initializers {
 
 template <class String>
-struct set_cmd_line_ : ::boost::process::detail::initializers::base
+struct set_cmd_line_ : ::boost::process::detail::initializers::handler_base
 {
     typedef String string_type;
     typedef typename String::value_type char_type;

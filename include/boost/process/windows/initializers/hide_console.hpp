@@ -10,13 +10,13 @@
 #ifndef BOOST_PROCESS_WINDOWS_INITIALIZERS_HIDE_CONSOLE_HPP
 #define BOOST_PROCESS_WINDOWS_INITIALIZERS_HIDE_CONSOLE_HPP
 
-#include <boost/process/detail/initializers/base.hpp>
 #include <boost/detail/winapi/process.hpp>
 #include <boost/detail/winapi/show_window.hpp>
+#include <boost/process/detail/initializers/handler_base.hpp>
 
 namespace boost { namespace process { namespace windows { namespace initializers {
 
-class hide_console_ : public ::boost::process::detail::initializers::base
+class hide_console_ : public ::boost::process::detail::initializers::handler_base
 {
 public:
     template <class WindowsExecutor>

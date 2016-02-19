@@ -10,14 +10,14 @@
 #ifndef BOOST_PROCESS_WINDOWS_INITIALIZERS_BIND_STDERR_HPP
 #define BOOST_PROCESS_WINDOWS_INITIALIZERS_BIND_STDERR_HPP
 
-#include <boost/process/detail/initializers/base.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
 #include <boost/detail/winapi/handle_info.hpp>
 #include <boost/detail/winapi/process.hpp>
+#include <boost/process/detail/initializers/handler_base.hpp>
 
 namespace boost { namespace process { namespace windows { namespace initializers {
 
-struct bind_stderr : ::boost::process::detail::initializers::base
+struct bind_stderr : ::boost::process::detail::initializers::handler_base
 {
     explicit bind_stderr(const boost::iostreams::file_descriptor_sink &sink) : sink_(sink) {}
 

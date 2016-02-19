@@ -11,14 +11,14 @@
 #ifndef BOOST_PROCESS_WINDOWS_INITIALIZERS_SHOW_WINDOW_HPP
 #define BOOST_PROCESS_WINDOWS_INITIALIZERS_SHOW_WINDOW_HPP
 
-#include <boost/process/detail/initializers/base.hpp>
 #include <boost/detail/winapi/process.hpp>
+#include <boost/process/detail/initializers/handler_base.hpp>
 
 
 namespace boost { namespace process { namespace windows { namespace initializers { namespace show_window {
 
 template<::boost::detail::winapi::WORD_ Flags>
-struct show_window : ::boost::process::detail::initializers::base
+struct show_window : ::boost::process::detail::initializers::handler_base
 {
     template <class WindowsExecutor>
     void on_setup(WindowsExecutor &e) const

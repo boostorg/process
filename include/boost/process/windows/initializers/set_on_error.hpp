@@ -12,12 +12,12 @@
 #define BOOST_PROCESS_WINDOWS_INITIALIZERS_SET_ON_ERROR_HPP
 
 #include <boost/process/config.hpp>
-#include <boost/process/detail/initializers/base.hpp>
+#include <boost/process/detail/initializers/handler_base.hpp>
 #include <boost/system/error_code.hpp>
 
 namespace boost { namespace process { namespace windows { namespace initializers {
 
-struct set_on_error : ::boost::process::detail::initializers::base
+struct set_on_error : ::boost::process::detail::initializers::handler_base
 {
     set_on_error(const set_on_error&) = default;
     explicit set_on_error(boost::system::error_code &ec) : ec_(ec) {}

@@ -10,13 +10,13 @@
 #ifndef BOOST_PROCESS_WINDOWS_INITIALIZERS_CLOSE_STDERR_HPP
 #define BOOST_PROCESS_WINDOWS_INITIALIZERS_CLOSE_STDERR_HPP
 
-#include <boost/process/detail/initializers/base.hpp>
 #include <boost/detail/winapi/process.hpp>
 #include <boost/detail/winapi/handles.hpp>
+#include <boost/process/detail/initializers/handler_base.hpp>
 
 namespace boost { namespace process { namespace windows { namespace initializers {
 
-struct close_stderr : public ::boost::process::detail::initializers::base
+struct close_stderr : public ::boost::process::detail::initializers::handler_base
 {
     template <class WindowsExecutor>
     void on_setup(WindowsExecutor &e) const

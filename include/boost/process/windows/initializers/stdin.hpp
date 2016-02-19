@@ -12,15 +12,15 @@
 #define INCLUDE_BOOST_PROCESS_WINDOWS_INITIALIZERS_STDIN_HPP_
 
 #include <cstddef>
-#include <boost/process/detail/initializers/base.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
 #include <boost/detail/winapi/handle_info.hpp>
 #include <boost/detail/winapi/process.hpp>
+#include <boost/process/detail/initializers/handler_base.hpp>
 #include <boost/process/windows/pipe.hpp>
 
 namespace boost { namespace process { namespace windows { namespace initializers {
 
-struct sync_stdin : ::boost::process::detail::initializers::base
+struct sync_stdin : ::boost::process::detail::initializers::handler_base
 {
     explicit sync_stdin(const boost::iostreams::file_descriptor_source &source) : source_(source) {}
 
@@ -39,12 +39,12 @@ private:
     boost::iostreams::file_descriptor_source source_;
 };
 
-struct async_stdin : ::boost::process::detail::initializers::base
+struct async_stdin : ::boost::process::detail::initializers::handler_base
 {
 
 };
 
-struct close_stdin_ : public ::boost::process::detail::initializers::base
+struct close_stdin_ : public ::boost::process::detail::initializers::handler_base
 {
     template <class WindowsExecutor>
     void on_setup(WindowsExecutor &e) const

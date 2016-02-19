@@ -11,14 +11,14 @@
 #define BOOST_PROCESS_WINDOWS_INITIALIZERS_START_IN_DIR_HPP
 
 #include <boost/detail/winapi/config.hpp>
-#include <boost/process/detail/initializers/base.hpp>
 #include <boost/filesystem/path.hpp>
+#include <boost/process/detail/initializers/handler_base.hpp>
 #include <string>
 
 namespace boost { namespace process { namespace windows { namespace initializers {
 
 template <class String>
-struct start_dir_handler : ::boost::process::detail::initializers::base
+struct start_dir_handler : ::boost::process::detail::initializers::handler_base
 {
     typedef String string_type;
     typedef typename string_type::value_type char_type;

@@ -10,14 +10,14 @@
 #ifndef BOOST_PROCESS_WINDOWS_INITIALIZERS_RUN_EXE_HPP
 #define BOOST_PROCESS_WINDOWS_INITIALIZERS_RUN_EXE_HPP
 
-#include <boost/process/detail/initializers/base.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/process/detail/initializers/handler_base.hpp>
 #include <string>
 
 namespace boost { namespace process { namespace windows { namespace initializers {
 
 template <class String>
-struct run_exe_ : ::boost::process::detail::initializers::base
+struct run_exe_ : ::boost::process::detail::initializers::handler_base
 {
     typedef String string_type;
     typedef typename string_type::value_type char_type;

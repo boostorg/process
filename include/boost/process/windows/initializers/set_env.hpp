@@ -12,7 +12,7 @@
 #define BOOST_PROCESS_WINDOWS_INITIALIZERS_SET_ENV_HPP
 
 #include <boost/detail/winapi/process.hpp>
-#include <boost/process/detail/initializers/base.hpp>
+#include <boost/process/detail/initializers/handler_base.hpp>
 #include <boost/range/numeric.hpp>
 #include <boost/range/algorithm/copy.hpp>
 #include <boost/range/algorithm/for_each.hpp>
@@ -23,7 +23,7 @@
 namespace boost { namespace process { namespace windows { namespace initializers {
 
 template <class Range>
-struct set_env_t : ::boost::process::detail::initializers::base
+struct set_env_t : ::boost::process::detail::initializers::handler_base
 {
     typedef typename Range::value_type string_type;
     typedef typename string_type::value_type char_type;

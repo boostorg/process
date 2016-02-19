@@ -25,13 +25,16 @@ struct make_handler_t
     constexpr Template<Handler> operator+=(Handler handler) const {return Template<Handler>(handler);}
 };
 
-struct base
+
+struct handler_base
 {
+    using resource_type = void;
+
     template <class Executor>
     void on_setup(Executor&) const {}
 
     template <class Executor>
-    void on_error(Executor&, const boost::system::error_code &ec) const {}
+    void on_error(Executor&, const boost::system::error_code &) const {}
 
     template <class Executor>
     void on_success(Executor&) const {}
@@ -39,7 +42,7 @@ struct base
 };
 
 template <class Handler>
-class on_setup_ : public base
+class on_setup_ : public handler_base
 {
 public:
     explicit on_setup_(Handler handler) : handler_(handler) {}
@@ -54,7 +57,7 @@ private:
 };
 
 template <class Handler>
-class on_error_ : public base
+class on_error_ : public handler_base
 {
 public:
     explicit on_error_(Handler handler) : handler_(handler) {}
@@ -69,7 +72,7 @@ private:
 };
 
 template <class Handler>
-class on_success_ : public base
+class on_success_ : public handler_base
 {
 public:
     explicit on_success_(Handler handler) : handler_(handler) {}
@@ -89,14 +92,10 @@ constexpr make_handler_t<on_success_> on_success;
 
 }}
 
-namespace initializers
-{
 using ::boost::process::detail::initializers::on_setup  ;
 using ::boost::process::detail::initializers::on_error  ;
 using ::boost::process::detail::initializers::on_success;
 
-
-}
 
 }}
 

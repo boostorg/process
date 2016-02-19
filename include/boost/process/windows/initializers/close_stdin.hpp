@@ -10,13 +10,13 @@
 #ifndef BOOST_PROCESS_WINDOWS_INITIALIZERS_CLOSE_STDIN_HPP
 #define BOOST_PROCESS_WINDOWS_INITIALIZERS_CLOSE_STDIN_HPP
 
-#include <boost/process/detail/initializers/base.hpp>
 #include <boost/detail/winapi/process.hpp>
 #include <boost/detail/winapi/handles.hpp>
+#include <boost/process/detail/initializers/handler_base.hpp>
 
 namespace boost { namespace process { namespace windows { namespace initializers {
 
-struct close_stdin : public ::boost::process::detail::initializers::base
+struct close_stdin : public ::boost::process::detail::initializers::handler_base
 {
 public:
     template <class WindowsExecutor>
