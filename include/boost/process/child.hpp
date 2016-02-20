@@ -33,13 +33,7 @@
 
 namespace boost { namespace process {
 
-#if defined(BOOST_POSIX_API)
-namespace api = ::boost::process::posix;
-#elif defined(BOOST_WINDOWS_API)
-namespace api = ::boost::process::windows;
-#else
-#error "boost.process only works with "
-#endif
+
 
 
 /**

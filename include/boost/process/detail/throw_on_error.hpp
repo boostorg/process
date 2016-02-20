@@ -12,27 +12,25 @@
 #define BOOST_PROCESS_DETAIL_INITIALIZERS_THROW_ON_ERROR_HPP
 
 #include <boost/process/config.hpp>
-#include <boost/process/detail/initializers/handler_base.hpp>
+#include <boost/process/detail/handler_base.hpp>
 
-namespace boost { namespace process { namespace windows { namespace initializers {
+namespace boost { namespace process { namespace detail {
 
 struct throw_on_error_ : ::boost::process::detail::initializers::handler_base
 {
     template <class Executor>
-    void on_error(Executor&, const boost::system::error_code & ec) const
+    void on_error(Executor&, const std::error_code & ec) const
     {
-        boost::throw_exception(
-                        boost::system::system_error(
-                            ec, "process creation failed"
-                        )
-                    );
+        throw std::system_error(ec, "process creation failed");
     }
 
     const throw_on_error_ &operator()() const {return *this;}
 };
 
-constexpr static throw_on_error_ throw_on_error;
+}
 
-}}}}
+constexpr static boost::process::detail::throw_on_error_ throw_on_error;
+
+}}
 
 #endif

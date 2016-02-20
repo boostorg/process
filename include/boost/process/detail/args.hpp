@@ -22,7 +22,7 @@ namespace boost { namespace process { namespace detail {
 struct arg_setter_combiner;
 
 template <class Char, bool Append = false>
-struct arg_setter_ : ::boost::process::detail::initializers::handler_base
+struct arg_setter_ : ::boost::process::detail::handler
 {
     typedef typename Char char_type;
     typedef std::basic_stringstream<char_type>   string_type;
@@ -44,10 +44,15 @@ struct arg_setter_ : ::boost::process::detail::initializers::handler_base
     static constexpr  char   _get_quote_sign(char)    {return  '"';}
     static constexpr wchar_t _get_quote_sign(wchar_t) {return L'"';}
 
-protected:
+    template <class Executor>
+    void on_setup(Executor& e) const
+    {
+        api::apply_args(_args, e);
+    }
 
+private:
     friend arg_setter_combiner;
-    std::vector<std::string> _args;
+    std::vector<string_type> _args;
 };
 
 
@@ -84,42 +89,44 @@ void combine(arg_setter_<T, B0> & base, const arg_setter_<T, B1> &  rhs) {arg_se
 template<typename T, bool B0, bool B1>
 void combine(arg_setter_<T, B0> & base,       arg_setter_<T, B1> && rhs) {arg_setter_combiner::combine(base, std::move(rhs));}
 
-template<template <class, bool> class Template>
 struct args_
 {
     template <class Range>
-    Template<Range, true>     operator()(Range &&range) const
+    arg_setter_<Range, true>     operator()(Range &&range) const
     {
         return Template<Range>(std::forward<Range>(range));
     }
     template <class Range>
-    Template<Range, true>     operator+=(Range &&range) const
+    arg_setter_<Range, true>     operator+=(Range &&range) const
     {
         return Template<Range>(std::forward<Range>(range));
     }
     template <class Range>
-    Template<Range, false>    operator= (Range &&range) const
+    arg_setter_<Range, false>    operator= (Range &&range) const
     {
         return Template<Range>(std::forward<Range>(range));
     }
     template <class Char>
-    Template<Char, true>      operator()(const std::initializer_list<Char*> &range) const
+    arg_setter_<Char, true>      operator()(const std::initializer_list<Char*> &range) const
     {
         return Template<Char>(range);
     }
     template <class Char>
-    Template<Char, true>      operator+=(const std::initializer_list<Char*> &range) const
+    arg_setter_<Char, true>      operator+=(const std::initializer_list<Char*> &range) const
     {
         return Template<Char, true>(range);
     }
     template <class Char>
-    Template<Char, false>     operator= (const std::initializer_list<Char*> &range) const
+    arg_setter_<Char, false>     operator= (const std::initializer_list<Char*> &range) const
     {
         return Template<Char, true>(range);
     }
 };
 
 }
+
+constexpr boost::process::detail::args_ args;
+constexpr boost::process::detail::args_ argv;
 
 
 }}

@@ -8,16 +8,18 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BOOST_PROCESS_WINDOWS_INITIALIZERS_SET_ON_ERROR_HPP
-#define BOOST_PROCESS_WINDOWS_INITIALIZERS_SET_ON_ERROR_HPP
+#ifndef BOOST_PROCESS_DETAIL_ERROR_HPP
+#define BOOST_PROCESS_DETAIL_ERROR_HPP
 
-#include <boost/process/config.hpp>
-#include <boost/process/detail/initializers/handler_base.hpp>
+#include <boost/process/detail/config.hpp>
+#include <boost/process/detail/handler_base.hpp>
 #include <boost/system/error_code.hpp>
 
-namespace boost { namespace process { namespace windows { namespace initializers {
+namespace boost { namespace process {
 
-struct set_on_error : ::boost::process::detail::initializers::handler_base
+namespace detail {
+
+struct set_on_error : ::boost::process::detail::handler
 {
     set_on_error(const set_on_error&) = default;
     explicit set_on_error(boost::system::error_code &ec) : ec_(ec) {}
@@ -25,7 +27,6 @@ struct set_on_error : ::boost::process::detail::initializers::handler_base
     template <class WindowsExecutor>
     void on_error(WindowsExecutor&, const boost::system::error_code & ec) const
     {
-        std::cout << "EC: " << ec.message() << std::endl;
         ec_ = ec;
     }
 
@@ -40,9 +41,13 @@ struct error_
 
 };
 
-constexpr static error_ error;
+}
+
+constexpr static boost::process::detail::error_ error;
+constexpr static boost::process::detail::error_ error_ref;
+constexpr static boost::process::detail::error_ error_code;
 
 
-}}}}
+}}
 
 #endif

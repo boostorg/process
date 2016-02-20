@@ -20,22 +20,20 @@
 namespace boost { namespace process { namespace detail {
 
 template <class String>
-struct cmd_setter_ : ::boost::process::detail::handler
+struct exe_setter_ : ::boost::process::detail::handler
 {
     typedef String string_type;
     typedef typename String::value_type char_type;
 
-    explicit cmd_setter_(const string_type &s) : cmd_line_(s) {}
-    explicit cmd_setter_(string_type &&s     ) : cmd_line_(std::move(s)) {}
-
-
+    explicit exe_setter_(const string_type &s) : exe_(s) {}
+    explicit exe_setter_(string_type &&s     ) : exe_(std::move(s)) {}
 
 private:
-    string_type cmd_line_;
+    string_type exe_;
 };
 
 template<template <class> class ExeSetter>
-struct cmd_
+struct exe_
 {
     inline ExeSetter<std::wstring> operator()(const wchar_t *ws) const
     {
@@ -71,9 +69,7 @@ struct cmd_
     {
         return ExeSetter<std::string>(s);
     }
-};
-
-
+    };
 
 }}}
 
