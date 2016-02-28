@@ -14,27 +14,17 @@ namespace boost
 {
 namespace process
 {
-namespace windows
-{
 namespace detail
 {
-
-
-template <class String>
-struct cmd_setter_ : ::boost::process::detail::cmd_setter_
+namespace windows
 {
-    using ::boost::process::detail::arg_setter_::arg_setter_;
-
-    template <class WindowsExecutor>
-    void on_setup(WindowsExecutor &e) const
-    {
-        e.cmd_line = cmd_line_.get();
-    }
-};
-
+template<class StringType, class Executor>
+void apply_cmd(const StringType & cmd_line, Executor & e)
+{
+    e.cmd_line = cmd_line;
 }
 
-constexpr boost::process::detail::cmd_ <boost::process::windows::detail::cmd_setter_> cmd;
+}
 
 
 }

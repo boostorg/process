@@ -71,5 +71,17 @@ namespace windows = boost::process::detail::windows::extensions;
 #endif
 
 
+template<typename Char> extern Char null_char;
+template<> char     null_char<char>     =  '\0';
+template<> wchar_t  null_char<wchar_t>  = L'\0';
+template<> char16_t null_char<char16_t> = u'\0';
+template<> char32_t null_char<char32_t> = U'\0';
+
+template<typename Char> extern Char equal_sign;
+template<> char     equal_sign<char>     =  '=';
+template<> wchar_t  equal_sign<wchar_t>  = L'=';
+template<> char16_t equal_sign<char16_t> = u'=';
+template<> char32_t equal_sign<char32_t> = U'=';
+
 }}
 #endif

@@ -24,8 +24,8 @@ struct set_on_error : ::boost::process::detail::handler
     set_on_error(const set_on_error&) = default;
     explicit set_on_error(boost::system::error_code &ec) : ec_(ec) {}
 
-    template <class WindowsExecutor>
-    void on_error(WindowsExecutor&, const boost::system::error_code & ec) const
+    template <class Executor>
+    void on_error(Executor&, const boost::system::error_code & ec) const
     {
         ec_ = ec;
     }

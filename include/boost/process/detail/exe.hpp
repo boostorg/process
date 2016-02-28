@@ -28,6 +28,11 @@ struct exe_setter_ : ::boost::process::detail::handler
     explicit exe_setter_(const string_type &s) : exe_(s) {}
     explicit exe_setter_(string_type &&s     ) : exe_(std::move(s)) {}
 
+    template <class WindowsExecutor>
+    void on_setup(WindowsExecutor &e) const
+    {
+        api::apply_exe(exe_, e);
+    }
 private:
     string_type exe_;
 };
@@ -69,7 +74,14 @@ struct exe_
     {
         return ExeSetter<std::string>(s);
     }
-    };
+};
+
+template<class String>
+inline constexpr std:: true_type is_exe_setter(const exe_setter_<String>&) {return {};}
+inline constexpr std::false_type is_exe_setter(const auto &) {return {};}
+
+
+
 
 }}}
 

@@ -123,6 +123,12 @@ struct args_
     }
 };
 
+
+template<class Char, bool Append>
+inline constexpr std:: true_type is_arg_setter(const arg_setter_<Char, Append>&) {return {};}
+inline constexpr std::false_type is_arg_setter(const auto &) {return {};}
+
+
 }
 
 constexpr boost::process::detail::args_ args;

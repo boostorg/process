@@ -11,12 +11,12 @@
 #ifndef BOOST_PROCESS_DETAIL_INITIALIZERS_THROW_ON_ERROR_HPP
 #define BOOST_PROCESS_DETAIL_INITIALIZERS_THROW_ON_ERROR_HPP
 
-#include <boost/process/config.hpp>
+#include <boost/process/detail/config.hpp>
 #include <boost/process/detail/handler_base.hpp>
 
 namespace boost { namespace process { namespace detail {
 
-struct throw_on_error_ : ::boost::process::detail::initializers::handler_base
+struct throw_on_error_ : ::boost::process::detail::handler
 {
     template <class Executor>
     void on_error(Executor&, const std::error_code & ec) const
