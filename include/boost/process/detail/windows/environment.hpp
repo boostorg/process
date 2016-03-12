@@ -10,12 +10,11 @@
 #include <vector>
 #include <unordered_map>
 #include <boost/detail/winapi/environment.hpp>
-#include <boost/process/detail/config.hpp>
+#include <boost/process/config.hpp>
+#include <boost/detail/winapi/get_current_process.hpp>
+#include <boost/detail/winapi/get_current_process_id.hpp>
 
 namespace boost { namespace process { namespace detail { namespace windows {
-
-namespace windows
-{
 
 template<typename Char>
 class native_environment_impl
@@ -47,7 +46,8 @@ public:
     native_environment_impl() = default;
     native_environment_impl(const native_environment_impl& ) = delete;
     native_environment_impl(native_environment_impl && ) = default;
-
+    native_environment_impl & operator=(const native_environment_impl& ) = delete;
+    native_environment_impl & operator=(native_environment_impl && ) = default;
     Char ** _env_impl = &*_env_arr.begin();
 
     native_handle_type native_handle() {return _buf.get();}
@@ -77,7 +77,6 @@ inline void native_environment_impl<Char>::set(const pointer_type id, const poin
 template<typename Char>
 inline void  native_environment_impl<Char>::reset(const pointer_type id)
 {
-    cout << "Deleting: '" << id << "'" << endl;
     boost::detail::winapi::set_environment_variable(id, nullptr);
 }
 
@@ -114,7 +113,7 @@ std::vector<Char*> native_environment_impl<Char>::_load_var(Char* p)
 template<typename Char>
 struct basic_environment_impl
 {
-    std::vector<Char*> _data{null_char<Char>};
+    std::vector<Char> _data = {null_char<Char>};
     std::vector<Char*> _load_var(Char* p);
     std::vector<Char*> _env_arr{_load_var(&*_data.begin())};
 public:
@@ -138,8 +137,10 @@ public:
 
     basic_environment_impl(const native_environment_impl<Char> & nei);
     basic_environment_impl() = default;
-    basic_environment_impl(const basic_environment_impl& ) = delete;
+    basic_environment_impl(const basic_environment_impl& ) = default;
     basic_environment_impl(basic_environment_impl && ) = default;
+    basic_environment_impl & operator=(const basic_environment_impl& ) = default;
+    basic_environment_impl & operator=(basic_environment_impl && ) = default;
 
     Char ** _env_impl = &*_env_arr.begin();
 
@@ -251,7 +252,7 @@ inline void* native_handle()  {return boost::detail::winapi::GetCurrentProcess()
 }
 }
 }
-}
+
 
 
 

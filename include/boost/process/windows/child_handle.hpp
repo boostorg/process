@@ -14,7 +14,7 @@
 #include <boost/detail/winapi/handles.hpp>
 #include <boost/detail/winapi/process.hpp>
 
-namespace boost { namespace process { namespace windows {
+namespace boost { namespace process { namespace detail { namespace windows {
 
 struct child_handle
 {
@@ -58,6 +58,6 @@ struct child_handle
     }
 };
 
-}}}
+}}}}
 
 #endif

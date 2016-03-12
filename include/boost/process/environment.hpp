@@ -4,15 +4,17 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 
-#ifndef BOOST_PROCESS_DETAIL_ENVIRONMENT_HPP_
-#define BOOST_PROCESS_DETAIL_ENVIRONMENT_HPP_
+#ifndef BOOST_PROCESS_ENVIRONMENT_HPP_
+#define BOOST_PROCESS_ENVIRONMENT_HPP_
 
-#include <boost/config.hpp>
+#include <boost/process/config.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/iterator/transform_iterator.hpp>
 
 #if defined(BOOST_POSIX_API)
-#include <boost/process/detail/windows/environment.hpp>
-#elif defined(BOOST_WINDOWS_API)
 #include <boost/process/detail/posix/environment.hpp>
+#elif defined(BOOST_WINDOWS_API)
+#include <boost/process/detail/windows/environment.hpp>
 #endif
 
 namespace boost { namespace process {
@@ -264,7 +266,6 @@ public:
     {
         auto p = this->_env_impl;
         auto st1 = id + equal_sign<Char>;
-        bool found = false;
         auto f = find(id);
         if (f != end())
         {
@@ -276,6 +277,7 @@ public:
             return std::pair<iterator, bool>(f, true);
     }
     using implementation_type::implementation_type;
+    using implementation_type::operator=;
     using native_handle_type = typename implementation_type::native_handle_type;
     using implementation_type::native_handle;
     //copy ctor if impl is copy-constructible
@@ -286,7 +288,6 @@ public:
     std::size_t size() const
     {
         auto p = this->_env_impl;
-        std::size_t size;
         while (p != nullptr)
             p++;
         return (p - this->_env_impl);
@@ -330,6 +331,15 @@ typedef basic_environment<wchar_t, detail::api::native_environment_impl>  native
 typedef basic_environment<char,    detail::api::basic_environment_impl>   environment;
 typedef basic_environment<wchar_t, detail::api::basic_environment_impl>  wenvironment;
 
+template<typename CharT>
+struct basic_empty_env
+{
+    using native_handle_type = typename detail::api::native_environment_impl<CharT>::native_handle_type;
+    native_handle_type get() {return nullptr;};
+};
+
+typedef basic_empty_env<char>     empty_env;
+typedef basic_empty_env<wchar_t> wempty_env;
 
 namespace this_process
 {

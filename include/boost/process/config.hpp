@@ -64,12 +64,12 @@ inline void throw_last_error()
 
 }
 
-#if defined(BOOST_POSIX_API)
-namespace posix   = boost::process::detail::posix  ::extensions;
-#elif defined(BOOST_WINDOWS_API)
-namespace windows = boost::process::detail::windows::extensions;
-#endif
-
+//#if defined(BOOST_POSIX_API)
+//namespace posix   = boost::process::detail::posix  ::extensions;
+//#elif defined(BOOST_WINDOWS_API)
+//namespace windows = boost::process::detail::windows::extensions;
+//#endif
+//
 
 template<typename Char> extern Char null_char;
 template<> char     null_char<char>     =  '\0';

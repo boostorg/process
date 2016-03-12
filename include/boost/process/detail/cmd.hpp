@@ -20,22 +20,12 @@
 namespace boost { namespace process { namespace detail {
 
 template <class String>
-struct cmd_setter_ : ::boost::process::detail::handler
+struct cmd_setter_ : ::boost::process::detail::handler_base
 {
-    typedef String string_type;
-    typedef typename String::value_type char_type;
+    String _cmd_line;
+    cmd_setter_(String && cmd_line) : _cmd_line(std::move(cmd_line)) {}
+    cmd_setter_(const String & cmd_line) : _cmd_line(cmd_line) {}
 
-    explicit cmd_setter_(const string_type &s) : _cmd_line(s) {}
-    explicit cmd_setter_(string_type &&s     ) : _cmd_line(std::move(s)) {}
-
-    template <class Executor>
-    void on_setup(Executor &e) const
-    {
-        api::apply_cmd(_cmd_line, e);
-    }
-
-private:
-    string_type _cmd_line;
 };
 
 struct cmd_
@@ -79,8 +69,31 @@ struct cmd_
 
 template<class String>
 inline constexpr std:: true_type is_cmd_setter(const cmd_setter_<String>&) {return {};}
-inline constexpr std::false_type is_cmd_setter(const auto &) {return {};}
+template<typename T>
+inline constexpr std::false_type is_cmd_setter(const T &) {return {};}
 
+template<typename T>
+struct is_cmd_setter_t : decltype(is_cmd_setter(T())) {};
+
+
+struct cmd_builder
+{
+    std::string cmd;
+
+    const char* get_exe     () const { return nullptr;}
+    const char* get_cmd_line() const { return cmd.c_str();}
+
+    void operator()(std::string & data)
+    {
+        cmd = std::move(data);
+    }
+    void operator()(cmd_setter_<std::string> & data)
+    {
+        cmd = std::move(data._cmd_line);
+    }
+
+
+};
 
 }}}
 

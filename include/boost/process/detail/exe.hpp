@@ -8,8 +8,8 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BOOST_PROCESS_WINDOWS_INITIALIZERS_SET_CMD_LINE_HPP
-#define BOOST_PROCESS_WINDOWS_INITIALIZERS_SET_CMD_LINE_HPP
+#ifndef BOOST_PROCESS_WINDOWS_INITIALIZERS_SET_EXE_HPP
+#define BOOST_PROCESS_WINDOWS_INITIALIZERS_SET_EXE_HPP
 
 #include <boost/detail/winapi/config.hpp>
 #include <boost/process/detail/handler_base.hpp>
@@ -20,21 +20,10 @@
 namespace boost { namespace process { namespace detail {
 
 template <class String>
-struct exe_setter_ : ::boost::process::detail::handler
+struct exe_setter_ : ::boost::process::detail::handler_base
 {
-    typedef String string_type;
-    typedef typename String::value_type char_type;
-
-    explicit exe_setter_(const string_type &s) : exe_(s) {}
-    explicit exe_setter_(string_type &&s     ) : exe_(std::move(s)) {}
-
-    template <class WindowsExecutor>
-    void on_setup(WindowsExecutor &e) const
-    {
-        api::apply_exe(exe_, e);
-    }
-private:
-    string_type exe_;
+    String exe_;
+    exe_setter_(String && str) : exe_(std::move(str)) {}
 };
 
 template<template <class> class ExeSetter>
@@ -78,8 +67,11 @@ struct exe_
 
 template<class String>
 inline constexpr std:: true_type is_exe_setter(const exe_setter_<String>&) {return {};}
-inline constexpr std::false_type is_exe_setter(const auto &) {return {};}
+template<typename T>
+inline constexpr std::false_type is_exe_setter(const T &) {return {};}
 
+template<typename T>
+struct is_exe_setter_t : decltype(is_exe_setter(T())) {};
 
 
 

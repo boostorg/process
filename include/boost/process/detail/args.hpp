@@ -21,118 +21,66 @@ namespace boost { namespace process { namespace detail {
 
 struct arg_setter_combiner;
 
-template <class Char, bool Append = false>
-struct arg_setter_ : ::boost::process::detail::handler
+template <class String, bool Append = false>
+struct arg_setter_ : ::boost::process::detail::handler_base
 {
-    typedef typename Char char_type;
-    typedef std::basic_stringstream<char_type>   string_type;
-    typedef typename string_type::const_iterator const_iterator;
-
-    constexpr static char_type quote_sign = _get_quote_sign(char_type());
-    constexpr static char_type space_sign = _get_space_sign(char_type());
-
-    constexpr static bool store_after_launch = false;//
-    constexpr static bool is_append = Append;
-
-    arg_setter_(arg_setter_&&) = default;
-    arg_setter_& operator=(arg_setter_&&) = default;
-    explicit arg_setter_(const std::vector<std::string> & args) : _args(args)  {}
-    explicit arg_setter_(      std::vector<std::string> &&args) : _args(args) {};
-
-    static constexpr  char   _get_space_sign(char)    {return  ' ';}
-    static constexpr wchar_t _get_space_sign(wchar_t) {return L' ';}
-    static constexpr  char   _get_quote_sign(char)    {return  '"';}
-    static constexpr wchar_t _get_quote_sign(wchar_t) {return L'"';}
-
-    template <class Executor>
-    void on_setup(Executor& e) const
-    {
-        api::apply_args(_args, e);
-    }
-
-private:
-    friend arg_setter_combiner;
-    std::vector<string_type> _args;
+    std::vector<String> _args;
+    template<typename Range>
+    arg_setter_(Range && str) :
+            _args(std::make_move_iterator(str.begin()),
+                  std::make_move_iterator(str.end())) {}
 };
 
-
-struct arg_setter_combiner
-{
-    template<typename T, bool B0>
-    static void combine(arg_setter_<T, B0> & base, const arg_setter_<T, true> &  rhs)
-    {
-        base._args.insert(base._args.end(), rhs._args.begin(), rhs._args.end());
-    }
-
-    template<typename T, bool B0>
-    static void combine(arg_setter_<T, B0> & base,       arg_setter_<T, true> && rhs)
-    {
-        base._args.insert(base._args.end(),
-                            std::move_iterator(rhs._args.begin()),
-                            std::move_iterator(rhs._args.end()  ));
-    }
-    template<typename T, bool B0>
-    static void combine(arg_setter_<T, B0> & base, const arg_setter_<T, false> &  rhs)
-    {
-        base._args = rhs._args;
-    }
-
-    template<typename T, bool B0>
-    static void combine(arg_setter_<T, B0> & base,       arg_setter_<T, false> && rhs)
-    {
-        base._args = std::move(rhs._args);
-    }
-};
-
-template<typename T, bool B0, bool B1>
-void combine(arg_setter_<T, B0> & base, const arg_setter_<T, B1> &  rhs) {arg_setter_combiner::combine(base, rhs);}
-template<typename T, bool B0, bool B1>
-void combine(arg_setter_<T, B0> & base,       arg_setter_<T, B1> && rhs) {arg_setter_combiner::combine(base, std::move(rhs));}
 
 struct args_
 {
     template <class Range>
-    arg_setter_<Range, true>     operator()(Range &&range) const
+    arg_setter_<Range, true>     operator()(Range &range) const
     {
-        return Template<Range>(std::forward<Range>(range));
+        return arg_setter_<Range>(std::move(range));
     }
     template <class Range>
-    arg_setter_<Range, true>     operator+=(Range &&range) const
+    arg_setter_<Range, true>     operator+=(Range &range) const
     {
-        return Template<Range>(std::forward<Range>(range));
+        return arg_setter_<Range>(std::move(range));
     }
     template <class Range>
-    arg_setter_<Range, false>    operator= (Range &&range) const
+    arg_setter_<Range, false>    operator= (Range &range) const
     {
-        return Template<Range>(std::forward<Range>(range));
+        return arg_setter_<Range>(std::move>(range));
     }
     template <class Char>
-    arg_setter_<Char, true>      operator()(const std::initializer_list<Char*> &range) const
+    arg_setter_<std::basic_string<Char>, true> operator()(std::initializer_list<Char*> &range) const
     {
-        return Template<Char>(range);
+        return arg_setter_<std::basic_string<Char>>(std::move(range));
     }
     template <class Char>
-    arg_setter_<Char, true>      operator+=(const std::initializer_list<Char*> &range) const
+    arg_setter_<std::basic_string<Char>, true> operator+=(std::initializer_list<Char*> &range) const
     {
-        return Template<Char, true>(range);
+        return arg_setter_<std::basic_string<Char>, true>(std::move(range));
     }
     template <class Char>
-    arg_setter_<Char, false>     operator= (const std::initializer_list<Char*> &range) const
+    arg_setter_<std::basic_string<Char>, false> operator= (std::initializer_list<Char*> &range) const
     {
-        return Template<Char, true>(range);
+        return arg_setter_<std::basic_string<Char>, true>(std::move(range));
     }
 };
 
 
 template<class Char, bool Append>
 inline constexpr std:: true_type is_arg_setter(const arg_setter_<Char, Append>&) {return {};}
-inline constexpr std::false_type is_arg_setter(const auto &) {return {};}
+
+template<typename T>
+inline constexpr std::false_type is_arg_setter(const T &) {return {};}
+
+template<typename T>
+struct is_arg_setter_t : decltype(is_arg_setter(T())) {};
 
 
 }
 
-constexpr boost::process::detail::args_ args;
-constexpr boost::process::detail::args_ argv;
+constexpr boost::process::detail::args_ args{};
+constexpr boost::process::detail::args_ argv{};
 
 
 }}

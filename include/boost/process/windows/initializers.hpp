@@ -20,11 +20,8 @@
 #include <boost/process/windows/initializers/inherit_env.hpp>
 #include <boost/process/windows/initializers/run_exe.hpp>
 #include <boost/process/windows/initializers/set_env.hpp>
-#include <boost/process/windows/initializers/set_on_error.hpp>
 #include <boost/process/windows/initializers/show_window.hpp>
 #include <boost/process/windows/initializers/start_dir.hpp>
-#include <boost/process/detail/initializers/throw_on_error.hpp>
-#include <boost/process/windows/initializers/args.hpp>
 #include <boost/process/windows/initializers/set_cmd.hpp>
 
 #endif

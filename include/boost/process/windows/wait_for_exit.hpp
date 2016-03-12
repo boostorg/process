@@ -15,10 +15,10 @@
 #include <boost/system/error_code.hpp>
 #include <boost/detail/winapi/synchronization.hpp>
 #include <boost/detail/winapi/process.hpp>
-#include <boost/process/windows/child.hpp>
+#include <boost/process/windows/child_handle.hpp>
 #include <chrono>
 
-namespace boost { namespace process { namespace windows {
+namespace boost { namespace process { namespace detail { namespace windows {
 
 inline void wait(const child_handle &p, int & exit_code)
 {
@@ -27,7 +27,7 @@ inline void wait(const child_handle &p, int & exit_code)
             throw std::system_error(
                 std::error_code(
                 ::boost::detail::winapi::GetLastError(),
-                boost::system::system_category()),
+                std::system_category()),
                 "WaitForSingleObject() failed");
 
     ::boost::detail::winapi::DWORD_ _exit_code;
@@ -35,13 +35,13 @@ inline void wait(const child_handle &p, int & exit_code)
         throw std::system_error(
                 std::error_code(
                 ::boost::detail::winapi::GetLastError(),
-                boost::system::system_category()),
+                 std::system_category()),
                 "GetExitCodeProcess() failed");
 
     exit_code = static_cast<int>(exit_code);
 }
 
-inline void wait(const child_handle &p, int & exit_code, boost::system::error_code &ec)
+inline void wait(const child_handle &p, int & exit_code, std::error_code &ec)
 {
 	::boost::detail::winapi::DWORD_ _exit_code = 1;
 
@@ -76,7 +76,7 @@ inline bool wait_for(
         throw std::system_error(
             std::error_code(
             ::boost::detail::winapi::GetLastError(),
-            boost::system::system_category()),
+            std::system_category()),
             "WaitForSingleObject() failed");
     else if (wait_code == ::boost::detail::winapi::wait_timeout)
         return false; //
@@ -86,7 +86,7 @@ inline bool wait_for(
         throw std::system_error(
                 std::error_code(
                 ::boost::detail::winapi::GetLastError(),
-                boost::system::system_category()),
+                std::system_category()),
                 "GetExitCodeProcess() failed");
 
     exit_code = static_cast<int>(_exit_code);
@@ -98,7 +98,7 @@ inline bool wait_for(
         const child_handle &p,
         int & exit_code,
         const std::chrono::duration<Rep, Period>& rel_time,
-        boost::system::error_code &ec)
+        std::error_code &ec)
 {
 
     std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(rel_time);
@@ -146,7 +146,7 @@ inline bool wait_until(
         throw std::system_error(
             std::error_code(
             ::boost::detail::winapi::GetLastError(),
-            boost::system::system_category()),
+            std::system_category()),
             "WaitForSingleObject() failed");
     else if (wait_code == ::boost::detail::winapi::wait_timeout)
         return false;
@@ -156,7 +156,7 @@ inline bool wait_until(
         throw std::system_error(
             std::error_code(
             ::boost::detail::winapi::GetLastError(),
-            boost::system::system_category()),
+            std::system_category()),
             "GetExitCodeProcess() failed");
 
     exit_code = static_cast<int>(_exit_code);
@@ -170,7 +170,7 @@ inline bool wait_until(
         const child_handle &p,
         int & exit_code,
         const std::chrono::time_point<Clock, Duration>& timeout_time,
-        boost::system::error_code &ec)
+        std::error_code &ec)
 {
     std::chrono::milliseconds ms =
             std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -195,6 +195,6 @@ inline bool wait_until(
 }
 
 
-}}}
+}}}}
 
 #endif

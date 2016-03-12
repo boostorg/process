@@ -18,8 +18,6 @@
 
 #include <boost/process/config.hpp>
 
-#include BOOST_PROCESS_PLATFORM_PROMOTE_PATH(create_pipe)
-BOOST_PROCESS_PLATFORM_PROMOTE_NAMESPACE(create_pipe)
 
 #if defined(BOOST_PROCESS_DOXYGEN)
 namespace boost { namespace process {

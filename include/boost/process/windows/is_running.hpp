@@ -11,7 +11,7 @@
 #include <cstdlib>
 #include <boost/detail/winapi/process.hpp>
 
-namespace boost { namespace process { namespace windows {
+namespace boost { namespace process { namespace detail { namespace windows {
 
 template <class Process>
 bool is_running(const Process &p)
@@ -21,11 +21,7 @@ bool is_running(const Process &p)
     static constexpr ::boost::detail::winapi::DWORD_ still_active = 259;
 
     if (!::boost::detail::winapi::GetExitCodeProcess(p.process_handle(), &code))
-        throw std::system_error(
-                std::error_code(
-                ::boost::detail::winapi::GetLastError(),
-                boost::system::system_category()),
-                "GetExitCodeProcess() failed");
+        ::boost::process::detail::throw_last_error("GetExitCodeProcess() failed");
 
 
     return code == still_active;
@@ -39,15 +35,13 @@ bool is_running(const Process &p, std::error_code &ec)
     static constexpr ::boost::detail::winapi::DWORD_ still_active = 259;
 
     if (!::boost::detail::winapi::GetExitCodeProcess(p.process_handle(), &code))
-        ec = std::error_code(
-                ::boost::detail::winapi::GetLastError(),
-                std::system_category());
+        ec = ::boost::process::detail::get_last_error();
     else
         ec.clear();
 
     return code == still_active;
 }
 
-}}}
+}}}}
 
 #endif

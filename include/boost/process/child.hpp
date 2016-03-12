@@ -21,20 +21,18 @@
 #include <chrono>
 
 #if defined(BOOST_POSIX_API)
-#include <boost/process/posix/child.hpp>
+#include <boost/process/posix/child_handle.hpp>
 #include <boost/process/posix/wait_for_exit.hpp>
 #include <boost/process/posix/is_running.hpp>
 #elif defined(BOOST_WINDOWS_API)
-#include <boost/process/windows/child.hpp>
+#include <boost/process/windows/child_handle.hpp>
 #include <boost/process/windows/wait_for_exit.hpp>
 #include <boost/process/windows/is_running.hpp>
 
 #endif
+namespace boost {
 
-namespace boost { namespace process {
-
-
-
+namespace process {
 
 /**
  * Represents a child process.
@@ -44,13 +42,14 @@ namespace boost { namespace process {
  */
 class child
 {
-    api::child_handle _child_handle;
+    ::boost::process::detail::api::child_handle _child_handle;
     int _exit_code = -1;
     bool _attached = true;
     bool _exited = false;
 public:
-    typedef api::child_handle::process_handle_t native_handle_t;
-    explicit child(api::child_handle &&ch) : _child_handle(std::move(ch)) {}
+    typedef ::boost::process::detail::api::child_handle child_handle;
+    typedef child_handle::process_handle_t native_handle_t;
+    explicit child(child_handle &&ch) : _child_handle(std::move(ch)) {}
 
     child(const child&) = delete;
     child(child && ) = default;
@@ -70,23 +69,23 @@ public:
 
     void wait()
     {
-        api::wait(_child_handle, _exit_code);
-        _exited = !api::is_running(_child_handle);
+        boost::process::detail::api::wait(_child_handle, _exit_code);
+        _exited = !boost::process::detail::api::is_running(_child_handle);
     }
 
     template< class Rep, class Period >
     bool wait_for  (const std::chrono::duration<Rep, Period>& rel_time)
     {
-        auto b = api::wait_for(_child_handle, _exit_code, rel_time);
-        _exited = !api::is_running(_child_handle);
+        auto b = boost::process::detail::api::wait_for(_child_handle, _exit_code, rel_time);
+        _exited = !boost::process::detail::api::is_running(_child_handle);
         return b;
     }
 
     template< class Clock, class Duration >
     bool wait_until(const std::chrono::time_point<Clock, Duration>& timeout_time )
     {
-        auto b = api::wait_until(_child_handle, _exit_code, timeout_time);
-        _exited = !api::is_running(_child_handle);
+        auto b = boost::process::detail::api::wait_until(_child_handle, _exit_code, timeout_time);
+        _exited = !boost::process::detail::api::is_running(_child_handle);
         return b;
     }
 
