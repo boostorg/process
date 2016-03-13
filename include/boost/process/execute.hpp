@@ -53,11 +53,6 @@ auto execute(Args&& ... args)
 
     auto others = boost::hana::second(par);
 
-    using namespace std;
-    cout << "Input : " << typeindex::type_id<decltype(tup)>().pretty_name() << endl;
-    cout << "Inits : " << typeindex::type_id<decltype(inits)>().pretty_name() << endl;
-    cout << "Others: " << typeindex::type_id<decltype(others)>().pretty_name() << endl;
-
     //get the tags of the elements of initializers.
     auto tags = boost::hana::unique(
                     boost::hana::transform(others,

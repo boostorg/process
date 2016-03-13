@@ -28,5 +28,17 @@ int main(int argc, char* argv[])
 
     auto c2 = bp::execute("doesnt-exist", ec);
     BOOST_TEST(ec);
+
+
+    try
+    {
+        auto c = bp::execute("doesnt-exist");
+        BOOST_TEST(false);
+    }
+    catch(std::system_error & se)
+    {
+        BOOST_TEST(true);
+    }
+
     return boost::report_errors();
 }

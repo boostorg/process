@@ -110,18 +110,16 @@ struct executor : startup_info_impl<char>
     {
     }
 
+    void internal_throw(std:: true_type, std::error_code &ec ) {}
+    void internal_throw(std::false_type, std::error_code &ec )
+    {
+        throw std::system_error(ec);
+    }
+
+
     child operator()()
     {
         boost::hana::for_each(seq, [this](const auto &elem){elem->on_setup(*this);});
-        using namespace std;
-        if (exe != nullptr)
-            cout << "Exe: " << exe << endl;
-        else
-            cout << "Empty exe" << endl;
-        if (cmd_line != nullptr)
-            cout << "Cmd: " << cmd_line << endl;
-        else
-            cout << "Empty cmd" << endl;
 
         int err_code = ::boost::detail::winapi::create_process(
             exe,                                        //       LPCSTR_ lpApplicationName,
@@ -140,6 +138,7 @@ struct executor : startup_info_impl<char>
             auto last_error = boost::process::detail::get_last_error();
             boost::hana::for_each(seq,
                     [this, err_code, last_error](const auto &elem){elem->on_error(*this, last_error);});
+            internal_throw(has_error_handler(seq), last_error);
         }
         else
             boost::hana::for_each(seq, [this](const auto &elem){elem->on_success(*this);});
