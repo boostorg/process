@@ -10,29 +10,23 @@
 #include <boost/core/lightweight_test.hpp>
 #include <iostream>
 
-#include <boost/process.hpp>
 
-
-#include <boost/system/error_code.hpp>
+#include <boost/process/cmd.hpp>
+#include <boost/process/error.hpp>
+#include <boost/process/execute.hpp>
 
 namespace bp = boost::process;
-namespace bpi = boost::process::initializers;
 
 int main(int argc, char* argv[])
 {
-    boost::system::error_code ec;
+    std::error_code ec;
+    std::cout << "EC: " << &ec << std::endl;
     BOOST_TEST(!ec);
 
-    auto c = bp::execute(
-        bpi::exe(argv[1]),
-        bpi::error = ec
-    );
+    auto c = bp::execute(argv[1], ec);
     BOOST_TEST(!ec);
 
-    auto c2 = bp::execute(
-        bpi::exe = "doesnt-exist",
-        bpi::error(ec)
-    );
+    auto c2 = bp::execute("doesnt-exist", ec);
     BOOST_TEST(ec);
     return boost::report_errors();
 }

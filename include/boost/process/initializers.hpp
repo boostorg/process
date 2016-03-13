@@ -16,10 +16,8 @@
 #ifndef BOOST_PROCESS_INITIALIZERS_HPP
 #define BOOST_PROCESS_INITIALIZERS_HPP
 
-#include <boost/process/detail/config.hpp>
+#include <boost/process/config.hpp>
 
-#include BOOST_PROCESS_PLATFORM_PROMOTE_PATH(initializers)
-BOOST_PROCESS_PLATFORM_PROMOTE_INITIALIZERS_NAMESPACE
 
 #if defined(BOOST_PROCESS_DOXYGEN)
 namespace boost { namespace process { namespace initializers {

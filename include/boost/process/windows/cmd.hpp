@@ -7,8 +7,7 @@
 #ifndef BOOST_PROCESS_WINDOWS_CMD_HPP_
 #define BOOST_PROCESS_WINDOWS_CMD_HPP_
 
-#include <boost/process/detail/cmd.hpp>
-#include <boost/algorithm/string/trim.hpp>
+#include <string>
 
 namespace boost
 {
@@ -22,6 +21,12 @@ template<class StringType, class Executor>
 void apply_cmd(const StringType & cmd_line, Executor & e)
 {
     e.cmd_line = cmd_line;
+}
+
+template<class StringType, class Executor>
+void apply_cmd(const std::basic_string<StringType> & cmd_line, Executor & e)
+{
+    e.cmd_line = cmd_line.c_str();
 }
 
 }

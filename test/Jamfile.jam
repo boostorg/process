@@ -23,7 +23,7 @@ searched-lib shell32 ;
 
 import testing ;
 
-lib system : : <name>boost_system-mgw-mt-1_60 <search>F:/boost/lib ;
+#lib system : : <name>boost_filesystem-clang37-mt-1_60.lib <search>F:/boost-git/lib ;
 
 exe sparring_partner : sparring_partner.cpp  :
 	<linkflags>-LF:/boost-git/lib
@@ -46,7 +46,7 @@ test-suite ts :
 #     [ run extensions.cpp system : : sparring_partner                                                                          ]
 #     [ run inherit_env.cpp iostreams program_options system : : sparring_partner                                               ]
 #     [ run posix_specific.cpp iostreams system : : sparring_partner : <build>no <target-os>linux:<build>yes                    ]
-      [ run run_exe.cpp system : : sparring_partner                                                                             ]
+      [ run run_exe.cpp  : : sparring_partner                                                                             ]
 #     [ run run_exe_path.cpp filesystem system : : sparring_partner                                                             ]
 #     [ run run_exe_wstring.cpp filesystem system : : sparring_partner : <build>no <target-os>windows:<build>yes                ]
 #     [ run search_path.cpp filesystem system : : : <target-os>windows:<source>shell32                                          ]

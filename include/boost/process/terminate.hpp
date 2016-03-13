@@ -18,8 +18,21 @@
 
 #include <boost/process/config.hpp>
 
-#include BOOST_PROCESS_PLATFORM_PROMOTE_PATH(terminate)
-BOOST_PROCESS_PLATFORM_PROMOTE_NAMESPACE(terminate)
+#if defined(BOOST_POSIX_API)
+#include <boost/process/posix/terminate.hpp>
+#elif defined(BOOST_WINDOWS_API)
+#include <boost/process/windows/terminate.hpp>
+#endif
+
+namespace boost { namespace process {
+
+#if defined(BOOST_POSIX_API)
+using boost::process::posix::terminate;
+#elif defined(BOOST_WINDOWS_API)
+using boost::process::windows::terminate;
+#endif
+
+}}
 
 #if defined(BOOST_PROCESS_DOXYGEN)
 namespace boost { namespace process {

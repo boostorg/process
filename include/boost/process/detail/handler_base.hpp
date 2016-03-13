@@ -11,7 +11,7 @@
 #ifndef BOOST_PROCESS_DETAIL_HANDLER_BASE_HPP
 #define BOOST_PROCESS_DETAIL_HANDLER_BASE_HPP
 
-#include <boost/system/system_error.hpp>
+#include <system_error>
 
 namespace boost { namespace process { namespace detail {
 
@@ -35,7 +35,7 @@ struct handler_base
     void on_setup(Executor&) const {}
 
     template <class Executor>
-    void on_error(Executor&, const boost::system::error_code &) const {}
+    void on_error(Executor&, const std::error_code &) const {}
 
     template <class Executor>
     void on_success(Executor&) const {}

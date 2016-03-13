@@ -12,31 +12,40 @@
 #define BOOST_PROCESS_WINDOWS_INITIALIZERS_SET_CMD_LINE_HPP
 
 #include <boost/detail/winapi/config.hpp>
+#include <boost/process/config.hpp>
 #include <boost/process/detail/handler_base.hpp>
+#include <boost/process/detail/cmd_or_exe.hpp>
+#include <boost/process/windows/cmd.hpp>
 #include <boost/range/algorithm/copy.hpp>
 #include <boost/shared_array.hpp>
 #include <memory>
+#include <boost/hana/tuple.hpp>
 
 namespace boost { namespace process { namespace detail {
 
 template <class String>
 struct cmd_setter_ : ::boost::process::detail::handler_base
 {
-    String _cmd_line;
     cmd_setter_(String && cmd_line) : _cmd_line(std::move(cmd_line)) {}
     cmd_setter_(const String & cmd_line) : _cmd_line(cmd_line) {}
-
+    template <class Executor>
+    void on_setup(Executor& exec) const
+    {
+        detail::api::apply_cmd(_cmd_line, exec);
+    }
+public:
+    String _cmd_line;
 };
 
 struct cmd_
 {
-    inline cmd_setter_<std::wstring> operator()(const wchar_t *ws) const
+    inline cmd_setter_<const wchar_t *> operator()(const wchar_t *ws) const
     {
-        return cmd_setter_<std::wstring>(ws);
+        return cmd_setter_<const wchar_t *>(ws);
     }
-    inline cmd_setter_<std::wstring> operator= (const wchar_t *ws) const
+    inline cmd_setter_<const wchar_t *> operator= (const wchar_t *ws) const
     {
-        return cmd_setter_<std::wstring>(ws);
+        return cmd_setter_<const wchar_t *>(ws);
     }
 
     inline cmd_setter_<std::wstring> operator()(const std::wstring &ws) const
@@ -47,13 +56,13 @@ struct cmd_
     {
         return cmd_setter_<std::wstring>(ws);
     }
-    inline cmd_setter_<std::string> operator()(const char *s) const
+    inline cmd_setter_<const char *> operator()(const char *s) const
     {
-        return cmd_setter_<std::string>(s);
+        return cmd_setter_<const char *>(s);
     }
-    inline cmd_setter_<std::string> operator= (const char *s) const
+    inline cmd_setter_<const char *> operator= (const char *s) const
     {
-        return cmd_setter_<std::string>(s);
+        return cmd_setter_<const char *>(s);
     }
 
     inline cmd_setter_<std::string> operator()(const std::string &s) const
@@ -66,34 +75,24 @@ struct cmd_
     }
 };
 
-
-template<class String>
-inline constexpr std:: true_type is_cmd_setter(const cmd_setter_<String>&) {return {};}
 template<typename T>
-inline constexpr std::false_type is_cmd_setter(const T &) {return {};}
+std::true_type is_initializer(const cmd_setter_<T> &){return {};}
 
-template<typename T>
-struct is_cmd_setter_t : decltype(is_cmd_setter(T())) {};
-
-
-struct cmd_builder
+inline cmd_setter_<const char *> make_initializer(cmd_or_exe_tag&, boost::hana::tuple<char *> & cmd)
 {
-    std::string cmd;
-
-    const char* get_exe     () const { return nullptr;}
-    const char* get_cmd_line() const { return cmd.c_str();}
-
-    void operator()(std::string & data)
-    {
-        cmd = std::move(data);
-    }
-    void operator()(cmd_setter_<std::string> & data)
-    {
-        cmd = std::move(data._cmd_line);
-    }
-
-
-};
+    const auto & value = boost::hana::at(cmd, boost::hana::size_c<0>);
+    return cmd_setter_<const char *>(value);
+}
+inline cmd_setter_<const char *> make_initializer(cmd_or_exe_tag&, boost::hana::tuple<const char *> & cmd)
+{
+    const auto & value = boost::hana::at(cmd, boost::hana::size_c<0>);
+    return cmd_setter_<const char *>(value);
+}
+inline cmd_setter_<std::string> make_initializer (cmd_or_exe_tag&, boost::hana::tuple<std::string> &cmd)
+{
+    auto && value = std::move(boost::hana::at(cmd, boost::hana::size_c<0>));
+    return cmd_setter_<std::string>(value);
+}
 
 }}}
 

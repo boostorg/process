@@ -6,7 +6,7 @@
 #ifndef BOOST_PROCESS_DETAIL_WINDOWS_HANDLER_HPP_
 #define BOOST_PROCESS_DETAIL_WINDOWS_HANDLER_HPP_
 
-#include <boost/process/detail/windows/handler.hpp>
+#include <boost/process/detail/handler_base.hpp>
 
 namespace boost { namespace process { namespace detail { namespace windows {
 

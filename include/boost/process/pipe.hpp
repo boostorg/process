@@ -18,6 +18,11 @@
 
 #include <boost/config.hpp>
 
+#if defined(BOOST_POSIX_API)
+#include <boost/process/posix/pipe.hpp>
+#elif defined(BOOST_WINDOWS_API)
+#include <boost/process/windows/pipe.hpp>
+#endif
 
 namespace boost { namespace process {
 

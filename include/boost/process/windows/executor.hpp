@@ -11,18 +11,21 @@
 #ifndef BOOST_PROCESS_WINDOWS_EXECUTOR_HPP
 #define BOOST_PROCESS_WINDOWS_EXECUTOR_HPP
 
-
+#include <boost/process/child.hpp>
+#include <boost/process/detail/traits.hpp>
 #include <cstring>
 #include <boost/hana/for_each.hpp>
+#include <boost/hana/filter.hpp>
+#include <boost/hana/tuple.hpp>
+#include <boost/hana/transform.hpp>
 #include <boost/detail/winapi/handles.hpp>
 #include <boost/detail/winapi/process.hpp>
+#include <boost/none.hpp>
 #include <system_error>
+#include <memory>
 
+namespace boost { namespace process { namespace detail { namespace windows {
 
-namespace boost { namespace process { namespace windows {
-
-namespace detail
-{
 template<typename CharType> struct startup_info;
 #if !defined( BOOST_NO_ANSI_APIS )
 
@@ -97,59 +100,72 @@ struct startup_info_impl
 
 #endif
 
-}
 
 
 
-
-template<typename CharT>
-struct basic_executor : detail::startup_info_impl<CharT>
+template<typename Sequence>
+struct executor : startup_info_impl<char>
 {
-    constexpr basic_executor() : detail::startup_info_impl<CharT>(),
-            proc_attrs(0), thread_attrs(0), inherit_handles(false), work_dir(0)
+    executor(Sequence & seq) : seq(seq)
     {
     }
 
-    template<class Exe, class Env, class InitializerSequence>
-    child operator()(const Exe & exe, const Env & env, const InitializerSequence &seq)
+    child operator()()
     {
         boost::hana::for_each(seq, [this](const auto &elem){elem.on_setup(*this);});
+        using namespace std;
+        if (exe != nullptr)
+            cout << "Exe: " << exe << endl;
+        else
+            cout << "Empty exe" << endl;
+        if (cmd_line != nullptr)
+            cout << "Cmd: " << cmd_line << endl;
+        else
+            cout << "Empty cmd" << endl;
+
         int err_code = ::boost::detail::winapi::create_process(
-            exe.get_exe(),
-            exe.get_cmd_line(),
-            proc_attrs,
-            thread_attrs,
-            inherit_handles,
-            creation_flags,
-            env.get(),
-            work_dir,
-            &startup_info,
-            &proc_info);
+            exe,                                        //       LPCSTR_ lpApplicationName,
+            const_cast<char*>(cmd_line),                //       LPSTR_ lpCommandLine,
+            proc_attrs,                                 //       LPSECURITY_ATTRIBUTES_ lpProcessAttributes,
+            thread_attrs,                               //       LPSECURITY_ATTRIBUTES_ lpThreadAttributes,
+            inherit_handles,                            //       INT_ bInheritHandles,
+            creation_flags,                             //       DWORD_ dwCreationFlags,
+            reinterpret_cast<void*>(const_cast<char*>(env)),  //     LPVOID_ lpEnvironment,
+            work_dir,                                   //       LPCSTR_ lpCurrentDirectory,
+            &this->startup_info,                        //       LPSTARTUPINFOA_ lpStartupInfo,
+            &proc_info);                                //       LPPROCESS_INFORMATION_ lpProcessInformation)
 
         if (err_code == 0)
             boost::hana::for_each(seq,
-                    [this, error](const auto &elem){elem.on_error(*this, boost::process::detail::get_last_error());});
+                    [this, err_code](const auto &elem){elem.on_error(*this, boost::process::detail::get_last_error());});
         else
             boost::hana::for_each(seq, [this](const auto &elem){elem.on_success(*this);});
-
         return
-                child(child_handle(std::move(proc_info)));
+                child(child_handle(std::move(proc_info)), make_resource_pointer(seq));
     }
 
-    ::boost::detail::winapi::LPSECURITY_ATTRIBUTES_ proc_attrs;
-    ::boost::detail::winapi::LPSECURITY_ATTRIBUTES_ thread_attrs;
-    ::boost::detail::winapi::BOOL_ inherit_handles;
-    const CharT* work_dir;
+    ::boost::detail::winapi::LPSECURITY_ATTRIBUTES_ proc_attrs   = nullptr;
+    ::boost::detail::winapi::LPSECURITY_ATTRIBUTES_ thread_attrs = nullptr;
+    ::boost::detail::winapi::BOOL_ inherit_handles = false;
+    const char * work_dir = nullptr;
+    const char * cmd_line = nullptr;
+    const char * exe      = nullptr;
+    const char * env      = nullptr;
 
     ::boost::detail::winapi::PROCESS_INFORMATION_ proc_info;
+
+    Sequence & seq;
 };
 
-#if !defined( BOOST_NO_ANSI_APIS )
-typedef basic_executor<char>     executor;
-#endif
-typedef basic_executor<wchar_t> wexecutor;
 
 
-}}}
+template<typename Tup>
+executor<Tup> make_executor(Tup & tup)
+{
+    return executor<Tup>(tup);
+}
+
+
+}}}}
 
 #endif
