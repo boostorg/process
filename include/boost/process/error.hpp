@@ -57,10 +57,10 @@ inline std::true_type is_initializer  (const set_on_error &) {return {};}
 inline error_tag initializer_tag(const std::error_code&) {return {};}
 
 
-inline set_on_error make_initializer(error_tag, boost::hana::tuple<std::error_code&> & err)
+inline set_on_error make_initializer(error_tag, boost::hana::tuple<std::error_code*> & err)
 {
-    std::error_code & value = boost::hana::at(err, boost::hana::size_c<0>);
-    set_on_error setter(value);
+    std::error_code * value = boost::hana::at(err, boost::hana::size_c<0>);
+    set_on_error setter(*value);
     return setter;
 }
 

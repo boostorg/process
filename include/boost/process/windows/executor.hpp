@@ -112,7 +112,7 @@ struct executor : startup_info_impl<char>
 
     child operator()()
     {
-        boost::hana::for_each(seq, [this](const auto &elem){elem.on_setup(*this);});
+        boost::hana::for_each(seq, [this](const auto &elem){elem->on_setup(*this);});
         using namespace std;
         if (exe != nullptr)
             cout << "Exe: " << exe << endl;
@@ -136,10 +136,13 @@ struct executor : startup_info_impl<char>
             &proc_info);                                //       LPPROCESS_INFORMATION_ lpProcessInformation)
 
         if (err_code == 0)
+        {
+            auto last_error = boost::process::detail::get_last_error();
             boost::hana::for_each(seq,
-                    [this, err_code](const auto &elem){elem.on_error(*this, boost::process::detail::get_last_error());});
+                    [this, err_code, last_error](const auto &elem){elem->on_error(*this, last_error);});
+        }
         else
-            boost::hana::for_each(seq, [this](const auto &elem){elem.on_success(*this);});
+            boost::hana::for_each(seq, [this](const auto &elem){elem->on_success(*this);});
         return
                 child(child_handle(std::move(proc_info)), make_resource_pointer(seq));
     }

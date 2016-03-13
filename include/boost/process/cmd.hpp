@@ -78,19 +78,33 @@ struct cmd_
 template<typename T>
 std::true_type is_initializer(const cmd_setter_<T> &){return {};}
 
-inline cmd_setter_<const char *> make_initializer(cmd_or_exe_tag&, boost::hana::tuple<char *> & cmd)
+template<std::size_t Size>
+inline cmd_setter_<const char *> make_initializer(cmd_or_exe_tag&, boost::hana::tuple<char (*)[Size]> & cmd)
 {
-    const auto & value = boost::hana::at(cmd, boost::hana::size_c<0>);
+    const auto & value = *boost::hana::at(cmd, boost::hana::size_c<0>);
     return cmd_setter_<const char *>(value);
 }
-inline cmd_setter_<const char *> make_initializer(cmd_or_exe_tag&, boost::hana::tuple<const char *> & cmd)
+
+template<std::size_t Size>
+inline cmd_setter_<const char *> make_initializer(cmd_or_exe_tag&, boost::hana::tuple<const char (*)[Size]> & cmd)
 {
-    const auto & value = boost::hana::at(cmd, boost::hana::size_c<0>);
+    const auto & value = *boost::hana::at(cmd, boost::hana::size_c<0>);
     return cmd_setter_<const char *>(value);
 }
-inline cmd_setter_<std::string> make_initializer (cmd_or_exe_tag&, boost::hana::tuple<std::string> &cmd)
+
+inline cmd_setter_<const char *> make_initializer(cmd_or_exe_tag&, boost::hana::tuple<char **> & cmd)
 {
-    auto && value = std::move(boost::hana::at(cmd, boost::hana::size_c<0>));
+    const auto & value = *boost::hana::at(cmd, boost::hana::size_c<0>);
+    return cmd_setter_<const char *>(value);
+}
+inline cmd_setter_<const char *> make_initializer(cmd_or_exe_tag&, boost::hana::tuple<const char **> & cmd)
+{
+    const auto & value = *boost::hana::at(cmd, boost::hana::size_c<0>);
+    return cmd_setter_<const char *>(value);
+}
+inline cmd_setter_<std::string> make_initializer (cmd_or_exe_tag&, boost::hana::tuple<std::string*> &cmd)
+{
+    auto && value = std::move(*boost::hana::at(cmd, boost::hana::size_c<0>));
     return cmd_setter_<std::string>(value);
 }
 
