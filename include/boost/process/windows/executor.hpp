@@ -121,6 +121,7 @@ struct executor : startup_info_impl<char>
     {
         boost::hana::for_each(seq, [this](const auto &elem){elem->on_setup(*this);});
 
+        //NOTE: The non-cast cmd-line string can only be modified by the wchar_t variant which is currently disabled.
         int err_code = ::boost::detail::winapi::create_process(
             exe,                                        //       LPCSTR_ lpApplicationName,
             const_cast<char*>(cmd_line),                //       LPSTR_ lpCommandLine,
@@ -150,7 +151,7 @@ struct executor : startup_info_impl<char>
     ::boost::detail::winapi::LPSECURITY_ATTRIBUTES_ thread_attrs = nullptr;
     ::boost::detail::winapi::BOOL_ inherit_handles = false;
     const char * work_dir = nullptr;
-    const char * cmd_line = nullptr;
+    const char * cmd_line       = nullptr;
     const char * exe      = nullptr;
     const char * env      = nullptr;
 

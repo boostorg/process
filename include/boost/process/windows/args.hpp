@@ -10,6 +10,14 @@
 #include <boost/process/detail/args.hpp>
 #include <boost/algorithm/string/trim.hpp>
 
+
+#if defined( BOOST_WINDOWS_API )
+#include <boost/process/windows/args.hpp>
+#elif defined( BOOST_POSIX_API )
+#include <boost/process/windows/args.hpp>
+
+#endif
+
 namespace boost
 {
 namespace process
@@ -19,11 +27,12 @@ namespace detail
 namespace windows
 {
 
+typedef std::string native_args;
 
-template<class StringType, class Executor>
-void apply_args(const std::vector<StringType> & data, Executor & e)
+
+inline std::string build_args(std::vector<std::string> && data)
 {
-    StringType st;
+    std::string st;
     for (auto & arg : data)
     {
         //don't need the argument afterwards so,
@@ -45,7 +54,13 @@ void apply_args(const std::vector<StringType> & data, Executor & e)
 
         st += arg;
     }
-    e._args = std::move(st);
+    return st;
+}
+
+template< class Executor>
+void apply_args(const std::string & data, Executor & e)
+{
+    e.cmd_line = data.c_str();
 }
 
 }

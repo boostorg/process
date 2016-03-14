@@ -10,12 +10,17 @@
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_IGNORE_SIGCHLD
 #include <boost/test/included/unit_test.hpp>
-#include <boost/process.hpp>
-#include <boost/system/error_code.hpp>
+
+#include <system_error>
 #include <boost/filesystem.hpp>
 
+#include <boost/process/exe_args.hpp>
+#include <boost/process/cmd.hpp>
+#include <boost/process/error.hpp>
+#include <boost/process/execute.hpp>
+
 namespace bp = boost::process;
-namespace bpi = boost::process::initializers;
+
 
 BOOST_AUTO_TEST_CASE(run_exe_success)
 {
@@ -23,10 +28,10 @@ BOOST_AUTO_TEST_CASE(run_exe_success)
 
     boost::filesystem::path exe = master_test_suite().argv[1];
 
-    boost::system::error_code ec;
+    std::error_code ec;
     bp::execute(
-        bpi::run_exe(exe),
-        bpi::set_on_error(ec)
+        exe,
+        ec
     );
     BOOST_CHECK(!ec);
 }
@@ -36,10 +41,10 @@ BOOST_AUTO_TEST_CASE(run_exe_error)
 {
     boost::filesystem::path exe = "doesnt-exist";
 
-    boost::system::error_code ec;
+    std::error_code ec;
     bp::execute(
-        bpi::run_exe(exe),
-        bpi::set_on_error(ec)
+        exe,
+        ec
     );
     BOOST_CHECK(ec);
 }

@@ -17,13 +17,21 @@
 #include <boost/shared_array.hpp>
 #include <memory>
 
+#if defined( BOOST_WINDOWS_API )
+#include <boost/process/windows/exe.hpp>
+#elif defined( BOOST_POSIX_API )
+#include <boost/process/posix/exe.hpp>
+#endif
+
 namespace boost { namespace process { namespace detail {
 
 template <class String>
-struct exe_setter_ : ::boost::process::detail::handler_base
+struct exe_setter_
 {
     String exe_;
     exe_setter_(String && str) : exe_(std::move(str)) {}
+    exe_setter_(const String & str) : exe_(std::move(str)) {}
+
 };
 
 template<template <class> class ExeSetter>
@@ -72,6 +80,8 @@ inline constexpr std::false_type is_exe_setter(const T &) {return {};}
 
 template<typename T>
 struct is_exe_setter_t : decltype(is_exe_setter(T())) {};
+
+
 
 
 

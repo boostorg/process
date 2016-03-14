@@ -4,8 +4,8 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 
-#ifndef BOOST_PROCESS_WINDOWS_CMD_HPP_
-#define BOOST_PROCESS_WINDOWS_CMD_HPP_
+#ifndef BOOST_PROCESS_WINDOWS_EXE_HPP_
+#define BOOST_PROCESS_WINDOWS_EXE_HPP_
 
 #include <boost/process/detail/exe.hpp>
 #include <boost/algorithm/string/trim.hpp>
@@ -22,7 +22,7 @@ namespace windows
 template<class StringType, class Executor>
 void apply_exe(const StringType & exe, Executor & e)
 {
-    e.exe = exe;
+    e.exe = exe.c_str();
 }
 
 }

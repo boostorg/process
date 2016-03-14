@@ -17,6 +17,12 @@
 #include <initializer_list>
 #include <iterator>
 
+#if defined( BOOST_WINDOWS_API )
+#include <boost/process/windows/args.hpp>
+#elif defined( BOOST_POSIX_API )
+#include <boost/process/posix/args.hpp>
+#endif
+
 namespace boost { namespace process { namespace detail {
 
 struct arg_setter_combiner;
