@@ -27,13 +27,22 @@ import testing ;
 
 exe sparring_partner : sparring_partner.cpp  :
 	<linkflags>-LF:/boost-git/lib
-	<library>F:/boost-git/lib/libboost_program_options-clang37-mt-1_60.lib
-	<library>F:/boost-git/lib/libboost_filesystem-clang37-mt-1_60.lib
-	<library>F:/boost-git/lib/libboost_iostreams-clang37-mt-1_60.lib
-	<library>F:/boost-git/lib/libboost_system-clang37-mt-1_60.lib
+	<toolset>clang:<library>F:/boost-git/lib/libboost_program_options-clang37-mt-1_60.lib
+	<toolset>clang:<library>F:/boost-git/lib/libboost_filesystem-clang37-mt-1_60.lib
+	<toolset>clang:<library>F:/boost-git/lib/libboost_iostreams-clang37-mt-1_60.lib
+	<toolset>clang:<library>F:/boost-git/lib/libboost_system-clang37-mt-1_60.lib
+	<toolset>clang:<linkflags>-lstdc++
+	<toolset>gcc:<library>F:/boost-git/lib64/libboost_program_options-mgw-mt-1_60.a
+	<toolset>gcc:<library>F:/boost-git/lib64/libboost_filesystem-mgw-mt-1_60.a
+	<toolset>gcc:<library>F:/boost-git/lib64/libboost_iostreams-mgw-mt-1_60.a
+	<toolset>gcc:<library>F:/boost-git/lib64/libboost_system-mgw-mt-1_60.a
 	;
 
 test-suite ts :
+	  [ run pipe.cpp : : :	
+	  	<toolset>clang:<library>F:/boost-git/lib/libboost_iostreams-clang37-mt-1_60.lib
+	  	<toolset>gcc:<library>F:/boost-git/lib64/libboost_iostreams-mgw-mt-1_60.a 	  	
+	  	 ]
 #     [ run bind_stderr.cpp iostreams system : : sparring_partner                                                               ]
 #     [ run bind_stdin.cpp iostreams system : : sparring_partner                                                                ]
 #     [ run bind_stdin_stdout.cpp iostreams system : : sparring_partner                                                         ]

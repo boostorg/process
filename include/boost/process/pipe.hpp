@@ -17,6 +17,9 @@
 #define BOOST_PROCESS_PIPE_HPP
 
 #include <boost/config.hpp>
+#include <boost/process/config.hpp>
+#include <boost/iostreams/device/file_descriptor.hpp>
+#include <boost/iostreams/stream.hpp>
 
 #if defined(BOOST_POSIX_API)
 #include <boost/process/posix/pipe.hpp>
@@ -26,51 +29,66 @@
 
 namespace boost { namespace process {
 
-#if defined(BOOST_POSIX_API)
-using boost::process::posix::pipe;
-#elif defined(BOOST_WINDOWS_API)
-using boost::process::windows::pipe;
-#endif
-
-}}
-
-#if defined(BOOST_PROCESS_DOXYGEN)
-namespace boost { namespace process {
-
-/**
- * Represents a pipe.
- */
-struct pipe
+class pipe
 {
-    /**
-     * Read-end.
-     */
-    pipe_end_type source;
 
-    /**
-     * Write-end.
-     */
-    pipe_end_type sink;
+    boost::iostreams::file_descriptor_sink   _sink  ;
+    boost::iostreams::file_descriptor_source _source;
+public:
 
-    /**
-     * Default constructor, creates a pipe.
-     */
-    pipe();
+    using sink_t   = boost::iostreams::file_descriptor_sink  ;
+    using source_t = boost::iostreams::file_descriptor_source;
+    typedef char                            char_type;
 
-    /**
-     * Copy constructor.
-     */
-    pipe(const pipe& p);
+    typedef boost::iostreams::bidirectional_device_tag    category;
 
-    /**
-     * Create a pipe.
-     */
-    static pipe create();
+    pipe(boost::process::detail::api::pipe && handle)
+        :  _sink  (handle.sink(),   boost::iostreams::close_handle),
+           _source(handle.source(), boost::iostreams::close_handle)
+    {}
+
+    pipe() : pipe(boost::process::detail::api::pipe::create()) {}
+
+    pipe(      pipe&&) = default;
+    pipe(const pipe& ) = default;
+
+    pipe& operator=(      pipe&&) = default;
+    pipe& operator=(const pipe& ) = default;
+
+    static pipe create()                    { return pipe(boost::process::detail::api::pipe::create());  }
+    static pipe create(std::error_code &ec) { return pipe(boost::process::detail::api::pipe::create(ec));}
+
+    std::streamsize read(char_type* s, std::streamsize n)
+    {
+        return _source.read(s, n);
+    }
+
+    std::streamsize write(const char_type* s, std::streamsize n)
+    {
+        return _sink.write(s, n);
+    }
+
+
+    source_t & source() {return _source;}
+    sink_t   & sink()   {return _sink;}
+
+    bool is_open()
+    {
+        return _source.is_open() || _sink.is_open();
+    }
+
+    void close()
+    {
+        _source.close();
+        _sink.close();
+    }
 
 };
 
+using pipe_stream = boost::iostreams::stream<pipe>;
 
 }}
-#endif
+
+
 
 #endif

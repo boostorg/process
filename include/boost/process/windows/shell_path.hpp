@@ -33,7 +33,7 @@ inline boost::filesystem::path shell_path()
     return p / "cmd.exe";
 }
 
-inline boost::filesystem::path shell_path(boost::system::error_code &ec)
+inline boost::filesystem::path shell_path(std::error_code &ec)
 {
 
 	::boost::detail::winapi::WCHAR_ sysdir[260];

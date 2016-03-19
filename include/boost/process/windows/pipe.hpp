@@ -12,12 +12,17 @@
 
 #include <boost/detail/winapi/basic_types.hpp>
 #include <boost/detail/winapi/pipes.hpp>
+#include <boost/detail/winapi/handles.hpp>
 #include <boost/detail/winapi/file_management.hpp>
 #include <boost/detail/winapi/get_last_error.hpp>
 #include <boost/detail/winapi/access_rights.hpp>
 #include <system_error>
+#include <array>
+#include <boost/iostreams/device/file_descriptor.hpp>
 
-namespace boost { namespace process { namespace windows {
+namespace boost { namespace process { namespace detail { namespace windows {
+
+
 
 class pipe
 {
@@ -26,8 +31,11 @@ class pipe
 protected:
     pipe(boost::detail::winapi::HANDLE_ source, boost::detail::winapi::HANDLE_ sink) : _source(source), _sink(sink) {}
 public:
-    pipe(const pipe&) = default;
-    pipe() : pipe(create()) {}
+    pipe(const pipe& ) = delete;
+    pipe(pipe&& lhs)   = default;
+    pipe& operator=(const pipe& ) = delete;
+    pipe& operator=(pipe&& lhs)   = default;
+
     void * source() const {return _source;}
     void * sink  () const {return _sink;}
 
@@ -38,7 +46,7 @@ public:
             throw std::system_error(
                     std::error_code(
                     ::boost::detail::winapi::GetLastError(),
-                    boost::system::system_category()),
+                    std::system_category()),
                     "CreatePipe() failed");
         return pipe(handles[0], handles[1]);
     }
@@ -55,7 +63,7 @@ public:
         return pipe(handles[0], handles[1]);
     }
 };
-
+/*
 struct async_pipe : pipe
 {
     enum direction
@@ -73,7 +81,6 @@ struct async_pipe : pipe
 
         namespace fs = boost::filesystem;
         fs::path p = name + "0"; //first
-
 
         while (fs::exists(p)) //so it limits it to 2^31 pipes. should suffice.
         {
@@ -168,9 +175,9 @@ struct async_pipe : pipe
 
 private:
     using pipe::pipe;
-};
+};*/
 
 
-}}}
+}}}}
 
 #endif

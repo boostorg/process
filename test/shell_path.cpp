@@ -11,12 +11,13 @@
 #include <boost/test/included/unit_test.hpp>
 #include <boost/process.hpp>
 #include <boost/filesystem.hpp>
+#include <system_error>
 
 namespace bp = boost::process;
 
 BOOST_AUTO_TEST_CASE(shell_set_on_error)
 {
-    boost::system::error_code ec;
+    std::error_code ec;
     boost::filesystem::path p = bp::shell_path(ec);
     BOOST_CHECK(!ec);
     BOOST_CHECK(boost::filesystem::exists(p));
