@@ -15,20 +15,44 @@ namespace bp = boost::process;
 
 int main(int , char* [])
 {
-    bp::pipe pipe;
+    {
+        bp::pipe pipe;
 
-    std::string in  = "test";
+        std::string in  = "test";
+        pipe.write(in.c_str(), in.size());
 
+        std::string out;
+        out.resize(4);
+        pipe.read(&out.front(), out.size());
 
-    pipe.write(in.c_str(), in.size());
+        BOOST_TEST(out == in);
+    }
 
+    {
+        bp::pipe pipe = bp::pipe::create_named();
 
-    std::string out;
-    out.resize(4);
+        std::string in  = "xyz";
+        pipe.write(in.c_str(), in.size());
 
-    pipe.read(&out.front(), out.size());
+        std::string out;
+        out.resize(3);
+        pipe.read(&out.front(), out.size());
 
-    BOOST_TEST(out == in);
+        BOOST_TEST(out == in);
+    }
+
+    {
+        bp::pipe pipe = bp::pipe::create_async();
+
+        std::string in  = "    ";
+        pipe.write(in.c_str(), in.size());
+
+        std::string out;
+        out.resize(4);
+        pipe.read(&out.front(), out.size());
+
+        BOOST_TEST(out == in);
+    }
 
     return boost::report_errors();
 }

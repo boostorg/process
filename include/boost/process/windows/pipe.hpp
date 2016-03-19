@@ -16,6 +16,7 @@
 #include <boost/detail/winapi/file_management.hpp>
 #include <boost/detail/winapi/get_last_error.hpp>
 #include <boost/detail/winapi/access_rights.hpp>
+#include <boost/filesystem.hpp>
 #include <system_error>
 #include <array>
 #include <boost/iostreams/device/file_descriptor.hpp>
@@ -62,120 +63,100 @@ public:
             ec.clear();
         return pipe(handles[0], handles[1]);
     }
+    inline static std::string make_pipe_name();
+
+    inline static pipe create_named(const std::string & name = make_pipe_name());
+    inline static pipe create_named(const std::string & name, std::error_code & ec);
+    inline static pipe create_named(std::error_code & ec)
+    {
+        return create_named(make_pipe_name(), ec);
+    }
+
+    inline static pipe create_async()                     {return create_named();  }
+    inline static pipe create_async(std::error_code & ec) {return create_named(ec);}
+
 };
-/*
-struct async_pipe : pipe
+
+std::string pipe::make_pipe_name()
 {
-    enum direction
+    std::string name = "\\\\.\\pipe\\boost_process\\pipe_";
+
+    namespace fs = boost::filesystem;
+    fs::path p = name + "0"; //first
+
+    while (fs::exists(p)) //so it limits it to 2^31 pipes. should suffice.
     {
-        none = 0b00,
-        read = 0b01,
-        write= 0b10,
-        bidirectional = 0b11
-    };
-    static std::string get_pipe_name()
-    {
-        std::string name = "\\\\.\\pipe\\boost_process\\async_pipe_";
-
-        boost::detail::winapi::WIN32_FIND_DATAA_ find_data;
-
-        namespace fs = boost::filesystem;
-        fs::path p = name + "0"; //first
-
-        while (fs::exists(p)) //so it limits it to 2^31 pipes. should suffice.
-        {
-            static unsigned int i = 0;
-            p = name + std::to_string(i);
-            i++;
-        }
-
-        return p.string();
-
+        static unsigned long long int i = 0;
+        p = name + std::to_string(i);
+        i++;
     }
-    static async_pipe create(direction dir = bidirectional)
+    return p.string();
+}
+
+
+
+pipe pipe::create_named(const std::string & name)
+{
+    static constexpr int OPEN_EXISTING_         = 3; //temporary.
+    static constexpr int FILE_FLAG_OVERLAPPED_  = 0x40000000; //temporary
+    //static constexpr int FILE_ATTRIBUTE_NORMAL_ = 0x00000080; //temporary
+
+    boost::detail::winapi::HANDLE_ handle1 = boost::detail::winapi::create_named_pipe(
+            name.c_str(),
+            boost::detail::winapi::PIPE_ACCESS_INBOUND_
+            || FILE_FLAG_OVERLAPPED_, //write flag
+            0, 1, 8192, 8192, 0, nullptr);
+
+    if (handle1 == boost::detail::winapi::INVALID_HANDLE_VALUE_)
+        boost::process::detail::throw_last_error("create_named_pipe() failed");
+
+    boost::detail::winapi::HANDLE_ handle2 = boost::detail::winapi::create_file(
+            name.c_str(),
+            boost::detail::winapi::GENERIC_WRITE_, 0, nullptr,
+            OPEN_EXISTING_,
+            FILE_FLAG_OVERLAPPED_, //to allow read
+            nullptr);
+
+    if (handle2 == boost::detail::winapi::INVALID_HANDLE_VALUE_)
+        boost::process::detail::throw_last_error("create_file() failed");
+
+
+    return pipe(handle1, handle2);
+}
+
+pipe pipe::create_named(const std::string & name, std::error_code & ec)
+{
+    static constexpr int OPEN_EXISTING_         = 3; //temporary.
+    static constexpr int FILE_FLAG_OVERLAPPED_  = 0x40000000; //temporary
+    //static constexpr int FILE_ATTRIBUTE_NORMAL_ = 0x00000080; //temporary
+
+    boost::detail::winapi::HANDLE_ handle1 = boost::detail::winapi::create_named_pipe(
+            name.c_str(),
+            boost::detail::winapi::PIPE_ACCESS_INBOUND_
+            || FILE_FLAG_OVERLAPPED_, //write flag
+            0, 1, 8192, 8192, 0, nullptr);
+
+    if (handle1 == boost::detail::winapi::INVALID_HANDLE_VALUE_)
+        ec = boost::process::detail::get_last_error();
+
+    boost::detail::winapi::HANDLE_ handle2;
+
+    if (!ec)
     {
-        static constexpr int OPEN_EXISTING_         = 3; //temporary.
-        static constexpr int FILE_FLAG_OVERLAPPED_  = 0x40000000; //temporary
-        static constexpr int FILE_ATTRIBUTE_NORMAL_ = 0x00000080; //temporary
-
-        boost::detail::winapi::DWORD_ pipe_flag = boost::detail::winapi::PIPE_ACCESS_INBOUND_;
-        if (dir & write)
-            pipe_flag = FILE_FLAG_OVERLAPPED_;
-
-        std::string name = get_pipe_name();
-
-        boost::detail::winapi::HANDLE_ handle1 = boost::detail::winapi::create_named_pipe(
-                name.c_str(), pipe_flag, 0, 1, 8192, 8192, 0, nullptr);
-
-        if (handle1 == boost::detail::winapi::INVALID_HANDLE_VALUE_)
-            throw std::system_error(
-                    std::error_code(
-                    ::boost::detail::winapi::GetLastError(),
-                    boost::system::system_category()),
-                    "create_named_pipe() failed");
-
-        boost::detail::winapi::DWORD_ file_flag = (dir & read) ?
-                                                  FILE_FLAG_OVERLAPPED_ :
-                                                  FILE_ATTRIBUTE_NORMAL_;
-
-        boost::detail::winapi::HANDLE_ handle2 = boost::detail::winapi::create_file(
+        handle2 = boost::detail::winapi::create_file(
                 name.c_str(),
                 boost::detail::winapi::GENERIC_WRITE_, 0, nullptr,
                 OPEN_EXISTING_,
-                FILE_FLAG_OVERLAPPED_, nullptr);
+                FILE_FLAG_OVERLAPPED_, //to allow read
+                nullptr);
 
-        if (handle1 == boost::detail::winapi::INVALID_HANDLE_VALUE_)
-            throw std::system_error(
-                    std::error_code(
-                    ::boost::detail::winapi::GetLastError(),
-                    boost::system::system_category()),
-                    "create_file() failed");
-
-        return async_pipe(handle1, handle2);
+        if (handle2 == boost::detail::winapi::INVALID_HANDLE_VALUE_)
+            ec = boost::process::detail::get_last_error();
     }
 
-    static async_pipe create(std::error_code& ec) {return create(bidirectional, ec); }
-    static async_pipe create(direction dir = bidirectional, std::error_code& ec)
-    {
-        static constexpr int OPEN_EXISTING_         = 3; //temporary.
-        static constexpr int FILE_FLAG_OVERLAPPED_  = 0x40000000; //temporary
-        static constexpr int FILE_ATTRIBUTE_NORMAL_ = 0x00000080; //temporary
+    return pipe(handle1, handle2);
+}
 
-        boost::detail::winapi::DWORD_ pipe_flag = boost::detail::winapi::PIPE_ACCESS_INBOUND_;
-        if (dir & write)
-            pipe_flag = FILE_FLAG_OVERLAPPED_;
-
-        std::string name = get_pipe_name();
-
-        boost::detail::winapi::HANDLE_ handle1 = boost::detail::winapi::create_named_pipe(
-                name.c_str(), pipe_flag, 0, 1, 8192, 8192, 0, nullptr);
-
-        if (handle1 == boost::detail::winapi::INVALID_HANDLE_VALUE_)
-            ec = std::error_code(
-                    ::boost::detail::winapi::GetLastError(),
-                    std::system_category());
-
-        boost::detail::winapi::DWORD_ file_flag = (dir & read) ?
-                                                  FILE_FLAG_OVERLAPPED_ :
-                                                  FILE_ATTRIBUTE_NORMAL_;
-
-        boost::detail::winapi::HANDLE_ handle2 = boost::detail::winapi::create_file(
-                name.c_str(),
-                boost::detail::winapi::GENERIC_WRITE_, 0, nullptr,
-                OPEN_EXISTING_,
-                FILE_FLAG_OVERLAPPED_, nullptr);
-
-        if (handle1 == boost::detail::winapi::INVALID_HANDLE_VALUE_)
-            ec = std::error_code(
-                    ::boost::detail::winapi::GetLastError(),
-                    std::system_category());
-
-        return async_pipe(handle1, handle2);
-    }
-
-private:
-    using pipe::pipe;
-};*/
 
 
 }}}}

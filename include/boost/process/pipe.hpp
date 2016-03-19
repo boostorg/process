@@ -41,6 +41,7 @@ public:
     typedef char                            char_type;
 
     typedef boost::iostreams::bidirectional_device_tag    category;
+    typedef boost::process::detail::api::pipe native_pipe;
 
     pipe(boost::process::detail::api::pipe && handle)
         :  _sink  (handle.sink(),   boost::iostreams::close_handle),
@@ -55,14 +56,28 @@ public:
     pipe& operator=(      pipe&&) = default;
     pipe& operator=(const pipe& ) = default;
 
-    static pipe create()                    { return pipe(boost::process::detail::api::pipe::create());  }
-    static pipe create(std::error_code &ec) { return pipe(boost::process::detail::api::pipe::create(ec));}
+    static pipe create()                    { return pipe(native_pipe::create());  }
+    static pipe create(std::error_code &ec) { return pipe(native_pipe::create(ec));}
+
+
+    inline static std::string make_pipe_name() {return native_pipe::make_pipe_name(); }
+
+    inline static pipe create_named(const std::string & name = make_pipe_name())    {return native_pipe::create_named(name);}
+    inline static pipe create_named(const std::string & name, std::error_code & ec) {return native_pipe::create_named(name,ec);}
+
+
+    inline static pipe create_named(std::error_code & ec) {return create_named(make_pipe_name(), ec);}
+
+    inline static pipe create_async()                     {return native_pipe::create_async(); }
+    inline static pipe create_async(std::error_code & ec) {return native_pipe::create_async(ec); }
+
+
+
 
     std::streamsize read(char_type* s, std::streamsize n)
     {
         return _source.read(s, n);
     }
-
     std::streamsize write(const char_type* s, std::streamsize n)
     {
         return _sink.write(s, n);
