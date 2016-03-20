@@ -123,8 +123,8 @@ struct std_out_
 
     template<int pin, typename = std::enable_if_t<
             (((p1 == 1) && (pin == 2)) ||
-             ((p1 == 2) && (pin == 1))
-             && (p2 == -1))>>
+             ((p1 == 2) && (pin == 1)))
+             && (p2 == -1)>>
     constexpr std_out_<1, 2> operator& (const std_out_<pin> &lhs) const
     {
         return std_out_<1, 2> ();
@@ -144,6 +144,28 @@ constexpr static null_t  null;
 constexpr static std_in_ std_in;
 constexpr static std_out_<1> std_out;
 constexpr static std_out_<2> std_err;
+
+
+inline std::true_type is_initializer  (const std_in_ &)    {return {};}
+inline std::true_type is_initializer  (const std_out_<1> &) {return {};}
+inline std::true_type is_initializer  (const std_out_<2> &) {return {};}
+inline std::true_type is_initializer  (const std_out_<1,2> &) {return {};}
+
+
+inline std::true_type is_initializer ( const api::close_in &) {return {}; }
+inline std::true_type is_initializer ( const api::null_in  &) {return {}; }
+inline std::true_type is_initializer ( const api::file_in  &) {return {}; }
+inline std::true_type is_initializer ( const api::pipe_in  &) {return {}; }
+
+template<int N, int M>
+inline std::true_type is_initializer ( const api::close_out<N,M> &) {return {}; }
+template<int N, int M>
+inline std::true_type is_initializer ( const api::null_out<N,M>  &) {return {}; }
+template<int N, int M>
+inline std::true_type is_initializer ( const api::file_out<N,M>  &) {return {}; }
+template<int N, int M>
+inline std::true_type is_initializer ( const api::pipe_out<N,M>  &) {return {}; }
+
 
 }
 

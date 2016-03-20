@@ -121,8 +121,8 @@ public:
     native_handle_t native_handle() const { return _child_handle.process_handle(); }
 
 
-    int exit_code() const;
-    int get_pid() const;
+    int exit_code() const {return _exit_code;}
+    int get_pid()   const;
 
     bool running();
 

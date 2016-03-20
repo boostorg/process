@@ -67,6 +67,13 @@ struct exe_builder
         else
             args.push_back(std::move(data));
     }
+    void operator()(const char* data)
+    {
+        if (exe.empty())
+            exe = data;
+        else
+            args.push_back(data);
+    }
     void operator()(std::vector<std::string> & data)
     {
         if (data.empty())
@@ -82,24 +89,34 @@ struct exe_builder
         }
         args.insert(args.end(), itr, end);
     }
-    void operator()(exe_setter_ & data)
+    void operator()(exe_setter_ && data)
     {
         exe = std::move(data.exe_);
     }
     template<typename Range>
-    void operator()(arg_setter_<Range, false> & data)
+    void operator()(arg_setter_<Range, false> && data)
     {
         args.assign(
                 std::make_move_iterator(data._args.begin()),
                 std::make_move_iterator(data._args.end()));
     }
     template<typename Range>
-    void operator()(arg_setter_<Range, true> & data)
+    void operator()(arg_setter_<Range, true> && data)
     {
         args.insert(args.end(),
                 std::make_move_iterator(data._args.begin()),
                 std::make_move_iterator(data._args.end()));
     }
+//    template<typename Range>
+//    void operator()(const arg_setter_<Range, false> & data)
+//    {
+//        args.assign(data._args.begin(), data._args.end());
+//    }
+//    template<typename Range>
+//    void operator()(const arg_setter_<Range, true> & data)
+//    {
+//        args.insert(args.end(), data._args.begin(), data._args.end());
+//    }
 
     exe_args_init get()
     {
@@ -128,6 +145,12 @@ inline exe_args_init make_initializer(cmd_or_exe_tag&, boost::hana::tuple<boost:
     const auto & value = *boost::hana::at(cmd, boost::hana::size_c<0>);
     return exe_args_init(value.string());
 }
+
+
+constexpr inline cmd_or_exe_tag initializer_tag  (const exe_setter_&) {return {};}
+template<class String, bool Append>
+constexpr inline cmd_or_exe_tag initializer_tag  (const arg_setter_<String, Append>&) {return {};}
+
 
 }}}
 

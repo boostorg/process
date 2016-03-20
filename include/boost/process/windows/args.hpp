@@ -10,6 +10,7 @@
 #include <boost/process/detail/args.hpp>
 #include <boost/algorithm/string/trim.hpp>
 
+#include <iostream>
 
 #if defined( BOOST_WINDOWS_API )
 #include <boost/process/windows/args.hpp>
@@ -45,7 +46,7 @@ inline std::string build_args(std::vector<std::string> && data)
             {
                 //the first one is put directly onto the output,
                 //because then I don't have to copy the whole string
-                st += '"';
+                arg.insert(arg.begin(), '"');
                 arg += '"'; //thats the post one.
             }
         }

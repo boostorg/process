@@ -17,14 +17,16 @@
 #include <boost/asio.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-#include <boost/process/execute.hpp>
 #include <boost/process/exe_args.hpp>
+#include <boost/process/error.hpp>
 #include <boost/process/io.hpp>
 #include <boost/process/child.hpp>
+#include <boost/process/execute.hpp>
 
 
 #include <string>
 #include <istream>
+#include <iostream>
 #include <cstdlib>
 #if defined(BOOST_WINDOWS_API)
 #   include <Windows.h>
@@ -49,7 +51,7 @@ BOOST_AUTO_TEST_CASE(sync_io)
         std::error_code ec;
         bp::execute(
             master_test_suite().argv[1],
-            bp::args={"test", "--echo-stderr hello"},
+            bp::args={"test", "--echo-stderr", "hello"},
             bp::std_err>sink,
             ec
         );
@@ -85,22 +87,28 @@ BOOST_AUTO_TEST_CASE(async_io)
     using boost::unit_test::framework::master_test_suite;
 
     bp::pipe p = bp::pipe::create_async();
-
+    std::cout << "Log " << __LINE__ << std::endl;
     {
         bio::file_descriptor_sink sink(p.sink().handle(), bio::close_handle);
-        boost::system::error_code ec;
+        std::error_code ec;
         bp::execute(
             bp::exe=master_test_suite().argv[1],
             bp::args+="test",
-            bp::args+="--echo-stderr abc",
+            bp::args+={"--echo-stderr", "abc"},
             bp::std_err>sink,
             ec
         );
+        std::cout << "Log " << __LINE__ << std::endl;
         BOOST_REQUIRE(!ec);
+        std::cout << "Log " << __LINE__ << std::endl;
     }
+    std::cout << "Log " << __LINE__ << std::endl;
 
     boost::asio::io_service io_service;
+    std::cout << "Log " << __LINE__ << std::endl;
+
     pipe_end pend(io_service, p.source().handle());
+    std::cout << "Log " << __LINE__ << std::endl;
 
     boost::asio::streambuf buffer;
     boost::asio::async_read_until(pend, buffer, '\n',
@@ -119,7 +127,7 @@ BOOST_AUTO_TEST_CASE(nul)
     bio::file_descriptor_sink sink("/dev/null");
 #endif
 
-    boost::system::error_code ec;
+    std::error_code ec;
     bp::child c = bp::execute(
         bp::exe(master_test_suite().argv[1]),
         bp::args+={"test", "--is-nul-stderr"},

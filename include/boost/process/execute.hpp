@@ -56,7 +56,11 @@ auto execute(Args&& ... args)
     //get the tags of the elements of initializers.
     auto tags = boost::hana::unique(
                     boost::hana::transform(others,
-                            [](auto * x){return detail::initializer_tag(*x);}
+                            [](auto * x)
+                            {
+                                static_assert(!std::is_void<decltype(detail::initializer_tag(*x))>::value, "Unrecognized initializer type");
+                                return detail::initializer_tag(*x);
+                            }
                         ),
                         [](auto a, auto b)
                         {
@@ -77,7 +81,7 @@ auto execute(Args&& ... args)
                 return detail::make_initializer(tag, tup);
             });
 
-    //exec only takes a refernenc eto initializers.
+    //exec only takes a reference to initializers.
     auto other_ptr = boost::hana::transform(other_inits, get_ptr);
 
     auto init_ptr = boost::hana::concat(inits, std::move(other_ptr));

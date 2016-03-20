@@ -9,8 +9,8 @@
 #define BOOST_PROCESS_DETAIL_STRING_TRAITS_HPP_
 
 #include <string>
-#include <type_traits>
 #include <vector>
+#include <type_traits>
 #include <initializer_list>
 #include <boost/filesystem/path.hpp>
 

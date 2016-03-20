@@ -25,6 +25,12 @@ import testing ;
 
 #lib system : : <name>boost_filesystem-clang37-mt-1_60.lib <search>F:/boost-git/lib ;
 
+
+lib program_options : : <file>F:/boost-git/lib64/libboost_program_options-mgw-mt-1_60.a ;
+lib filesystem 	    : : <file>F:/boost-git/lib64/libboost_filesystem-mgw-mt-1_60.a      ;
+lib iostreams 		: : <file>F:/boost-git/lib64/libboost_iostreams-mgw-mt-1_60.a       ;
+lib systems   		: : <file>F:/boost-git/lib64/libboost_system-mgw-mt-1_60.a          ;
+
 exe sparring_partner : sparring_partner.cpp  :
 	<linkflags>-LF:/boost-git/lib
 	<toolset>clang:<library>F:/boost-git/lib/libboost_program_options-clang37-mt-1_60.lib
@@ -44,7 +50,7 @@ test-suite ts :
 	  	<toolset>clang:<library>F:/boost-git/lib/libboost_iostreams-clang37-mt-1_60.lib
 	  	<toolset>gcc:<library>F:/boost-git/lib64/libboost_iostreams-mgw-mt-1_60.a 	  	
 	  	 ]
-      [ run bind_stderr.cpp  : : sparring_partner                                                               ]
+      [ run bind_stderr.cpp iostreams : : sparring_partner : <linkflags>-lws2_32  ]
 #     [ run bind_stdin.cpp iostreams system : : sparring_partner                                                                ]
 #     [ run bind_stdin_stdout.cpp iostreams system : : sparring_partner                                                         ]
 #     [ run bind_stdout.cpp iostreams system : : sparring_partner                                                               ]
