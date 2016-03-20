@@ -59,6 +59,9 @@ public:
     static pipe create()                    { return pipe(native_pipe::create());  }
     static pipe create(std::error_code &ec) { return pipe(native_pipe::create(ec));}
 
+    static pipe create(const std::string & name)                      { return create_named(name);  }
+    static pipe create(const std::string & name, std::error_code &ec) { return create_named(name, ec);}
+
 
     inline static std::string make_pipe_name() {return native_pipe::make_pipe_name(); }
 

@@ -24,47 +24,6 @@
 
 namespace boost { namespace process { namespace windows {
 
-inline std::wstring search_path(
-        const std::wstring &filename,
-        std::wstring path = L"")
-{
-    if (path.empty())
-    {
-        path = ::_wgetenv(L"PATH");
-        if (path.empty())
-            BOOST_PROCESS_THROW(std::runtime_error(
-                "Environment variable PATH not found"));
-    }
-
-    typedef boost::tokenizer<boost::char_separator<wchar_t>,
-        std::wstring::const_iterator, std::wstring> tokenizer;
-
-    boost::char_separator<wchar_t> sep(L";");
-    tokenizer tok(path, sep);
-
-    for (boost::filesystem::path p : tok)
-    {
-        p /= filename;
-        std::array<std::wstring, 4> extensions =
-            { L"", L".exe", L".com", L".bat" };
-        for (boost::filesystem::path ext : extensions)
-        {
-            boost::filesystem::path p2 = p;
-            p2 += ext;
-            boost::system::error_code ec;
-            bool file = boost::filesystem::is_regular_file(p2, ec);
-            if (!ec &&
-                 file &&
-            	 ::boost::detail::winapi::sh_get_file_info(p2.c_str(), 0, 0, 0, ::boost::detail::winapi::SHGFI_EXETYPE_))
-            {
-                return p2.wstring();
-            }
-        }
-    }
-    return L"";
-}
-
-#if !defined( BOOST_NO_ANSI_APIS )
 inline std::string search_path(
         const std::string &filename,
         std::string path = "")
@@ -73,8 +32,8 @@ inline std::string search_path(
     {
         path = ::getenv("PATH");
         if (path.empty())
-            BOOST_PROCESS_THROW(std::runtime_error(
-                "Environment variable PATH not found"));
+            throw std::runtime_error(
+                "Environment variable PATH not found");
     }
 
     typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
@@ -100,7 +59,6 @@ inline std::string search_path(
     }
     return "";
 }
-#endif //BOOST_NO_ANSI_APIS
 
 }}}
 

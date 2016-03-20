@@ -7,22 +7,23 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BOOST_PROCESS_WINDOWS_INITIALIZERS_CLOSE_STDERR_HPP
-#define BOOST_PROCESS_WINDOWS_INITIALIZERS_CLOSE_STDERR_HPP
+#ifndef BOOST_PROCESS_WINDOWS_INITIALIZERS_CLOSE_IN_HPP
+#define BOOST_PROCESS_WINDOWS_INITIALIZERS_CLOSE_IN_HPP
 
 #include <boost/detail/winapi/process.hpp>
 #include <boost/detail/winapi/handles.hpp>
-#include <boost/process/detail/initializers/handler_base.hpp>
+#include <boost/process/detail/handler_base.hpp>
 
-namespace boost { namespace process { namespace windows { namespace initializers {
+namespace boost { namespace process { namespace detail { namespace windows {
 
-struct close_stderr : public ::boost::process::detail::initializers::handler_base
+struct close_in : public ::boost::process::detail::handler_base
 {
+public:
     template <class WindowsExecutor>
     void on_setup(WindowsExecutor &e) const
     {
-        e.startup_info.hStdError = ::boost::detail::winapi::INVALID_HANDLE_VALUE_;
-        e.startup_info.dwFlags  |= ::boost::detail::winapi::STARTF_USESTDHANDLES_;
+        e.startup_info.hStdInput = boost::detail::winapi::INVALID_HANDLE_VALUE_;
+        e.startup_info.dwFlags  |= boost::detail::winapi::STARTF_USESTDHANDLES_;
     }
 };
 
