@@ -10,12 +10,19 @@
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_IGNORE_SIGCHLD
 #include <boost/test/included/unit_test.hpp>
-#include <boost/process.hpp>
-#include <boost/system/error_code.hpp>
+#include <system_error>
+
 #include <boost/iostreams/device/file_descriptor.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/asio.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+
+#include <boost/process/execute.hpp>
+#include <boost/process/exe_args.hpp>
+#include <boost/process/io.hpp>
+#include <boost/process/child.hpp>
+
+
 #include <string>
 #include <istream>
 #include <cstdlib>
@@ -29,47 +36,32 @@ typedef boost::asio::posix::stream_descriptor pipe_end;
 #endif
 
 namespace bp = boost::process;
-namespace bpi = boost::process::initializers;
 namespace bio = boost::iostreams;
 
 BOOST_AUTO_TEST_CASE(sync_io)
 {
     using boost::unit_test::framework::master_test_suite;
 
-    bp::pipe p = bp::create_pipe();
+    bp::pipe p;
 
     {
-        bio::file_descriptor_sink sink(p.sink, bio::close_handle);
-        boost::system::error_code ec;
+        bio::file_descriptor_sink sink(p.sink().handle(), bio::close_handle);
+        std::error_code ec;
         bp::execute(
-            bpi::run_exe(master_test_suite().argv[1]),
-            bpi::set_cmd_line("test --echo-stderr hello"),
-            bpi::bind_stderr(sink),
-            bpi::set_on_error(ec)
+            master_test_suite().argv[1],
+            bp::args={"test", "--echo-stderr hello"},
+            bp::std_err>sink,
+            ec
         );
         BOOST_REQUIRE(!ec);
     }
 
-    bio::file_descriptor_source source(p.source, bio::close_handle);
+    bio::file_descriptor_source source(p.source().handle(), bio::close_handle);
     bio::stream<bio::file_descriptor_source> is(source);
 
     std::string s;
     is >> s;
     BOOST_CHECK_EQUAL(s, "hello");
-}
-
-bp::pipe create_async_pipe()
-{
-#if defined(BOOST_WINDOWS_API)
-    std::string name = "\\\\.\\pipe\\boost_process_test_bind_stderr";
-    HANDLE handle1 = CreateNamedPipeA(name.c_str(), PIPE_ACCESS_INBOUND |
-        FILE_FLAG_OVERLAPPED, 0, 1, 8192, 8192, 0, NULL);
-    HANDLE handle2 = CreateFileA(name.c_str(), GENERIC_WRITE, 0, NULL,
-        OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-    return bp::make_pipe(handle1, handle2);
-#elif defined(BOOST_POSIX_API)
-    return bp::create_pipe();
-#endif
 }
 
 struct read_handler
@@ -92,22 +84,23 @@ BOOST_AUTO_TEST_CASE(async_io)
 {
     using boost::unit_test::framework::master_test_suite;
 
-    bp::pipe p = create_async_pipe();
+    bp::pipe p = bp::pipe::create_async();
 
     {
-        bio::file_descriptor_sink sink(p.sink, bio::close_handle);
+        bio::file_descriptor_sink sink(p.sink().handle(), bio::close_handle);
         boost::system::error_code ec;
         bp::execute(
-            bpi::run_exe(master_test_suite().argv[1]),
-            bpi::set_cmd_line("test --echo-stderr abc"),
-            bpi::bind_stderr(sink),
-            bpi::set_on_error(ec)
+            bp::exe=master_test_suite().argv[1],
+            bp::args+="test",
+            bp::args+="--echo-stderr abc",
+            bp::std_err>sink,
+            ec
         );
         BOOST_REQUIRE(!ec);
     }
 
     boost::asio::io_service io_service;
-    pipe_end pend(io_service, p.source);
+    pipe_end pend(io_service, p.source().handle());
 
     boost::asio::streambuf buffer;
     boost::asio::async_read_until(pend, buffer, '\n',
@@ -128,14 +121,15 @@ BOOST_AUTO_TEST_CASE(nul)
 
     boost::system::error_code ec;
     bp::child c = bp::execute(
-        bpi::run_exe(master_test_suite().argv[1]),
-        bpi::set_cmd_line("test --is-nul-stderr"),
-        bpi::bind_stderr(sink),
-        bpi::set_on_error(ec)
+        bp::exe(master_test_suite().argv[1]),
+        bp::args+={"test", "--is-nul-stderr"},
+        bp::std_err>sink,
+        ec
     );
     BOOST_REQUIRE(!ec);
 
-    int exit_code = bp::wait_for_exit(c);
+    c.wait();
+    int exit_code = c.exit_code();
 #if defined(BOOST_WINDOWS_API)
     BOOST_CHECK_EQUAL(EXIT_SUCCESS, exit_code);
 #elif defined(BOOST_POSIX_API)

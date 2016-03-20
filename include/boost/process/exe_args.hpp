@@ -82,7 +82,7 @@ struct exe_builder
         }
         args.insert(args.end(), itr, end);
     }
-    void operator()(exe_setter_<std::string> & data)
+    void operator()(exe_setter_ & data)
     {
         exe = std::move(data.exe_);
     }

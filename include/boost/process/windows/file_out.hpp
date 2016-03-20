@@ -31,7 +31,7 @@ struct file_out : public ::boost::process::detail::handler_base
 
 template<>
 template<typename WindowsExecutor>
-void file_out<1,0>::on_setup<WindowsExecutor>(WindowsExecutor &e) const
+void file_out<1,-1>::on_setup(WindowsExecutor &e) const
 {
     e.startup_info.hStdOutput = file.handle();
     e.startup_info.dwFlags   |= ::boost::detail::winapi::STARTF_USESTDHANDLES_;
@@ -39,7 +39,7 @@ void file_out<1,0>::on_setup<WindowsExecutor>(WindowsExecutor &e) const
 
 template<>
 template<typename WindowsExecutor>
-void file_out<2,0>::on_setup<WindowsExecutor>(WindowsExecutor &e) const
+void file_out<2,-1>::on_setup(WindowsExecutor &e) const
 {
     e.startup_info.hStdError = file.handle();
     e.startup_info.dwFlags  |= ::boost::detail::winapi::STARTF_USESTDHANDLES_;
@@ -47,7 +47,7 @@ void file_out<2,0>::on_setup<WindowsExecutor>(WindowsExecutor &e) const
 
 template<>
 template<typename WindowsExecutor>
-void file_out<1,2>::on_setup<WindowsExecutor>(WindowsExecutor &e) const
+void file_out<1,2>::on_setup(WindowsExecutor &e) const
 {
     e.startup_info.hStdOutput = file.handle();
     e.startup_info.hStdError  = file.handle();

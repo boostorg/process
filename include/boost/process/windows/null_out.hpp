@@ -26,7 +26,7 @@ struct null_out : public ::boost::process::detail::handler_base
 
 template<>
 template<typename WindowsExecutor>
-void null_out<1,0>::on_setup<WindowsExecutor>(WindowsExecutor &e) const
+void null_out<1,0>::on_setup(WindowsExecutor &e) const
 {
     boost::iostreams::file_descriptor_sink sink("nul", boost::iostreams::never_close_handle);
     e.startup_info.hStdOutput = sink.handle();
@@ -35,7 +35,7 @@ void null_out<1,0>::on_setup<WindowsExecutor>(WindowsExecutor &e) const
 
 template<>
 template<typename WindowsExecutor>
-void null_out<2,0>::on_setup<WindowsExecutor>(WindowsExecutor &e) const
+void null_out<2,0>::on_setup(WindowsExecutor &e) const
 {
     boost::iostreams::file_descriptor_sink sink("nul", boost::iostreams::never_close_handle);
     e.startup_info.hStdError = sink.handle();
@@ -44,7 +44,7 @@ void null_out<2,0>::on_setup<WindowsExecutor>(WindowsExecutor &e) const
 
 template<>
 template<typename WindowsExecutor>
-void null_out<1,2>::on_setup<WindowsExecutor>(WindowsExecutor &e) const
+void null_out<1,2>::on_setup(WindowsExecutor &e) const
 {
     boost::iostreams::file_descriptor_sink sink("nul", boost::iostreams::never_close_handle);
     e.startup_info.hStdOutput = sink.handle();

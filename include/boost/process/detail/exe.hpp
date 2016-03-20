@@ -25,56 +25,37 @@
 
 namespace boost { namespace process { namespace detail {
 
-template <class String>
 struct exe_setter_
 {
-    String exe_;
-    exe_setter_(String && str) : exe_(std::move(str)) {}
-    exe_setter_(const String & str) : exe_(std::move(str)) {}
+    std::string exe_;
+    exe_setter_(std::string && str)      : exe_(std::move(str)) {}
+    exe_setter_(const std::string & str) : exe_(str) {}
 
 };
 
-template<template <class> class ExeSetter>
 struct exe_
 {
-    inline ExeSetter<std::wstring> operator()(const wchar_t *ws) const
+    inline exe_setter_ operator()(const char *s) const
     {
-        return ExeSetter<std::wstring>(ws);
+        return exe_setter_(s);
     }
-    inline ExeSetter<std::wstring> operator= (const wchar_t *ws) const
+    inline exe_setter_ operator= (const char *s) const
     {
-        return ExeSetter<std::wstring>(ws);
-    }
-
-    inline ExeSetter<std::wstring> operator()(const std::wstring &ws) const
-    {
-        return ExeSetter<std::wstring>(ws);
-    }
-    inline ExeSetter<std::wstring> operator= (const std::wstring &ws) const
-    {
-        return ExeSetter<std::wstring>(ws);
-    }
-    inline ExeSetter<std::string> operator()(const char *s) const
-    {
-        return ExeSetter<std::string>(s);
-    }
-    inline ExeSetter<std::string> operator= (const char *s) const
-    {
-        return ExeSetter<std::string>(s);
+        return exe_setter_(s);
     }
 
-    inline ExeSetter<std::string> operator()(const std::string &s) const
+    inline exe_setter_ operator()(const std::string &s) const
     {
-        return ExeSetter<std::string>(s);
+        return exe_setter_(s);
     }
-    inline ExeSetter<std::string> operator= (const std::string &s) const
+    inline exe_setter_ operator= (const std::string &s) const
     {
-        return ExeSetter<std::string>(s);
+        return exe_setter_(s);
     }
 };
 
-template<class String>
-inline constexpr std:: true_type is_exe_setter(const exe_setter_<String>&) {return {};}
+inline constexpr std:: true_type is_exe_setter(const exe_setter_&) {return {};}
+
 template<typename T>
 inline constexpr std::false_type is_exe_setter(const T &) {return {};}
 
@@ -82,9 +63,10 @@ template<typename T>
 struct is_exe_setter_t : decltype(is_exe_setter(T())) {};
 
 
+}
 
+constexpr boost::process::detail::exe_ exe{};
 
-
-}}}
+}}
 
 #endif

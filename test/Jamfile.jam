@@ -36,6 +36,7 @@ exe sparring_partner : sparring_partner.cpp  :
 	<toolset>gcc:<library>F:/boost-git/lib64/libboost_filesystem-mgw-mt-1_60.a
 	<toolset>gcc:<library>F:/boost-git/lib64/libboost_iostreams-mgw-mt-1_60.a
 	<toolset>gcc:<library>F:/boost-git/lib64/libboost_system-mgw-mt-1_60.a
+	<warnings>off
 	;
 
 test-suite ts :
@@ -43,7 +44,7 @@ test-suite ts :
 	  	<toolset>clang:<library>F:/boost-git/lib/libboost_iostreams-clang37-mt-1_60.lib
 	  	<toolset>gcc:<library>F:/boost-git/lib64/libboost_iostreams-mgw-mt-1_60.a 	  	
 	  	 ]
-#     [ run bind_stderr.cpp iostreams system : : sparring_partner                                                               ]
+      [ run bind_stderr.cpp  : : sparring_partner                                                               ]
 #     [ run bind_stdin.cpp iostreams system : : sparring_partner                                                                ]
 #     [ run bind_stdin_stdout.cpp iostreams system : : sparring_partner                                                         ]
 #     [ run bind_stdout.cpp iostreams system : : sparring_partner                                                               ]

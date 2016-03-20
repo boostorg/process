@@ -22,7 +22,7 @@ struct file_in : public ::boost::process::detail::handler_base
     boost::iostreams::file_descriptor_source file;
 
     template<typename T>
-    file_in(T&& t) : file(std::forward<T>(t), boost::iostreams::never_close_handle) {}
+    file_in(T&& t) : file(std::forward<T>(t)) {}
 
     template <class WindowsExecutor>
     void on_setup(WindowsExecutor &e) const

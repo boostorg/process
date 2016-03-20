@@ -86,7 +86,8 @@ public:
         return _sink.write(s, n);
     }
 
-
+    const source_t & source() const {return _source;}
+    const sink_t   & sink()   const {return _sink;}
     source_t & source() {return _source;}
     sink_t   & sink()   {return _sink;}
 

@@ -33,42 +33,90 @@ struct arg_setter_ : ::boost::process::detail::handler_base
     std::vector<String> _args;
     template<typename Range>
     arg_setter_(Range && str) :
-            _args(std::make_move_iterator(str.begin()),
-                  std::make_move_iterator(str.end())) {}
+            _args(std::make_move_iterator(std::begin(str)),
+                  std::make_move_iterator(std::end(str))) {}
+
+    auto begin() {return _args.begin();}
+    auto end()   {return _args.end();}
+    auto begin() const {return _args.begin();}
+    auto end()   const {return _args.end();}
+    arg_setter_(std::string && s) : _args({std::move(s)}) {}
+    arg_setter_(const std::string & s) : _args({s}) {}
+    arg_setter_(const char* s) : _args({std::move(s)}) {}
+
+    template<std::size_t Size>
+    arg_setter_(const char (&s) [Size]) : _args({s}) {}
 };
 
 
 struct args_
 {
     template <class Range>
-    arg_setter_<Range, true>     operator()(Range &range) const
+    arg_setter_<Range, true>     operator()(Range &&range) const
     {
-        return arg_setter_<Range>(std::move(range));
+        return arg_setter_<Range, true>(std::move(range));
     }
     template <class Range>
-    arg_setter_<Range, true>     operator+=(Range &range) const
+    arg_setter_<Range, true>     operator+=(Range &&range) const
     {
-        return arg_setter_<Range>(std::move(range));
+        return arg_setter_<Range, true>(std::move(range));
     }
     template <class Range>
-    arg_setter_<Range, false>    operator= (Range &range) const
+    arg_setter_<Range, false>    operator= (Range &&range) const
     {
-        return arg_setter_<Range>(std::move>(range));
+        return arg_setter_<Range, true>(std::move>(range));
     }
-    template <class Char>
-    arg_setter_<std::basic_string<Char>, true> operator()(std::initializer_list<Char*> &range) const
+    arg_setter_<std::string, true>     operator()(const char* str) const
     {
-        return arg_setter_<std::basic_string<Char>>(std::move(range));
+        return arg_setter_<std::string, true> (str);
     }
-    template <class Char>
-    arg_setter_<std::basic_string<Char>, true> operator+=(std::initializer_list<Char*> &range) const
+    arg_setter_<std::string, true>     operator+=(const char* str) const
     {
-        return arg_setter_<std::basic_string<Char>, true>(std::move(range));
+        return arg_setter_<std::string, true> (str);
     }
-    template <class Char>
-    arg_setter_<std::basic_string<Char>, false> operator= (std::initializer_list<Char*> &range) const
+    arg_setter_<std::string, false>    operator= (const char* str) const
     {
-        return arg_setter_<std::basic_string<Char>, true>(std::move(range));
+        return arg_setter_<std::string, false>(str);
+    }
+    template<std::size_t Size>
+    arg_setter_<std::string, true>     operator()(const char (&str) [Size]) const
+    {
+        return arg_setter_<std::string, true> (str);
+    }
+    template<std::size_t Size>
+    arg_setter_<std::string, true>     operator+=(const char (&str) [Size]) const
+    {
+        return arg_setter_<std::string, true> (str);
+    }
+    template<std::size_t Size>
+    arg_setter_<std::string, false>    operator= (const char (&str) [Size]) const
+    {
+        return arg_setter_<std::string, false>(str);
+    }
+
+    arg_setter_<std::string, true> operator()(std::initializer_list<const char*> &&range) const
+    {
+        return arg_setter_<std::string>(std::move(range));
+    }
+    arg_setter_<std::string, true> operator+=(std::initializer_list<const char*> &&range) const
+    {
+        return arg_setter_<std::string, true>(std::move(range));
+    }
+    arg_setter_<std::string, false> operator= (std::initializer_list<const char*> &&range) const
+    {
+        return arg_setter_<std::string, true>(std::move(range));
+    }
+    arg_setter_<std::string, true> operator()(std::initializer_list<std::string> &&range) const
+    {
+        return arg_setter_<std::string>(std::move(range));
+    }
+    arg_setter_<std::string, true> operator+=(std::initializer_list<std::string> &&range) const
+    {
+        return arg_setter_<std::string, true>(std::move(range));
+    }
+    arg_setter_<std::string, false> operator= (std::initializer_list<std::string> &&range) const
+    {
+        return arg_setter_<std::string, true>(std::move(range));
     }
 };
 

@@ -15,17 +15,17 @@
 #include <boost/process/pipe.hpp>
 #include <boost/process/detail/handler_base.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
-
+#include <cstdio>
+#include <io.h>
 
 namespace boost { namespace process { namespace detail { namespace windows {
 
 struct pipe_in : public ::boost::process::detail::handler_base
 {
     boost::iostreams::file_descriptor_source file;
-
     pipe_in(FILE * f) : file(_get_osfhandle(_fileno(f)), boost::iostreams::never_close_handle) {}
-    pipe_in(const pipe & p) : file(p.source(), boost::iostreams::never_close_handle) {}
-    pipe_in(const boost::iostreams::file_descriptor_source &f) : file(f, boost::iostreams::never_close_handle) {}
+    pipe_in(const boost::process::pipe & p) : file(p.source().handle(), boost::iostreams::never_close_handle) {}
+    pipe_in(const boost::iostreams::file_descriptor_source &f) : file(f) {}
 
     template <class WindowsExecutor>
     void on_setup(WindowsExecutor &e) const
