@@ -25,18 +25,18 @@ struct async_out : public ::boost::process::detail::handler_base
     template<typename T>
     async_out(T&&) {}
     template <typename WindowsExecutor>
-    void on_setup(WindowsExecutor &e) const;
+    inline void on_setup(WindowsExecutor &e) const;
 };
 
 template<>
 template<typename WindowsExecutor>
-void pipe_out<1,0>::on_setup(WindowsExecutor &e) const
+void pipe_out<1,-1>::on_setup(WindowsExecutor &e) const
 {
 }
 
 template<>
 template<typename WindowsExecutor>
-void pipe_out<2,0>::on_setup(WindowsExecutor &e) const
+void pipe_out<2,-1>::on_setup(WindowsExecutor &e) const
 {
 }
 

@@ -31,10 +31,12 @@
 
 #if defined(BOOST_POSIX_API)
 #include <boost/process/posix/child_handle.hpp>
+#include <boost/process/posix/terminate.hpp>
 #include <boost/process/posix/wait_for_exit.hpp>
 #include <boost/process/posix/is_running.hpp>
 #elif defined(BOOST_WINDOWS_API)
 #include <boost/process/windows/child_handle.hpp>
+#include <boost/process/windows/terminate.hpp>
 #include <boost/process/windows/wait_for_exit.hpp>
 #include <boost/process/windows/is_running.hpp>
 
@@ -114,7 +116,7 @@ public:
 
     child(const child&) = delete;
     child(child && ) = default;
-
+    child() = default;
     child& operator=(const child&) = delete;
     child& operator=(child && ) = default;
 
@@ -126,7 +128,10 @@ public:
 
     bool running();
 
-    void terminate();
+    void terminate()
+    {
+        boost::process::detail::api::terminate(_child_handle);
+    }
 
     void wait()
     {

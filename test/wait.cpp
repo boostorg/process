@@ -10,29 +10,31 @@
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_IGNORE_SIGCHLD
 #include <boost/test/included/unit_test.hpp>
-#include <boost/process.hpp>
-#include <boost/system/error_code.hpp>
+#include <boost/process/exe_args.hpp>
+#include <boost/process/error.hpp>
+#include <boost/process/execute.hpp>
+#include <system_error>
 #include <boost/asio.hpp>
 #if defined(BOOST_POSIX_API)
 #   include <signal.h>
 #endif
 
 namespace bp = boost::process;
-namespace bpi = boost::process::initializers;
 
 BOOST_AUTO_TEST_CASE(sync_wait)
 {
     using boost::unit_test::framework::master_test_suite;
 
-    boost::system::error_code ec;
+    std::error_code ec;
     bp::child c = bp::execute(
-        bpi::run_exe(master_test_suite().argv[1]),
-        bpi::set_cmd_line("test --wait 1"),
-        bpi::set_on_error(ec)
+        master_test_suite().argv[1],
+        bp::args+={"test", "--wait", "1"},
+        ec
     );
     BOOST_REQUIRE(!ec);
 
-    bp::wait_for_exit(c);
+    c.wait();
+
 }
 
 struct wait_handler
@@ -49,18 +51,18 @@ BOOST_AUTO_TEST_CASE(async_wait)
     using boost::unit_test::framework::master_test_suite;
     using namespace boost::asio;
 
-    boost::system::error_code ec;
+    std::error_code ec;
     bp::child c = bp::execute(
-        bpi::run_exe(master_test_suite().argv[1]),
-        bpi::set_cmd_line("test --wait 1"),
-        bpi::set_on_error(ec)
+        master_test_suite().argv[1],
+        bp::args+={"test", "--wait", "1"},
+        ec
     );
     BOOST_REQUIRE(!ec);
 
     boost::asio::io_service io_service;
 
 #if defined(BOOST_WINDOWS_API)
-    windows::object_handle handle(io_service, c.process_handle());
+    windows::object_handle handle(io_service, c.native_handle());
     handle.async_wait(wait_handler());
 #elif defined(BOOST_POSIX_API)
     signal_set set(io_service, SIGCHLD);

@@ -32,11 +32,29 @@ class pipe
 protected:
     pipe(boost::detail::winapi::HANDLE_ source, boost::detail::winapi::HANDLE_ sink) : _source(source), _sink(sink) {}
 public:
+    pipe() : pipe(create()) {}
     pipe(const pipe& ) = delete;
-    pipe(pipe&& lhs)   = default;
+    pipe(pipe&& lhs)  : _source(lhs._source), _sink(lhs._sink)
+    {
+        lhs._source = nullptr;
+        lhs._sink = nullptr;
+    }
     pipe& operator=(const pipe& ) = delete;
-    pipe& operator=(pipe&& lhs)   = default;
-
+    pipe& operator=(pipe&& lhs)
+    {
+        lhs._source = _source;
+        lhs._sink   = _sink;
+        _source = nullptr;
+        _sink   = nullptr;
+        return *this;
+    }
+    ~pipe()
+    {
+        if (_sink   != nullptr)
+            boost::detail::winapi::CloseHandle(_sink);
+        if (_source != nullptr)
+            boost::detail::winapi::CloseHandle(_source);
+    }
     void * source() const {return _source;}
     void * sink  () const {return _sink;}
 
@@ -104,7 +122,7 @@ pipe pipe::create_named(const std::string & name)
     boost::detail::winapi::HANDLE_ handle1 = boost::detail::winapi::create_named_pipe(
             name.c_str(),
             boost::detail::winapi::PIPE_ACCESS_INBOUND_
-            || FILE_FLAG_OVERLAPPED_, //write flag
+            | FILE_FLAG_OVERLAPPED_, //write flag
             0, 1, 8192, 8192, 0, nullptr);
 
     if (handle1 == boost::detail::winapi::INVALID_HANDLE_VALUE_)
@@ -133,7 +151,7 @@ pipe pipe::create_named(const std::string & name, std::error_code & ec)
     boost::detail::winapi::HANDLE_ handle1 = boost::detail::winapi::create_named_pipe(
             name.c_str(),
             boost::detail::winapi::PIPE_ACCESS_INBOUND_
-            || FILE_FLAG_OVERLAPPED_, //write flag
+            | FILE_FLAG_OVERLAPPED_, //write flag
             0, 1, 8192, 8192, 0, nullptr);
 
     if (handle1 == boost::detail::winapi::INVALID_HANDLE_VALUE_)

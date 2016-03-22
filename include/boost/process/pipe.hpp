@@ -29,32 +29,28 @@
 
 namespace boost { namespace process {
 
-class pipe
+struct pipe
 {
-
-    boost::iostreams::file_descriptor_sink   _sink  ;
-    boost::iostreams::file_descriptor_source _source;
-public:
+    typedef boost::process::detail::api::pipe native_pipe;
 
     using sink_t   = boost::iostreams::file_descriptor_sink  ;
     using source_t = boost::iostreams::file_descriptor_source;
     typedef char                            char_type;
 
     typedef boost::iostreams::bidirectional_device_tag    category;
-    typedef boost::process::detail::api::pipe native_pipe;
 
     pipe(boost::process::detail::api::pipe && handle)
-        :  _sink  (handle.sink(),   boost::iostreams::close_handle),
-           _source(handle.source(), boost::iostreams::close_handle)
-    {}
+        :  _native(std::move(handle))
+    {
+    }
 
     pipe() : pipe(boost::process::detail::api::pipe::create()) {}
 
     pipe(      pipe&&) = default;
-    pipe(const pipe& ) = default;
+    pipe(const pipe& ) = delete;
 
     pipe& operator=(      pipe&&) = default;
-    pipe& operator=(const pipe& ) = default;
+    pipe& operator=(const pipe& ) = delete;
 
     static pipe create()                    { return pipe(native_pipe::create());  }
     static pipe create(std::error_code &ec) { return pipe(native_pipe::create(ec));}
@@ -85,7 +81,6 @@ public:
     {
         return _sink.write(s, n);
     }
-
     const source_t & source() const {return _source;}
     const sink_t   & sink()   const {return _sink;}
     source_t & source() {return _source;}
@@ -101,6 +96,11 @@ public:
         _source.close();
         _sink.close();
     }
+private:
+    native_pipe _native;
+    boost::iostreams::file_descriptor_sink   _sink   {_native.sink(),   boost::iostreams::never_close_handle};
+    boost::iostreams::file_descriptor_source _source {_native.source(), boost::iostreams::never_close_handle};
+
 
 };
 

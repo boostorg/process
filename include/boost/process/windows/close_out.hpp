@@ -20,7 +20,7 @@ template<int p1, int p2>
 struct close_out : public ::boost::process::detail::handler_base
 {
     template <class WindowsExecutor>
-    void on_setup(WindowsExecutor &e) const;
+    inline void on_setup(WindowsExecutor &e) const;
 };
 
 template<>

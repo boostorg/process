@@ -10,25 +10,27 @@
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_IGNORE_SIGCHLD
 #include <boost/test/included/unit_test.hpp>
-#include <boost/process.hpp>
-#include <boost/system/error_code.hpp>
+#include <boost/process/exe_args.hpp>
+#include <boost/process/error.hpp>
+#include <boost/process/execute.hpp>
+#include <system_error>
 
 namespace bp = boost::process;
-namespace bpi = boost::process::initializers;
 
 BOOST_AUTO_TEST_CASE(terminate_set_on_error)
 {
     using boost::unit_test::framework::master_test_suite;
 
-    boost::system::error_code ec;
+    std::error_code ec;
     bp::child c = bp::execute(
-        bpi::run_exe(master_test_suite().argv[1]),
-        bpi::set_cmd_line("test --loop"),
-        bpi::set_on_error(ec)
+        bp::exe(master_test_suite().argv[1]),
+        bp::args+={"test", "--loop"},
+        ec
     );
     BOOST_REQUIRE(!ec);
 
-    bp::terminate(c, ec);
+    c.terminate(); //throws on error
+
     BOOST_CHECK(!ec);
 }
 
@@ -36,13 +38,14 @@ BOOST_AUTO_TEST_CASE(terminate_throw_on_error)
 {
     using boost::unit_test::framework::master_test_suite;
 
-    boost::system::error_code ec;
+    std::error_code ec;
     bp::child c = bp::execute(
-        bpi::run_exe(master_test_suite().argv[1]),
-        bpi::set_cmd_line("test --loop"),
-        bpi::set_on_error(ec)
+        master_test_suite().argv[1],
+        bp::args+="test",
+        bp::args+="--loop",
+        ec
     );
     BOOST_REQUIRE(!ec);
 
-    BOOST_CHECK_NO_THROW(bp::terminate(c));
+    BOOST_CHECK_NO_THROW(c.terminate());
 }

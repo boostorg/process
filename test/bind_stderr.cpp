@@ -46,20 +46,16 @@ BOOST_AUTO_TEST_CASE(sync_io)
 
     bp::pipe p;
 
-    {
-        bio::file_descriptor_sink sink(p.sink().handle(), bio::close_handle);
-        std::error_code ec;
-        bp::execute(
-            master_test_suite().argv[1],
-            bp::args={"test", "--echo-stderr", "hello"},
-            bp::std_err>sink,
-            ec
-        );
-        BOOST_REQUIRE(!ec);
-    }
+    std::error_code ec;
+    auto c = bp::execute(
+        master_test_suite().argv[1],
+        bp::args={"test", "--echo-stderr", "hello"},
+        bp::std_err>p,
+        ec
+    );
+    BOOST_REQUIRE(!ec);
 
-    bio::file_descriptor_source source(p.source().handle(), bio::close_handle);
-    bio::stream<bio::file_descriptor_source> is(source);
+    bio::stream<bio::file_descriptor_source> is(p.source());
 
     std::string s;
     is >> s;
@@ -81,38 +77,30 @@ struct read_handler
         BOOST_CHECK(boost::algorithm::starts_with(line, "abc"));
     }
 };
-
+#define LX() std::cout << __LINE__ << std::endl;
 BOOST_AUTO_TEST_CASE(async_io)
 {
     using boost::unit_test::framework::master_test_suite;
 
     bp::pipe p = bp::pipe::create_async();
-    std::cout << "Log " << __LINE__ << std::endl;
-    {
-        bio::file_descriptor_sink sink(p.sink().handle(), bio::close_handle);
-        std::error_code ec;
-        bp::execute(
+
+    std::error_code ec;
+    auto c = bp::execute(
             bp::exe=master_test_suite().argv[1],
             bp::args+="test",
             bp::args+={"--echo-stderr", "abc"},
-            bp::std_err>sink,
+            bp::std_err>p,
             ec
         );
-        std::cout << "Log " << __LINE__ << std::endl;
-        BOOST_REQUIRE(!ec);
-        std::cout << "Log " << __LINE__ << std::endl;
-    }
-    std::cout << "Log " << __LINE__ << std::endl;
+    BOOST_REQUIRE(!ec);
 
     boost::asio::io_service io_service;
-    std::cout << "Log " << __LINE__ << std::endl;
 
     pipe_end pend(io_service, p.source().handle());
-    std::cout << "Log " << __LINE__ << std::endl;
 
     boost::asio::streambuf buffer;
     boost::asio::async_read_until(pend, buffer, '\n',
-        read_handler(buffer));
+    read_handler(buffer));
 
     io_service.run();
 }
@@ -121,17 +109,11 @@ BOOST_AUTO_TEST_CASE(nul)
 {
     using boost::unit_test::framework::master_test_suite;
 
-#if defined(BOOST_WINDOWS_API)
-    bio::file_descriptor_sink sink("NUL");
-#elif defined(BOOST_POSIX_API)
-    bio::file_descriptor_sink sink("/dev/null");
-#endif
-
     std::error_code ec;
     bp::child c = bp::execute(
         bp::exe(master_test_suite().argv[1]),
         bp::args+={"test", "--is-nul-stderr"},
-        bp::std_err>sink,
+        bp::std_err>bp::null,
         ec
     );
     BOOST_REQUIRE(!ec);

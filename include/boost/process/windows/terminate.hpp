@@ -16,30 +16,22 @@
 #include <boost/detail/winapi/process.hpp>
 #include <boost/detail/winapi/get_last_error.hpp>
 
-namespace boost { namespace process { namespace windows {
+namespace boost { namespace process { namespace detail { namespace windows {
 
-template <class Process>
-void terminate(const Process &p)
+inline void terminate(const child_handle &p)
 {
     if (!::boost::detail::winapi::TerminateProcess(p.process_handle(), EXIT_FAILURE))
-        throw std::system_error(
-                std::error_code(
-                ::boost::detail::winapi::GetLastError(),
-                boost::system::system_category()),
-                "TerminateProcess() failed");//position of this is not really interesting
+        boost::process::detail::throw_last_error("TerminateProcess() failed");
 }
 
-template <class Process>
-void terminate(const Process &p, std::error_code &ec)
+inline void terminate(const child_handle &p, std::error_code &ec)
 {
     if (!::boost::detail::winapi::TerminateProcess(p.process_handle(), EXIT_FAILURE))
-        ec = std::error_code(
-                ::boost::detail::winapi::GetLastError(),
-                std::system_category());
+        ec = boost::process::detail::get_last_error();
     else
         ec.clear();
 }
 
-}}}
+}}}}
 
 #endif

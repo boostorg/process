@@ -29,7 +29,7 @@ import testing ;
 lib program_options : : <file>F:/boost-git/lib64/libboost_program_options-mgw-mt-1_60.a ;
 lib filesystem 	    : : <file>F:/boost-git/lib64/libboost_filesystem-mgw-mt-1_60.a      ;
 lib iostreams 		: : <file>F:/boost-git/lib64/libboost_iostreams-mgw-mt-1_60.a       ;
-lib systems   		: : <file>F:/boost-git/lib64/libboost_system-mgw-mt-1_60.a          ;
+lib system   		: : <file>F:/boost-git/lib64/libboost_system-mgw-mt-1_60.a          ;
 
 exe sparring_partner : sparring_partner.cpp  :
 	<linkflags>-LF:/boost-git/lib
@@ -78,8 +78,8 @@ test-suite ts :
 #     [ run show_window.cpp iostreams system : : sparring_partner  : <build>no <target-os>windows:<build>yes                    ]
 #     [ run start_in_dir.cpp iostreams filesystem system : : sparring_partner                                                   ]
 #     [ run start_in_dir_wstring.cpp iostreams filesystem system : : sparring_partner : <build>no <target-os>windows:<build>yes ]
-#     [ run terminate.cpp system : : sparring_partner                                                                           ]
+      [ run terminate.cpp system : : sparring_partner : <linkflags>-lws2_32                                                     ]
 #     [ run throw_on_error.cpp system : : sparring_partner                                                                      ]
-#     [ run wait.cpp system : : sparring_partner                                                                                ]
+      [ run wait.cpp system : : sparring_partner : <linkflags>-lws2_32                                                          ]
 #     [ run windows_specific.cpp iostreams system : : sparring_partner : <build>no <target-os>windows:<build>yes                ]
 	;

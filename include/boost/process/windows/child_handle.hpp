@@ -18,10 +18,11 @@ namespace boost { namespace process { namespace detail { namespace windows {
 
 struct child_handle
 {
-    ::boost::detail::winapi::PROCESS_INFORMATION_ proc_info;
+    ::boost::detail::winapi::PROCESS_INFORMATION_ proc_info{nullptr, nullptr, 0,0};
 
     explicit child_handle(const ::boost::detail::winapi::PROCESS_INFORMATION_ &pi) : proc_info(pi) {}
 
+    child_handle() = default;
     ~child_handle()
     {
         ::boost::detail::winapi::CloseHandle(proc_info.hProcess);

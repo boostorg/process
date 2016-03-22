@@ -12,6 +12,7 @@
 
 #include <boost/detail/winapi/process.hpp>
 #include <boost/detail/winapi/handles.hpp>
+#include <boost/detail/winapi/handle_info.hpp>
 #include <boost/process/detail/handler_base.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
 
@@ -20,36 +21,53 @@ namespace boost { namespace process { namespace detail { namespace windows {
 template<int p1, int p2>
 struct null_out : public ::boost::process::detail::handler_base
 {
+    boost::iostreams::file_descriptor_sink sink {"NUL"}; //works because it gets destroyed AFTER launch.
+
     template <typename WindowsExecutor>
-    void on_setup(WindowsExecutor &e) const;
+    inline void on_setup(WindowsExecutor &e) const;
 };
 
 template<>
 template<typename WindowsExecutor>
-void null_out<1,0>::on_setup(WindowsExecutor &e) const
+void null_out<1,-1>::on_setup(WindowsExecutor &e) const
 {
-    boost::iostreams::file_descriptor_sink sink("nul", boost::iostreams::never_close_handle);
+    boost::detail::winapi::SetHandleInformation(sink.handle(),
+              boost::detail::winapi::HANDLE_FLAG_INHERIT_,
+              boost::detail::winapi::HANDLE_FLAG_INHERIT_);
+
     e.startup_info.hStdOutput = sink.handle();
     e.startup_info.dwFlags   |= ::boost::detail::winapi::STARTF_USESTDHANDLES_;
+    e.inherit_handles = true;
+
 }
 
 template<>
 template<typename WindowsExecutor>
-void null_out<2,0>::on_setup(WindowsExecutor &e) const
+void null_out<2,-1>::on_setup(WindowsExecutor &e) const
 {
-    boost::iostreams::file_descriptor_sink sink("nul", boost::iostreams::never_close_handle);
+    boost::detail::winapi::SetHandleInformation(sink.handle(),
+              boost::detail::winapi::HANDLE_FLAG_INHERIT_,
+              boost::detail::winapi::HANDLE_FLAG_INHERIT_);
+
     e.startup_info.hStdError = sink.handle();
     e.startup_info.dwFlags  |= ::boost::detail::winapi::STARTF_USESTDHANDLES_;
+    e.inherit_handles = true;
+
 }
 
 template<>
 template<typename WindowsExecutor>
 void null_out<1,2>::on_setup(WindowsExecutor &e) const
 {
-    boost::iostreams::file_descriptor_sink sink("nul", boost::iostreams::never_close_handle);
+    boost::detail::winapi::SetHandleInformation(sink.handle(),
+            boost::detail::winapi::HANDLE_FLAG_INHERIT_,
+            boost::detail::winapi::HANDLE_FLAG_INHERIT_);
+
     e.startup_info.hStdOutput = sink.handle();
     e.startup_info.hStdError  = sink.handle();
     e.startup_info.dwFlags   |= ::boost::detail::winapi::STARTF_USESTDHANDLES_;
+    e.inherit_handles = true;
+
 }
 
 }}}}

@@ -38,7 +38,7 @@ inline void wait(const child_handle &p, int & exit_code)
                  std::system_category()),
                 "GetExitCodeProcess() failed");
 
-    exit_code = static_cast<int>(exit_code);
+    exit_code = static_cast<int>(_exit_code);
 }
 
 inline void wait(const child_handle &p, int & exit_code, std::error_code &ec)
