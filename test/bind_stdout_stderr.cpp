@@ -10,7 +10,15 @@
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_IGNORE_SIGCHLD
 #include <boost/test/included/unit_test.hpp>
-#include <boost/process.hpp>
+
+#include <boost/process/exe_args.hpp>
+#include <boost/process/error.hpp>
+#include <boost/process/io.hpp>
+#include <boost/process/child.hpp>
+#include <boost/process/execute.hpp>
+
+#include <system_error>
+
 #include <boost/system/error_code.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
 #include <boost/iostreams/stream.hpp>
@@ -26,57 +34,39 @@ typedef boost::asio::posix::stream_descriptor pipe_end;
 #endif
 
 namespace bp = boost::process;
-namespace bpi = boost::process::initializers;
 namespace bio = boost::iostreams;
 
 BOOST_AUTO_TEST_CASE(sync_io)
 {
     using boost::unit_test::framework::master_test_suite;
 
-    bp::pipe p1 = bp::create_pipe();
-    bp::pipe p2 = bp::create_pipe();
+    bp::pipe p1;
+    bp::pipe p2;
 
-    {
-        bio::file_descriptor_sink sink1(p1.sink, bio::close_handle);
-        bio::file_descriptor_sink sink2(p2.sink, bio::close_handle);
-        boost::system::error_code ec;
-        bp::execute(
-            bpi::run_exe(master_test_suite().argv[1]),
-            bpi::set_cmd_line("test --echo-stdout-stderr hello"),
-            bpi::bind_stdout(sink1),
-            bpi::bind_stderr(sink2),
-            bpi::set_on_error(ec)
-        );
-        BOOST_REQUIRE(!ec);
-    }
+    std::error_code ec;
+    bp::execute(
+        master_test_suite().argv[1],
+        "test", "--echo-stdout-stderr", "hello",
+        bp::std_out>p1,
+        bp::std_err>p2,
+        ec
+    );
+    BOOST_REQUIRE(!ec);
 
-    bio::file_descriptor_source source1(p1.source, bio::close_handle);
-    bio::stream<bio::file_descriptor_source> is1(source1);
+
+
+    bio::stream<bio::file_descriptor_source> is1(p1.source());
 
     std::string s;
     is1 >> s;
     BOOST_CHECK_EQUAL(s, "hello");
 
-    bio::file_descriptor_source source2(p2.source, bio::close_handle);
-    bio::stream<bio::file_descriptor_source> is2(source2);
+    bio::stream<bio::file_descriptor_source> is2(p2.source());
 
     is2 >> s;
     BOOST_CHECK_EQUAL(s, "hello");
 }
 
-bp::pipe create_async_pipe(const std::string &s)
-{
-#if defined(BOOST_WINDOWS_API)
-    std::string name = "\\\\.\\pipe\\boost_process_test_bind_stdout_stderr" + s;
-    HANDLE handle1 = CreateNamedPipeA(name.c_str(), PIPE_ACCESS_INBOUND |
-        FILE_FLAG_OVERLAPPED, 0, 1, 8192, 8192, 0, NULL);
-    HANDLE handle2 = CreateFileA(name.c_str(), GENERIC_WRITE, 0, NULL,
-        OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-    return bp::make_pipe(handle1, handle2);
-#elif defined(BOOST_POSIX_API)
-    return bp::create_pipe();
-#endif
-}
 
 struct read_handler
 {
@@ -97,27 +87,26 @@ struct read_handler
 BOOST_AUTO_TEST_CASE(async_io)
 {
     using boost::unit_test::framework::master_test_suite;
+    using namespace std;
+    cout << "Creating pipe 1" << endl;
+    bp::pipe p1 = bp::pipe::create_async();
+    cout << "Creating pipe 2" << endl;
+    bp::pipe p2 = bp::pipe::create_async();
+    cout << "Created both pipes" << endl;
+    std::error_code ec;
+    bp::execute(
+        master_test_suite().argv[1],
+        bp::args={"test", "--echo-stdout-stderr", "abc"},
+        bp::std_out > p1,
+        bp::std_err > p2,
+        ec
+    );
+    BOOST_REQUIRE(!ec);
 
-    bp::pipe p1 = create_async_pipe("1");
-    bp::pipe p2 = create_async_pipe("2");
-
-    {
-        bio::file_descriptor_sink sink1(p1.sink, bio::close_handle);
-        bio::file_descriptor_sink sink2(p2.sink, bio::close_handle);
-        boost::system::error_code ec;
-        bp::execute(
-            bpi::run_exe(master_test_suite().argv[1]),
-            bpi::set_cmd_line("test --echo-stdout-stderr abc"),
-            bpi::bind_stdout(sink1),
-            bpi::bind_stderr(sink2),
-            bpi::set_on_error(ec)
-        );
-        BOOST_REQUIRE(!ec);
-    }
 
     boost::asio::io_service io_service;
-    pipe_end pend1(io_service, p1.source);
-    pipe_end pend2(io_service, p2.source);
+    pipe_end pend1(io_service, p1.source().handle());
+    pipe_end pend2(io_service, p2.source().handle());
 
     boost::asio::streambuf buffer1;
     boost::asio::async_read_until(pend1, buffer1, '\n',
@@ -128,4 +117,25 @@ BOOST_AUTO_TEST_CASE(async_io)
         read_handler(buffer2));
 
     io_service.run();
+}
+
+BOOST_AUTO_TEST_CASE(nul)
+{
+    using boost::unit_test::framework::master_test_suite;
+    std::error_code ec;
+    bp::child c = bp::execute(
+        bp::exe(master_test_suite().argv[1]),
+        bp::args+={"test", "--echo-stdout-stderr", "some string"},
+        (bp::std_err & bp::std_out) > bp::null,
+        ec
+    );
+    BOOST_REQUIRE(!ec);
+
+    c.wait();
+    int exit_code = c.exit_code();
+#if defined(BOOST_WINDOWS_API)
+    BOOST_CHECK_EQUAL(EXIT_SUCCESS, exit_code);
+#elif defined(BOOST_POSIX_API)
+    BOOST_CHECK_EQUAL(EXIT_SUCCESS, WEXITSTATUS(exit_code));
+#endif
 }

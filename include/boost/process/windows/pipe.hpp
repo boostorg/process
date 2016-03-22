@@ -19,7 +19,6 @@
 #include <boost/filesystem.hpp>
 #include <system_error>
 #include <array>
-#include <boost/iostreams/device/file_descriptor.hpp>
 
 namespace boost { namespace process { namespace detail { namespace windows {
 
@@ -97,17 +96,18 @@ public:
 
 std::string pipe::make_pipe_name()
 {
-    std::string name = "\\\\.\\pipe\\boost_process\\pipe_";
+    std::string name = "\\\\.\\pipe\\boost_process_auto_pipe_";
 
     namespace fs = boost::filesystem;
-    fs::path p = name + "0"; //first
+    fs::path p;
 
-    while (fs::exists(p)) //so it limits it to 2^31 pipes. should suffice.
+    do
     {
         static unsigned long long int i = 0;
         p = name + std::to_string(i);
         i++;
     }
+    while (fs::exists(p)); //so it limits it to 2^31 pipes. should suffice.
     return p.string();
 }
 
@@ -137,7 +137,6 @@ pipe pipe::create_named(const std::string & name)
 
     if (handle2 == boost::detail::winapi::INVALID_HANDLE_VALUE_)
         boost::process::detail::throw_last_error("create_file() failed");
-
 
     return pipe(handle1, handle2);
 }
