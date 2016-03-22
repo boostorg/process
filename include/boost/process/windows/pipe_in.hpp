@@ -17,6 +17,7 @@
 #include <boost/iostreams/device/file_descriptor.hpp>
 #include <cstdio>
 #include <io.h>
+#include <iostream>
 
 namespace boost { namespace process { namespace detail { namespace windows {
 
@@ -30,9 +31,14 @@ struct pipe_in : public ::boost::process::detail::handler_base
     template <class WindowsExecutor>
     void on_setup(WindowsExecutor &e) const
     {
+        boost::detail::winapi::SetHandleInformation(file.handle(),
+                boost::detail::winapi::HANDLE_FLAG_INHERIT_,
+                boost::detail::winapi::HANDLE_FLAG_INHERIT_);
+
         e.startup_info.hStdInput = file.handle();
         e.startup_info.dwFlags  |= boost::detail::winapi::STARTF_USESTDHANDLES_;
-    }
+        e.inherit_handles = true;
+   }
 };
 
 }}}}

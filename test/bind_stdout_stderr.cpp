@@ -87,12 +87,10 @@ struct read_handler
 BOOST_AUTO_TEST_CASE(async_io)
 {
     using boost::unit_test::framework::master_test_suite;
-    using namespace std;
-    cout << "Creating pipe 1" << endl;
+
     bp::pipe p1 = bp::pipe::create_async();
-    cout << "Creating pipe 2" << endl;
     bp::pipe p2 = bp::pipe::create_async();
-    cout << "Created both pipes" << endl;
+
     std::error_code ec;
     bp::execute(
         master_test_suite().argv[1],

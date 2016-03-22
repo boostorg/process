@@ -173,6 +173,7 @@ using boost::process::detail::close;
 using boost::process::detail::null;
 using boost::process::detail::std_out;
 using boost::process::detail::std_err;
+using boost::process::detail::std_in;
 
 }}
 #endif /* INCLUDE_BOOST_PROCESS_IO_HPP_ */

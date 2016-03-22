@@ -29,6 +29,7 @@ struct file_in : public ::boost::process::detail::handler_base
     {
         e.startup_info.hStdInput = file.handle();
         e.startup_info.dwFlags  |= boost::detail::winapi::STARTF_USESTDHANDLES_;
+        e.inherit_handles = true;
     }
 };
 
