@@ -24,6 +24,9 @@
 #include <system_error>
 #include <memory>
 
+#include <boost/type_index.hpp>
+#include <iostream>
+
 namespace boost { namespace process { namespace detail { namespace windows {
 
 template<typename CharType> struct startup_info;
@@ -119,7 +122,7 @@ struct executor : startup_info_impl<char>
 
     child operator()()
     {
-        boost::hana::for_each(seq, [this](const auto &elem){elem->on_setup(*this);});
+        boost::hana::for_each(seq, [this](const auto &elem) {elem->on_setup(*this);});
 
         //NOTE: The non-cast cmd-line string can only be modified by the wchar_t variant which is currently disabled.
         int err_code = ::boost::detail::winapi::create_process(

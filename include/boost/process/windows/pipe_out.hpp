@@ -16,6 +16,8 @@
 #include <boost/process/detail/handler_base.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
 
+#include <iostream>
+
 namespace boost { namespace process { namespace detail { namespace windows {
 
 template<int p1, int p2>
@@ -24,7 +26,7 @@ struct pipe_out : public ::boost::process::detail::handler_base
     boost::iostreams::file_descriptor_sink file;
 
     pipe_out(FILE * f) : file(_get_osfhandle(_fileno(f)), boost::iostreams::never_close_handle) {}
-    pipe_out(const boost::process::pipe & p) : file(p.source().handle(), boost::iostreams::never_close_handle) {}
+    pipe_out(const boost::process::pipe & p) : file(p.sink().handle(), boost::iostreams::never_close_handle) {}
     pipe_out(const boost::iostreams::file_descriptor_sink &f) : file(f.handle(), boost::iostreams::never_close_handle) {}
 
     template <typename WindowsExecutor>
@@ -51,6 +53,7 @@ void pipe_out<2,-1>::on_setup(WindowsExecutor &e) const
     boost::detail::winapi::SetHandleInformation(file.handle(),
             boost::detail::winapi::HANDLE_FLAG_INHERIT_,
             boost::detail::winapi::HANDLE_FLAG_INHERIT_);
+
 
     e.startup_info.hStdError = file.handle();
     e.startup_info.dwFlags  |= ::boost::detail::winapi::STARTF_USESTDHANDLES_;

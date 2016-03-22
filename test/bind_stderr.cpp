@@ -77,13 +77,12 @@ struct read_handler
         BOOST_CHECK(boost::algorithm::starts_with(line, "abc"));
     }
 };
-#define LX() std::cout << __LINE__ << std::endl;
+
 BOOST_AUTO_TEST_CASE(async_io)
 {
     using boost::unit_test::framework::master_test_suite;
 
     bp::pipe p = bp::pipe::create_async();
-
     std::error_code ec;
     auto c = bp::execute(
             bp::exe=master_test_suite().argv[1],
@@ -108,7 +107,6 @@ BOOST_AUTO_TEST_CASE(async_io)
 BOOST_AUTO_TEST_CASE(nul)
 {
     using boost::unit_test::framework::master_test_suite;
-
     std::error_code ec;
     bp::child c = bp::execute(
         bp::exe(master_test_suite().argv[1]),

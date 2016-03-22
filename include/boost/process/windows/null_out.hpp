@@ -24,7 +24,7 @@ struct null_out : public ::boost::process::detail::handler_base
     boost::iostreams::file_descriptor_sink sink {"NUL"}; //works because it gets destroyed AFTER launch.
 
     template <typename WindowsExecutor>
-    inline void on_setup(WindowsExecutor &e) const;
+    void on_setup(WindowsExecutor &e) const;
 };
 
 template<>
