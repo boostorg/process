@@ -90,6 +90,7 @@ inline bool wait_for(
                 "GetExitCodeProcess() failed");
 
     exit_code = static_cast<int>(_exit_code);
+    return true;
 }
 
 
@@ -190,7 +191,8 @@ inline bool wait_until(
     else
         ec.clear();
 
-    return static_cast<int>(exit_code);
+    exit_code = static_cast<int>(exit_code);
+    return true;
 ;
 }
 

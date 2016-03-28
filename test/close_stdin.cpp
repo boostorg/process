@@ -10,7 +10,14 @@
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_IGNORE_SIGCHLD
 #include <boost/test/included/unit_test.hpp>
-#include <boost/process.hpp>
+
+#include <boost/process/exe_args.hpp>
+#include <boost/process/error.hpp>
+#include <boost/process/io.hpp>
+#include <boost/process/child.hpp>
+#include <boost/process/execute.hpp>
+#include <system_error>
+
 #include <boost/system/error_code.hpp>
 #include <cstdlib>
 #if defined(BOOST_POSIX_API)
@@ -18,22 +25,22 @@
 #endif
 
 namespace bp = boost::process;
-namespace bpi = boost::process::initializers;
 
 BOOST_AUTO_TEST_CASE(closed)
 {
     using boost::unit_test::framework::master_test_suite;
 
-    boost::system::error_code ec;
+    std::error_code ec;
     bp::child c = bp::execute(
-        bpi::run_exe(master_test_suite().argv[1]),
-        bpi::set_cmd_line("test --is-closed-stdin"),
-        bpi::close_stdin(),
-        bpi::set_on_error(ec)
+        master_test_suite().argv[1],
+        "test", "--is-closed-stdin",
+        bp::std_in.close(),
+        ec
     );
     BOOST_REQUIRE(!ec);
 
-    int exit_code = bp::wait_for_exit(c);
+    c.wait();
+    int exit_code = c.exit_code();
 #if defined(BOOST_WINDOWS_API)
     BOOST_CHECK_EQUAL(EXIT_SUCCESS, exit_code);
 #elif defined(BOOST_POSIX_API)

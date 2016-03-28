@@ -10,7 +10,14 @@
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_IGNORE_SIGCHLD
 #include <boost/test/included/unit_test.hpp>
-#include <boost/process.hpp>
+
+#include <boost/process/exe_args.hpp>
+#include <boost/process/error.hpp>
+#include <boost/process/io.hpp>
+#include <boost/process/child.hpp>
+#include <boost/process/execute.hpp>
+#include <system_error>
+
 #include <boost/system/error_code.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
 #include <boost/iostreams/stream.hpp>
@@ -18,38 +25,28 @@
 #include <iostream>
 
 namespace bp = boost::process;
-namespace bpi = boost::process::initializers;
 namespace bio = boost::iostreams;
 
 BOOST_AUTO_TEST_CASE(sync_io)
 {
     using boost::unit_test::framework::master_test_suite;
 
-    bp::pipe p1 = bp::create_pipe();
-    bp::pipe p2 = bp::create_pipe();
+    bp::pipe p1;
+    bp::pipe p2;
 
-    {
-        bio::file_descriptor_source source(p1.source, bio::close_handle);
-        bio::file_descriptor_sink sink(p2.sink, bio::close_handle);
-        boost::system::error_code ec;
-        bp::execute(
-            bpi::run_exe(master_test_suite().argv[1]),
-            bpi::set_cmd_line("test --stdin-to-stdout"),
-            bpi::bind_stdin(source),
-            bpi::bind_stdout(sink),
-#if defined(BOOST_POSIX_API)
-            bpi::close_fd(p1.sink),
-#endif
-            bpi::set_on_error(ec)
-        );
-        BOOST_REQUIRE(!ec);
-    }
+    std::error_code ec;
+    bp::execute(
+        master_test_suite().argv[1],
+        bp::args+={"test", "--stdin-to-stdout"},
+        bp::std_in<p1,
+        bp::std_out>p2,
+        ec
+    );
+    BOOST_REQUIRE(!ec);
 
-    bio::file_descriptor_sink sink(p1.sink, bio::close_handle);
-    bio::stream<bio::file_descriptor_sink> os(sink);
+    bio::stream<bio::file_descriptor_sink> os(p1.sink());
 
-    bio::file_descriptor_source source(p2.source, bio::close_handle);
-    bio::stream<bio::file_descriptor_source> is(source);
+    bio::stream<bio::file_descriptor_source> is(p2.source());
 
     std::string s = "abcdefghi j";
     for (std::string::const_iterator it = s.begin(); it != s.end(); ++it)

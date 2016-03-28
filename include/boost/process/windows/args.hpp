@@ -15,7 +15,7 @@
 #if defined( BOOST_WINDOWS_API )
 #include <boost/process/windows/args.hpp>
 #elif defined( BOOST_POSIX_API )
-#include <boost/process/windows/args.hpp>
+#include <boost/process/posix/args.hpp>
 
 #endif
 

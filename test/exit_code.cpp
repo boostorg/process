@@ -10,7 +10,11 @@
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_IGNORE_SIGCHLD
 #include <boost/test/included/unit_test.hpp>
-#include <boost/process.hpp>
+
+#include <boost/process/error.hpp>
+#include <boost/process/exe_args.hpp>
+#include <boost/process/execute.hpp>
+
 #include <boost/system/error_code.hpp>
 #include <boost/asio.hpp>
 #if defined(BOOST_WINDOWS_API)
@@ -23,21 +27,20 @@ typedef boost::asio::posix::stream_descriptor pipe_end;
 #endif
 
 namespace bp = boost::process;
-namespace bpi = boost::process::initializers;
 
 BOOST_AUTO_TEST_CASE(sync_wait)
 {
     using boost::unit_test::framework::master_test_suite;
 
-    boost::system::error_code ec;
+    std::error_code ec;
     bp::child c = bp::execute(
-        bpi::run_exe(master_test_suite().argv[1]),
-        bpi::set_cmd_line("test --exit-code 123"),
-        bpi::set_on_error(ec)
+        master_test_suite().argv[1],
+        "test", "--exit-code", "123",
+        ec
     );
     BOOST_REQUIRE(!ec);
-
-    int exit_code = bp::wait_for_exit(c);
+    c.wait();
+    int exit_code = c.exit_code();
 #if defined(BOOST_WINDOWS_API)
     BOOST_CHECK_EQUAL(123, exit_code);
 #elif defined(BOOST_POSIX_API)
@@ -86,11 +89,11 @@ BOOST_AUTO_TEST_CASE(async_wait)
     set.async_wait(wait_handler());
 #endif
 
-    boost::system::error_code ec;
+    std::error_code ec;
     bp::child c = bp::execute(
-        bpi::run_exe(master_test_suite().argv[1]),
-        bpi::set_cmd_line("test --exit-code 123"),
-        bpi::set_on_error(ec)
+        master_test_suite().argv[1],
+        "test", "--exit-code", "123",
+        ec
 #if defined(BOOST_POSIX_API)
         , bpi::notify_io_service(io_service)
 #endif
@@ -98,7 +101,7 @@ BOOST_AUTO_TEST_CASE(async_wait)
     BOOST_REQUIRE(!ec);
 
 #if defined(BOOST_WINDOWS_API)
-    windows::object_handle handle(io_service, c.process_handle());
+    windows::object_handle handle(io_service, c.native_handle());
     handle.async_wait(wait_handler(handle.native()));
 #endif
 

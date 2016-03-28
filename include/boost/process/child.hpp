@@ -22,6 +22,7 @@
 #include <memory>
 
 #include <boost/none.hpp>
+#include <atomic>
 
 #include <boost/hana/tuple.hpp>
 #include <boost/hana/type.hpp>
@@ -105,28 +106,55 @@ class child
 {
     ::boost::process::detail::api::child_handle _child_handle;
     std::unique_ptr<void, void(*)(void*)> _resource;
-    int _exit_code = -1;
-    bool _attached = true;
-    bool _exited = false;
+    std::atomic<bool> _exited{ false };
+    std::atomic<int> _exit_code{ -1 };
+    bool _attached = false;
 public:
     typedef std::unique_ptr<void, void(*)(void*)> resource_t;
     typedef ::boost::process::detail::api::child_handle child_handle;
     typedef child_handle::process_handle_t native_handle_t;
-    explicit child(child_handle &&ch, resource_t && resource) : _child_handle(std::move(ch)), _resource(std::move(resource)) {}
+    explicit child(child_handle &&ch, resource_t && resource = nullptr) : _child_handle(std::move(ch)), _resource(std::move(resource)) {}
 
     child(const child&) = delete;
-    child(child && ) = default;
+    child(child && lhs)
+        : _child_handle(std::move(lhs._child_handle)),
+          _resource (std::move(lhs._resource)),
+          _exited   (lhs._exited.load()),
+          _exit_code(lhs._exit_code.load()),
+          _attached (lhs._attached)
+    {
+
+    }
+
     child() = default;
     child& operator=(const child&) = delete;
-    child& operator=(child && ) = default;
+    child& operator=(child && lhs)
+    {
+        _child_handle= std::move(lhs._child_handle);
+        _resource    = std::move(lhs._resource);
+        _exited   .store(lhs._exited.load()   );
+        _exit_code.store(lhs._exit_code.load());
+        _attached    = lhs._attached;
+        return *this;
+    };
 
+    ~child()
+    {
+        if (!_exited.load() && _attached)
+            wait();
+    }
     native_handle_t native_handle() const { return _child_handle.process_handle(); }
 
 
-    int exit_code() const {return _exit_code;}
+    int exit_code() const {return _exit_code.load();}
     int get_pid()   const;
 
-    bool running();
+    bool running()
+    {
+        if (valid())
+            return boost::process::detail::api::is_running(_child_handle);
+        return false;
+    }
 
     void terminate()
     {
@@ -135,34 +163,51 @@ public:
 
     void wait()
     {
-        boost::process::detail::api::wait(_child_handle, _exit_code);
-        _exited = !boost::process::detail::api::is_running(_child_handle);
+        if (!_exited.load())
+        {
+            int exit_code = 0;
+            boost::process::detail::api::wait(_child_handle, exit_code);
+            _exited.store(true);
+            _exit_code.store(exit_code);
+        }
     }
 
     template< class Rep, class Period >
     bool wait_for  (const std::chrono::duration<Rep, Period>& rel_time)
     {
-        auto b = boost::process::detail::api::wait_for(_child_handle, _exit_code, rel_time);
-        _exited = !boost::process::detail::api::is_running(_child_handle);
-        return b;
+        if (!_exited.load())
+        {
+            int exit_code = 0;
+            auto b = boost::process::detail::api::wait_for(_child_handle, _exit_code, rel_time);
+            _exited.store(b);
+            if (!b)
+                return false;
+            _exit_code.store(exit_code);
+        }
+        return true;
     }
 
     template< class Clock, class Duration >
     bool wait_until(const std::chrono::time_point<Clock, Duration>& timeout_time )
     {
-        auto b = boost::process::detail::api::wait_until(_child_handle, _exit_code, timeout_time);
-        _exited = !boost::process::detail::api::is_running(_child_handle);
-        return b;
+        if (!_exited.load())
+        {
+            int exit_code = 0;
+            auto b = boost::process::detail::api::wait_until(_child_handle, _exit_code, timeout_time);
+            _exited.store(b);
+            if (!b)
+                return false;
+            _exit_code.store(exit_code);
+        }
+        return true;
     }
 
     bool valid() const
     {
         return _child_handle.valid();
     }
+    operator bool() const {return valid();}
 
-
-    void detach();
-    void attach();
 
 };
 

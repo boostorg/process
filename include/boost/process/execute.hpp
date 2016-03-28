@@ -40,7 +40,7 @@ namespace boost { namespace process {
 
 
 template<typename ...Args>
-auto execute(Args&& ... args)
+inline auto execute(Args&& ... args)
 {
     auto get_ptr = [](auto && val) {return &val;};
     auto get_ref = [](auto * ptr) -> std::remove_pointer_t<decltype(ptr)> & { return *ptr;};
@@ -54,18 +54,20 @@ auto execute(Args&& ... args)
     auto others = boost::hana::second(par);
 
     //get the tags of the elements of initializers.
-    auto tags = boost::hana::unique(
-                    boost::hana::transform(others,
-                            [](auto * x)
-                            {
-                                static_assert(!std::is_void<decltype(detail::initializer_tag(*x))>::value, "Unrecognized initializer type");
-                                return detail::initializer_tag(*x);
-                            }
-                        ),
-                        [](auto a, auto b)
-                        {
-                            return boost::hana::decltype_(a) == boost::hana::decltype_(b);
-                        });
+    auto tags =
+        boost::hana::unique(
+            boost::hana::transform(others,
+                    [](auto * x)
+                    {
+                        static_assert(!std::is_void<decltype(detail::initializer_tag(*x))>::value,
+                                        "Unrecognized initializer type");
+                        return detail::initializer_tag(*x);
+                    }
+                ),
+                [](auto a, auto b)
+                {
+                    return boost::hana::decltype_(a) == boost::hana::decltype_(b);
+                });
 
     //combine the other argument to get initializers.
     auto other_inits = boost::hana::transform(tags,
@@ -89,9 +91,6 @@ auto execute(Args&& ... args)
     auto exec = boost::process::detail::api::make_executor(init_ptr);
     return exec();
 }
-
-
-
 
 }}
 

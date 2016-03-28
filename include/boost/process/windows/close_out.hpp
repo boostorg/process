@@ -25,7 +25,7 @@ struct close_out : public ::boost::process::detail::handler_base
 
 template<>
 template<typename WindowsExecutor>
-void close_out<1,0>::on_setup(WindowsExecutor &e) const
+void close_out<1,-1>::on_setup(WindowsExecutor &e) const
 {
     e.startup_info.hStdOutput = ::boost::detail::winapi::INVALID_HANDLE_VALUE_;
     e.startup_info.dwFlags   |= ::boost::detail::winapi::STARTF_USESTDHANDLES_;
@@ -33,7 +33,7 @@ void close_out<1,0>::on_setup(WindowsExecutor &e) const
 
 template<>
 template<typename WindowsExecutor>
-void close_out<2,0>::on_setup(WindowsExecutor &e) const
+void close_out<2,-1>::on_setup(WindowsExecutor &e) const
 {
     e.startup_info.hStdError = ::boost::detail::winapi::INVALID_HANDLE_VALUE_;
     e.startup_info.dwFlags  |= ::boost::detail::winapi::STARTF_USESTDHANDLES_;

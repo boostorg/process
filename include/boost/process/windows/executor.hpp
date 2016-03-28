@@ -25,7 +25,6 @@
 #include <memory>
 
 #include <boost/type_index.hpp>
-#include <iostream>
 
 namespace boost { namespace process { namespace detail { namespace windows {
 
