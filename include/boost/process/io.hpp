@@ -3,15 +3,21 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef INCLUDE_BOOST_PROCESS_IO_HPP_
-#define INCLUDE_BOOST_PROCESS_IO_HPP_
+#ifndef BOOST_PROCESS_IO_HPP_
+#define BOOST_PROCESS_IO_HPP_
 
 #include <iosfwd>
 #include <cstdio>
+#include <functional>
+#include <utility>
 #include <boost/iostreams/device/file_descriptor.hpp>
 #include <boost/process/config.hpp>
 #include <boost/process/pipe.hpp>
 #include <boost/asio/buffer.hpp>
+
+#if !defined (BOOST_NO_CXX11_HDR_FUTURE)
+#include <future>
+#endif
 
 #if defined(BOOST_POSIX_API)
 #include <boost/process/posix/close_in.hpp>
@@ -78,6 +84,7 @@ struct std_in_
     api::async_in operator<(asio::mutable_buffer & buf) const {return api::async_in(buf);}
     api::async_in operator<(asio::const_buffer   & buf) const {return api::async_in(buf);}
     api::async_in operator<(std::ostream & os)          const {return api::async_in(os);}
+
 };
 
 //-1 == empty.
@@ -119,6 +126,26 @@ struct std_out_
     api::async_out<p1,p2> operator>(asio::mutable_buffer & buf) const {return api::async_out<p1,p2>(buf);}
     api::async_out<p1,p2> operator>(asio::const_buffer   & buf) const {return api::async_out<p1,p2>(buf);}
     api::async_out<p1,p2> operator>(std::ostream & os)          const {return api::async_out<p1,p2>(os );}
+
+
+    template<typename T>
+    api::async_out<p1,p2> buffer(T & buf) {return api::async_out<p1, p2>(boost::asio::buffer(std::move(buf))); }
+
+
+    api::async_out<p1,p2> operator=(std::function<void(std::string value)> & f)  const;
+    api::async_out<p1,p2> operator=(std::pair<std::function<void(std::string value)>,char> & f)  const;
+    api::async_out<p1,p2> operator=(std::pair<std::function<void(std::string value)>,int>  & f)  const;
+
+    api::async_out<p1,p2> operator>(std::function<void(std::string value)> & f)  const;
+    api::async_out<p1,p2> operator>(std::pair<std::function<void(std::string value)>,char> & f)  const;
+    api::async_out<p1,p2> operator>(std::pair<std::function<void(std::string value)>,int>  & f)  const;
+
+
+#if !defined (BOOST_NO_CXX11_HDR_FUTURE)
+    api::async_out<p1,p2> operator=(std::future<std::string> & fut) const;
+    api::async_out<p1,p2> operator>(std::future<std::string> & fut) const;
+#endif
+
 
 
     template<int pin, typename = std::enable_if_t<
@@ -169,6 +196,7 @@ inline std::true_type is_initializer ( const api::pipe_out<N,M>  &) {return {}; 
 
 }
 
+using boost::asio::buffer;
 using boost::process::detail::close;
 using boost::process::detail::null;
 using boost::process::detail::std_out;
