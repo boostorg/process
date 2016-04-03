@@ -61,6 +61,8 @@ struct wait_handler
         DWORD exit_code;
         BOOST_REQUIRE(GetExitCodeProcess(handle_, &exit_code));
         BOOST_CHECK_EQUAL(123, exit_code);
+        BOOST_REQUIRE(GetExitCodeProcess(handle_, &exit_code));
+        BOOST_CHECK_EQUAL(123, exit_code);
     }
 };
 #elif defined(BOOST_POSIX_API)

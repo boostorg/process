@@ -113,10 +113,7 @@ struct executor : startup_info_impl<char>
     }
 
     void internal_throw(std:: true_type, std::error_code &ec ) {}
-    void internal_throw(std::false_type, std::error_code &ec )
-    {
-        throw std::system_error(ec);
-    }
+    void internal_throw(std::false_type, std::error_code &ec ) {throw std::system_error(ec);}
 
 
     child operator()()
@@ -145,15 +142,16 @@ struct executor : startup_info_impl<char>
         }
         else
             boost::hana::for_each(seq, [this](const auto &elem){elem->on_success(*this);});
+
         return
-                child(child_handle(std::move(proc_info)), make_resource_pointer(seq));
+                child(child_handle(std::move(proc_info)));
     }
 
     ::boost::detail::winapi::LPSECURITY_ATTRIBUTES_ proc_attrs   = nullptr;
     ::boost::detail::winapi::LPSECURITY_ATTRIBUTES_ thread_attrs = nullptr;
     ::boost::detail::winapi::BOOL_ inherit_handles = false;
     const char * work_dir = nullptr;
-    const char * cmd_line       = nullptr;
+    const char * cmd_line = nullptr;
     const char * exe      = nullptr;
     const char * env      = nullptr;
 
