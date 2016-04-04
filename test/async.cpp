@@ -58,22 +58,22 @@ BOOST_AUTO_TEST_CASE(async_out_stream)
 
     std::error_code ec;
 
-    std::istream istr(nullptr);
+    boost::asio::streambuf buf;
+
     bp::execute(
         master_test_suite().argv[1],
         "test", "--echo-stdout", "abc",
-        bp::std_out > istr,
+        bp::std_out > buf,
         io_service,
         ec
     );
-    BOOST_REQUIRE(istr.rdbuf() != nullptr);
     BOOST_REQUIRE(!ec);
 
-    boost::thread th{[&]{ io_service.run();}};
+    io_service.run();
+    std::istream istr(&buf);
 
     std::string line;
     std::getline(istr, line);
     BOOST_CHECK(boost::algorithm::starts_with(line, "abc"));
-    th.join();
 
 }

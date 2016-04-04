@@ -119,13 +119,13 @@ struct std_out_
     api::pipe_out<p1,p2> operator>(const boost::iostreams::file_descriptor_sink &f) const {return api::pipe_out<p1,p2>(f);}
     api::pipe_out<p1,p2> operator>(const pipe & p)                                  const {return api::pipe_out<p1,p2>(p);}
 
-//    api::async_out<p1, p2, asio::mutable_buffer> operator=(asio::mutable_buffer & buf) const {return buf;}
-//    api::async_out<p1, p2, asio::const_buffer  > operator=(asio::const_buffer   & buf) const {return buf;}
-    api::async_out_stream<p1, p2>                operator=(std::istream & os)          const {return os ;}
+    api::async_out_buffer<p1, p2, asio::mutable_buffer> operator=(asio::mutable_buffer & buf) const {return buf;}
+    api::async_out_buffer<p1, p2, asio::const_buffer  > operator=(asio::const_buffer   & buf) const {return buf;}
+    api::async_out_buffer<p1, p2, asio::streambuf>      operator=(asio::streambuf & os)       const {return os ;}
 
-//    api::async_out<p1, p2, asio::mutable_buffer> operator>(asio::mutable_buffer & buf) const {return buf;}
-//    api::async_out<p1, p2, asio::const_buffer>   operator>(asio::const_buffer   & buf) const {return buf;}
-    api::async_out_stream<p1, p2>                operator>(std::istream & os)          const {return os ;}
+    api::async_out_buffer<p1, p2, asio::mutable_buffer> operator>(asio::mutable_buffer & buf) const {return buf;}
+    api::async_out_buffer<p1, p2, asio::const_buffer>   operator>(asio::const_buffer   & buf) const {return buf;}
+    api::async_out_buffer<p1, p2, asio::streambuf>      operator>(asio::streambuf & os)       const {return os ;}
 
 
 //    template<typename T>
@@ -203,8 +203,8 @@ inline std::true_type is_initializer ( const api::file_out<N,M>  &) {return {}; 
 template<int N, int M>
 inline std::true_type is_initializer ( const api::pipe_out<N,M>  &) {return {}; }
 
-template<int N, int M>
-inline std::true_type is_initializer ( const api::async_out_stream<N,M>  &) {return {}; }
+template<int N, int M, typename T>
+inline std::true_type is_initializer ( const api::async_out_buffer<N,M, T>  &) {return {}; }
 
 
 }
