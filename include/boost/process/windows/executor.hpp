@@ -118,7 +118,7 @@ struct executor : startup_info_impl<char>
 
     child operator()()
     {
-        boost::hana::for_each(seq, [this](const auto &elem) {elem->on_setup(*this);});
+        boost::hana::for_each(seq, [this]( auto &elem) {elem->on_setup(*this);});
 
         //NOTE: The non-cast cmd-line string can only be modified by the wchar_t variant which is currently disabled.
         int err_code = ::boost::detail::winapi::create_process(
@@ -137,11 +137,11 @@ struct executor : startup_info_impl<char>
         {
             auto last_error = boost::process::detail::get_last_error();
             boost::hana::for_each(seq,
-                    [this, err_code, last_error](const auto &elem){elem->on_error(*this, last_error);});
+                    [this, err_code, last_error]( auto &elem){elem->on_error(*this, last_error);});
             internal_throw(has_error_handler(seq), last_error);
         }
         else
-            boost::hana::for_each(seq, [this](const auto &elem){elem->on_success(*this);});
+            boost::hana::for_each(seq, [this]( auto &elem){elem->on_success(*this);});
 
         return
                 child(child_handle(std::move(proc_info)));

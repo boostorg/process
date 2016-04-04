@@ -8,6 +8,7 @@
 
 #include <boost/process/detail/handler_base.hpp>
 #include <boost/process/detail/traits.hpp>
+#include <boost/process/windows/async_handler.hpp>
 #include <boost/type_index.hpp>
 #include <boost/asio.hpp>
 
@@ -19,7 +20,6 @@
 #include <boost/process/windows/io_service_ref.hpp>
 #endif
 
-#include <thread>
 
 namespace boost { namespace process { namespace detail {
 

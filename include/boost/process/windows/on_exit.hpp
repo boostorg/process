@@ -13,7 +13,6 @@
 #include <boost/detail/winapi/process.hpp>
 #include <system_error>
 #include <functional>
-#include <iostream>
 
 namespace boost { namespace process { namespace detail { namespace windows {
 
@@ -34,7 +33,6 @@ struct on_exit_: boost::process::detail::windows::async_handler
 
         return [handler, process_handle](const std::error_code & ec_in)
                 {
-            std::cout << "on_exit_handler" << std::endl;
                     ::boost::detail::winapi::DWORD_ exit_code = 0;
                     auto ec = ec_in;
                     if (!ec)

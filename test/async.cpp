@@ -14,9 +14,14 @@
 #include <boost/process/error.hpp>
 #include <boost/process/exe_args.hpp>
 #include <boost/process/async.hpp>
+#include <boost/process/io.hpp>
 #include <boost/process/execute.hpp>
 
+#include <boost/thread.hpp>
+
 #include <boost/system/error_code.hpp>
+
+#include <boost/algorithm/string/predicate.hpp>
 
 namespace bp = boost::process;
 
@@ -42,4 +47,33 @@ BOOST_AUTO_TEST_CASE(async_wait)
     io_service.run();
     BOOST_CHECK(exit_called);
     BOOST_CHECK_EQUAL(exit_code, 123);
+}
+
+BOOST_AUTO_TEST_CASE(async_out_stream)
+{
+    using boost::unit_test::framework::master_test_suite;
+
+    boost::asio::io_service io_service;
+
+
+    std::error_code ec;
+
+    std::istream istr(nullptr);
+    bp::execute(
+        master_test_suite().argv[1],
+        "test", "--echo-stdout", "abc",
+        bp::std_out > istr,
+        io_service,
+        ec
+    );
+    BOOST_REQUIRE(istr.rdbuf() != nullptr);
+    BOOST_REQUIRE(!ec);
+
+    boost::thread th{[&]{ io_service.run();}};
+
+    std::string line;
+    std::getline(istr, line);
+    BOOST_CHECK(boost::algorithm::starts_with(line, "abc"));
+    th.join();
+
 }

@@ -31,7 +31,6 @@ struct io_service_ref : boost::process::detail::handler_base
     template <class Executor>
     void on_success(Executor& exec) const
     {
-          std::cout << "on_success" << std::endl;
           ::boost::detail::winapi::PROCESS_INFORMATION_ & proc = exec.proc_info;
           auto process_handle = proc.hProcess;
 
@@ -46,8 +45,6 @@ struct io_service_ref : boost::process::detail::handler_base
           handle_p->async_wait(
                   [funcs, _ = std::move(handle)](const boost::system::error_code & ec_in)
                   {
-                      std::cout << "async_wait" << std::endl;
-                      std::cout << "type_index: " << boost::typeindex::type_id<decltype(funcs)>().pretty_name() << std::endl;
                       auto ec = std::error_code(ec_in.value(), std::system_category());
                       boost::hana::for_each(funcs, [&](const auto & func){func(ec);});
                   });

@@ -119,32 +119,42 @@ struct std_out_
     api::pipe_out<p1,p2> operator>(const boost::iostreams::file_descriptor_sink &f) const {return api::pipe_out<p1,p2>(f);}
     api::pipe_out<p1,p2> operator>(const pipe & p)                                  const {return api::pipe_out<p1,p2>(p);}
 
-    api::async_out<p1,p2> operator=(asio::mutable_buffer & buf) const {return api::async_out<p1,p2>(buf);}
-    api::async_out<p1,p2> operator=(asio::const_buffer   & buf) const {return api::async_out<p1,p2>(buf);}
-    api::async_out<p1,p2> operator=(std::ostream & os)          const {return api::async_out<p1,p2>(os );}
+//    api::async_out<p1, p2, asio::mutable_buffer> operator=(asio::mutable_buffer & buf) const {return buf;}
+//    api::async_out<p1, p2, asio::const_buffer  > operator=(asio::const_buffer   & buf) const {return buf;}
+    api::async_out_stream<p1, p2>                operator=(std::istream & os)          const {return os ;}
 
-    api::async_out<p1,p2> operator>(asio::mutable_buffer & buf) const {return api::async_out<p1,p2>(buf);}
-    api::async_out<p1,p2> operator>(asio::const_buffer   & buf) const {return api::async_out<p1,p2>(buf);}
-    api::async_out<p1,p2> operator>(std::ostream & os)          const {return api::async_out<p1,p2>(os );}
-
-
-    template<typename T>
-    api::async_out<p1,p2> buffer(T & buf) {return api::async_out<p1, p2>(boost::asio::buffer(std::move(buf))); }
+//    api::async_out<p1, p2, asio::mutable_buffer> operator>(asio::mutable_buffer & buf) const {return buf;}
+//    api::async_out<p1, p2, asio::const_buffer>   operator>(asio::const_buffer   & buf) const {return buf;}
+    api::async_out_stream<p1, p2>                operator>(std::istream & os)          const {return os ;}
 
 
-    api::async_out<p1,p2> operator=(std::function<void(std::string value)> & f)  const;
-    api::async_out<p1,p2> operator=(std::pair<std::function<void(std::string value)>,char> & f)  const;
-    api::async_out<p1,p2> operator=(std::pair<std::function<void(std::string value)>,int>  & f)  const;
-
-    api::async_out<p1,p2> operator>(std::function<void(std::string value)> & f)  const;
-    api::async_out<p1,p2> operator>(std::pair<std::function<void(std::string value)>,char> & f)  const;
-    api::async_out<p1,p2> operator>(std::pair<std::function<void(std::string value)>,int>  & f)  const;
-
-
-#if !defined (BOOST_NO_CXX11_HDR_FUTURE)
-    api::async_out<p1,p2> operator=(std::future<std::string> & fut) const;
-    api::async_out<p1,p2> operator>(std::future<std::string> & fut) const;
-#endif
+//    template<typename T>
+//    auto buffer(T & buf)
+//    {
+//        return api::async_out_buffer<p1, p2,
+//                decltype(boost::asio::buffer(std::move(buf)))>(boost::asio::buffer(std::move(buf)));
+//    }
+//
+//
+//    api::async_out<p1,p2, std::function<void(std::string value)>>
+//            operator=(std::function<void(std::string value)> & f)  const;
+//    api::async_out<p1,p2, std::pair<std::function<void(std::string value)>,char>>
+//            operator=(std::pair<std::function<void(std::string value)>,char> & f)  const;
+//    api::async_out<p1,p2, std::pair<std::function<void(std::string value)>,int> >
+//            operator=(std::pair<std::function<void(std::string value)>,int>  & f)  const;
+//
+//    api::async_out<p1,p2, std::function<void(std::string value)>>
+//            operator>(std::function<void(std::string value)> & f)  const;
+//    api::async_out<p1,p2, std::pair<std::function<void(std::string value)>,char>>
+//            operator>(std::pair<std::function<void(std::string value)>,char> & f)  const;
+//    api::async_out<p1,p2, std::pair<std::function<void(std::string value)>,int> >
+//            operator>(std::pair<std::function<void(std::string value)>,int>  & f)  const;
+//
+//
+//#if !defined (BOOST_NO_CXX11_HDR_FUTURE)
+//    api::async_out<p1,p2, std::future<std::string>> operator=(std::future<std::string> & fut) const;
+//    api::async_out<p1,p2, std::future<std::string>> operator>(std::future<std::string> & fut) const;
+//#endif
 
 
 
@@ -192,6 +202,9 @@ template<int N, int M>
 inline std::true_type is_initializer ( const api::file_out<N,M>  &) {return {}; }
 template<int N, int M>
 inline std::true_type is_initializer ( const api::pipe_out<N,M>  &) {return {}; }
+
+template<int N, int M>
+inline std::true_type is_initializer ( const api::async_out_stream<N,M>  &) {return {}; }
 
 
 }
