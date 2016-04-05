@@ -22,7 +22,7 @@ namespace boost { namespace process { namespace detail {
 
 
 template<typename T>
-std::false_type is_initializer(const T &){return {};}
+std::is_base_of<handler_base, T> is_initializer(const T &){return {};}
 
 template<typename T>
 boost::none_t initializer_tag(const boost::none_t&);// {return boost::none;}

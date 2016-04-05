@@ -18,10 +18,15 @@
 #include <boost/process/execute.hpp>
 
 #include <boost/thread.hpp>
+#include <future>
 
 #include <boost/system/error_code.hpp>
 
 #include <boost/algorithm/string/predicate.hpp>
+
+#include <iostream>
+
+using namespace std;
 
 namespace bp = boost::process;
 
@@ -75,5 +80,80 @@ BOOST_AUTO_TEST_CASE(async_out_stream)
     std::string line;
     std::getline(istr, line);
     BOOST_CHECK(boost::algorithm::starts_with(line, "abc"));
+}
 
+BOOST_AUTO_TEST_CASE(async_out_callback)
+{
+    using boost::unit_test::framework::master_test_suite;
+
+    boost::asio::io_service io_service;
+
+    std::error_code ec;
+
+    std::string result;
+
+    bp::execute(
+        master_test_suite().argv[1],
+        "test", "--echo-stdout", "abc",
+        bp::std_out>[&](const std::string & val){result = val;},
+        io_service,
+        ec
+    );
+    BOOST_REQUIRE(!ec);
+
+    io_service.run();
+
+    BOOST_CHECK(boost::algorithm::starts_with(result, "abc"));
+}
+
+BOOST_AUTO_TEST_CASE(async_out_callback_sep)
+{
+    using boost::unit_test::framework::master_test_suite;
+
+    boost::asio::io_service io_service;
+
+    std::error_code ec;
+
+    std::vector<std::string> res;
+
+    bp::execute(
+        master_test_suite().argv[1],
+        "test", "--echo-stdout", "abc\ndef",
+        bp::std_out ([&](const std::string & val){res.push_back(val);}, '\n'),
+        io_service,
+        ec
+    );
+    BOOST_REQUIRE(!ec);
+
+    io_service.run();
+
+    BOOST_REQUIRE(res.size() > 0);
+}
+
+
+BOOST_AUTO_TEST_CASE(async_out_callback_size)
+{
+    using boost::unit_test::framework::master_test_suite;
+
+    boost::asio::io_service io_service;
+
+    std::error_code ec;
+
+    std::vector<std::string> res;
+
+    bp::execute(
+        master_test_suite().argv[1],
+        "test", "--echo-stdout", "abcdef",
+        bp::std_out ([&](const std::string & val) {res.push_back(val);}, 3),
+        io_service,
+        ec
+    );
+    BOOST_REQUIRE(!ec);
+
+    io_service.run();
+
+    std::cout << "res.size() " << res.size() << std::endl;
+    BOOST_REQUIRE(res.size() == 2);
+    BOOST_CHECK(res[0] == "abc");
+    BOOST_CHECK(res[1] == "def");
 }

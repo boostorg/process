@@ -22,6 +22,10 @@
 #include <boost/system/api_config.hpp>
 
 
+#if !defined(BOOST_GCC_CXX11) || defined (_GLIBCXX_HAS_GTHREADS)
+#define BOOST_PROCESS_USE_FUTURE
+#endif
+
 #if defined(BOOST_POSIX_API)
 #include <errno.h>
 #elif defined(BOOST_WINDOWS_API)
