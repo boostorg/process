@@ -101,33 +101,9 @@ BOOST_AUTO_TEST_CASE(async_out_callback)
     );
     BOOST_REQUIRE(!ec);
 
-    io_service.run();
 
+    io_service.run();
+    BOOST_CHECK(false);
     BOOST_CHECK(boost::algorithm::starts_with(result, "abc"));
 }
-
-BOOST_AUTO_TEST_CASE(async_out_callback_sep)
-{
-    using boost::unit_test::framework::master_test_suite;
-
-    boost::asio::io_service io_service;
-
-    std::error_code ec;
-
-    std::vector<std::string> res;
-
-    bp::execute(
-        master_test_suite().argv[1],
-        "test", "--echo-stdout", "abc\ndef",
-        bp::std_out ([&](const std::string & val){res.push_back(val);}, '\n'),
-        io_service,
-        ec
-    );
-    BOOST_REQUIRE(!ec);
-
-    io_service.run();
-
-    BOOST_REQUIRE(res.size() > 0);
-}
-
 

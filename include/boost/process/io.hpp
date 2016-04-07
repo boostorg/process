@@ -79,11 +79,24 @@ struct std_in_
 
     api::async_in operator=(asio::mutable_buffer & buf) const {return api::async_in(buf);}
     api::async_in operator=(asio::const_buffer   & buf) const {return api::async_in(buf);}
-    api::async_in operator=(std::ostream & os)          const {return api::async_in(os);}
+    api::async_in operator=(asio::streambuf      & buf) const {return api::async_in(buf);}
 
     api::async_in operator<(asio::mutable_buffer & buf) const {return api::async_in(buf);}
     api::async_in operator<(asio::const_buffer   & buf) const {return api::async_in(buf);}
-    api::async_in operator<(std::ostream & os)          const {return api::async_in(os);}
+    api::async_in operator<(asio::streambuf      & buf) const {return api::async_in(buf);}
+
+//    api::async_in_future<std::string>       operator()(const std::string & st,       std::future<void> & fut)  {return {st, fut};}
+//    api::async_in_future<std::vector<char>> operator()(const std::vector<char> & st, std::future<void> & fut)  {return {st, fut};}
+//
+//    using string_cb = const std::function<std::string      (bool &)>;
+//    using vector_cb = const std::function<std::vector<char>(bool &)>;
+//
+//    api::async_in_cb<string_cb> operator<(string_cb & cb) const {return cb;}
+//    api::async_in_cb<vector_cb> operator<(vector_cb & cb) const {return cb;}
+//
+//    api::async_in_cb<string_cb> operator=(string_cb & cb) const {return cb;}
+//    api::async_in_cb<vector_cb> operator=(vector_cb & cb) const {return cb;}
+
 
 };
 
@@ -131,14 +144,9 @@ struct std_out_
     using vector_cb = const std::function<void(std::vector<char>)>;
 
     api::async_out_cb      <p1,p2, string_cb>      operator= (string_cb & f)        const {return f;}
-    api::async_out_cb_until<p1,p2, string_cb,char> operator()(string_cb& cb,char f) const {return {cb, f};}
-
-
     api::async_out_cb      <p1,p2, vector_cb>      operator= (vector_cb & f)        const {return f;}
-    api::async_out_cb_until<p1,p2, vector_cb,char> operator()(vector_cb& cb,char f) const {return {cb, f};}
     api::async_out_cb      <p1,p2, string_cb>      operator> (string_cb & f)        const {return f;}
     api::async_out_cb      <p1,p2, vector_cb>      operator> (vector_cb & f)        const {return f;}
-
 
 #if defined (BOOST_PROCESS_USE_FUTURE)
     api::async_out_future<p1,p2, std::string>       operator=(std::future<std::string> & fut) const;
