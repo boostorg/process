@@ -17,6 +17,7 @@
 #include <boost/detail/winapi/get_last_error.hpp>
 #include <boost/detail/winapi/access_rights.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/asio/windows/stream_handle.hpp>
 #include <system_error>
 #include <array>
 
@@ -174,6 +175,7 @@ pipe pipe::create_named(const std::string & name, std::error_code & ec)
     return pipe(handle1, handle2);
 }
 
+typedef boost::asio::windows::stream_handle async_pipe_handle;
 
 
 }}}}

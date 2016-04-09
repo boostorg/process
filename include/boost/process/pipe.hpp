@@ -101,10 +101,85 @@ private:
     boost::iostreams::file_descriptor_sink   _sink   {_native.sink(),   boost::iostreams::never_close_handle};
     boost::iostreams::file_descriptor_source _source {_native.source(), boost::iostreams::never_close_handle};
 
-
 };
 
 using pipe_stream = boost::iostreams::stream<pipe>;
+
+struct async_pipe : pipe
+{
+    typedef boost::process::detail::api::async_pipe_handle native_async_handle;
+    void cancel()
+    {
+        if (_sink.is_open())
+            _sink.cancel();
+        if (_source.is_open())
+            _source.cancel();
+    }
+
+    void close()
+    {
+        if (_sink.is_open())
+            _sink.cancel();
+        if (_source.is_open())
+            _source.cancel();}
+
+    bool is_open() const
+    {
+        return  _sink.is_open() || _source.is_open();
+    }
+
+
+
+    template<typename MutableBufferSequence>
+    std::size_t read_some(const MutableBufferSequence & buffers)
+    {
+        return _source.read_some(buffers);
+    }
+    template<typename MutableBufferSequence>
+    std::size_t write_some(const MutableBufferSequence & buffers)
+    {
+        return _sink.write_some(buffers);
+    }
+
+
+    native_async_handle &async_source() {return _source;}
+    native_async_handle &async_sink  () {return _sink;}
+
+
+    template<typename MutableBufferSequence,
+             typename ReadHandler>
+    void async_read_some(
+        const MutableBufferSequence & buffers,
+              ReadHandler handler)
+    {
+        _source.async_read_some(buffers, handler);
+    }
+
+    template<typename ConstBufferSequence,
+             typename WriteHandler>
+    void async_write_some(
+        const ConstBufferSequence & buffers,
+        WriteHandler handler)
+    {
+        _sink.async_write_some(buffers, handler);
+    }
+
+    boost::asio::io_service& get_io_service() {return *_ios;}
+    async_pipe(boost::asio::io_service & ios) : _ios(&ios),
+            _sink  (ios, pipe::sink().  handle()),
+            _source(ios, pipe::source().handle())
+    {}
+    async_pipe(const async_pipe &) = default;
+    async_pipe(async_pipe &&) = default;
+
+    async_pipe& operator=(const async_pipe &) = default;
+    async_pipe& operator=(async_pipe &&) = default;
+
+private:
+    boost::asio::io_service * _ios;
+    native_async_handle _sink;
+    native_async_handle _source;
+};
 
 }}
 

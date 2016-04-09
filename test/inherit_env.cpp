@@ -20,7 +20,6 @@
 #include <stdlib.h>
 
 namespace bp = boost::process;
-namespace bpi = boost::process::initializers;
 
 BOOST_AUTO_TEST_CASE(inherit_env)
 {
@@ -33,22 +32,19 @@ BOOST_AUTO_TEST_CASE(inherit_env)
     bp::pipe p = bp::create_pipe();
 
     {
-        bio::file_descriptor_sink sink(p.sink, bio::close_handle);
         boost::system::error_code ec;
         bp::execute(
-            bpi::run_exe(master_test_suite().argv[1]),
-            bpi::set_cmd_line("test --query " + it->first),
-            bpi::inherit_env(),
-            bpi::bind_stdout(sink),
-            bpi::set_on_error(ec)
+            master_test_suite().argv[1],
+            "test", "--query ", it->first,
+            bp::std_out>p,
+            ec
         );
         BOOST_REQUIRE(!ec);
     }
 
-    bio::file_descriptor_source source(p.source, bio::close_handle);
     bio::filtering_istream is;
     is.push(bio::newline_filter(bio::newline::posix));
-    is.push(source);
+    is.push(p.source());
 
     std::string s;
     std::getline(is, s);

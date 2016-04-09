@@ -86,7 +86,6 @@ BOOST_AUTO_TEST_CASE(async_out_stream)
 
 BOOST_AUTO_TEST_CASE(async_in_stream)
 {
-    cout << "async_in_stream" << endl;
     using boost::unit_test::framework::master_test_suite;
 
     boost::asio::io_service io_service;
