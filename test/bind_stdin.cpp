@@ -35,7 +35,6 @@ typedef boost::asio::windows::stream_handle pipe_end;
 typedef boost::asio::posix::stream_descriptor pipe_end;
 #endif
 
-#define L()     std::cout << __LINE__ << std::endl;
 
 
 namespace bp = boost::process;

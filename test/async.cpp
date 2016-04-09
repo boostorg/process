@@ -82,28 +82,44 @@ BOOST_AUTO_TEST_CASE(async_out_stream)
     BOOST_CHECK(boost::algorithm::starts_with(line, "abc"));
 }
 
-BOOST_AUTO_TEST_CASE(async_out_callback)
+
+
+BOOST_AUTO_TEST_CASE(async_in_stream)
 {
+    cout << "async_in_stream" << endl;
     using boost::unit_test::framework::master_test_suite;
 
     boost::asio::io_service io_service;
 
+
     std::error_code ec;
 
-    std::string result;
+    boost::asio::streambuf buf;
+    boost::asio::streambuf in_buf;
+
+    std::string st = "test-";
+
+    std::ostream ostr(&in_buf);
+    ostr << "-string" << endl ;
 
     bp::execute(
         master_test_suite().argv[1],
-        "test", "--echo-stdout", "abc",
-        bp::std_out>[&](const std::string & val){result = val;},
+        "test", "--prefix-once", "test",
+        bp::std_in  < in_buf,
+        bp::std_out > buf,
         io_service,
         ec
     );
     BOOST_REQUIRE(!ec);
 
-
     io_service.run();
-    BOOST_CHECK(false);
-    BOOST_CHECK(boost::algorithm::starts_with(result, "abc"));
+
+
+    std::istream istr(&buf);
+
+    std::string line;
+    std::getline(istr, line);
+    BOOST_CHECK(boost::algorithm::starts_with(line, "test-string"));
 }
+
 

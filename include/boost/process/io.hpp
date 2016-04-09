@@ -77,26 +77,13 @@ struct std_in_
     api::pipe_in operator<(const boost::iostreams::file_descriptor_source &f) const {return api::pipe_in(f);}
     api::pipe_in operator<(const pipe & p)                                    const {return api::pipe_in(p);}
 
-    api::async_in operator=(asio::mutable_buffer & buf) const {return api::async_in(buf);}
-    api::async_in operator=(asio::const_buffer   & buf) const {return api::async_in(buf);}
-    api::async_in operator=(asio::streambuf      & buf) const {return api::async_in(buf);}
+    api::async_in_buffer<const asio::mutable_buffer> operator=(const asio::mutable_buffer & buf) const {return buf;}
+    api::async_in_buffer<const asio::const_buffer  > operator=(const asio::const_buffer   & buf) const {return buf;}
+    api::async_in_buffer<asio::streambuf     >       operator=(asio::streambuf            & buf) const {return buf;}
 
-    api::async_in operator<(asio::mutable_buffer & buf) const {return api::async_in(buf);}
-    api::async_in operator<(asio::const_buffer   & buf) const {return api::async_in(buf);}
-    api::async_in operator<(asio::streambuf      & buf) const {return api::async_in(buf);}
-
-//    api::async_in_future<std::string>       operator()(const std::string & st,       std::future<void> & fut)  {return {st, fut};}
-//    api::async_in_future<std::vector<char>> operator()(const std::vector<char> & st, std::future<void> & fut)  {return {st, fut};}
-//
-//    using string_cb = const std::function<std::string      (bool &)>;
-//    using vector_cb = const std::function<std::vector<char>(bool &)>;
-//
-//    api::async_in_cb<string_cb> operator<(string_cb & cb) const {return cb;}
-//    api::async_in_cb<vector_cb> operator<(vector_cb & cb) const {return cb;}
-//
-//    api::async_in_cb<string_cb> operator=(string_cb & cb) const {return cb;}
-//    api::async_in_cb<vector_cb> operator=(vector_cb & cb) const {return cb;}
-
+    api::async_in_buffer<const asio::mutable_buffer> operator<(const asio::mutable_buffer & buf) const {return buf;}
+    api::async_in_buffer<const asio::const_buffer  > operator<(const asio::const_buffer   & buf) const {return buf;}
+    api::async_in_buffer<asio::streambuf     >       operator<(asio::streambuf            & buf) const {return buf;}
 
 };
 
@@ -139,23 +126,12 @@ struct std_out_
     api::async_out_buffer<p1, p2, asio::streambuf>      operator>(asio::streambuf & os)       const {return os ;}
 
 
-
-    using string_cb = const std::function<void(std::string)>;
-    using vector_cb = const std::function<void(std::vector<char>)>;
-
-    api::async_out_cb      <p1,p2, string_cb>      operator= (string_cb & f)        const {return f;}
-    api::async_out_cb      <p1,p2, vector_cb>      operator= (vector_cb & f)        const {return f;}
-    api::async_out_cb      <p1,p2, string_cb>      operator> (string_cb & f)        const {return f;}
-    api::async_out_cb      <p1,p2, vector_cb>      operator> (vector_cb & f)        const {return f;}
-
 #if defined (BOOST_PROCESS_USE_FUTURE)
     api::async_out_future<p1,p2, std::string>       operator=(std::future<std::string> & fut) const;
     api::async_out_future<p1,p2, std::string>       operator>(std::future<std::string> & fut) const;
     api::async_out_future<p1,p2, std::vector<char>> operator=(std::future<std::vector<char>> & fut) const;
     api::async_out_future<p1,p2, std::vector<char>> operator>(std::future<std::vector<char>> & fut) const;
 #endif
-
-
 
     template<int pin, typename = std::enable_if_t<
             (((p1 == 1) && (pin == 2)) ||
@@ -180,37 +156,6 @@ constexpr static null_t  null;
 constexpr static std_in_ std_in;
 constexpr static std_out_<1> std_out;
 constexpr static std_out_<2> std_err;
-
-/*
-inline std::true_type is_initializer  (const std_in_ &)    {return {};}
-inline std::true_type is_initializer  (const std_out_<1> &) {return {};}
-inline std::true_type is_initializer  (const std_out_<2> &) {return {};}
-inline std::true_type is_initializer  (const std_out_<1,2> &) {return {};}
-
-
-inline std::true_type is_initializer ( const api::close_in &) {return {}; }
-inline std::true_type is_initializer ( const api::null_in  &) {return {}; }
-inline std::true_type is_initializer ( const api::file_in  &) {return {}; }
-inline std::true_type is_initializer ( const api::pipe_in  &) {return {}; }
-
-template<int N, int M>
-inline std::true_type is_initializer ( const api::close_out<N,M> &) {return {}; }
-template<int N, int M>
-inline std::true_type is_initializer ( const api::null_out<N,M>  &) {return {}; }
-template<int N, int M>
-inline std::true_type is_initializer ( const api::file_out<N,M>  &) {return {}; }
-template<int N, int M>
-inline std::true_type is_initializer ( const api::pipe_out<N,M>  &) {return {}; }
-
-template<int N, int M, typename T>
-inline std::true_type is_initializer ( const api::async_out_buffer<N,M, T>  &) {return {}; }
-
-template<int N, int M, typename T>
-inline std::true_type is_initializer ( const api::async_out_cb<N,M, T>  &) {return {}; }
-
-template<int N, int M, typename T, typename U>
-inline std::true_type is_initializer ( const api::async_out_cb_until<N,M,T,U>  &) {return {}; }
-*/
 
 }
 

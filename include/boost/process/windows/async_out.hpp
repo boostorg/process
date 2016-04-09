@@ -99,81 +99,11 @@ struct async_out_buffer : ::boost::process::detail::windows::async_handler
         return [stream_handle, pipe](const std::error_code & ec)
                 {
                     boost::asio::io_service & ios = stream_handle->get_io_service();
-                    ios.post([stream_handle]{stream_handle->close();});
-
-                };
-
-    };
-    template <typename WindowsExecutor>
-    void on_setup(WindowsExecutor &exec)
-    {
-        stream_handle = std::make_shared<boost::asio::windows::stream_handle>(get_io_service(exec.seq), pipe->source().handle());
-        apply_out_handles(exec, sink.handle(), std::integral_constant<int, p1>(), std::integral_constant<int, p2>());
-    }
-};
-
-template<typename T> struct deduce_async_out_cb_type;
-template<typename T> struct deduce_async_out_cb_type<const std::function<void(T)>> {using type = T;};
-
-
-struct completion_handler {};
-
-template<int p1, int p2, typename Callback>
-struct async_out_cb : ::boost::process::detail::windows::async_handler
-{
-    Callback cb;
-
-    using argument_type = typename deduce_async_out_cb_type<Callback>::type;
-
-    std::shared_ptr<boost::asio::windows::stream_handle> stream_handle;
-    std::shared_ptr<boost::asio::streambuf> buffer = std::make_shared<boost::asio::streambuf>();
-
-    std::shared_ptr<boost::process::pipe> pipe = std::make_shared<boost::process::pipe>(boost::process::pipe::create_async());
-    //because the pipe will be moved later on, but i might need the source at another point.
-    boost::iostreams::file_descriptor_sink sink = pipe->sink();
-
-    async_out_cb(const Callback & cb) : cb(cb) {}
-
-    template <typename Executor>
-    inline void on_success(Executor &exec) const
-    {
-        boost::asio::io_service &is_ser = get_io_service(exec.seq);
-        auto& stream_handle = this->stream_handle;
-        auto pipe   = this->pipe;
-        auto buffer = this->buffer;
-        auto cb     = this->cb;
-        auto func_p = std::make_shared<std::function<std::size_t(const boost::system::error_code&, std::size_t)>>();
-
-        *func_p = [stream_handle, pipe, buffer, cb,  func_p](const boost::system::error_code&, std::size_t size)
-                  {
-                      if (buffer->size() > 0)
-                      {
-                          std::istream is (buffer.get());
-                          argument_type arg;
-                          arg.resize(buffer->size());
-                          is.read(&*arg.begin(), buffer->size());
-                          cb(std::move(arg));
-                      }
-                      if (stream_handle->is_open())
-                      {
-                          return 1024u;
-                      }
-                      else
-                          return 0u;
-                  };
-
-        boost::asio::async_read(*stream_handle, *buffer, *func_p, [](const boost::system::error_code & , std::size_t){});
-    }
-
-    template<typename Executor>
-    auto on_exit_handler(Executor & exec)
-    {
-        auto  stream_handle = this->stream_handle;
-        auto & pipe = this->pipe;
-        return [stream_handle, pipe](const std::error_code & ec)
-                {
-                    boost::asio::io_service & ios = stream_handle->get_io_service();
-                    ios.post([stream_handle]{stream_handle->close();});
+                    ios.post([stream_handle]
+                            {
+                                boost::system::error_code ec;
+                                stream_handle->close(ec);
+                            });
 
                 };
 
@@ -241,7 +171,11 @@ struct async_out_future : ::boost::process::detail::windows::async_handler
         return [stream_handle, pipe](const std::error_code & ec)
                 {
                     boost::asio::io_service & ios = stream_handle->get_io_service();
-                    ios.post([stream_handle]{stream_handle->close();});
+                    ios.post([stream_handle]
+                            {
+                                boost::system::error_code ec;
+                                stream_handle->close(ec);
+                            });
 
                 };
 
