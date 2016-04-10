@@ -12,13 +12,10 @@
 #define BOOST_PROCESS_WINDOWS_INITIALIZERS_SET_CMD_LINE_HPP
 
 #include <boost/detail/winapi/config.hpp>
-#include <boost/process/config.hpp>
+#include <boost/process/detail/config.hpp>
 #include <boost/process/detail/handler_base.hpp>
 #include <boost/process/detail/cmd_or_exe.hpp>
-#include <boost/process/windows/cmd.hpp>
-#include <boost/range/algorithm/copy.hpp>
-#include <boost/shared_array.hpp>
-#include <memory>
+#include <boost/process/detail/windows/cmd.hpp>
 #include <boost/hana/tuple.hpp>
 
 namespace boost { namespace process { namespace detail {

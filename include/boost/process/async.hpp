@@ -9,6 +9,13 @@
 #include <boost/asio/io_service.hpp>
 #include <type_traits>
 
+#if defined(BOOST_POSIX_API)
+#include <boost/process/detail/posix/on_exit.hpp>
+#include <boost/process/detail/posix/io_service_ref.hpp>
+#elif defined(BOOST_WINDOWS_API)
+#include <boost/process/detail/windows/on_exit.hpp>
+#include <boost/process/detail/windows/io_service_ref.hpp>
+#endif
 
 namespace boost { namespace process { namespace detail {
 
@@ -49,7 +56,7 @@ inline api::io_service_ref make_initializer(async_tag&, boost::hana::tuple<boost
 
 using ::boost::process::detail::on_exit;
 
-}}}
+}}
 
 
 

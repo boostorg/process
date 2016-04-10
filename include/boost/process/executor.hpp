@@ -16,12 +16,12 @@
 #ifndef BOOST_PROCESS_EXECUTOR_HPP
 #define BOOST_PROCESS_EXECUTOR_HPP
 
-#include <boost/process/config.hpp>
+#include <boost/process/detail/config.hpp>
 
 #if defined( BOOST_POSIX_API )
-#include <boost/process/posix/executor.hpp>
+#include <boost/process/detail/posix/executor.hpp>
 #elif defined( BOOST_WINDOWS_API )
-#include <boost/process/windows/executor.hpp>
+#include <boost/process/detail/windows/executor.hpp>
 #endif
 
 

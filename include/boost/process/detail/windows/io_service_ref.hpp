@@ -7,8 +7,9 @@
 #define BOOST_PROCESS_WINDOWS_IO_SERVICE_REF_HPP_
 
 #include <boost/process/detail/handler_base.hpp>
-#include <boost/process/windows/async_handler.hpp>
+#include <boost/process/detail/windows/async_handler.hpp>
 #include <boost/asio/io_service.hpp>
+#include <boost/asio/windows/object_handle.hpp>
 #include <boost/detail/winapi/process.hpp>
 #include <boost/hana/filter.hpp>
 #include <boost/hana/transform.hpp>

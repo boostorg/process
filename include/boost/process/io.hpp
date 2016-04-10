@@ -11,36 +11,37 @@
 #include <functional>
 #include <utility>
 #include <boost/iostreams/device/file_descriptor.hpp>
-#include <boost/process/config.hpp>
+#include <boost/process/detail/config.hpp>
 #include <boost/process/pipe.hpp>
 #include <boost/asio/buffer.hpp>
+#include <boost/asio/streambuf.hpp>
 
 #if defined (BOOST_PROCESS_USE_FUTURE)
 #include <future>
 #endif
 
 #if defined(BOOST_POSIX_API)
-#include <boost/process/posix/close_in.hpp>
-#include <boost/process/posix/close_out.hpp>
-#include <boost/process/posix/null_in.hpp>
-#include <boost/process/posix/null_out.hpp>
-#include <boost/process/posix/file_in.hpp>
-#include <boost/process/posix/file_out.hpp>
-#include <boost/process/posix/pipe_in.hpp>
-#include <boost/process/posix/pipe_out.hpp>
-#include <boost/process/posix/async_in.hpp>
-#include <boost/process/posix/async_out.hpp>
+#include <boost/process/detail/posix/close_in.hpp>
+#include <boost/process/detail/posix/close_out.hpp>
+#include <boost/process/detail/posix/null_in.hpp>
+#include <boost/process/detail/posix/null_out.hpp>
+#include <boost/process/detail/posix/file_in.hpp>
+#include <boost/process/detail/posix/file_out.hpp>
+#include <boost/process/detail/posix/pipe_in.hpp>
+#include <boost/process/detail/posix/pipe_out.hpp>
+#include <boost/process/detail/posix/async_in.hpp>
+#include <boost/process/detail/posix/async_out.hpp>
 #elif defined(BOOST_WINDOWS_API)
-#include <boost/process/windows/close_in.hpp>
-#include <boost/process/windows/close_out.hpp>
-#include <boost/process/windows/null_in.hpp>
-#include <boost/process/windows/null_out.hpp>
-#include <boost/process/windows/file_in.hpp>
-#include <boost/process/windows/file_out.hpp>
-#include <boost/process/windows/pipe_in.hpp>
-#include <boost/process/windows/pipe_out.hpp>
-#include <boost/process/windows/async_in.hpp>
-#include <boost/process/windows/async_out.hpp>
+#include <boost/process/detail/windows/close_in.hpp>
+#include <boost/process/detail/windows/close_out.hpp>
+#include <boost/process/detail/windows/null_in.hpp>
+#include <boost/process/detail/windows/null_out.hpp>
+#include <boost/process/detail/windows/file_in.hpp>
+#include <boost/process/detail/windows/file_out.hpp>
+#include <boost/process/detail/windows/pipe_in.hpp>
+#include <boost/process/detail/windows/pipe_out.hpp>
+#include <boost/process/detail/windows/async_in.hpp>
+#include <boost/process/detail/windows/async_out.hpp>
 #endif
 
 

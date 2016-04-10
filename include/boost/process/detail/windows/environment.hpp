@@ -13,6 +13,8 @@
 #include <boost/process/detail/config.hpp>
 #include <boost/detail/winapi/get_current_process.hpp>
 #include <boost/detail/winapi/get_current_process_id.hpp>
+#include <algorithm>
+
 
 namespace boost { namespace process { namespace detail { namespace windows {
 
@@ -21,7 +23,7 @@ class native_environment_impl
 {
     static void _deleter(Char* p) {boost::detail::winapi::free_environment_strings(p);};
     std::unique_ptr<Char[], void(*)(Char*)> _buf{boost::detail::winapi::get_environment_strings<Char>(), &native_environment_impl::_deleter};
-    std::vector<Char*> _load_var(Char* p);
+    static std::vector<Char*> _load_var(Char* p);
     std::vector<Char*> _env_arr{_load_var(_buf.get())};
 public:
     using char_type = Char;
@@ -50,7 +52,7 @@ public:
     native_environment_impl & operator=(native_environment_impl && ) = default;
     Char ** _env_impl = &*_env_arr.begin();
 
-    native_handle_type native_handle() {return _buf.get();}
+    native_handle_type native_handle() const {return _buf.get();}
 };
 
 template<typename Char>
@@ -86,26 +88,21 @@ std::vector<Char*> native_environment_impl<Char>::_load_var(Char* p)
     std::vector<Char*> ret;
     if (*p != null_char<Char>)
     {
-        bool found = false;
-        while (true)
+        ret.push_back(p);
+        while ((*p != null_char<Char>) || (*(p+1) !=  null_char<Char>))
         {
-            p++;
-            if (*p == null_char<Char>)
+            if (*p==null_char<Char>)
             {
-                if (found)//found the second one
-                    break;
-                else
-                    found = true;
-            }
-            else if (found)
-            {
+                p++;
                 ret.push_back(p);
-                found = false;
             }
+            else
+                p++;
         }
     }
     p++;
     ret.push_back(nullptr);
+
     return ret;
 }
 
@@ -114,8 +111,8 @@ template<typename Char>
 struct basic_environment_impl
 {
     std::vector<Char> _data = {null_char<Char>};
-    std::vector<Char*> _load_var(Char* p);
-    std::vector<Char*> _env_arr{_load_var(&*_data.begin())};
+    static std::vector<Char*> _load_var(Char* p);
+    std::vector<Char*> _env_arr{_load_var(_data.data())};
 public:
     using char_type = Char;
     using pointer_type = const char_type*;
@@ -123,8 +120,8 @@ public:
     using native_handle_type = pointer_type;
     void reload()
     {
-        _env_arr = _load_var(&*_data.begin());
-        _env_impl = &*_env_arr.begin();
+        _env_arr = _load_var(_data.data());
+        _env_impl = _env_arr.data();
     }
 
     string_type get(const pointer_type id) {return get(string_type(id));}
@@ -137,14 +134,24 @@ public:
 
     basic_environment_impl(const native_environment_impl<Char> & nei);
     basic_environment_impl() = default;
-    basic_environment_impl(const basic_environment_impl& ) = default;
+    basic_environment_impl(const basic_environment_impl& rhs)
+        : _data(rhs._data)
+    {
+
+    }
     basic_environment_impl(basic_environment_impl && ) = default;
-    basic_environment_impl & operator=(const basic_environment_impl& ) = default;
+    basic_environment_impl & operator=(const basic_environment_impl& rhs)
+    {
+        _data = rhs._data;
+        _env_arr = _load_var(&*_data.begin());
+        _env_impl = &*_env_arr.begin();
+        return *this;
+    }
     basic_environment_impl & operator=(basic_environment_impl && ) = default;
 
     Char ** _env_impl = &*_env_arr.begin();
 
-    native_handle_type native_handle() {return &*_data.begin();}
+    native_handle_type native_handle() const {return &*_data.begin();}
 };
 
 
@@ -153,19 +160,12 @@ basic_environment_impl<Char>::basic_environment_impl(const native_environment_im
 {
     auto beg = nei.native_handle();
     auto p   = beg;
-    while (*p != null_char<Char>)
-    {
+    while ((*p != null_char<Char>) || (*(p+1) != null_char<Char>))
         p++;
-        if (*p == null_char<Char>)
-        {
-            p++;
-            if (*p == null_char<Char>)
-            {
-                p++;
-                break;//got it
-            }
-        }
-    }
+
+    p++; //pointing to the second nullchar
+    p++; //to get the pointer behing the second nullchar, so it's end.
+
     this->_data.assign(beg, p);
 }
 
@@ -173,43 +173,78 @@ basic_environment_impl<Char>::basic_environment_impl(const native_environment_im
 template<typename Char>
 inline auto basic_environment_impl<Char>::get(const string_type &id) -> string_type
 {
-    for (auto & e : _env_impl)
-        if (std::equal(id.begin(), id.end(), e))
-            return string_type(e  + id.size() + 1);
-    return string_type();
+
+    if (std::equal(id.begin(), id.end(), _data.begin()) && (_data[id.size()] == '='))
+        return string_type(_data.data()); //null-char is handled by the string.
+
+    std::vector<Char> seq = {'\0'}; //using a vector, because strings might cause problems with nullchars
+    seq.insert(seq.end(), id.begin(), id.end());
+    seq.push_back('=');
+
+    auto itr = std::search(_data.begin(), _data.end(), seq.begin(), seq.end());
+
+    if (itr == _data.end()) //not found
+        return "";
+
+    itr += seq.size(); //advance to the value behind the '='; the std::string will take care of finding the null-char.
+
+    return string_type(&*itr);
 }
 
 template<typename Char>
 inline void basic_environment_impl<Char>::set(const string_type &id, const string_type &value)
 {
-    for (auto & e : _env_impl)
-        if (std::equal(id.begin(), id.end(), e))
-        {
-            //ok, found the thingy.
-            auto p = _data.begin() + (e - *&_data.begin());
-            auto end = p;
-            while (*end != null_char<Char>)
-                end++;
-            _data.erase(p, end);
-        }
+    reset(id);
 
-    auto new_val = id + equal_sign<Char> + value;
-    _data.insert(_data.end(), new_val.begin(), new_val.end());
+    std::vector<char> insertion;
+
+    insertion.insert(insertion.end(), id.begin(),    id.end());
+    insertion.push_back('=');
+    insertion.insert(insertion.end(), value.begin(), value.end());
+    insertion.push_back('\0');
+
+    _data.insert(_data.end() -1, insertion.begin(), insertion.end());
+
+    reload();
 }
 
 template<typename Char>
 inline void  basic_environment_impl<Char>::reset(const string_type &id)
 {
-    for (auto & e : _env_impl)
-        if (std::equal(id.begin(), id.end(), e))
-        {
-            //ok, found the thingy.
-            auto p = _data.begin() + (e - *&_data.begin());
-            auto end = p;
-            while (*end != null_char<Char>)
-                end++;
-            _data.erase(p, end);
-        }
+    if (std::equal(id.begin(), id.end(), _data.begin()) && (_data[id.size()] == '='))
+    {
+        auto beg = _data.begin() + _data.size() + 1;
+        auto end = beg;
+
+        while (*end != '\0')
+            end++;
+
+        end++; //to point behind the last null-char
+
+        _data.erase(beg, end); //and remove the thingy
+
+    }
+
+    std::vector<Char> seq = {'\0'}; //using a vector, because strings might cause problems with nullchars
+    seq.insert(seq.end(), id.begin(), id.end());
+    seq.push_back('=');
+
+    auto itr = std::search(_data.begin(), _data.end(), seq.begin(), seq.end());
+
+    if (itr == _data.end())
+        return;//nothing to return if it's empty anyway...
+
+    auto end = itr;
+
+    while (*end != '\0')
+        end++;
+
+    end ++; //to point behind the last null-char
+
+    _data.erase(itr, end);//and remove it
+    reload();
+
+
 }
 
 template<typename Char>
@@ -218,26 +253,21 @@ std::vector<Char*> basic_environment_impl<Char>::_load_var(Char* p)
     std::vector<Char*> ret;
     if (*p != null_char<Char>)
     {
-        bool found = false;
-        while (true)
+        ret.push_back(p);
+        while ((*p != null_char<Char>) || (*(p+1) !=  null_char<Char>))
         {
-            p++;
-            if (*p == null_char<Char>)
+            if (*p==null_char<Char>)
             {
-                if (found)//found the second one
-                    break;
-                else
-                    found = true;
-            }
-            else if (found)
-            {
+                p++;
                 ret.push_back(p);
-                found = false;
             }
+            else
+                p++;
         }
     }
     p++;
     ret.push_back(nullptr);
+    return ret;
 }
 
 

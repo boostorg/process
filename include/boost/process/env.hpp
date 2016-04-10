@@ -11,6 +11,12 @@
 #include <boost/hana/tuple.hpp>
 #include <boost/hana/for_each.hpp>
 
+#if defined(BOOST_POSIX_API)
+#include <boost/process/detail/posix/env_init.hpp>
+#elif defined(BOOST_WINDOWS_API)
+#include <boost/process/detail/windows/env_init.hpp>
+#endif
+
 namespace boost { namespace process { namespace detail {
 
 struct env_tag {};
@@ -114,6 +120,10 @@ struct env_
 struct env_builder
 {
     environment env;
+    void operator()(const environment & e)
+    {
+        env = e;
+    }
 
     void operator()(env_init & ei)
     {
@@ -133,21 +143,22 @@ struct env_builder
     {
         //env.set(es.key, es.value_to_string());
     }
+
+    api::env_init get_initializer()
+    {
+        return api::env_init(std::move(env));
+    }
 };
 
 
 template<typename ...Args>
-auto build_env(boost::hana::tuple<Args...> && env_tup)
+auto make_initializer(const env_tag & , boost::hana::tuple<Args*...> & env_tup)
 {
     env_builder env;
-    hana::for_each(env_tup, env);
-    return env;
+    hana::for_each(env_tup, [&](auto & value){env(std::move(*value));});
+    return env.get_initializer();
 }
 
-auto build_env(boost::hana::tuple<> && e)
-{
-    return boost::process::empty_env();
-}
 
 template<class String>
 inline constexpr env_tag initializer_tag(const env_set<String>&) {return {};}
@@ -160,9 +171,6 @@ inline constexpr env_tag initializer_tag(const wenvironment&) {return {};}
 
 inline constexpr env_tag initializer_tag(const  empty_env&) {return {};}
 inline constexpr env_tag initializer_tag(const wempty_env&) {return {};}
-
-template<typename T>
-struct is_env_t : decltype(is_env_setter(T())) {};
 
 
 constexpr static env_ env;

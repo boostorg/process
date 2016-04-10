@@ -12,7 +12,7 @@
 
 #include <boost/detail/winapi/process.hpp>
 #include <boost/detail/winapi/handles.hpp>
-#include <boost/process/windows/pipe.hpp>
+#include <boost/process/detail/windows/pipe.hpp>
 #include <boost/process/detail/handler_base.hpp>
 #include <boost/asio/windows/stream_handle.hpp>
 #include <boost/asio/read.hpp>
@@ -72,7 +72,7 @@ struct async_out_buffer : ::boost::process::detail::windows::async_handler
 
     Buffer & buf;
 
-    std::shared_ptr<boost::process::pipe> pipe = std::make_shared<boost::process::pipe>(boost::process::pipe::create_async());
+    std::shared_ptr<boost::process::pipe> pipe = std::make_shared<boost::process::pipe>(pipe::create_async());
     //because the pipe will be moved later on, but i might need the source at another point.
     boost::iostreams::file_descriptor_sink sink = pipe->sink();
 

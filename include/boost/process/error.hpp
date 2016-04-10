@@ -11,7 +11,7 @@
 #ifndef BOOST_PROCESS_DETAIL_ERROR_HPP
 #define BOOST_PROCESS_DETAIL_ERROR_HPP
 
-#include <boost/process/config.hpp>
+#include <boost/process/detail/config.hpp>
 #include <boost/process/detail/handler_base.hpp>
 #include <system_error>
 #include <boost/hana/tuple.hpp>
@@ -50,9 +50,6 @@ struct set_on_error : ::boost::process::detail::handler_base
     template <class Executor>
     void on_error(Executor&, const std::error_code & ec) const
     {
-        std::cout << "EC2: " << &ec << std::endl;
-        std::cout << "EC3: " << &ec_ << std::endl;
-
         ec_ = ec;
     }
 

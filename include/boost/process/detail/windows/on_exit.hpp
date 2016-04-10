@@ -6,10 +6,10 @@
 #ifndef BOOST_PROCESS_WINDOWS_ON_EXIT_HPP_
 #define BOOST_PROCESS_WINDOWS_ON_EXIT_HPP_
 
-#include <boost/process/config.hpp>
+#include <boost/process/detail/config.hpp>
 #include <boost/process/detail/handler_base.hpp>
-#include <boost/process/windows/on_exit.hpp>
-#include <boost/process/windows/async_handler.hpp>
+#include <boost/process/detail/windows/on_exit.hpp>
+#include <boost/process/detail/windows/async_handler.hpp>
 #include <boost/detail/winapi/process.hpp>
 #include <system_error>
 #include <functional>

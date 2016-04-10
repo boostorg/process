@@ -6,7 +6,7 @@
 #ifndef BOOST_PROCESS_WINDOWS_IS_RUNNING_HPP
 #define BOOST_PROCESS_WINDOWS_IS_RUNNING_HPP
 
-#include <boost/process/config.hpp>
+#include <boost/process/detail/config.hpp>
 #include <boost/system/error_code.hpp>
 #include <cstdlib>
 #include <boost/detail/winapi/process.hpp>

@@ -7,7 +7,7 @@
 #ifndef BOOST_PROCESS_DETAIL_TRAITS_HPP_
 #define BOOST_PROCESS_DETAIL_TRAITS_HPP_
 
-#include <boost/process/config.hpp>
+#include <boost/process/detail/config.hpp>
 #include <boost/none.hpp>
 #include <type_traits>
 

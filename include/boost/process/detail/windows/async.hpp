@@ -8,16 +8,16 @@
 
 #include <boost/process/detail/handler_base.hpp>
 #include <boost/process/detail/traits.hpp>
-#include <boost/process/windows/async_handler.hpp>
+#include <boost/process/detail/windows/async_handler.hpp>
 #include <boost/type_index.hpp>
 #include <boost/asio.hpp>
 
 #if defined(BOOST_POSIX_API)
-#include <boost/process/posix/close_in.hpp>
-#include <boost/process/posix/close_out.hpp>
+#include <boost/process/detail/posix/on_exit.hpp>
+#include <boost/process/detail/posix/io_service_ref.hpp>
 #elif defined(BOOST_WINDOWS_API)
-#include <boost/process/windows/on_exit.hpp>
-#include <boost/process/windows/io_service_ref.hpp>
+#include <boost/process/detail/windows/on_exit.hpp>
+#include <boost/process/detail/windows/io_service_ref.hpp>
 #endif
 
 
@@ -27,6 +27,6 @@ namespace boost { namespace process { namespace detail {
 
 
 
-}}
+}}}
 
 #endif /* INCLUDE_BOOST_ASYNC_HPP_ */

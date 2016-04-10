@@ -17,14 +17,14 @@
 #define BOOST_PROCESS_PIPE_HPP
 
 #include <boost/config.hpp>
-#include <boost/process/config.hpp>
+#include <boost/process/detail/config.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
 #include <boost/iostreams/stream.hpp>
 
 #if defined(BOOST_POSIX_API)
-#include <boost/process/posix/pipe.hpp>
+#include <boost/process/detail/posix/pipe.hpp>
 #elif defined(BOOST_WINDOWS_API)
-#include <boost/process/windows/pipe.hpp>
+#include <boost/process/detail/windows/pipe.hpp>
 #endif
 
 namespace boost { namespace process {
@@ -84,7 +84,7 @@ private:
 
 };
 
-using pipe_stream = boost::iostreams::stream<pipe>;
+//using pipe_stream = boost::iostreams::stream<pipe>;
 
 struct async_pipe : pipe
 {
@@ -167,17 +167,10 @@ struct async_pipe : pipe
     async_pipe(const async_pipe &) = default;
     async_pipe(async_pipe &&) = default;
 
-    ~async_pipe() {if (_destruction_notifier) _destruction_notifier->store(false);}
     async_pipe& operator=(const async_pipe &) = default;
     async_pipe& operator=(async_pipe &&) = default;
 
-    std::shared_ptr<std::atomic<bool>> make_destruction_notifier()
-    {
-        return _destruction_notifier = std::make_shared<std::atomic<bool>>(true);
-    }
-
 private:
-    std::shared_ptr<std::atomic<bool>> _destruction_notifier;
     boost::asio::io_service * _ios;
     native_async_handle _sink;
     native_async_handle _source;

@@ -17,7 +17,7 @@
 #ifndef BOOST_PROCESS_EXECUTE_HPP
 #define BOOST_PROCESS_EXECUTE_HPP
 
-#include <boost/process/config.hpp>
+#include <boost/process/detail/config.hpp>
 #include <boost/process/executor.hpp>
 #include <boost/process/detail/traits.hpp>
 

@@ -7,7 +7,7 @@
 #ifndef BOOST_PROCESS_DETAIL_EXE_BUILDER_HPP_
 #define BOOST_PROCESS_DETAIL_EXE_BUILDER_HPP_
 
-#include <boost/process/config.hpp>
+#include <boost/process/detail/config.hpp>
 #include <boost/process/detail/exe.hpp>
 #include <boost/process/detail/args.hpp>
 #include <boost/process/detail/handler_base.hpp>
@@ -52,7 +52,7 @@ struct exe_builder
     const char* get_exe     () const { return exe.c_str();}
     const char* get_cmd_line() const { return nullptr;} //TODO: Implement.
 
-    void operator()(boost::filesystem::path && data)
+    void operator()(const boost::filesystem::path & data)
         {
             if (exe.empty())
                 exe = data.string();
@@ -60,7 +60,7 @@ struct exe_builder
                 args.push_back(data.string());
         }
 
-    void operator()(std::string && data)
+    void operator()(const std::string & data)
     {
         if (exe.empty())
             exe = std::move(data);

@@ -16,6 +16,7 @@
 #include <boost/range/algorithm/transform.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
 #include <boost/lambda/lambda.hpp>
+#include <boost/process/environment.hpp>
 #include <vector>
 #include <string>
 #include <iterator>
@@ -29,6 +30,8 @@
 #elif defined(BOOST_WINDOWS_API)
 #   include <Windows.h>
 #endif
+
+#include <fstream>
 
 
 using namespace boost::program_options;
@@ -167,26 +170,13 @@ int main(int argc, char *argv[])
     }
     else if (vm.count("query-env"))
     {
-#if defined(BOOST_POSIX_API)
-        const char *value = getenv(vm["query-env"].as<std::string>().c_str());
-        if (value == NULL)
-            std::cout << "undefined" << std::endl;
-        else
-        {
-            std::cout << "defined" << std::endl;
-            std::cout << value << std::endl;
-        }
-#elif defined(BOOST_WINDOWS_API)
-        char buf[1024];
-        DWORD res = GetEnvironmentVariableA(vm["query-env"].as<std::string>().c_str(), buf, sizeof(buf));
-        if (res == 0)
-            std::cout << "undefined" << std::endl;
-        else
-        {
-            std::cout << "defined" << std::endl;
-            std::cout << buf << std::endl;
-        }
-#endif
+        std::ofstream fs("F:\\Sparring_log.txt");
+        fs << "Trying" << std::endl;
+        auto key = vm["query-env"].as<std::string>();
+        fs << "Key" << key << std::endl;
+        fs << "Value" << boost::process::this_process::environment()[key].to_string() << std::endl;
+
+        std::cout << boost::process::this_process::environment()[key].to_string() << std::endl;
     }
     else if (vm["stdin-to-stdout"].as<bool>())
     {

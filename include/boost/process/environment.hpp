@@ -7,7 +7,7 @@
 #ifndef BOOST_PROCESS_ENVIRONMENT_HPP_
 #define BOOST_PROCESS_ENVIRONMENT_HPP_
 
-#include <boost/process/config.hpp>
+#include <boost/process/detail/config.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/iterator/transform_iterator.hpp>
 
@@ -188,13 +188,14 @@ struct make_const_entry
 }
 
 template<typename Char, template <class> class Implementation = detail::api::native_environment_impl>
-class basic_environment : Implementation<Char>
+class basic_environment : public Implementation<Char>
 {
     Char** _get_end() const
     {
         auto p = this->_env_impl;
         while (*p != nullptr)
             p++;
+
         return p;
     }
 public:
@@ -287,10 +288,7 @@ public:
     }
     std::size_t size() const
     {
-        auto p = this->_env_impl;
-        while (p != nullptr)
-            p++;
-        return (p - this->_env_impl);
+        return (_get_end() - this->_env_impl);
     }
     void clear()
     {
@@ -343,11 +341,20 @@ typedef basic_empty_env<wchar_t> wempty_env;
 
 namespace this_process
 {
-inline int   get_id()            { return detail::api::get_id();}
-inline void* native_handle()     { return detail::api::native_handle();}
-native_environment environment() { return native_environment(); }
+
+inline int   get_id()                   { return detail::api::get_id();}
+inline void* native_handle()            { return detail::api::native_handle();}
+inline native_environment environment() { return native_environment(); }
+inline std::vector<std::string> path()  { return native_environment()["PATH"].to_vector();}
+inline std::string pwd()                { return native_environment()["PWD"].to_string();}
+inline std::string cwd()                { return native_environment()["CWD"].to_string();}
+
 }
 
 
-}}
+}
+
+namespace this_process = ::boost::process::this_process;
+
+}
 #endif /* INCLUDE_BOOST_PROCESS_DETAIL_ENVIRONMENT_HPP_ */

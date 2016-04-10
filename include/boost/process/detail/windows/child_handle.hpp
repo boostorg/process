@@ -32,7 +32,7 @@ struct child_handle
     {
         ::boost::detail::winapi::CloseHandle(proc_info.hProcess);
         ::boost::detail::winapi::CloseHandle(proc_info.hThread);
-        if (job != nullptr)
+        if (job_object != nullptr)
             ::boost::detail::winapi::CloseHandle(job_object);
     }
     child_handle(const child_handle & c) = delete;

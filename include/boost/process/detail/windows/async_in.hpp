@@ -13,7 +13,10 @@
 #include <boost/detail/winapi/process.hpp>
 #include <boost/detail/winapi/handles.hpp>
 #include <boost/process/detail/handler_base.hpp>
+#include <boost/process/detail/windows/async_handler.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
+
+#include <boost/asio/write.hpp>
 
 #if defined (BOOST_PROCESS_USE_FUTURE)
 #include <future>
@@ -35,14 +38,14 @@ struct async_in_buffer : ::boost::process::detail::windows::async_handler
 
 #if defined (BOOST_PROCESS_USE_FUTURE)
     std::shared_ptr<std::promise<void>> promise;
-    async_in_val operator<(std::future<void> & fut)
+    async_in_buffer operator<(std::future<void> & fut)
     {
         promise = std::make_shared<std::promise<void>>();
         fut = promise->get_future(); return std::move(*this);
     }
 #endif
 
-    std::shared_ptr<boost::process::pipe> pipe = std::make_shared<boost::process::pipe>(boost::process::pipe::create_async());
+    std::shared_ptr<boost::process::pipe> pipe = std::make_shared<boost::process::pipe>(pipe::create_async());
     //because the pipe will be moved later on, but i might need the source at another point.
     boost::iostreams::file_descriptor_source source = pipe->source();
 

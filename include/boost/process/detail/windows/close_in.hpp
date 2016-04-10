@@ -18,7 +18,6 @@ namespace boost { namespace process { namespace detail { namespace windows {
 
 struct close_in : public ::boost::process::detail::handler_base
 {
-public:
     template <class WindowsExecutor>
     void on_setup(WindowsExecutor &e) const
     {
