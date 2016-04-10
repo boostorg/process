@@ -46,32 +46,13 @@ struct pipe
 
     pipe() : pipe(boost::process::detail::api::pipe::create()) {}
 
+    pipe(const std::string & name) : pipe(native_pipe::create_named(name)) {}
+
     pipe(      pipe&&) = default;
     pipe(const pipe& ) = delete;
 
     pipe& operator=(      pipe&&) = default;
     pipe& operator=(const pipe& ) = delete;
-
-    static pipe create()                    { return pipe(native_pipe::create());  }
-    static pipe create(std::error_code &ec) { return pipe(native_pipe::create(ec));}
-
-    static pipe create(const std::string & name)                      { return create_named(name);  }
-    static pipe create(const std::string & name, std::error_code &ec) { return create_named(name, ec);}
-
-
-    inline static std::string make_pipe_name() {return native_pipe::make_pipe_name(); }
-
-    inline static pipe create_named(const std::string & name = make_pipe_name())    {return native_pipe::create_named(name);}
-    inline static pipe create_named(const std::string & name, std::error_code & ec) {return native_pipe::create_named(name,ec);}
-
-
-    inline static pipe create_named(std::error_code & ec) {return create_named(make_pipe_name(), ec);}
-
-    inline static pipe create_async()                     {return native_pipe::create_async(); }
-    inline static pipe create_async(std::error_code & ec) {return native_pipe::create_async(ec); }
-
-
-
 
     std::streamsize read(char_type* s, std::streamsize n)
     {
@@ -127,7 +108,13 @@ struct async_pipe : pipe
     {
         return  _sink.is_open() || _source.is_open();
     }
-
+    void async_close()
+    {
+        if (_sink.is_open())
+            _sink.get_io_service().  post([this]{_sink.close();});
+        if (_source.is_open())
+            _source.get_io_service().post([this]{_source.close();});
+    }
 
 
     template<typename MutableBufferSequence>
@@ -165,17 +152,32 @@ struct async_pipe : pipe
     }
 
     boost::asio::io_service& get_io_service() {return *_ios;}
-    async_pipe(boost::asio::io_service & ios) : _ios(&ios),
+    async_pipe(boost::asio::io_service & ios) :
+            pipe(native_pipe::create_async()),
+            _ios(&ios),
             _sink  (ios, pipe::sink().  handle()),
             _source(ios, pipe::source().handle())
     {}
+    async_pipe(boost::asio::io_service & ios, const std::string & name) :
+               pipe(name),
+               _ios(&ios),
+               _sink  (ios, pipe::sink().  handle()),
+               _source(ios, pipe::source().handle())
+       {}
     async_pipe(const async_pipe &) = default;
     async_pipe(async_pipe &&) = default;
 
+    ~async_pipe() {if (_destruction_notifier) _destruction_notifier->store(false);}
     async_pipe& operator=(const async_pipe &) = default;
     async_pipe& operator=(async_pipe &&) = default;
 
+    std::shared_ptr<std::atomic<bool>> make_destruction_notifier()
+    {
+        return _destruction_notifier = std::make_shared<std::atomic<bool>>(true);
+    }
+
 private:
+    std::shared_ptr<std::atomic<bool>> _destruction_notifier;
     boost::asio::io_service * _ios;
     native_async_handle _sink;
     native_async_handle _source;

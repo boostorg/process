@@ -13,6 +13,9 @@
 
 namespace boost { namespace process { namespace detail {
 
+struct env_tag {};
+
+
 template<typename T>
 struct env_set
 {
@@ -147,19 +150,16 @@ auto build_env(boost::hana::tuple<> && e)
 }
 
 template<class String>
-inline constexpr std:: true_type is_env_setter(const env_set<String>&) {return {};}
+inline constexpr env_tag initializer_tag(const env_set<String>&) {return {};}
 template<class String>
-inline constexpr std:: true_type is_env_setter(const env_append<String>&) {return {};}
-inline constexpr std:: true_type is_env_setter(const env_reset&) {return {};}
+inline constexpr env_tag initializer_tag(const env_append<String>&) {return {};}
+inline constexpr env_tag initializer_tag(const env_reset&) {return {};}
 
-inline constexpr std:: true_type is_env_setter(const  environment&) {return {};}
-inline constexpr std:: true_type is_env_setter(const wenvironment&) {return {};}
+inline constexpr env_tag initializer_tag(const  environment&) {return {};}
+inline constexpr env_tag initializer_tag(const wenvironment&) {return {};}
 
-inline constexpr std:: true_type is_env_setter(const  empty_env&) {return {};}
-inline constexpr std:: true_type is_env_setter(const wempty_env&) {return {};}
-
-template<typename T>
-inline constexpr std::false_type is_env_setter(const T &) {return {};}
+inline constexpr env_tag initializer_tag(const  empty_env&) {return {};}
+inline constexpr env_tag initializer_tag(const wempty_env&) {return {};}
 
 template<typename T>
 struct is_env_t : decltype(is_env_setter(T())) {};

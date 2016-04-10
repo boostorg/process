@@ -65,8 +65,6 @@ void apply_out_handles(Executor &e, void* handle, std::integral_constant<int, 1>
     e.inherit_handles = true;
 }
 
-
-
 template<int p1, int p2, typename Buffer>
 struct async_out_buffer : ::boost::process::detail::windows::async_handler
 {
@@ -115,6 +113,8 @@ struct async_out_buffer : ::boost::process::detail::windows::async_handler
         apply_out_handles(exec, sink.handle(), std::integral_constant<int, p1>(), std::integral_constant<int, p2>());
     }
 };
+
+
 
 #if defined (BOOST_PROCESS_USE_FUTURE)
 

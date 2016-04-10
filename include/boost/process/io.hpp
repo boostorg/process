@@ -125,7 +125,6 @@ struct std_out_
     api::async_out_buffer<p1, p2, asio::mutable_buffer> operator>(asio::mutable_buffer & buf) const {return buf;}
     api::async_out_buffer<p1, p2, asio::streambuf>      operator>(asio::streambuf & os)       const {return os ;}
 
-
 #if defined (BOOST_PROCESS_USE_FUTURE)
     api::async_out_future<p1,p2, std::string>       operator=(std::future<std::string> & fut) const;
     api::async_out_future<p1,p2, std::string>       operator>(std::future<std::string> & fut) const;
