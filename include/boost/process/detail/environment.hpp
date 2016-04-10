@@ -9,7 +9,7 @@
 #include <boost/process/detail/environment.hpp>
 #include <boost/blank.hpp>
 
-namespace boost { namespace process { namespace initializers {
+namespace boost { namespace process { namespace detail {
 
 inline std::string join_var_values(const std::vector<std::string> & vec)
 {
@@ -101,7 +101,7 @@ constexpr static env_ env;
 
 }
 
-using boost::process::initializers::env;
+using boost::process::detail::env;
 
 }}
 

@@ -10,7 +10,7 @@
 #include <vector>
 #include <unordered_map>
 #include <boost/detail/winapi/environment.hpp>
-#include <boost/process/config.hpp>
+#include <boost/process/detail/config.hpp>
 #include <boost/detail/winapi/get_current_process.hpp>
 #include <boost/detail/winapi/get_current_process_id.hpp>
 

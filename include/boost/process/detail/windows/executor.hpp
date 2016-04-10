@@ -144,12 +144,13 @@ struct executor : startup_info_impl<char>
             boost::hana::for_each(seq, [this]( auto &elem){elem->on_success(*this);});
 
         return
-                child(child_handle(std::move(proc_info)));
+                child(child_handle(std::move(proc_info), job_object));
     }
 
     ::boost::detail::winapi::LPSECURITY_ATTRIBUTES_ proc_attrs   = nullptr;
     ::boost::detail::winapi::LPSECURITY_ATTRIBUTES_ thread_attrs = nullptr;
     ::boost::detail::winapi::BOOL_ inherit_handles = false;
+    ::boost::detail::winapi::HANDLE_ job_object = nullptr;
     const char * work_dir = nullptr;
     const char * cmd_line = nullptr;
     const char * exe      = nullptr;
