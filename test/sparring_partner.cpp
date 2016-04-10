@@ -31,8 +31,6 @@
 #   include <Windows.h>
 #endif
 
-#include <fstream>
-
 
 using namespace boost::program_options;
 
@@ -170,11 +168,7 @@ int main(int argc, char *argv[])
     }
     else if (vm.count("query-env"))
     {
-        std::ofstream fs("F:\\Sparring_log.txt");
-        fs << "Trying" << std::endl;
         auto key = vm["query-env"].as<std::string>();
-        fs << "Key" << key << std::endl;
-        fs << "Value" << boost::process::this_process::environment()[key].to_string() << std::endl;
 
         std::cout << boost::process::this_process::environment()[key].to_string() << std::endl;
     }
