@@ -72,9 +72,6 @@ struct cmd_
     }
 };
 
-template<typename T>
-std::true_type is_initializer(const cmd_setter_<T> &){return {};}
-
 template<std::size_t Size>
 inline cmd_setter_<const char *> make_initializer(cmd_or_exe_tag&, boost::hana::tuple<char (*)[Size]> & cmd)
 {

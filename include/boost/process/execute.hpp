@@ -18,8 +18,9 @@
 #define BOOST_PROCESS_EXECUTE_HPP
 
 #include <boost/process/detail/config.hpp>
-#include <boost/process/executor.hpp>
+#include <boost/process/detail/executor.hpp>
 #include <boost/process/detail/traits.hpp>
+#include <boost/process/child.hpp>
 
 #include <boost/hana/partition.hpp>
 #include <boost/hana/pair.hpp>
@@ -30,17 +31,17 @@
 #include <boost/hana/tuple.hpp>
 #include <boost/hana/concat.hpp>
 
+#include <tuple>
 #include <type_traits>
 #include <utility>
 
-#include <boost/type_index.hpp>
-
 namespace boost { namespace process {
 
-
-
-template<typename ...Args>
-inline auto execute(Args&& ... args)
+template<typename ...Args,
+         typename = typename std::enable_if<
+             boost::process::detail::valid_argument_list<
+                 typename std::remove_reference<Args>::type...>::value>::type>
+inline child execute(Args&& ... args)
 {
     auto get_ptr = [](auto && val) {return &val;};
     auto get_ref = [](auto * ptr) -> std::remove_pointer_t<decltype(ptr)> & { return *ptr;};

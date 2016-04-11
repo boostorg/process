@@ -24,8 +24,6 @@
 #include <system_error>
 #include <memory>
 
-#include <boost/type_index.hpp>
-
 namespace boost { namespace process { namespace detail { namespace windows {
 
 template<typename CharType> struct startup_info;

@@ -329,15 +329,6 @@ typedef basic_environment<wchar_t, detail::api::native_environment_impl>  native
 typedef basic_environment<char,    detail::api::basic_environment_impl>   environment;
 typedef basic_environment<wchar_t, detail::api::basic_environment_impl>  wenvironment;
 
-template<typename CharT>
-struct basic_empty_env
-{
-    using native_handle_type = typename detail::api::native_environment_impl<CharT>::native_handle_type;
-    native_handle_type get() {return nullptr;};
-};
-
-typedef basic_empty_env<char>     empty_env;
-typedef basic_empty_env<wchar_t> wempty_env;
 
 namespace this_process
 {

@@ -65,7 +65,6 @@ struct error_
 
 };
 
-struct error_tag {};
 
 template<typename T>
 std::false_type is_error_handler(const T & ) {return {};}
