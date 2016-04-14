@@ -7,7 +7,6 @@
 #ifndef BOOST_PROCESS_WINDOWS_EXE_HPP_
 #define BOOST_PROCESS_WINDOWS_EXE_HPP_
 
-#include <boost/process/detail/exe.hpp>
 #include <boost/algorithm/string/trim.hpp>
 
 namespace boost

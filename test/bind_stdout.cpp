@@ -17,7 +17,7 @@
 #include <boost/asio.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-#include <boost/process/exe_args.hpp>
+#include <boost/process/basic_cmd.hpp>
 #include <boost/process/error.hpp>
 #include <boost/process/io.hpp>
 #include <boost/process/child.hpp>

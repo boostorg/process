@@ -12,7 +12,7 @@
 #include <boost/test/included/unit_test.hpp>
 
 #include <boost/process/error.hpp>
-#include <boost/process/exe_args.hpp>
+#include <boost/process/basic_cmd.hpp>
 #include <boost/process/execute.hpp>
 
 #include <boost/system/error_code.hpp>

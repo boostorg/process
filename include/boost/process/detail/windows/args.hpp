@@ -7,18 +7,11 @@
 #ifndef BOOST_PROCESS_WINDOWS_ARGS_HPP_
 #define BOOST_PROCESS_WINDOWS_ARGS_HPP_
 
-#include <boost/process/detail/args.hpp>
 #include <boost/algorithm/string/trim.hpp>
 
 #include <vector>
 #include <string>
 
-#if defined( BOOST_WINDOWS_API )
-#include <boost/process/detail/windows/args.hpp>
-#elif defined( BOOST_POSIX_API )
-#include <boost/process/detail/posix/args.hpp>
-
-#endif
 
 namespace boost
 {

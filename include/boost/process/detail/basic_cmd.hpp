@@ -4,15 +4,23 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 
-#ifndef BOOST_PROCESS_DETAIL_EXE_BUILDER_HPP_
-#define BOOST_PROCESS_DETAIL_EXE_BUILDER_HPP_
+#ifndef BOOST_PROCESS_DETAIL_BASIC_CMD_HPP_
+#define BOOST_PROCESS_DETAIL_BASIC_CMD_HPP_
 
 #include <boost/process/detail/config.hpp>
-#include <boost/process/detail/exe.hpp>
-#include <boost/process/detail/args.hpp>
+
 #include <boost/process/detail/handler_base.hpp>
 #include <boost/process/detail/traits/cmd_or_exe.hpp>
 
+#if defined( BOOST_WINDOWS_API )
+#include <boost/process/detail/windows/args.hpp>
+#include <boost/process/detail/windows/exe.hpp>
+#include <boost/process/detail/windows/cmd.hpp>
+#elif defined( BOOST_POSIX_API )
+#include <boost/process/detail/posix/args.hpp>
+#include <boost/process/detail/posix/exe.hpp>
+#include <boost/process/detail/posix/cmd.hpp>
+#endif
 
 #include <iterator>
 
@@ -20,30 +28,68 @@
 
 namespace boost { namespace process { namespace detail {
 
-
-struct exe_args_init : boost::process::detail::handler_base
+struct exe_setter_
 {
-    exe_args_init(const std::string & exe)
-                : exe(exe), args({}) {};
-    exe_args_init(std::string && exe)
-                : exe(std::move(exe)), args({}) {};
+    std::string exe_;
+    exe_setter_(std::string && str)      : exe_(std::move(str)) {}
+    exe_setter_(const std::string & str) : exe_(str) {}
 
-    exe_args_init(std::string && exe, std::vector<std::string> && args)
-            : exe(std::move(exe)), args(api::build_args(std::move(args))) {};
+};
+
+
+template <class String, bool Append = false>
+struct arg_setter_ : ::boost::process::detail::handler_base
+{
+    std::vector<String> _args;
+    template<typename Range>
+    arg_setter_(Range && str) :
+            _args(std::make_move_iterator(std::begin(str)),
+                  std::make_move_iterator(std::end(str))) {}
+
+    auto begin() {return _args.begin();}
+    auto end()   {return _args.end();}
+    auto begin() const {return _args.begin();}
+    auto end()   const {return _args.end();}
+    arg_setter_(std::string && s) : _args({std::move(s)}) {}
+    arg_setter_(const std::string & s) : _args({s}) {}
+    arg_setter_(const char* s) : _args({std::move(s)}) {}
+
+    template<std::size_t Size>
+    arg_setter_(const char (&s) [Size]) : _args({s}) {}
+};
+
+
+struct exe_cmd_init : boost::process::detail::handler_base
+{
+    exe_cmd_init(const std::string & exe, bool cmd_only = false)
+                : exe(exe), args({}), cmd_only(cmd_only) {};
+    exe_cmd_init(std::string && exe, bool cmd_only = false)
+                : exe(std::move(exe)), args({}), cmd_only(cmd_only) {};
+
+    exe_cmd_init(std::string && exe, std::vector<std::string> && args)
+            : exe(std::move(exe)), args(api::build_args(std::move(args))), cmd_only(false) {};
     template <class Executor>
     void on_setup(Executor& exec) const
     {
-        detail::api::apply_exe (exe,  exec);
-        detail::api::apply_args(args, exec);
+        if (cmd_only)
+            detail::api::apply_cmd (exe, exec);
+        else
+        {
+            detail::api::apply_exe (exe,  exec);
+            detail::api::apply_args(args, exec);
+        }
     }
     typedef api::native_args native_args;
 private:
     std::string exe;
     native_args args;
+    bool cmd_only;
 };
 
 struct exe_builder
 {
+    //set by path, because that will not be interpreted as a cmd
+    bool not_cmd = false;
     std::string exe;
     std::vector<std::string> args;
 
@@ -51,12 +97,13 @@ struct exe_builder
     const char* get_cmd_line() const { return nullptr;} //TODO: Implement.
 
     void operator()(const boost::filesystem::path & data)
-        {
-            if (exe.empty())
-                exe = data.string();
-            else
-                args.push_back(data.string());
-        }
+    {
+        not_cmd = true;
+        if (exe.empty())
+            exe = data.string();
+        else
+            args.push_back(data.string());
+    }
 
     void operator()(const std::string & data)
     {
@@ -89,6 +136,7 @@ struct exe_builder
     }
     void operator()(exe_setter_ && data)
     {
+        not_cmd = true;
         exe = std::move(data.exe_);
     }
     template<typename Range>
@@ -116,11 +164,14 @@ struct exe_builder
 //        args.insert(args.end(), data._args.begin(), data._args.end());
 //    }
 
-    exe_args_init get_initializer()
+    exe_cmd_init get_initializer()
     {
-        return exe_args_init(std::move(exe), std::move(args));
+        if (not_cmd || !args.empty())
+            return exe_cmd_init(std::move(exe), std::move(args));
+        else
+            return exe_cmd_init(std::move(exe), true);
     }
-    typedef exe_args_init result_type;
+    typedef exe_cmd_init result_type;
 };
 
 template<>

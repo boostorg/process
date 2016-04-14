@@ -20,6 +20,8 @@
 #include <boost/process/detail/config.hpp>
 #include <boost/process/detail/executor.hpp>
 #include <boost/process/detail/traits.hpp>
+#include <boost/process/detail/basic_cmd.hpp>
+
 #include <boost/process/child.hpp>
 
 #include <boost/fusion/view.hpp>
