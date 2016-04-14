@@ -16,7 +16,7 @@ project : requirements
   <toolset>msvc:<define>_SCL_SECURE_NO_WARNINGS
   <target-os>windows:<define>WIN32_LEAN_AND_MEAN
   <target-os>linux:<linkflags>-lpthread
-  <toolset>gcc:<cxxflags>-std=gnu++1y
+  <toolset>gcc:<cxxflags>-std=gnu++11
 ;
 
 searched-lib shell32 ;

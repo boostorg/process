@@ -98,30 +98,30 @@ template<typename ...Args>
 inline child execute(Args&& ... args)
 {
     //create a tuple from the argument list
-    boost::fusion::tuple<std::remove_reference_t<Args>&...> tup(args...);
+    boost::fusion::tuple<typename std::remove_reference<Args>::type&...> tup(args...);
 
     auto inits = boost::fusion::filter_if<
                 boost::process::detail::is_initializer<
-                    std::remove_reference_t<
+                    typename std::remove_reference<
                         boost::mpl::_
-                        >
+                        >::type
                     >
                 >(tup);
 
     auto others = boost::fusion::filter_if<
                 boost::mpl::not_<
                     boost::process::detail::is_initializer<
-                        std::remove_reference_t<
+                     typename std::remove_reference<
                             boost::mpl::_
-                            >
+                            >::type
                         >
                     >
                 >(tup);
 
    // typename detail::make_builders_from_view<decltype(others)>::type builders;
 
-    using inits_t  = typename boost::fusion::result_of::as_vector<decltype(inits)>::type;
-    using others_t = typename boost::fusion::result_of::as_vector<decltype(others)>::type;
+    typedef typename boost::fusion::result_of::as_vector<decltype(inits)>::type  inits_t;
+    typedef typename boost::fusion::result_of::as_vector<decltype(others)>::type others_t;
 
   //  typedef decltype(others) others_t;
     typedef typename detail::make_builders_from_view<

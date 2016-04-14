@@ -41,15 +41,19 @@ template <class String, bool Append = false>
 struct arg_setter_ : ::boost::process::detail::handler_base
 {
     std::vector<String> _args;
+
+    typedef typename std::vector<String>::iterator       iterator;
+    typedef typename std::vector<String>::const_iterator const_iterator;
+
     template<typename Range>
     arg_setter_(Range && str) :
             _args(std::make_move_iterator(std::begin(str)),
                   std::make_move_iterator(std::end(str))) {}
 
-    auto begin() {return _args.begin();}
-    auto end()   {return _args.end();}
-    auto begin() const {return _args.begin();}
-    auto end()   const {return _args.end();}
+    iterator begin() {return _args.begin();}
+    iterator end()   {return _args.end();}
+    const_iterator begin() const {return _args.begin();}
+    const_iterator end()   const {return _args.end();}
     arg_setter_(std::string && s) : _args({std::move(s)}) {}
     arg_setter_(const std::string & s) : _args({s}) {}
     arg_setter_(const char* s) : _args({std::move(s)}) {}
