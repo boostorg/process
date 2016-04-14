@@ -21,7 +21,6 @@ namespace bp = boost::process;
 int main(int argc, char* argv[])
 {
     std::error_code ec;
-    std::cout << "EC: " << &ec << std::endl;
     BOOST_TEST(!ec);
 
     auto c = bp::execute(argv[1], ec);

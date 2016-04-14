@@ -19,6 +19,9 @@
 #include <boost/fusion/algorithm/query/find_if.hpp>
 #include <boost/fusion/sequence/intrinsic/end.hpp>
 
+#include <boost/type_index.hpp>
+#include <iostream>
+
 namespace boost { namespace process {
 
 namespace detail {
@@ -64,14 +67,6 @@ struct error_
 
 };
 
-/*
-template<typename T>
-struct is_error_handler { typedef  std::false_type type; constexpr static bool value = false;};
-
-template<> struct is_error_handler<set_on_error>    {typedef std::true_type type; constexpr static bool value = true;};
-template<> struct is_error_handler<throw_on_error_> {typedef std::true_type type; constexpr static bool value = true;};
-template<> struct is_error_handler<ignore_error_>   {typedef std::true_type type; constexpr static bool value = true;};
-*/
 
 template<typename T>
 struct is_error_handler : std::false_type {};
@@ -91,27 +86,18 @@ struct has_error_handler
                 >::type itr;
 
     typedef typename boost::fusion::result_of::end<Tuple>::type end;
+    typedef typename boost::fusion::result_of::equal_to<itr, end>::type equal;
     typedef std::integral_constant<bool,
-            !std::is_same<end, itr>::value > type;
+            !equal::value > type;
 
 };
-/*
-
-inline error_tag initializer_tag(const std::error_code&) {return {};}
-
-
-inline set_on_error make_initializer(error_tag, boost::hana::tuple<std::error_code*> & err)
-{
-    std::error_code * value = boost::hana::at(err, boost::hana::size_c<0>);
-    set_on_error setter(*value);
-    return setter;
-}*/
 
 struct error_builder
 {
+    std::error_code *err;
     typedef set_on_error result_type;
-    set_on_error get_initializer() {};
-    void operator()(std::error_code & ec) {};
+    set_on_error get_initializer() {return set_on_error(*err);};
+    void operator()(std::error_code & ec) {err = &ec;};
 };
 
 template<>

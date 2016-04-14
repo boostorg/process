@@ -114,10 +114,35 @@ struct executor : startup_info_impl<char>
     void internal_throw(std:: true_type, std::error_code &ec ) {}
     void internal_throw(std::false_type, std::error_code &ec ) {throw std::system_error(ec);}
 
+    struct on_setup_t
+    {
+        executor & exec;
+        on_setup_t(executor & exec) : exec(exec) {};
+        template<typename T>
+        void operator()(T & t) const {t.on_setup(exec);}
+    };
+
+    struct on_error_t
+    {
+        executor & exec;
+        const std::error_code & error;
+        on_error_t(executor & exec, const std::error_code & error) : exec(exec), error(error) {};
+        template<typename T>
+        void operator()(T & t) const {t.on_error(exec, error);}
+    };
+
+    struct on_success_t
+    {
+        executor & exec;
+        on_success_t(executor & exec) : exec(exec) {};
+        template<typename T>
+        void operator()(T & t) const {t.on_success(exec);}
+    };
 
     child operator()()
     {
-        boost::fusion::for_each(seq, [this]( auto &elem) {elem.on_setup(*this);});
+        on_setup_t on_setup(*this);
+        boost::fusion::for_each(seq, on_setup);
 
         //NOTE: The non-cast cmd-line string can only be modified by the wchar_t variant which is currently disabled.
         int err_code = ::boost::detail::winapi::create_process(
@@ -135,13 +160,15 @@ struct executor : startup_info_impl<char>
         if (err_code == 0)
         {
             auto last_error = boost::process::detail::get_last_error();
-            boost::fusion::for_each(seq,
-                    [this, err_code, last_error]( auto &elem){elem.on_error(*this, last_error);});
+            on_error_t on_error(*this, last_error);
+            boost::fusion::for_each(seq, on_error);
             internal_throw(has_error_handler(), last_error);
         }
         else
-            boost::fusion::for_each(seq, [this]( auto &elem){elem.on_success(*this);});
-
+        {
+            on_success_t on_success(*this);
+            boost::fusion::for_each(seq, on_success);
+        }
         return
                 child(child_handle(std::move(proc_info), job_object));
     }
