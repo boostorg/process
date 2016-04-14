@@ -14,11 +14,10 @@
 #include <boost/process/detail/config.hpp>
 #include <boost/process/detail/handler_base.hpp>
 #include <system_error>
-#include <boost/hana/tuple.hpp>
-#include <boost/hana/find_if.hpp>
-#include <boost/hana/size.hpp>
 
-#include <boost/type_index.hpp>
+#include <type_traits>
+#include <boost/fusion/algorithm/query/find_if.hpp>
+#include <boost/fusion/sequence/intrinsic/end.hpp>
 
 namespace boost { namespace process {
 
@@ -65,27 +64,38 @@ struct error_
 
 };
 
+/*
+template<typename T>
+struct is_error_handler { typedef  std::false_type type; constexpr static bool value = false;};
+
+template<> struct is_error_handler<set_on_error>    {typedef std::true_type type; constexpr static bool value = true;};
+template<> struct is_error_handler<throw_on_error_> {typedef std::true_type type; constexpr static bool value = true;};
+template<> struct is_error_handler<ignore_error_>   {typedef std::true_type type; constexpr static bool value = true;};
+*/
 
 template<typename T>
-std::false_type is_error_handler(const T & ) {return {};}
+struct is_error_handler : std::false_type {};
 
-inline std::true_type is_error_handler(const set_on_error &)    {return {};}
-inline std::true_type is_error_handler(const throw_on_error_ &) {return {};}
-inline std::true_type is_error_handler(const ignore_error_ &)   {return {};}
-inline std::true_type is_initializer  (const set_on_error &)    {return {};}
-inline std::true_type is_initializer  (const throw_on_error_ &) {return {};}
-inline std::true_type is_initializer  (const ignore_error_ &)   {return {};}
+template<> struct is_error_handler<set_on_error>    : std::true_type {};
+template<> struct is_error_handler<throw_on_error_> : std::true_type {};
+template<> struct is_error_handler<ignore_error_>   : std::true_type {};
 
 
 //note: is a tuple of pointers to initializers
 template<typename Tuple>
-constexpr auto has_error_handler(Tuple &t)
+struct has_error_handler
 {
-    auto err_handlers = boost::hana::find_if(t, [](auto * p){ return is_error_handler(*p);});
+    typedef typename boost::fusion::result_of::find_if<
+            Tuple,
+            is_error_handler<typename std::remove_reference<boost::mpl::_>::type>
+                >::type itr;
 
-    return boost::hana::not_(boost::hana::size(err_handlers) == hana::size_c<0>);
-}
+    typedef typename boost::fusion::result_of::end<Tuple>::type end;
+    typedef std::integral_constant<bool,
+            !std::is_same<end, itr>::value > type;
 
+};
+/*
 
 inline error_tag initializer_tag(const std::error_code&) {return {};}
 
@@ -95,8 +105,27 @@ inline set_on_error make_initializer(error_tag, boost::hana::tuple<std::error_co
     std::error_code * value = boost::hana::at(err, boost::hana::size_c<0>);
     set_on_error setter(*value);
     return setter;
-}
+}*/
 
+struct error_builder
+{
+    typedef set_on_error result_type;
+    set_on_error get_initializer() {};
+    void operator()(std::error_code & ec) {};
+};
+
+template<>
+struct initializer_tag<std::error_code>
+{
+    typedef error_tag type;
+};
+
+
+template<>
+struct initializer_builder<error_tag>
+{
+    typedef error_builder type;
+};
 
 }
 

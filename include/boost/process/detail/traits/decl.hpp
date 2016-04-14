@@ -22,23 +22,14 @@ namespace boost { namespace process { namespace detail {
 
 
 template<typename T>
-using is_initializer = std::is_base_of<handler_base, T>;
+struct is_initializer : std::is_base_of<handler_base, T> {};
 
 template<typename T>
-struct initializer_tag_t;
+struct initializer_tag { typedef void type; };
+
 
 template<typename T>
-using initializer_tag = typename initializer_tag_t<T>::type;
-
-
-template<typename Tag>
-struct make_initializer_t { typedef void type;}; //means I can disable the thingy
-
-template<typename Tag, typename ...Args>
-auto make_initializer(Args&&...args) -> typename make_initializer_t<Tag>::type
-{
-    return make_initializer_t<Tag>::invoke(std::forward<Args>(args));
-}
+struct initializer_builder;
 
 
 template<typename First, typename ...Args>
@@ -47,17 +38,23 @@ struct valid_argument_list;
 template<typename First>
 struct valid_argument_list<First>
 {
-    constexpr bool value = is_initializer<First>::value || !std::is_void<intializer_tag<First>>::value;
+    constexpr static bool value = is_initializer<First>::value || !std::is_void<typename initializer_tag<First>::type>::value;
     typedef std::integral_constant<bool, value> type;
 };
 
 template<typename First, typename ...Args>
 struct valid_argument_list
 {
-    constexpr bool my_value = is_initializer<First>::value || !std::is_void<intializer_tag<First>>::value;
-    constexpr bool value = valid_argument_list<Args...>::value && my_value;
+    constexpr static bool my_value = is_initializer<First>::value || !std::is_void<typename initializer_tag<First>::type>::value;
+    constexpr static bool value = valid_argument_list<Args...>::value && my_value;
     typedef std::integral_constant<bool, value> type;
 };
+
+struct error_tag;
+
+template<>
+struct initializer_tag<std::error_code>;
+
 
 }}}
 

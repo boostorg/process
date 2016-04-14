@@ -150,27 +150,11 @@ struct env_builder
     }
 };
 
-
-template<typename ...Args>
-auto make_initializer(const env_tag & , boost::hana::tuple<Args*...> & env_tup)
+template<>
+struct initializer_builder<cmd_or_exe_tag>
 {
-    env_builder env;
-    hana::for_each(env_tup, [&](auto & value){env(std::move(*value));});
-    return env.get_initializer();
-}
-
-
-template<class String>
-inline constexpr env_tag initializer_tag(const env_set<String>&) {return {};}
-template<class String>
-inline constexpr env_tag initializer_tag(const env_append<String>&) {return {};}
-inline constexpr env_tag initializer_tag(const env_reset&) {return {};}
-
-inline constexpr env_tag initializer_tag(const  environment&) {return {};}
-inline constexpr env_tag initializer_tag(const wenvironment&) {return {};}
-
-inline constexpr env_tag initializer_tag(const  empty_env&) {return {};}
-inline constexpr env_tag initializer_tag(const wempty_env&) {return {};}
+    typedef env_builder type;
+};
 
 
 constexpr static env_ env;

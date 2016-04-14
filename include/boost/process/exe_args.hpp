@@ -11,10 +11,8 @@
 #include <boost/process/detail/exe.hpp>
 #include <boost/process/detail/args.hpp>
 #include <boost/process/detail/handler_base.hpp>
-#include <boost/process/detail/cmd_or_exe.hpp>
+#include <boost/process/detail/traits/cmd_or_exe.hpp>
 
-#include <boost/hana/tuple.hpp>
-#include <boost/hana/for_each.hpp>
 
 #include <iterator>
 
@@ -118,38 +116,19 @@ struct exe_builder
 //        args.insert(args.end(), data._args.begin(), data._args.end());
 //    }
 
-    exe_args_init get()
+    exe_args_init get_initializer()
     {
         return exe_args_init(std::move(exe), std::move(args));
     }
+    typedef exe_args_init result_type;
 };
 
-//everything with at least to parameters will use the exe_builder.
-template<typename T, typename... Rest>
-inline exe_args_init make_initializer(cmd_or_exe_tag&, boost::hana::tuple<T*,  Rest*...> & lst)
+template<>
+struct initializer_builder<cmd_or_exe_tag>
 {
-    exe_builder b;
-    boost::hana::for_each(lst, [&](auto & value){b(std::move(*value));});
+    typedef exe_builder type;
+};
 
-    return b.get();
-}
-
-inline exe_args_init make_initializer(cmd_or_exe_tag&, boost::hana::tuple<const boost::filesystem::path*> & cmd)
-{
-    const auto & value = *boost::hana::at(cmd, boost::hana::size_c<0>);
-    return exe_args_init(value.string());
-}
-
-inline exe_args_init make_initializer(cmd_or_exe_tag&, boost::hana::tuple<boost::filesystem::path*> & cmd)
-{
-    const auto & value = *boost::hana::at(cmd, boost::hana::size_c<0>);
-    return exe_args_init(value.string());
-}
-
-
-constexpr inline cmd_or_exe_tag initializer_tag  (const exe_setter_&) {return {};}
-template<class String, bool Append>
-constexpr inline cmd_or_exe_tag initializer_tag  (const arg_setter_<String, Append>&) {return {};}
 
 
 }}}

@@ -4,8 +4,8 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 
-#ifndef BOOST_PROCESS_DETAIL_TRAITS_DECL_HPP_
-#define BOOST_PROCESS_DETAIL_TRAITS_DECL_HPP_
+#ifndef BOOST_PROCESS_DETAIL_TRAITS_ASYNC_HPP_
+#define BOOST_PROCESS_DETAIL_TRAITS_ASYNC_HPP_
 
 #include <boost/process/detail/config.hpp>
 #include <boost/process/detail/traits/decl.hpp>
@@ -20,9 +20,9 @@ namespace boost { namespace process { namespace detail {
 struct async_tag {};
 
 template<>
-struct make_initializer_t<async_tag>;
+struct initializer_builder<async_tag>;
 
-template<> struct initializer_tag_t<boost::asio::io_service> { typedef async_tag type;};
+template<> struct initializer_tag<boost::asio::io_service> { typedef async_tag type;};
 
 
 

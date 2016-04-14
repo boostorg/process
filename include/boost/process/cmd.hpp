@@ -14,9 +14,8 @@
 #include <boost/detail/winapi/config.hpp>
 #include <boost/process/detail/config.hpp>
 #include <boost/process/detail/handler_base.hpp>
-#include <boost/process/detail/cmd_or_exe.hpp>
+#include <boost/process/detail/traits/cmd_or_exe.hpp>
 #include <boost/process/detail/windows/cmd.hpp>
-#include <boost/hana/tuple.hpp>
 
 namespace boost { namespace process { namespace detail {
 
@@ -71,7 +70,7 @@ struct cmd_
         return cmd_setter_<std::string>(s);
     }
 };
-
+/*
 template<std::size_t Size>
 inline cmd_setter_<const char *> make_initializer(cmd_or_exe_tag&, boost::hana::tuple<char (*)[Size]> & cmd)
 {
@@ -100,7 +99,7 @@ inline cmd_setter_<std::string> make_initializer (cmd_or_exe_tag&, boost::hana::
 {
     auto && value = std::move(*boost::hana::at(cmd, boost::hana::size_c<0>));
     return cmd_setter_<std::string>(value);
-}
+}*/
 
 }}}
 

@@ -13,16 +13,14 @@
 
 #include <boost/process/child.hpp>
 #include <boost/process/detail/traits.hpp>
-#include <cstring>
-#include <boost/hana/for_each.hpp>
-#include <boost/hana/filter.hpp>
-#include <boost/hana/tuple.hpp>
-#include <boost/hana/transform.hpp>
+#include <boost/fusion/algorithm/iteration/for_each.hpp>
 #include <boost/detail/winapi/handles.hpp>
 #include <boost/detail/winapi/process.hpp>
 #include <boost/none.hpp>
 #include <system_error>
 #include <memory>
+#include <cstring>
+
 
 namespace boost { namespace process { namespace detail { namespace windows {
 
@@ -106,6 +104,9 @@ struct startup_info_impl
 template<typename Sequence>
 struct executor : startup_info_impl<char>
 {
+    typedef typename ::boost::process::detail::has_error_handler<Sequence>::type has_error_handler;
+
+
     executor(Sequence & seq) : seq(seq)
     {
     }
@@ -116,7 +117,7 @@ struct executor : startup_info_impl<char>
 
     child operator()()
     {
-        boost::hana::for_each(seq, [this]( auto &elem) {elem->on_setup(*this);});
+        boost::fusion::for_each(seq, [this]( auto &elem) {elem.on_setup(*this);});
 
         //NOTE: The non-cast cmd-line string can only be modified by the wchar_t variant which is currently disabled.
         int err_code = ::boost::detail::winapi::create_process(
@@ -134,12 +135,12 @@ struct executor : startup_info_impl<char>
         if (err_code == 0)
         {
             auto last_error = boost::process::detail::get_last_error();
-            boost::hana::for_each(seq,
-                    [this, err_code, last_error]( auto &elem){elem->on_error(*this, last_error);});
-            internal_throw(has_error_handler(seq), last_error);
+            boost::fusion::for_each(seq,
+                    [this, err_code, last_error]( auto &elem){elem.on_error(*this, last_error);});
+            internal_throw(has_error_handler(), last_error);
         }
         else
-            boost::hana::for_each(seq, [this]( auto &elem){elem->on_success(*this);});
+            boost::fusion::for_each(seq, [this]( auto &elem){elem.on_success(*this);});
 
         return
                 child(child_handle(std::move(proc_info), job_object));

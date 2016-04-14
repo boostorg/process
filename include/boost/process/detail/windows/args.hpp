@@ -10,7 +10,8 @@
 #include <boost/process/detail/args.hpp>
 #include <boost/algorithm/string/trim.hpp>
 
-#include <iostream>
+#include <vector>
+#include <string>
 
 #if defined( BOOST_WINDOWS_API )
 #include <boost/process/detail/windows/args.hpp>

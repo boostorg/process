@@ -24,11 +24,6 @@
 #include <boost/none.hpp>
 #include <atomic>
 
-#include <boost/hana/tuple.hpp>
-#include <boost/hana/type.hpp>
-#include <boost/hana/transform.hpp>
-#include <boost/hana/filter.hpp>
-#include <boost/hana/unpack.hpp>
 
 #if defined(BOOST_POSIX_API)
 #include <boost/process/posix/child_handle.hpp>

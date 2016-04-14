@@ -25,18 +25,18 @@ template<typename Char, template <class> class Implementation = detail::api::nat
 class basic_environment;
 
 
-template<class String> struct initializer_tag_t<env_set<String>>    { typedef env_tag type; };
-template<class String> struct initializer_tag_t<env_append<String>> { typedef env_tag type; };
+template<class String> struct initializer_tag<env_set<String>>    { typedef env_tag type; };
+template<class String> struct initializer_tag<env_append<String>> { typedef env_tag type; };
 
-template<> struct initializer_tag_t<env_reset> { typedef env_tag type;};
-template<> struct initializer_tag_t<env_init> { typedef env_tag type;};
+template<> struct initializer_tag<env_reset> { typedef env_tag type;};
+template<> struct initializer_tag<env_init> { typedef env_tag type;};
 
 template<typename Char, template <class> class Implementation>
-struct initializer_tag_t<basic_environment<Char, Implementation>>   { typedef env_tag type; };
+struct initializer_tag<basic_environment<Char, Implementation>>   { typedef env_tag type; };
 
 
 template<>
-struct make_initializer_t<env_tag>;
+struct initializer_builder<env_tag>;
 
 }
 

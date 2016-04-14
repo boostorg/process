@@ -22,74 +22,121 @@
 #include <boost/process/detail/traits.hpp>
 #include <boost/process/child.hpp>
 
-#include <boost/hana/partition.hpp>
-#include <boost/hana/pair.hpp>
-#include <boost/hana/unique.hpp>
-#include <boost/hana/transform.hpp>
-#include <boost/hana/filter.hpp>
-#include <boost/hana/type.hpp>
-#include <boost/hana/tuple.hpp>
-#include <boost/hana/concat.hpp>
+#include <boost/fusion/view.hpp>
+#include <boost/fusion/container.hpp>
+#include <boost/fusion/sequence.hpp>
+#include <boost/fusion/tuple.hpp>
+#include <boost/fusion/algorithm/transformation/filter_if.hpp>
+#include <boost/fusion/adapted/std_tuple.hpp>
+#include <boost/fusion/container/vector/convert.hpp>
 
-#include <tuple>
+#include <boost/process/execute.hpp>
+
+#include <boost/type_index.hpp>
+
 #include <type_traits>
 #include <utility>
 
 namespace boost { namespace process {
 
-template<typename ...Args,
-         typename = typename std::enable_if<
-             boost::process::detail::valid_argument_list<
-                 typename std::remove_reference<Args>::type...>::value>::type>
+namespace detail {
+
+template<typename Iterator, typename End, typename ...Args>
+struct make_builders_from_view
+{
+    typedef boost::fusion::set<Args...> set;
+    typedef typename boost::fusion::result_of::deref<Iterator>::type ref_type;
+    typedef typename std::remove_reference<ref_type>::type res_type;
+    typedef typename initializer_tag<res_type>::type tag;
+    typedef typename initializer_builder<tag>::type builder_type;
+    typedef typename boost::fusion::result_of::has_key<set, tag> has_key;
+
+    typedef typename boost::fusion::result_of::next<Iterator>::type next_itr;
+    typedef typename make_builders_from_view<next_itr, End>::type next;
+
+    typedef typename
+            std::conditional<has_key::value,
+                typename make_builders_from_view<next_itr, End, Args...>::type,
+                typename make_builders_from_view<next_itr, End, builder_type, Args...>::type
+            >::type type;
+
+};
+
+template<typename Iterator, typename ...Args>
+struct make_builders_from_view<Iterator, Iterator, Args...>
+{
+    typedef boost::fusion::set<Args...> type;
+};
+
+template<typename Builders>
+struct builder_ref
+{
+    Builders &builders;
+    builder_ref(Builders & builders) : builders(builders) {};
+
+    template<typename T>
+    void operator()(T && value) const
+    {
+        typedef typename initializer_tag<typename std::remove_reference<T>::type>::type tag;
+        typedef typename initializer_builder<tag>::type builder_type;
+        boost::fusion::at_key<builder_type>(builders)(std::forward<T>(value));
+    }
+};
+
+template<typename ...Args>
+boost::fusion::tuple<typename Args::result_type...>
+        get_initializers(boost::fusion::set<Args...> & builders)
+{
+    return boost::fusion::tuple<typename Args::result_type...>(boost::fusion::at_key<Args>(builders).get_initializer()...);
+}
+
+}
+
+template<typename ...Args>
 inline child execute(Args&& ... args)
 {
-    auto get_ptr = [](auto && val) {return &val;};
-    auto get_ref = [](auto * ptr) -> std::remove_pointer_t<decltype(ptr)> & { return *ptr;};
-  //create a tuple from the argument list
-    auto tup = boost::hana::make_tuple(get_ptr(args)...);
+    //create a tuple from the argument list
+    boost::fusion::tuple<std::remove_reference_t<Args>&...> tup(args...);
 
-    auto par = boost::hana::partition(tup, [](const auto & x){return detail::is_initializer(*x);});
+    auto inits = boost::fusion::filter_if<
+                boost::process::detail::is_initializer<
+                    std::remove_reference_t<
+                        boost::mpl::_
+                        >
+                    >
+                >(tup);
 
-    auto inits = boost::hana::first(par);
+    auto others = boost::fusion::filter_if<
+                boost::mpl::not_<
+                    boost::process::detail::is_initializer<
+                        std::remove_reference_t<
+                            boost::mpl::_
+                            >
+                        >
+                    >
+                >(tup);
 
-    auto others = boost::hana::second(par);
+   // typename detail::make_builders_from_view<decltype(others)>::type builders;
 
-    //get the tags of the elements of initializers.
-    auto tags =
-        boost::hana::unique(
-            boost::hana::transform(others,
-                    [](auto * x)
-                    {
-                        static_assert(!std::is_void<decltype(detail::initializer_tag(*x))>::value,
-                                        "Unrecognized initializer type");
-                        return detail::initializer_tag(*x);
-                    }
-                ),
-                [](auto a, auto b)
-                {
-                    return boost::hana::decltype_(a) == boost::hana::decltype_(b);
-                });
+    using inits_t  = typename boost::fusion::result_of::as_vector<decltype(inits)>::type;
+    using others_t = typename boost::fusion::result_of::as_vector<decltype(others)>::type;
 
-    //combine the other argument to get initializers.
-    auto other_inits = boost::hana::transform(tags,
-            [&others, &get_ref](auto tag)
-            {
-                 //get the initializers fitting the tag
-                auto tup = boost::hana::filter(others,
-                        [&](auto * value)
-                        {
-                            return boost::hana::decltype_(detail::initializer_tag(*value))
-                                == boost::hana::decltype_(tag);
-                        });
-                return detail::make_initializer(tag, tup);
-            });
+  //  typedef decltype(others) others_t;
+    typedef typename detail::make_builders_from_view<
+            typename boost::fusion::result_of::begin<others_t>::type,
+            typename boost::fusion::result_of::end  <others_t>::type>::type builder_t;
 
-    //exec only takes a reference to initializers.
-    auto other_ptr = boost::hana::transform(other_inits, get_ptr);
+    builder_t builders;
+    detail::builder_ref<builder_t> builder_ref(builders);
 
-    auto init_ptr = boost::hana::concat(inits, std::move(other_ptr));
+    boost::fusion::for_each(others, builder_ref);
 
-    auto exec = boost::process::detail::api::make_executor(init_ptr);
+    auto other_inits = detail::get_initializers(builders);
+
+
+    boost::fusion::joint_view<decltype(other_inits), decltype(inits)> complete_inits(other_inits, inits);
+
+    auto exec = boost::process::detail::api::make_executor(complete_inits);
     return exec();
 }
 
