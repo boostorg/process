@@ -12,6 +12,7 @@
 #define BOOST_PROCESS_DETAIL_ERROR_HPP
 
 #include <boost/process/detail/config.hpp>
+#include <boost/process/detail/traits.hpp>
 #include <boost/process/detail/handler_base.hpp>
 #include <system_error>
 

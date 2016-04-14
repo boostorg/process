@@ -23,7 +23,7 @@
 #endif
 
 #include <iterator>
-
+#include <iostream>
 
 
 namespace boost { namespace process { namespace detail {
@@ -34,11 +34,12 @@ struct exe_setter_
     exe_setter_(std::string && str)      : exe_(std::move(str)) {}
     exe_setter_(const std::string & str) : exe_(str) {}
 
+
 };
 
 
-template <class String, bool Append = false>
-struct arg_setter_ : ::boost::process::detail::handler_base
+template <class String, bool Append >
+struct arg_setter_
 {
     std::vector<String> _args;
 
@@ -75,7 +76,7 @@ struct exe_cmd_init : boost::process::detail::handler_base
     template <class Executor>
     void on_setup(Executor& exec) const
     {
-        if (cmd_only)
+        if (cmd_only && args.empty())
             detail::api::apply_cmd (exe, exec);
         else
         {
@@ -143,6 +144,11 @@ struct exe_builder
         not_cmd = true;
         exe = std::move(data.exe_);
     }
+    void operator()(const exe_setter_ & data)
+    {
+        not_cmd = true;
+        exe = std::move(data.exe_);
+    }
     template<typename Range>
     void operator()(arg_setter_<Range, false> && data)
     {
@@ -157,16 +163,16 @@ struct exe_builder
                 std::make_move_iterator(data._args.begin()),
                 std::make_move_iterator(data._args.end()));
     }
-//    template<typename Range>
-//    void operator()(const arg_setter_<Range, false> & data)
-//    {
-//        args.assign(data._args.begin(), data._args.end());
-//    }
-//    template<typename Range>
-//    void operator()(const arg_setter_<Range, true> & data)
-//    {
-//        args.insert(args.end(), data._args.begin(), data._args.end());
-//    }
+    template<typename Range>
+    void operator()(const arg_setter_<Range, false> & data)
+    {
+        args.assign(data._args.begin(), data._args.end());
+    }
+    template<typename Range>
+    void operator()(const arg_setter_<Range, true> & data)
+    {
+        args.insert(args.end(), data._args.begin(), data._args.end());
+    }
 
     exe_cmd_init get_initializer()
     {

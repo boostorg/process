@@ -70,6 +70,15 @@ template<> struct initializer_tag<std::initializer_list<wchar_t *>> { typedef cm
 template<> struct initializer_tag<std::initializer_list<char16_t*>> { typedef cmd_or_exe_tag type;};
 template<> struct initializer_tag<std::initializer_list<char32_t*>> { typedef cmd_or_exe_tag type;};
 
+
+struct exe_setter_;
+template <class String, bool Append = false>
+struct arg_setter_;
+
+template <class String, bool Append>
+struct initializer_tag<arg_setter_<String, Append>> { typedef cmd_or_exe_tag type;};
+template<> struct initializer_tag<exe_setter_> { typedef cmd_or_exe_tag type;};
+
 template<>
 struct initializer_builder<cmd_or_exe_tag>;
 

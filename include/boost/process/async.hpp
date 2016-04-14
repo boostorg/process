@@ -6,8 +6,10 @@
 #ifndef BOOST_PROCESS_DETAIL_ASYNC_HPP_
 #define BOOST_PROCESS_DETAIL_ASYNC_HPP_
 
+#include <boost/process/detail/traits.hpp>
 #include <boost/asio/io_service.hpp>
 #include <type_traits>
+#include <boost/fusion/iterator/deref.hpp>
 
 #if defined(BOOST_POSIX_API)
 #include <boost/process/detail/posix/on_exit.hpp>
@@ -32,21 +34,33 @@ constexpr static on_exit_ on_exit;
 
 
 template<typename T>
-constexpr inline std::false_type is_io_service(const T & t) {return {};}
-constexpr inline std:: true_type is_io_service(const api::io_service_ref & t) {return {};}
+struct is_io_service : std::false_type {};
+template<>
+struct is_io_service<api::io_service_ref> : std::true_type {};
 
 template<typename Tuple>
-constexpr inline asio::io_service& get_io_service(const Tuple & tup)
+inline asio::io_service& get_io_service(const Tuple & tup)
 {
-    auto p = *boost::hana::find_if(tup, [](auto * p){return is_io_service(*p);});
-    return p->get();
+    boost::process::detail::windows::io_service_ref& ref = *boost::fusion::find_if<is_io_service<boost::mpl::_>>(tup);
+    return ref.get();
 }
 
-inline api::io_service_ref make_initializer(async_tag&, boost::hana::tuple<boost::asio::io_service*> & lst)
+struct async_builder
 {
-    return *boost::hana::at_c<0>(lst);
-}
+    boost::asio::io_service * ios;
 
+    void operator()(boost::asio::io_service & ios) {this->ios = &ios;};
+
+    typedef api::io_service_ref result_type;
+    api::io_service_ref get_initializer() {return api::io_service_ref (*ios);};
+};
+
+
+template<>
+struct initializer_builder<async_tag>
+{
+    typedef async_builder type;
+};
 
 }
 

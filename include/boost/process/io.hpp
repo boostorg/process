@@ -133,10 +133,10 @@ struct std_out_
     api::async_out_future<p1,p2, std::vector<char>> operator>(std::future<std::vector<char>> & fut) const;
 #endif
 
-    template<int pin, typename = std::enable_if_t<
+    template<int pin, typename = typename std::enable_if<
             (((p1 == 1) && (pin == 2)) ||
              ((p1 == 2) && (pin == 1)))
-             && (p2 == -1)>>
+             && (p2 == -1)>::type>
     constexpr std_out_<1, 2> operator& (const std_out_<pin> &lhs) const
     {
         return std_out_<1, 2> ();

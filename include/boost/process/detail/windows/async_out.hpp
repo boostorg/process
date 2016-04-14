@@ -90,20 +90,21 @@ struct async_out_buffer : ::boost::process::detail::windows::async_handler
     }
 
     template<typename Executor>
-    auto on_exit_handler(Executor & exec)
+    std::function<void(const std::error_code&)> on_exit_handler(Executor & exec)
     {
-        auto  stream_handle = this->stream_handle;
-        auto &pipe = this->pipe;
+
+        auto stream_handle = this->stream_handle;
+        auto pipe = this->pipe;
         return [stream_handle, pipe](const std::error_code & ec)
                 {
                     boost::asio::io_service & ios = stream_handle->get_io_service();
                     ios.post([stream_handle]
-                            {
-                                boost::system::error_code ec;
-                                stream_handle->close(ec);
-                            });
-
+                              {
+                                    boost::system::error_code ec;
+                                    stream_handle->close(ec);
+                              });
                 };
+
 
     };
     template <typename WindowsExecutor>
@@ -121,12 +122,12 @@ struct async_out_buffer : ::boost::process::detail::windows::async_handler
 template<int p1, int p2, typename Type>
 struct async_out_future : ::boost::process::detail::windows::async_handler
 {
-    std::shared_ptr<std::promise<Type>> promise = std::shared_ptr<std::promise<Type>>;
+    std::shared_ptr<std::promise<Type>> promise = std::make_shared<std::promise<Type>>();
 
     std::shared_ptr<boost::asio::windows::stream_handle> stream_handle;
     std::shared_ptr<boost::asio::streambuf> buffer = std::make_shared<boost::asio::streambuf>();
 
-    std::shared_ptr<boost::process::pipe> pipe = std::make_shared<boost::process::pipe>(boost::process::pipe::create_async());
+    std::shared_ptr<boost::process::pipe> pipe = std::make_shared<boost::process::pipe>(boost::process::detail::api::pipe::create_async());
     //because the pipe will be moved later on, but i might need the source at another point.
     boost::iostreams::file_descriptor_sink sink = pipe->sink();
 
@@ -163,23 +164,24 @@ struct async_out_future : ::boost::process::detail::windows::async_handler
     }
 
     template<typename Executor>
-    auto on_exit_handler(Executor & exec)
+    std::function<void(const std::error_code&)> on_exit_handler(Executor & exec)
     {
-        auto  stream_handle = this->stream_handle;
-        auto &pipe = this->pipe;
 
+        auto stream_handle = this->stream_handle;
+        auto pipe = this->pipe;
         return [stream_handle, pipe](const std::error_code & ec)
                 {
                     boost::asio::io_service & ios = stream_handle->get_io_service();
                     ios.post([stream_handle]
-                            {
-                                boost::system::error_code ec;
-                                stream_handle->close(ec);
-                            });
-
+                              {
+                                    boost::system::error_code ec;
+                                    stream_handle->close(ec);
+                              });
                 };
 
+
     };
+
     template <typename WindowsExecutor>
     void on_setup(WindowsExecutor &exec)
     {

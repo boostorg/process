@@ -18,7 +18,12 @@ struct async_handler : boost::process::detail::handler_base
 };
 
 template<typename T>
-constexpr auto is_async_handler(const T& t) -> std::is_base_of<async_handler, T> {return {};}
+struct is_async_handler :  std::is_base_of<async_handler, T> {};
+template<typename T>
+struct is_async_handler<T&> :  std::is_base_of<async_handler, T> {};
+template<typename T>
+struct is_async_handler<const T&> :  std::is_base_of<async_handler, T> {};
+
 
 
 }}}}

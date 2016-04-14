@@ -15,14 +15,15 @@
 #include <boost/process/detail/handler_base.hpp>
 #include <boost/process/detail/windows/async_handler.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
-
+#include <boost/asio/windows/stream_handle.hpp>
 #include <boost/asio/write.hpp>
+#include <memory>
+
 
 #if defined (BOOST_PROCESS_USE_FUTURE)
 #include <future>
 #endif
 
-#include <iostream>
 
 using namespace std;
 
@@ -79,19 +80,19 @@ struct async_in_buffer : ::boost::process::detail::windows::async_handler
     }
 
     template<typename Executor>
-    auto on_exit_handler(Executor & exec)
+    std::function<void(const std::error_code&)> on_exit_handler(Executor & exec)
     {
         auto stream_handle = this->stream_handle;
         auto pipe = this->pipe;
-        return [stream_handle, pipe](const std::error_code & ec)
-                {
-                    boost::asio::io_service & ios = stream_handle->get_io_service();
-                    ios.post([stream_handle]
-                              {
-                                    boost::system::error_code ec;
-                                    stream_handle->close(ec);
-                              });
-                };
+        return [stream_handle, pipe](const std::error_code& ec)
+               {
+                  boost::asio::io_service & ios = stream_handle->get_io_service();
+                  ios.post([stream_handle]
+                      {
+                            boost::system::error_code ec;
+                            stream_handle->close(ec);
+                      });
+               };
 
     };
     template <typename WindowsExecutor>

@@ -18,8 +18,8 @@
 #define BOOST_PROCESS_EXECUTE_HPP
 
 #include <boost/process/detail/config.hpp>
-#include <boost/process/detail/executor.hpp>
 #include <boost/process/detail/traits.hpp>
+#include <boost/process/detail/executor.hpp>
 #include <boost/process/detail/basic_cmd.hpp>
 
 #include <boost/process/child.hpp>
@@ -33,8 +33,6 @@
 #include <boost/fusion/container/vector/convert.hpp>
 
 #include <boost/process/execute.hpp>
-
-#include <boost/type_index.hpp>
 
 #include <type_traits>
 #include <utility>
@@ -51,7 +49,7 @@ struct make_builders_from_view
     typedef typename std::remove_reference<ref_type>::type res_type;
     typedef typename initializer_tag<res_type>::type tag;
     typedef typename initializer_builder<tag>::type builder_type;
-    typedef typename boost::fusion::result_of::has_key<set, tag> has_key;
+    typedef typename boost::fusion::result_of::has_key<set, builder_type> has_key;
 
     typedef typename boost::fusion::result_of::next<Iterator>::type next_itr;
     typedef typename make_builders_from_view<next_itr, End>::type next;
@@ -59,7 +57,7 @@ struct make_builders_from_view
     typedef typename
             std::conditional<has_key::value,
                 typename make_builders_from_view<next_itr, End, Args...>::type,
-                typename make_builders_from_view<next_itr, End, builder_type, Args...>::type
+                typename make_builders_from_view<next_itr, End, Args..., builder_type>::type
             >::type type;
 
 };
@@ -122,8 +120,7 @@ inline child execute(Args&& ... args)
 
     typedef typename boost::fusion::result_of::as_vector<decltype(inits)>::type  inits_t;
     typedef typename boost::fusion::result_of::as_vector<decltype(others)>::type others_t;
-
-  //  typedef decltype(others) others_t;
+    //  typedef decltype(others) others_t;
     typedef typename detail::make_builders_from_view<
             typename boost::fusion::result_of::begin<others_t>::type,
             typename boost::fusion::result_of::end  <others_t>::type>::type builder_t;

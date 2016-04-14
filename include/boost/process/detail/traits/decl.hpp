@@ -24,8 +24,13 @@ namespace boost { namespace process { namespace detail {
 template<typename T>
 struct is_initializer : std::is_base_of<handler_base, T> {};
 
+
 template<typename T>
-struct initializer_tag { typedef void type; };
+struct is_initializer<T&> : std::is_base_of<handler_base, T> {};
+
+
+template<typename T>
+struct initializer_tag;// { typedef void type; };
 
 
 template<typename T>

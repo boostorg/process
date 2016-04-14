@@ -29,7 +29,12 @@ int main(int , char* [])
     }
 
     {
-        bp::pipe pipe = bp::pipe::create_named();
+
+#if defined( BOOST_WINDOWS_API )
+        bp::pipe pipe("\\\\.\\pipe\\pipe_name");
+#elif defined( BOOST_POSIX_API )
+
+#endif
 
         std::string in  = "xyz";
         pipe.write(in.c_str(), in.size());
@@ -41,18 +46,7 @@ int main(int , char* [])
         BOOST_TEST(out == in);
     }
 
-    {
-        bp::pipe pipe = bp::pipe::create_async();
 
-        std::string in  = "    ";
-        pipe.write(in.c_str(), in.size());
-
-        std::string out;
-        out.resize(4);
-        pipe.read(&out.front(), out.size());
-
-        BOOST_TEST(out == in);
-    }
 
     return boost::report_errors();
 }
