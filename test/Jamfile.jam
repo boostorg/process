@@ -32,7 +32,7 @@ exe sparring_partner : sparring_partner.cpp program_options system filesystem :
 	;
 
 test-suite ts :
-  	 [ run pipe.cpp iostreams  ]
+     [ run pipe.cpp iostreams system ]
      [ run async.cpp iostreams system thread : : sparring_partner	]
      [ run bind_stderr.cpp iostreams : : sparring_partner 			]
      [ run bind_stdin.cpp iostreams system : : sparring_partner 	]
@@ -46,8 +46,8 @@ test-suite ts :
      [ run extensions.cpp system : : sparring_partner   ]
      [ run env.cpp iostreams program_options system : : sparring_partner ]
 #     [ run posix_specific.cpp iostreams system : : sparring_partner : <build>no <target-os>linux:<build>yes                    ]
-     [ run run_exe.cpp  : : sparring_partner                                                                             		]
-     [ run run_exe_path.cpp : : sparring_partner                                                             					]
+     [ run run_exe.cpp  : : sparring_partner                                                                          		]
+     [ run run_exe_path.cpp filesystem : : sparring_partner                                  					]
      [ run search_path.cpp filesystem system : : : <target-os>windows:<source>shell32 ]
      [ run shell_path.cpp filesystem system                                                                                    ]
      [ run show_window.cpp iostreams system : : sparring_partner  : <build>no <target-os>windows:<build>yes                    ]
