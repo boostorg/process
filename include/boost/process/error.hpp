@@ -116,6 +116,7 @@ struct initializer_builder<error_tag>
 
 }
 
+constexpr static boost::process::detail::ignore_error_ ignore_error;
 constexpr static boost::process::detail::error_ error;
 constexpr static boost::process::detail::error_ error_ref;
 constexpr static boost::process::detail::error_ error_code;

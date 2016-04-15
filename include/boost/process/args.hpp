@@ -12,7 +12,7 @@
 #define BOOST_PROCESS_ARGS_HPP
 
 #include <boost/process/detail/basic_cmd.hpp>
-
+#include <iterator>
 
 namespace boost { namespace process { namespace detail {
 
@@ -23,17 +23,17 @@ struct args_
     template <class Range>
     arg_setter_<Range, true>     operator()(Range &&range) const
     {
-        return arg_setter_<Range, true>(std::move(range));
+        return arg_setter_<Range, true>(std::forward<Range>(range));
     }
     template <class Range>
     arg_setter_<Range, true>     operator+=(Range &&range) const
     {
-        return arg_setter_<Range, true>(std::move(range));
+        return arg_setter_<Range, true>(std::forward<Range>(range));
     }
     template <class Range>
     arg_setter_<Range, false>    operator= (Range &&range) const
     {
-        return arg_setter_<Range, true>(std::move>(range));
+        return arg_setter_<Range, true>(std::forward<Range>(range));
     }
     arg_setter_<std::string, true>     operator()(const char* str) const
     {
@@ -65,27 +65,27 @@ struct args_
 
     arg_setter_<std::string, true> operator()(std::initializer_list<const char*> &&range) const
     {
-        return arg_setter_<std::string>(std::move(range));
+        return arg_setter_<std::string>(range.begin(), range.end());
     }
     arg_setter_<std::string, true> operator+=(std::initializer_list<const char*> &&range) const
     {
-        return arg_setter_<std::string, true>(std::move(range));
+        return arg_setter_<std::string, true>(range.begin(), range.end());
     }
     arg_setter_<std::string, false> operator= (std::initializer_list<const char*> &&range) const
     {
-        return arg_setter_<std::string, true>(std::move(range));
+        return arg_setter_<std::string, true>(range.begin(), range.end());
     }
     arg_setter_<std::string, true> operator()(std::initializer_list<std::string> &&range) const
     {
-        return arg_setter_<std::string>(std::move(range));
+        return arg_setter_<std::string>(range.begin(), range.end());
     }
     arg_setter_<std::string, true> operator+=(std::initializer_list<std::string> &&range) const
     {
-        return arg_setter_<std::string, true>(std::move(range));
+        return arg_setter_<std::string, true>(range.begin(), range.end());
     }
     arg_setter_<std::string, false> operator= (std::initializer_list<std::string> &&range) const
     {
-        return arg_setter_<std::string, true>(std::move(range));
+        return arg_setter_<std::string, true>(range.begin(), range.end());
     }
 };
 

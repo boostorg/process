@@ -21,6 +21,7 @@
 #include <boost/process/detail/traits.hpp>
 #include <boost/process/detail/executor.hpp>
 #include <boost/process/detail/basic_cmd.hpp>
+#include <boost/process/detail/handler.hpp>
 
 #include <boost/process/child.hpp>
 
@@ -83,12 +84,77 @@ struct builder_ref
     }
 };
 
+template<typename T>
+struct get_initializers_result
+{
+    typedef typename T::result_type type;
+};
+
+template<>
+struct get_initializers_result<boost::fusion::void_>
+{
+    typedef boost::fusion::void_ type;
+};
+
 template<typename ...Args>
-boost::fusion::tuple<typename Args::result_type...>
+struct helper_vector
+{
+
+};
+
+template<typename T, typename ...Stack>
+struct invoke_get_initializer_collect_keys;
+
+template<typename ...Stack>
+struct invoke_get_initializer_collect_keys<boost::fusion::vector<>, Stack...>
+{
+    typedef helper_vector<Stack...> type;
+};
+
+
+template<typename First, typename ...Args, typename ...Stack>
+struct invoke_get_initializer_collect_keys<boost::fusion::vector<First, Args...>, Stack...>
+{
+    typedef typename invoke_get_initializer_collect_keys<boost::fusion::vector<Args...>, Stack..., First>::type next;
+    typedef helper_vector<Stack...> stack_t;
+
+    typedef typename std::conditional<std::is_same<boost::fusion::void_, First>::value,
+            stack_t, next>::type type;
+
+
+};
+
+
+template<typename Keys>
+struct invoke_get_initializer;
+
+template<typename ...Args>
+struct invoke_get_initializer<helper_vector<Args...>>
+
+{
+    typedef boost::fusion::tuple<typename get_initializers_result<Args>::type...> result_type;
+
+    template<typename Sequence>
+    static result_type call(Sequence & seq)
+    {
+        return result_type(boost::fusion::at_key<Args>(seq).get_initializer()...);;
+    }
+};
+
+
+
+
+
+template<typename ...Args>
+boost::fusion::tuple<typename get_initializers_result<Args>::type...>
         get_initializers(boost::fusion::set<Args...> & builders)
 {
-    return boost::fusion::tuple<typename Args::result_type...>(boost::fusion::at_key<Args>(builders).get_initializer()...);
+    typedef boost::fusion::tuple<typename get_initializers_result<Args>::type...> return_type;
+    typedef typename invoke_get_initializer_collect_keys<boost::fusion::vector<Args...>>::type keys;
+    return invoke_get_initializer<keys>::call(builders);
 }
+
+
 
 }
 
@@ -130,7 +196,7 @@ inline child execute(Args&& ... args)
 
     boost::fusion::for_each(others, builder_ref);
 
-    auto other_inits = detail::get_initializers(builders);
+    auto other_inits = ::boost::process::detail::get_initializers(builders);
 
 
     boost::fusion::joint_view<decltype(other_inits), decltype(inits)> complete_inits(other_inits, inits);

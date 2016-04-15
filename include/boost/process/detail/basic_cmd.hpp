@@ -46,10 +46,14 @@ struct arg_setter_
     typedef typename std::vector<String>::iterator       iterator;
     typedef typename std::vector<String>::const_iterator const_iterator;
 
+
+    template<typename Iterator>
+    arg_setter_(Iterator && begin, Iterator && end) : _args(begin, end) {}
+
     template<typename Range>
     arg_setter_(Range && str) :
-            _args(std::make_move_iterator(std::begin(str)),
-                  std::make_move_iterator(std::end(str))) {}
+            _args(std::begin(str),
+                  std::end(str)) {}
 
     iterator begin() {return _args.begin();}
     iterator end()   {return _args.end();}

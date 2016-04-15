@@ -42,9 +42,9 @@ struct on_error_ : handler
     explicit on_error_(Handler handler) : handler_(handler) {}
 
     template <class Executor>
-    void on_error(Executor &e, const boost::system::error_code &ec) const
+    void on_error(Executor &e, const std::error_code &ec) const
     {
-        handler_(e);
+        handler_(e, ec);
     }
 private:
     Handler handler_;
