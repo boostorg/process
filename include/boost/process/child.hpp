@@ -152,6 +152,12 @@ public:
     }
     operator bool() const {return valid();}
 
+    void set_exited(int code)
+    {
+        _exit_code.store(code);
+        _exited.store(true);
+    }
+
 
 };
 
