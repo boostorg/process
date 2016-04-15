@@ -16,10 +16,12 @@
 #include <boost/iostreams/filter/newline.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/algorithm/string/compare.hpp>
 #include <string>
+#include <iostream>
 
-namespace bp = boost::process;
-namespace bpi = boost::process::initializers;
+namespace bp  = boost::process;
+namespace bio = boost::iostreams;
 
 struct test_dir
 {
@@ -36,28 +38,35 @@ BOOST_AUTO_TEST_CASE(start_in_dir)
 
     test_dir dir("start_in_dir_test");
 
-    bp::pipe p = bp::create_pipe();
+    bp::pipe p;
 
-    bio::file_descriptor_sink sink(p.sink, bio::close_handle);
-    boost::system::error_code ec;
+    std::error_code ec;
     bp::child c = bp::execute(
-        bpi::run_exe(boost::filesystem::absolute(master_test_suite().argv[1]).string()),
-        bpi::set_cmd_line("test --pwd"),
-        bpi::start_in_dir(dir.s_),
-        bpi::bind_stdout(sink),
-        bpi::set_on_error(ec)
+        bp::exe=boost::filesystem::absolute(master_test_suite().argv[1]).string(),
+        bp::args +={"test", "--pwd"},
+        bp::start_dir = dir.s_,
+        bp::std_out>p,
+        ec
     );
     BOOST_REQUIRE(!ec);
-    bio::close(sink);
 
-    bio::file_descriptor_source source(p.source, bio::close_handle);
-    bio::filtering_istream is;
-    is.push(bio::newline_filter(bio::newline::posix));
-    is.push(source);
+    bio::stream<bio::file_descriptor_source> is(p.source());
+
+    p.sink().close();
+
 
     std::string s;
     std::getline(is, s);
-    BOOST_CHECK_EQUAL(s, boost::filesystem::absolute(dir.s_));
+    auto path_read = boost::filesystem::absolute(boost::filesystem::path(s)).string();
+    auto path_set  = boost::filesystem::absolute(dir.s_).string();
 
-    BOOST_REQUIRE_NO_THROW(bp::wait_for_exit(c));
+    if (path_read.size() > path_set.size())
+        path_read.resize(path_set.size());
+    else if (path_read.size() < path_set.size())
+        path_set.resize(path_read.size());
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(path_read.begin(), path_read.end(),
+                                  path_set.begin(), path_set.end());
+
+    BOOST_REQUIRE_NO_THROW(c.wait());
 }

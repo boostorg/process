@@ -158,7 +158,7 @@ struct make_entry
     entry<Char, Environment> operator()(const Char* data) const
     {
         auto p = data;
-        while ((*p != equal_sign<Char>) && (*p != null_char<Char>))
+        while ((*p != equal_sign<Char>()) && (*p != null_char<Char>()))
                 p++;
         auto name = std::basic_string<Char>(data, p);
         p++; //go behind equal sign
@@ -176,7 +176,7 @@ struct make_const_entry
     const_entry<Char, Environment> operator()(const Char* data) const
     {
         auto p = data;
-        while ((*p != equal_sign<Char>) && (*p != null_char<Char>))
+        while ((*p != equal_sign<Char>()) && (*p != null_char<Char>()))
                 p++;
         auto name = std::basic_string<Char>(data, p);
         p++; //go behind equal sign
@@ -225,7 +225,7 @@ public:
     iterator        find( const string_type& key )
     {
         auto p = this->_env_impl;
-        auto st1 = key + equal_sign<Char>;
+        auto st1 = key + equal_sign<Char>();
         while (*p != nullptr)
         {
             if (std::equal(st1.begin(), st1.end(), *p))
@@ -237,7 +237,7 @@ public:
     const_iterator  find( const string_type& key ) const
     {
         auto p = this->_env_impl;
-        auto st1 = key + equal_sign<Char>;
+        auto st1 = key + equal_sign<Char>();
         while (*p != nullptr)
         {
             if (std::equal(st1.begin(), st1.end(), *p))
@@ -250,7 +250,7 @@ public:
     std::size_t count(const string_type & st) const
     {
         auto p = this->_env_impl;
-        auto st1 = st + equal_sign<Char>;
+        auto st1 = st + equal_sign<Char>();
         while (*p != nullptr)
         {
             if (std::equal(st1.begin(), st1.end(), *p))
@@ -266,7 +266,7 @@ public:
     std::pair<iterator,bool> emplace(const string_type & id, const string_type & value)
     {
         auto p = this->_env_impl;
-        auto st1 = id + equal_sign<Char>;
+        auto st1 = id + equal_sign<Char>();
         auto f = find(id);
         if (f != end())
         {

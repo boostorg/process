@@ -29,7 +29,7 @@ struct env_init : public ::boost::process::detail::handler_base
     {
         auto e = env.native_handle();
 
-        if (*e == null_char<char>)
+        if (*e == null_char<char>())
         {
             constexpr static ::boost::detail::winapi::DWORD_ ERROR_BAD_ENVIRONMENT_ = 0xA;
             throw std::system_error(std::error_code(

@@ -86,12 +86,12 @@ template<typename Char>
 std::vector<Char*> native_environment_impl<Char>::_load_var(Char* p)
 {
     std::vector<Char*> ret;
-    if (*p != null_char<Char>)
+    if (*p != null_char<Char>())
     {
         ret.push_back(p);
-        while ((*p != null_char<Char>) || (*(p+1) !=  null_char<Char>))
+        while ((*p != null_char<Char>()) || (*(p+1) !=  null_char<Char>()))
         {
-            if (*p==null_char<Char>)
+            if (*p==null_char<Char>())
             {
                 p++;
                 ret.push_back(p);
@@ -110,7 +110,7 @@ std::vector<Char*> native_environment_impl<Char>::_load_var(Char* p)
 template<typename Char>
 struct basic_environment_impl
 {
-    std::vector<Char> _data = {null_char<Char>};
+    std::vector<Char> _data = {null_char<Char>()};
     static std::vector<Char*> _load_var(Char* p);
     std::vector<Char*> _env_arr{_load_var(_data.data())};
 public:
@@ -160,7 +160,7 @@ basic_environment_impl<Char>::basic_environment_impl(const native_environment_im
 {
     auto beg = nei.native_handle();
     auto p   = beg;
-    while ((*p != null_char<Char>) || (*(p+1) != null_char<Char>))
+    while ((*p != null_char<Char>()) || (*(p+1) != null_char<Char>()))
         p++;
 
     p++; //pointing to the second nullchar
@@ -251,12 +251,12 @@ template<typename Char>
 std::vector<Char*> basic_environment_impl<Char>::_load_var(Char* p)
 {
     std::vector<Char*> ret;
-    if (*p != null_char<Char>)
+    if (*p != null_char<Char>())
     {
         ret.push_back(p);
-        while ((*p != null_char<Char>) || (*(p+1) !=  null_char<Char>))
+        while ((*p != null_char<Char>()) || (*(p+1) !=  null_char<Char>()))
         {
-            if (*p==null_char<Char>)
+            if (*p==null_char<Char>())
             {
                 p++;
                 ret.push_back(p);

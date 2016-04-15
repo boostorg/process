@@ -30,5 +30,6 @@
 #include <boost/process/io.hpp>
 #include <boost/process/pipe.hpp>
 #include <boost/process/search_path.hpp>
+#include <boost/process/start_dir.hpp>
 
 #endif

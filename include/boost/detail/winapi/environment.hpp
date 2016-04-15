@@ -52,6 +52,12 @@ BOOST_SYMBOL_IMPORT boost::detail::winapi::BOOL_ WINAPI  SetEnvironmentVariableW
 
 namespace boost { namespace detail { namespace winapi {
 
+#if defined( BOOST_USE_WINDOWS_H )
+const DWORD_ ERROR_ENVVAR_NOT_FOUND_  = ERROR_ENVVAR_NOT_FOUND;
+#else
+const DWORD_ ERROR_ENVVAR_NOT_FOUND_  = 203;
+#endif
+
 
 #if !defined( BOOST_NO_ANSI_APIS )
 
