@@ -27,7 +27,7 @@ alias iostreams 		: /boost//iostreams 	  ;
 alias system   			: /boost//system   		  ;
 alias thread   			: /boost//thread   		  ;
 
-exe sparring_partner : sparring_partner.cpp  :
+exe sparring_partner : sparring_partner.cpp program_options :
 	<warnings>off
 	;
 
