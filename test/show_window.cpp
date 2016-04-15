@@ -11,36 +11,36 @@
 #define BOOST_TEST_IGNORE_SIGCHLD
 #include <boost/test/included/unit_test.hpp>
 #include <boost/process.hpp>
+#include <boost/process/windows.hpp>
 #include <boost/system/error_code.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <string>
 
 namespace bp = boost::process;
-namespace bpi = boost::process::initializers;
 
 BOOST_AUTO_TEST_CASE(show_window)
 {
     using boost::unit_test::framework::master_test_suite;
     namespace bio = boost::iostreams;
 
-    bp::pipe p = bp::create_pipe();
+    bp::pipe p;
 
     {
-        bio::file_descriptor_sink sink(p.sink, bio::close_handle);
-        boost::system::error_code ec;
+
+        std::error_code ec;
         bp::execute(
-            bpi::run_exe(master_test_suite().argv[1]),
-            bpi::set_cmd_line("test --windows-print-showwindow"),
-            bpi::show_window(SW_SHOWNORMAL),
-            bpi::bind_stdout(sink),
-            bpi::set_on_error(ec)
+            master_test_suite().argv[1],
+            "test", "--windows-print-showwindow",
+            bp::show_normal,
+            bp::std_out>p,
+            ec
         );
         BOOST_REQUIRE(!ec);
     }
 
-    bio::file_descriptor_source source(p.source, bio::close_handle);
-    bio::stream<bio::file_descriptor_source> is(source);
+
+    bio::stream<bio::file_descriptor_source> is(p.source());
 
     int i;
     is >> i;

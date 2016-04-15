@@ -50,10 +50,9 @@ test-suite ts :
      [ run run_exe_path.cpp : : sparring_partner                                                             					]
      [ run search_path.cpp filesystem system : : : <target-os>windows:<source>shell32 ]
      [ run shell_path.cpp filesystem system                                                                                    ]
-#     [ run show_window.cpp iostreams system : : sparring_partner  : <build>no <target-os>windows:<build>yes                    ]
-     [ run start_in_dir.cpp iostreams filesystem system : : sparring_partner                                                   ]
+     [ run show_window.cpp iostreams system : : sparring_partner  : <build>no <target-os>windows:<build>yes                    ]
+     [ run start_dir.cpp iostreams filesystem system : : sparring_partner                                                   ]
      [ run terminate.cpp system : : sparring_partner     		]
      [ run throw_on_error.cpp system : : sparring_partner       ]
      [ run wait.cpp system : : sparring_partner				    ]
-#     [ run windows_specific.cpp iostreams system : : sparring_partner : <build>no <target-os>windows:<build>yes                ]
 	;
