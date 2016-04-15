@@ -10,7 +10,7 @@
 #ifndef BOOST_PROCESS_WINDOWS_SEARCH_PATH_HPP
 #define BOOST_PROCESS_WINDOWS_SEARCH_PATH_HPP
 
-#include <boost/process/config.hpp>
+#include <boost/process/detail/config.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/system/error_code.hpp>
@@ -22,7 +22,7 @@
 
 
 
-namespace boost { namespace process { namespace windows {
+namespace boost { namespace process { namespace detail { namespace windows {
 
 inline std::string search_path(
         const std::string &filename,
@@ -60,6 +60,6 @@ inline std::string search_path(
     return "";
 }
 
-}}}
+}}}}
 
 #endif

@@ -16,10 +16,20 @@
 #ifndef BOOST_PROCESS_SEARCH_PATH_HPP
 #define BOOST_PROCESS_SEARCH_PATH_HPP
 
-#include <boost/process/config.hpp>
+#include <boost/process/detail/config.hpp>
 
-#include BOOST_PROCESS_PLATFORM_PROMOTE_PATH(search_path)
-BOOST_PROCESS_PLATFORM_PROMOTE_NAMESPACE(search_path)
+#if defined(BOOST_POSIX_API)
+#include <boost/process/detail/posix/search_path.hpp>
+#elif defined(BOOST_WINDOWS_API)
+#include <boost/process/detail/windows/search_path.hpp>
+#endif
+
+
+namespace boost { namespace process {
+
+using boost::process::detail::api::search_path;
+
+}}
 
 #if defined(BOOST_PROCESS_DOXYGEN)
 namespace boost { namespace process {

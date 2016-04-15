@@ -16,10 +16,19 @@
 #ifndef BOOST_PROCESS_SHELL_PATH_HPP
 #define BOOST_PROCESS_SHELL_PATH_HPP
 
-#include <boost/process/config.hpp>
+#include <boost/process/detail/config.hpp>
 
-#include BOOST_PROCESS_PLATFORM_PROMOTE_PATH(shell_path)
-BOOST_PROCESS_PLATFORM_PROMOTE_NAMESPACE(shell_path)
+#if defined(BOOST_POSIX_API)
+#include <boost/process/detail/posix/shell_path.hpp>
+#elif defined(BOOST_WINDOWS_API)
+#include <boost/process/detail/windows/shell_path.hpp>
+#endif
+
+namespace boost { namespace process {
+
+using boost::process::detail::api::shell_path;
+
+}}
 
 #if defined(BOOST_PROCESS_DOXYGEN)
 namespace boost { namespace process {
@@ -29,7 +38,7 @@ namespace boost { namespace process {
  *
  * \returns the path to cmd.exe on Windows and /bin/sh on POSIX.
  *
- * \throws boost::system::system_error in case of an error
+ * \throws std::system_error in case of an error
  */
 boost::filesystem::path shell_path();
 
@@ -38,9 +47,11 @@ boost::filesystem::path shell_path();
  *
  * \returns the path to cmd.exe on Windows and /bin/sh on POSIX.
  */
-boost::filesystem::path shell_path(boost::system::error_code &ec);
+boost::filesystem::path shell_path(std::error_code &ec);
+
 
 }}
 #endif
+
 
 #endif

@@ -10,13 +10,13 @@
 #ifndef BOOST_PROCESS_WINDOWS_SHELL_PATH_HPP
 #define BOOST_PROCESS_WINDOWS_SHELL_PATH_HPP
 
-#include <boost/process/config.hpp>
-#include <boost/system/error_code.hpp>
+#include <boost/process/detail/config.hpp>
+#include <system_error>
 #include <boost/filesystem/path.hpp>
 #include <boost/detail/winapi/basic_types.hpp>
 #include <boost/detail/winapi/get_system_directory.hpp>
 
-namespace boost { namespace process { namespace windows {
+namespace boost { namespace process { namespace detail { namespace windows {
 
 inline boost::filesystem::path shell_path()
 {
@@ -26,7 +26,7 @@ inline boost::filesystem::path shell_path()
         throw std::system_error(
                 std::error_code(
                 ::boost::detail::winapi::GetLastError(),
-                boost::system::system_category()),
+                std::system_category()),
                 "GetSystemDirectory() failed");
 
     boost::filesystem::path p = sysdir;
@@ -52,6 +52,6 @@ inline boost::filesystem::path shell_path(std::error_code &ec)
     return p;
 }
 
-}}}
+}}}}
 
 #endif

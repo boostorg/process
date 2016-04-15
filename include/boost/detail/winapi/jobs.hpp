@@ -18,14 +18,14 @@ extern "C"
 
 #if !defined( BOOST_NO_ANSI_APIS )
 BOOST_SYMBOL_IMPORT boost::detail::winapi::HANDLE_ WINAPI CreateJobObjectA (
-    boost::detail::winapi::LPSECURITY_ATTRIBUTES_ lpJobAttributes,
+    ::_SECURITY_ATTRIBUTES* lpJobAttributes,
     boost::detail::winapi::LPCSTR_ lpName);
 
 #endif
 
 BOOST_SYMBOL_IMPORT boost::detail::winapi::HANDLE_ WINAPI CreateJobObjectW (
-      boost::detail::winapi::LPSECURITY_ATTRIBUTES_ lpJobAttributes,
-      boost::detail::winapi::LPCWSTR_ lpName);
+    ::_SECURITY_ATTRIBUTES* lpJobAttributes,
+    boost::detail::winapi::LPCWSTR_ lpName);
 
 
 }
@@ -50,7 +50,7 @@ HANDLE_ WINAPI create_job_object (
     LPSECURITY_ATTRIBUTES_ lpJobAttributes,
     LPCSTR_ lpName)
 {
-    return CreateJobObjectA(lpJobAttributes, lpName);
+    return CreateJobObjectA(reinterpret_cast<::SECURITY_ATTRIBUTES*>(lpJobAttributes), lpName);
 }
 
 #endif
@@ -59,7 +59,7 @@ HANDLE_ WINAPI create_job_object (
     LPSECURITY_ATTRIBUTES_ lpJobAttributes,
     LPCWSTR_ lpName)
 {
-    return CreateJobObjectW(lpJobAttributes, lpName);
+    return CreateJobObjectW(reinterpret_cast<::SECURITY_ATTRIBUTES*>(lpJobAttributes), lpName);
 }
 
 

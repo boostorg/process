@@ -8,8 +8,7 @@
 
 #include <boost/process/environment.hpp>
 #include <boost/none.hpp>
-#include <boost/hana/tuple.hpp>
-#include <boost/hana/for_each.hpp>
+
 
 #if defined(BOOST_POSIX_API)
 #include <boost/process/detail/posix/env_init.hpp>
@@ -18,8 +17,6 @@
 #endif
 
 namespace boost { namespace process { namespace detail {
-
-struct env_tag {};
 
 
 template<typename T>
@@ -144,6 +141,7 @@ struct env_builder
         //env.set(es.key, es.value_to_string());
     }
 
+    typedef api::env_init result_type;
     api::env_init get_initializer()
     {
         return api::env_init(std::move(env));
@@ -151,7 +149,7 @@ struct env_builder
 };
 
 template<>
-struct initializer_builder<cmd_or_exe_tag>
+struct initializer_builder<env_tag>
 {
     typedef env_builder type;
 };

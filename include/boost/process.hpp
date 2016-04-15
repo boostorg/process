@@ -17,6 +17,18 @@
 #ifndef BOOST_PROCESS_HPP
 #define BOOST_PROCESS_HPP
 
-
+#include <boost/process/args.hpp>
+#include <boost/process/async.hpp>
+#include <boost/process/attached.hpp>
+#include <boost/process/child.hpp>
+#include <boost/process/cmd.hpp>
+#include <boost/process/env.hpp>
+#include <boost/process/environment.hpp>
+#include <boost/process/error.hpp>
+#include <boost/process/exe.hpp>
+#include <boost/process/execute.hpp>
+#include <boost/process/io.hpp>
+#include <boost/process/pipe.hpp>
+#include <boost/process/search_path.hpp>
 
 #endif

@@ -7,12 +7,12 @@
 #ifndef BOOST_PROCESS_DETAIL_LAUNCH_MODE_HPP_
 #define BOOST_PROCESS_DETAIL_LAUNCH_MODE_HPP_
 
-#include <boost/process/config.hpp>
+#include <boost/process/detail/config.hpp>
 
 #if defined(BOOST_POSIX_API)
-#include <boost/process/posix/attached.hpp>
+#include <boost/process/detail/posix/attached.hpp>
 #elif defined(BOOST_WINDOWS_API)
-#include <boost/process/windows/attached.hpp>
+#include <boost/process/detail/windows/attached.hpp>
 #endif
 
 

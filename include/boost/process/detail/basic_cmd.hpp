@@ -76,6 +76,7 @@ struct exe_cmd_init : boost::process::detail::handler_base
     template <class Executor>
     void on_setup(Executor& exec) const
     {
+
         if (cmd_only && args.empty())
             detail::api::apply_cmd (exe, exec);
         else
@@ -147,7 +148,7 @@ struct exe_builder
     void operator()(const exe_setter_ & data)
     {
         not_cmd = true;
-        exe = std::move(data.exe_);
+        exe = data.exe_;
     }
     template<typename Range>
     void operator()(arg_setter_<Range, false> && data)

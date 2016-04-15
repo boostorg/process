@@ -7,7 +7,7 @@
 #ifndef BOOST_PROCESS_DETAIL_WINDOWS_ATTACHED_HPP_
 #define BOOST_PROCESS_DETAIL_WINDOWS_ATTACHED_HPP_
 
-#include <boost/process/config.hpp>
+#include <boost/process/detail/config.hpp>
 #include <boost/detail/winapi/jobs.hpp>
 
 #include <boost/process/detail/windows/handler.hpp>

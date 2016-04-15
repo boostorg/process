@@ -97,23 +97,26 @@ struct io_service_ref : boost::process::detail::handler_base
 
           wait_handler wh(std::move(funcs), ios, process_handle);
 
-
-          auto &handle_p = wh.handle;
-          handle_p.async_wait(std::move(wh));
+          auto handle_p = wh.handle.get();
+          handle_p->async_wait(std::move(wh));
     }
     struct wait_handler
     {
-        boost::asio::windows::object_handle handle;
+        std::unique_ptr<boost::asio::windows::object_handle> handle;
         std::vector<std::function<void(const std::error_code & ec)>> funcs;
-
+        wait_handler(const wait_handler & ) = delete;
         wait_handler(wait_handler && ) = default;
-        wait_handler(std::vector<std::function<void(const std::error_code & ec)>> && funcs, boost::asio::io_service & ios, void * handle) : funcs(std::move(funcs)), handle(ios, handle)
+        wait_handler(std::vector<std::function<void(const std::error_code & ec)>> && funcs, boost::asio::io_service & ios, void * handle) : funcs(std::move(funcs)),
+                handle(new boost::asio::windows::object_handle(ios, handle))
         {
 
         }
         void operator()(const boost::system::error_code & ec_in)
         {
-            auto ec = std::error_code(ec_in.value(), std::system_category());
+            std::error_code ec;
+            if (ec_in)
+                ec = std::error_code(ec_in.value(), std::system_category());
+
             for (auto & func : funcs)
                 func(ec);
         }
