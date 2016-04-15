@@ -10,57 +10,56 @@
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_IGNORE_SIGCHLD
 #include <boost/test/included/unit_test.hpp>
-#include <boost/process.hpp>
-#include <boost/system/error_code.hpp>
+#include <boost/process/execute.hpp>
+#include <boost/process/error.hpp>
+#include <system_error>
 #include <boost/bind.hpp>
 #include <boost/ref.hpp>
 
-#if defined(BOOST_WINDOWS_API) && !defined(BOOST_USE_WINDOWS_H)
-#   include <Windows.h>
-#elif defined(BOOST_POSIX_API)
-#   include <errno.h>
-#endif
+
 
 namespace bp = boost::process;
-namespace bpi = boost::process::initializers;
-namespace bio = boost::iostreams;
 
-void run_exe(const std::string &exe, bp::executor &e)
-{
-    e.exe = exe.c_str();
-}
 
-void set_on_error(boost::system::error_code &ec, bp::executor&)
+struct run_exe
 {
-    using namespace boost::system;
-#if defined(BOOST_WINDOWS_API)
-    ec = error_code(::GetLastError(), system_category());
-#elif defined(BOOST_POSIX_API)
-    ec = error_code(errno, system_category());
-#endif
-}
+    std::string exe;
+    template<typename T>
+    void operator()(T &e) const
+    {
+        e.exe = exe.c_str();
+    }
+
+};
+
+struct  set_on_error
+{
+    mutable std::error_code ec;
+    template<typename T>
+    void operator()(T &, const std::error_code & ec) const
+    {
+        this->ec = ec;
+    }
+};
 
 BOOST_AUTO_TEST_CASE(extensions)
 {
     using boost::unit_test::framework::master_test_suite;
 
-    std::string exe = master_test_suite().argv[1];
+    run_exe re;
 
-    boost::system::error_code ec;
+    re.exe = master_test_suite().argv[1];
+
+    set_on_error se;
+    std::error_code ec;
     bp::execute(
 #if defined(BOOST_WINDOWS_API)
-        bpi::on_CreateProcess_setup(
-            boost::bind(run_exe, exe, _1)),
-        bpi::set_cmd_line("test"),
-        bpi::on_CreateProcess_error(
-            boost::bind(set_on_error, boost::ref(ec), _1))
-#elif defined(BOOST_POSIX_API)
-        bpi::on_exec_setup(
-            boost::bind(run_exe, exe, _1)),
-        bpi::set_cmd_line("test"),
-        bpi::on_exec_error(
-            boost::bind(set_on_error, boost::ref(ec), _1))
+        "Wrong-Command",
+        "test",
+        bp::on_setup=re,
+        bp::on_error=se,
+        bp::ignore_error
 #endif
     );
-    BOOST_CHECK(!ec);
+    BOOST_CHECK(!se.ec);
 }
