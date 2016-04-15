@@ -11,10 +11,10 @@
 #define BOOST_TEST_IGNORE_SIGCHLD
 #include <boost/test/included/unit_test.hpp>
 
-#include <boost/process/basic_cmd.hpp>
 #include <boost/process/error.hpp>
 #include <boost/process/io.hpp>
 #include <boost/process/child.hpp>
+#include <boost/process/args.hpp>
 #include <boost/process/execute.hpp>
 
 #include <system_error>
@@ -110,7 +110,9 @@ BOOST_AUTO_TEST_CASE(async_io)
 {
     using boost::unit_test::framework::master_test_suite;
 
-    bp::pipe p1 = bp::pipe::create_async();
+    boost::asio::io_service io_service;
+
+    bp::async_pipe p1(io_service);
     bp::pipe p2 ;
 
     std::error_code ec;
@@ -127,11 +129,10 @@ BOOST_AUTO_TEST_CASE(async_io)
 
     bio::stream<bio::file_descriptor_source> is(p2.source());
 
-    boost::asio::io_service io_service;
-    pipe_end pend(io_service, p1.sink().handle());
+    //pipe_end pend(io_service, p1.sink().handle());
 
     std::string s = "hello\n";
-    boost::asio::async_write(pend, boost::asio::buffer(s),
+    boost::asio::async_write(p1, boost::asio::buffer(s),
         write_handler(is));
 
     io_service.run();

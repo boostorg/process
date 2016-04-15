@@ -17,9 +17,9 @@
 #include <boost/asio.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-#include <boost/process/basic_cmd.hpp>
 #include <boost/process/error.hpp>
 #include <boost/process/io.hpp>
+#include <boost/process/args.hpp>
 #include <boost/process/child.hpp>
 #include <boost/process/execute.hpp>
 #include <system_error>
@@ -82,7 +82,8 @@ BOOST_AUTO_TEST_CASE(async_io)
 {
     using boost::unit_test::framework::master_test_suite;
 
-    bp::pipe p = bp::pipe::create_async();
+    boost::asio::io_service io_service;
+    bp::async_pipe p(io_service);
 
     std::error_code ec;
     bp::execute(
@@ -93,11 +94,8 @@ BOOST_AUTO_TEST_CASE(async_io)
     );
     BOOST_REQUIRE(!ec);
 
-    boost::asio::io_service io_service;
-    pipe_end pend(io_service, p.source().handle());
-
     boost::asio::streambuf buffer;
-    boost::asio::async_read_until(pend, buffer, '\n',
+    boost::asio::async_read_until(p, buffer, '\n',
         read_handler(buffer));
 
     io_service.run();

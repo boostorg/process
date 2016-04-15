@@ -14,7 +14,6 @@
 #include <system_error>
 #include <boost/filesystem.hpp>
 
-#include <boost/process/basic_cmd.hpp>
 #include <boost/process/cmd.hpp>
 #include <boost/process/error.hpp>
 #include <boost/process/execute.hpp>

@@ -44,10 +44,14 @@ BOOST_AUTO_TEST_CASE(async_wait)
         "test", "--exit-code", "123",
         ec,
         io_service,
-        bp::on_exit([&](int exit, const std::error_code& ec_in){exit_code = exit; exit_called=true;BOOST_REQUIRE(!ec_in);})
+        bp::on_exit([&](int exit, const std::error_code& ec_in)
+                {
+                    exit_code = exit; exit_called=true;
+                    BOOST_CHECK(!ec_in);
+                })
     );
-    BOOST_REQUIRE(!ec);
 
+    BOOST_REQUIRE(!ec);
     io_service.run();
     BOOST_CHECK(exit_called);
     BOOST_CHECK_EQUAL(exit_code, 123);

@@ -10,22 +10,22 @@
 #include <boost/core/lightweight_test.hpp>
 
 #include <boost/process.hpp>
-#include <boost/system/system_error.hpp>
+#include <boost/process/cmd.hpp>
+#include <system_error>
 
 namespace bp = boost::process;
-namespace bpi = boost::process::initializers;
 
 int main(int argc, char* argv[])
 {
     bool thrown = false;
     try {
         bp::execute(
-            bpi::cmd="doesnt-exist",
-            bpi::throw_on_error
+            bp::cmd="doesnt-exist",
+            bp::throw_on_error
         );
         thrown = false;
     }
-    catch(boost::system::system_error & )
+    catch(std::system_error & )
     {
         thrown = true;
     }

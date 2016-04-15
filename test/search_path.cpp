@@ -14,7 +14,7 @@
 
 namespace bp = boost::process;
 
-BOOST_AUTO_TEST_CASE(search)
+BOOST_AUTO_TEST_CASE(search_path)
 {
 #if defined(BOOST_WINDOWS_API)
     std::string filename = "cmd";

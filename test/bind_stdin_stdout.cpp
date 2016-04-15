@@ -11,10 +11,10 @@
 #define BOOST_TEST_IGNORE_SIGCHLD
 #include <boost/test/included/unit_test.hpp>
 
-#include <boost/process/basic_cmd.hpp>
 #include <boost/process/error.hpp>
 #include <boost/process/io.hpp>
 #include <boost/process/child.hpp>
+#include <boost/process/args.hpp>
 #include <boost/process/execute.hpp>
 #include <system_error>
 

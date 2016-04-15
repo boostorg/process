@@ -96,11 +96,8 @@ BOOST_AUTO_TEST_CASE(async_io)
     BOOST_REQUIRE(!ec);
 
 
-    pipe_end pend(io_service, p.source().handle());
-
     boost::asio::streambuf buffer;
-    boost::asio::async_read_until(pend, buffer, '\n',
-    read_handler(buffer));
+    boost::asio::async_read_until(p, buffer, '\n', read_handler(buffer));
 
     io_service.run();
 }

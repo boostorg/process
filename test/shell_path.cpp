@@ -9,7 +9,7 @@
 
 #define BOOST_TEST_MAIN
 #include <boost/test/included/unit_test.hpp>
-#include <boost/process.hpp>
+#include <boost/process/shell_path.hpp>
 #include <boost/filesystem.hpp>
 #include <system_error>
 

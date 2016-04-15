@@ -12,7 +12,6 @@
 #include <boost/test/included/unit_test.hpp>
 
 #include <boost/process/environment.hpp>
-#include <boost/process/basic_cmd.hpp>
 #include <boost/process/error.hpp>
 #include <boost/process/io.hpp>
 #include <boost/process/env.hpp>

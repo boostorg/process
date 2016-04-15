@@ -11,11 +11,12 @@
 #define BOOST_TEST_IGNORE_SIGCHLD
 #include <boost/test/included/unit_test.hpp>
 
-#include <boost/process/basic_cmd.hpp>
 #include <boost/process/error.hpp>
 #include <boost/process/io.hpp>
 #include <boost/process/child.hpp>
+#include <boost/process/exe.hpp>
 #include <boost/process/execute.hpp>
+#include <boost/process/args.hpp>
 
 #include <system_error>
 
@@ -87,9 +88,10 @@ struct read_handler
 BOOST_AUTO_TEST_CASE(async_io)
 {
     using boost::unit_test::framework::master_test_suite;
+    boost::asio::io_service io_service;
 
-    bp::pipe p1 = bp::pipe::create_async();
-    bp::pipe p2 = bp::pipe::create_async();
+    bp::async_pipe p1(io_service);
+    bp::async_pipe p2(io_service);
 
     std::error_code ec;
     bp::execute(
@@ -101,17 +103,12 @@ BOOST_AUTO_TEST_CASE(async_io)
     );
     BOOST_REQUIRE(!ec);
 
-
-    boost::asio::io_service io_service;
-    pipe_end pend1(io_service, p1.source().handle());
-    pipe_end pend2(io_service, p2.source().handle());
-
     boost::asio::streambuf buffer1;
-    boost::asio::async_read_until(pend1, buffer1, '\n',
+    boost::asio::async_read_until(p1, buffer1, '\n',
         read_handler(buffer1));
 
     boost::asio::streambuf buffer2;
-    boost::asio::async_read_until(pend2, buffer2, '\n',
+    boost::asio::async_read_until(p2, buffer2, '\n',
         read_handler(buffer2));
 
     io_service.run();
