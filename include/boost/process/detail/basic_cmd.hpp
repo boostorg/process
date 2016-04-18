@@ -13,12 +13,10 @@
 #include <boost/process/detail/traits/cmd_or_exe.hpp>
 
 #if defined( BOOST_WINDOWS_API )
-#include <boost/process/detail/windows/args.hpp>
-#include <boost/process/detail/windows/exe.hpp>
+#include <boost/process/detail/windows/basic_cmd.hpp>
 #include <boost/process/detail/windows/cmd.hpp>
 #elif defined( BOOST_POSIX_API )
-#include <boost/process/detail/posix/args.hpp>
-#include <boost/process/detail/posix/exe.hpp>
+#include <boost/process/detail/posix/basic_cmd.hpp>
 #include <boost/process/detail/posix/cmd.hpp>
 #endif
 
@@ -67,34 +65,7 @@ struct arg_setter_
     arg_setter_(const char (&s) [Size]) : _args({s}) {}
 };
 
-
-struct exe_cmd_init : boost::process::detail::handler_base
-{
-    exe_cmd_init(const std::string & exe, bool cmd_only = false)
-                : exe(exe), args({}), cmd_only(cmd_only) {};
-    exe_cmd_init(std::string && exe, bool cmd_only = false)
-                : exe(std::move(exe)), args({}), cmd_only(cmd_only) {};
-
-    exe_cmd_init(std::string && exe, std::vector<std::string> && args)
-            : exe(std::move(exe)), args(api::build_args(std::move(args))), cmd_only(false) {};
-    template <class Executor>
-    void on_setup(Executor& exec) const
-    {
-
-        if (cmd_only && args.empty())
-            detail::api::apply_cmd (exe, exec);
-        else
-        {
-            detail::api::apply_exe (exe,  exec);
-            detail::api::apply_args(args, exec);
-        }
-    }
-    typedef api::native_args native_args;
-private:
-    std::string exe;
-    native_args args;
-    bool cmd_only;
-};
+using api::exe_cmd_init;
 
 struct exe_builder
 {
@@ -179,14 +150,14 @@ struct exe_builder
         args.insert(args.end(), data._args.begin(), data._args.end());
     }
 
-    exe_cmd_init get_initializer()
+    api::exe_cmd_init get_initializer()
     {
         if (not_cmd || !args.empty())
-            return exe_cmd_init(std::move(exe), std::move(args));
+            return api::exe_cmd_init::exe_args(std::move(exe), std::move(args));
         else
-            return exe_cmd_init(std::move(exe), true);
+            return api::exe_cmd_init::cmd(std::move(exe));
     }
-    typedef exe_cmd_init result_type;
+    typedef api::exe_cmd_init result_type;
 };
 
 template<>

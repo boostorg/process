@@ -159,7 +159,11 @@ int main(int argc, char *argv[])
     else if (vm.count("prefix-once"))
     {
         std::string line;
+        std::ofstream fs("log.txt");
+        fs << "read line" << std::endl;
         std::getline(std::cin, line);
+
+        fs << "got line '" << line << "'" << std::endl;
         std::cout << vm["prefix-once"].as<std::string>() << line << std::endl;
     }
     else if (vm["pwd"].as<bool>())

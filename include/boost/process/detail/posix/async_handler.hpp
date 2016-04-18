@@ -4,15 +4,15 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 
-#ifndef BOOST_PROCESS_WINDOWS_ASYNC_HANDLER_HPP_
-#define BOOST_PROCESS_WINDOWS_ASYNC_HANDLER_HPP_
+#ifndef BOOST_PROCESS_POSIX_ASYNC_HANDLER_HPP_
+#define BOOST_PROCESS_POSIX_ASYNC_HANDLER_HPP_
 
-#include <boost/process/detail/windows/handler.hpp>
+#include <boost/process/detail/posix/handler.hpp>
 #include <type_traits>
 
-namespace boost { namespace process { namespace detail { namespace windows {
+namespace boost { namespace process { namespace detail { namespace posix {
 
-struct async_handler : handler_ext
+struct async_handler : boost::process::detail::posix::handler_base_ext
 {
 };
 

@@ -13,6 +13,7 @@
 #include <boost/process/error.hpp>
 #include <boost/process/execute.hpp>
 #include <boost/process/args.hpp>
+#include <boost/process/async.hpp>
 #include <system_error>
 #include <boost/asio.hpp>
 #if defined(BOOST_POSIX_API)
@@ -51,15 +52,17 @@ BOOST_AUTO_TEST_CASE(async_wait)
     using boost::unit_test::framework::master_test_suite;
     using namespace boost::asio;
 
+    boost::asio::io_service io_service;
+
     std::error_code ec;
     bp::child c = bp::execute(
         master_test_suite().argv[1],
         bp::args+={"test", "--wait", "1"},
-        ec
+        ec,
+        io_service
     );
     BOOST_REQUIRE(!ec);
 
-    boost::asio::io_service io_service;
 
 #if defined(BOOST_WINDOWS_API)
     windows::object_handle handle(io_service, c.native_handle());

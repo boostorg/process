@@ -18,6 +18,8 @@
 
 namespace boost { namespace process { namespace detail { namespace windows {
 
+struct child_handle;
+
 inline void terminate(const child_handle &p)
 {
     if (!::boost::detail::winapi::TerminateProcess(p.process_handle(), EXIT_FAILURE))

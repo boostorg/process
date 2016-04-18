@@ -14,7 +14,7 @@
 #include <boost/process/detail/handler.hpp>
 
 #if defined (BOOST_POSIX_API)
-#include <boost/process/detail/posix/initializers.hpp>
+#include <boost/process/detail/posix/start_dir.hpp>
 #elif defined (BOOST_WINDOWS_API)
 #include <boost/process/detail/windows/start_dir.hpp>
 #endif
@@ -25,32 +25,17 @@
 
 namespace boost { namespace process { namespace detail {
 
-class start_dir_init : public handler
-{
-public:
-    explicit start_dir_init(const std::string &s) : s_(s) {}
-
-    template <class Executor>
-    void on_setup(Executor& exec) const
-    {
-        api::apply_start_dir(exec, s_);
-    }
-
-private:
-    std::string s_;
-};
-
 struct start_dir_
 {
     constexpr start_dir_() {};
 
-    start_dir_init operator()(const std::string & st)             const {return start_dir_init(st); }
-    start_dir_init operator()(std::string && s)                   const {return start_dir_init(std::move(s)); }
-    start_dir_init operator()(const boost::filesystem::path & st) const {return start_dir_init(st.string()); }
+    api::start_dir_init operator()(const std::string & st)             const {return api::start_dir_init(st); }
+    api::start_dir_init operator()(std::string && s)                   const {return api::start_dir_init(std::move(s)); }
+    api::start_dir_init operator()(const boost::filesystem::path & st) const {return api::start_dir_init(st.string()); }
 
-    start_dir_init operator=(const std::string & st)             const {return start_dir_init(st); }
-    start_dir_init operator=(std::string && s)                   const {return start_dir_init(std::move(s)); }
-    start_dir_init operator=(const boost::filesystem::path & st) const {return start_dir_init(st.string()); }
+    api::start_dir_init operator=(const std::string & st)             const {return api::start_dir_init(st); }
+    api::start_dir_init operator=(std::string && s)                   const {return api::start_dir_init(std::move(s)); }
+    api::start_dir_init operator=(const boost::filesystem::path & st) const {return api::start_dir_init(st.string()); }
 
 };
 

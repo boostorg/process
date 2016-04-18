@@ -16,6 +16,7 @@
 #include <boost/process/child.hpp>
 #include <boost/process/args.hpp>
 #include <boost/process/execute.hpp>
+#include <boost/process/async.hpp>
 
 #include <system_error>
 #include <boost/system/error_code.hpp>
@@ -42,53 +43,44 @@ namespace bio = boost::iostreams;
 
 BOOST_AUTO_TEST_CASE(sync_io)
 {
+    std::cout << "sync_io" << std::endl;
     using boost::unit_test::framework::master_test_suite;
 
     bp::pipe p1;
     bp::pipe p2;
 
     std::error_code ec;
-
+  
     auto c = bp::execute(
-            master_test_suite().argv[1],
-            bp::args+={"test", "--prefix", "abc"},
-            bp::std_in <p1,
-            bp::std_out>p2,
-            ec
-     );
-     BOOST_REQUIRE(!ec);
+        master_test_suite().argv[1],
+        bp::args+={"test", "--prefix", "abc"},
+        bp::std_in <p1,
+        bp::std_out>p2,
+        ec);
+    
+    BOOST_REQUIRE(!ec);
+  
+  
+    bio::stream<bio::file_descriptor_sink> os(p1.sink());
 
-     bio::stream<bio::file_descriptor_sink> os(p1.sink());
 
-     os << "hello" << std::endl;
+    os << "hello" << std::endl;
+      
+    bio::stream<bio::file_descriptor_source> is(p2.source());
+    std::string s;
 
-     bio::stream<bio::file_descriptor_source> is(p2.source());
 
-     std::string s;
-     is >> s;
-     BOOST_CHECK_EQUAL(s, "abchello");
-     os << 123 << std::endl;
-     is >> s;
-     BOOST_CHECK_EQUAL(s, "abc123");
-     os << 3.1415 << std::endl;
-     is >> s;
-     BOOST_CHECK_EQUAL(s, "abc3.1415");
+    is >> s;
+    BOOST_CHECK_EQUAL(s, "abchello");
+    os << 123 << std::endl;
+    is >> s;
+    BOOST_CHECK_EQUAL(s, "abc123");
+    os << 3.1415 << std::endl;
+    is >> s;
+    BOOST_CHECK_EQUAL(s, "abc3.1415");
 
 }
 
-//bp::pipe create_async_pipe()
-//{
-//#if defined(BOOST_WINDOWS_API)
-//    std::string name = "\\\\.\\pipe\\boost_process_test_bind_stdin";
-//    HANDLE handle1 = CreateNamedPipeA(name.c_str(), PIPE_ACCESS_INBOUND,
-//        0, 1, 8192, 8192, 0, NULL);
-//    HANDLE handle2 = CreateFileA(name.c_str(), GENERIC_WRITE, 0, NULL,
-//        OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
-//    return bp::make_pipe(handle1, handle2);
-//#elif defined(BOOST_POSIX_API)
-//    return bp::create_pipe();
-//#endif
-//}
 
 struct write_handler
 {
@@ -108,6 +100,7 @@ struct write_handler
 
 BOOST_AUTO_TEST_CASE(async_io)
 {
+    std::cout << "async_io" << std::endl;
     using boost::unit_test::framework::master_test_suite;
 
     boost::asio::io_service io_service;
@@ -129,7 +122,6 @@ BOOST_AUTO_TEST_CASE(async_io)
 
     bio::stream<bio::file_descriptor_source> is(p2.source());
 
-    //pipe_end pend(io_service, p1.sink().handle());
 
     std::string s = "hello\n";
     boost::asio::async_write(p1, boost::asio::buffer(s),
@@ -140,6 +132,8 @@ BOOST_AUTO_TEST_CASE(async_io)
 
 BOOST_AUTO_TEST_CASE(nul)
 {
+    std::cout << "nul" << std::endl;
+
     using boost::unit_test::framework::master_test_suite;
 
     std::error_code ec;

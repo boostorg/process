@@ -10,23 +10,23 @@
 #ifndef BOOST_PROCESS_POSIX_SHELL_PATH_HPP
 #define BOOST_PROCESS_POSIX_SHELL_PATH_HPP
 
-#include <boost/process/config.hpp>
+#include <boost/process/detail/config.hpp>
 #include <boost/system/error_code.hpp>
 #include <boost/filesystem/path.hpp>
 
-namespace boost { namespace process { namespace posix {
+namespace boost { namespace process { namespace detail { namespace posix {
 
 inline boost::filesystem::path shell_path()
 {
     return "/bin/sh";
 }
 
-inline boost::filesystem::path shell_path(boost::system::error_code &ec)
+inline boost::filesystem::path shell_path(std::error_code &ec)
 {
     ec.clear();
     return "/bin/sh";
 }
 
-}}}
+}}}}
 
 #endif

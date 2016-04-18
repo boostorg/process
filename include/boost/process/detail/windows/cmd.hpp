@@ -17,17 +17,21 @@ namespace detail
 {
 namespace windows
 {
-template<class StringType, class Executor>
-void apply_cmd(const StringType & cmd_line, Executor & e)
-{
-    e.cmd_line = cmd_line;
-}
 
-template<class StringType, class Executor>
-void apply_cmd(const std::basic_string<StringType> & cmd_line, Executor & e)
+
+
+struct cmd_setter_ : ::boost::process::detail::handler_base
 {
-    e.cmd_line = cmd_line.c_str();
-}
+    cmd_setter_(std::string && cmd_line)      : _cmd_line(std::move(cmd_line)) {}
+    cmd_setter_(const std::string & cmd_line) : _cmd_line(cmd_line) {}
+    template <class Executor>
+    void on_setup(Executor& exec) const
+    {
+   		e.cmd_line = cmd_line.c_str();
+    }
+public:
+    std::string _cmd_line;
+};
 
 }
 

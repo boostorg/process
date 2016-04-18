@@ -7,14 +7,15 @@
 #define BOOST_PROCESS_WINDOWS_IS_RUNNING_HPP
 
 #include <boost/process/detail/config.hpp>
-#include <boost/system/error_code.hpp>
+#include <system_error>
 #include <cstdlib>
 #include <boost/detail/winapi/process.hpp>
 
 namespace boost { namespace process { namespace detail { namespace windows {
 
-template <class Process>
-bool is_running(const Process &p)
+struct child_handle;
+
+inline bool is_running(const child_handle &p)
 {
     ::boost::detail::winapi::DWORD_ code;
     //single value, not needed in the winapi.
@@ -27,8 +28,7 @@ bool is_running(const Process &p)
     return code == still_active;
 }
 
-template <class Process>
-bool is_running(const Process &p, std::error_code &ec)
+inline bool is_running(const child_handle &p, std::error_code &ec)
 {
     ::boost::detail::winapi::DWORD_ code;
     //single value, not needed in the winapi.

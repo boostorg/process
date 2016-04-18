@@ -70,12 +70,12 @@ struct std_in_
     api::file_in operator<(const std::string &p)             const {return api::file_in(p);}
     api::file_in operator<(const char*p)                     const {return api::file_in(p);}
 
-    api::pipe_in operator=(FILE * f)                                          const {return api::pipe_in(f);}
-    api::pipe_in operator=(const boost::iostreams::file_descriptor_source &f) const {return api::pipe_in(f);}
+    api::file_in operator=(FILE * f)                                          const {return f;}
+    api::file_in operator<(FILE * f)                                          const {return f;}
+    api::file_in operator<(const boost::iostreams::file_descriptor_source &f) const {return f;}
+    api::file_in operator=(const boost::iostreams::file_descriptor_source &f) const {return f;}
+    
     api::pipe_in operator=(const pipe & p)                                    const {return api::pipe_in(p);}
-
-    api::pipe_in operator<(FILE * f)                                          const {return api::pipe_in(f);}
-    api::pipe_in operator<(const boost::iostreams::file_descriptor_source &f) const {return api::pipe_in(f);}
     api::pipe_in operator<(const pipe & p)                                    const {return api::pipe_in(p);}
 
     api::async_in_buffer<const asio::mutable_buffer> operator=(const asio::mutable_buffer & buf) const {return buf;}
@@ -112,12 +112,12 @@ struct std_out_
     api::file_out<p1,p2> operator>(const std::string &p)             const {return api::file_out<p1,p2>(p);}
     api::file_out<p1,p2> operator>(const char*p)                     const {return api::file_out<p1,p2>(p);}
 
-    api::pipe_out<p1,p2> operator=(FILE * f)                                        const {return api::pipe_out<p1,p2>(f);}
-    api::pipe_out<p1,p2> operator=(const boost::iostreams::file_descriptor_sink &f) const {return api::pipe_out<p1,p2>(f);}
-    api::pipe_out<p1,p2> operator=(const pipe & p)                                  const {return api::pipe_out<p1,p2>(p);}
+    api::file_out<p1,p2> operator=(FILE * f)                                        const {return api::pipe_out<p1,p2>(f);}
+    api::file_out<p1,p2> operator=(const boost::iostreams::file_descriptor_sink &f) const {return api::pipe_out<p1,p2>(f);}
+    api::file_out<p1,p2> operator>(FILE * f)                                        const {return api::pipe_out<p1,p2>(f);}
+    api::file_out<p1,p2> operator>(const boost::iostreams::file_descriptor_sink &f) const {return api::pipe_out<p1,p2>(f);}
 
-    api::pipe_out<p1,p2> operator>(FILE * f)                                        const {return api::pipe_out<p1,p2>(f);}
-    api::pipe_out<p1,p2> operator>(const boost::iostreams::file_descriptor_sink &f) const {return api::pipe_out<p1,p2>(f);}
+    api::pipe_out<p1,p2> operator=(const pipe & p)                                  const {return api::pipe_out<p1,p2>(p);}
     api::pipe_out<p1,p2> operator>(const pipe & p)                                  const {return api::pipe_out<p1,p2>(p);}
 
     api::async_out_buffer<p1, p2, asio::mutable_buffer> operator=(asio::mutable_buffer & buf) const {return buf;}

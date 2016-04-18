@@ -13,12 +13,21 @@
 
 #include <boost/process/detail/config.hpp>
 #include <boost/process/detail/traits.hpp>
-#include <boost/process/detail/handler_base.hpp>
+
+
+#if defined(BOOST_POSIX_API)
+#include <boost/process/detail/posix/handler.hpp>
+#elif defined(BOOST_WINDOWS_API)
+#include <boost/process/detail/windows/handler.hpp>
+#endif
+
 #include <system_error>
 
 #include <type_traits>
 #include <boost/fusion/algorithm/query/find_if.hpp>
 #include <boost/fusion/sequence/intrinsic/end.hpp>
+#include <boost/fusion/sequence/comparison/equal_to.hpp>
+#include <boost/fusion/container/set/convert.hpp>
 
 #include <boost/type_index.hpp>
 #include <iostream>
@@ -27,7 +36,7 @@ namespace boost { namespace process {
 
 namespace detail {
 
-struct throw_on_error_ : ::boost::process::detail::handler_base
+struct throw_on_error_ : ::boost::process::detail::api::handler_base_ext
 {
     constexpr throw_on_error_() {};
 
@@ -40,12 +49,12 @@ struct throw_on_error_ : ::boost::process::detail::handler_base
     const throw_on_error_ &operator()() const {return *this;}
 };
 
-struct ignore_error_ : ::boost::process::detail::handler_base
+struct ignore_error_ : ::boost::process::detail::api::handler_base_ext
 {
     constexpr ignore_error_() {};
 };
 
-struct set_on_error : ::boost::process::detail::handler_base
+struct set_on_error : ::boost::process::detail::api::handler_base_ext
 {
     set_on_error(const set_on_error&) = default;
     explicit set_on_error(std::error_code &ec) : ec_(ec) {}
@@ -78,19 +87,24 @@ template<> struct is_error_handler<ignore_error_>   : std::true_type {};
 
 
 //note: is a tuple of pointers to initializers
-template<typename Tuple>
+template<typename Sequence>
 struct has_error_handler
 {
-    typedef typename boost::fusion::result_of::find_if<
-            Tuple,
-            is_error_handler<typename std::remove_reference<boost::mpl::_>::type>
-                >::type itr;
+    
+    typedef typename boost::fusion::result_of::as_set<Sequence>::type set_type;
+    typedef typename boost::fusion::result_of::has_key<set_type, set_on_error>::type    t1;
+    typedef typename boost::fusion::result_of::has_key<set_type, throw_on_error_>::type t2;
+    typedef typename boost::fusion::result_of::has_key<set_type, ignore_error_>::type   t3;
 
-    typedef typename boost::fusion::result_of::end<Tuple>::type end;
-    typedef typename boost::fusion::result_of::equal_to<itr, end>::type equal;
-    typedef std::integral_constant<bool,
-            !equal::value > type;
+    typedef typename boost::mpl::or_<t1,t2,t3>::type type;
 
+};
+
+template<typename Sequence>
+struct has_ignore_error
+{
+    typedef typename boost::fusion::result_of::as_set<Sequence>::type set_type;
+    typedef typename boost::fusion::result_of::has_key<set_type, ignore_error_>::type type;
 };
 
 struct error_builder

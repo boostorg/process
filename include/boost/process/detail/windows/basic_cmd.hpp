@@ -4,10 +4,11 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 
-#ifndef BOOST_PROCESS_WINDOWS_ARGS_HPP_
-#define BOOST_PROCESS_WINDOWS_ARGS_HPP_
+#ifndef BOOST_PROCESS_DETAIL_WINDOWS_BASIC_CMD_HPP_
+#define BOOST_PROCESS_DETAIL_WINDOWS_BASIC_CMD_HPP_
 
 #include <boost/algorithm/string/trim.hpp>
+#include <boost/process/detail/windows/handler.hpp>
 
 #include <vector>
 #include <string>
@@ -52,11 +53,33 @@ inline std::string build_args(std::vector<std::string> && data)
     return st;
 }
 
-template< class Executor>
-void apply_args(const std::string & data, Executor & e)
+
+struct exe_cmd_init : handler_base_ext
 {
-    e.cmd_line = data.c_str();
-}
+    exe_cmd_init(const std::string & exe, bool cmd_only = false)
+                : exe(exe), args({}), cmd_only(cmd_only) {};
+    exe_cmd_init(std::string && exe, bool cmd_only = false)
+                : exe(std::move(exe)), args({}), cmd_only(cmd_only) {};
+
+    exe_cmd_init(std::string && exe, std::vector<std::string> && args)
+            : exe(std::move(exe)), args(build_args(std::move(args))), cmd_only(false) {};
+    template <class Executor>
+    void on_setup(Executor& exec) const
+    {
+
+        if (cmd_only && args.empty())
+            e.cmd_line = exe.c_str();
+        else
+        {
+            e.exe = exe.c_str();
+            e.cmd_line = data.c_str();
+        }
+    }
+private:
+    std::string exe;
+    std::string args;
+    bool cmd_only;
+};
 
 }
 

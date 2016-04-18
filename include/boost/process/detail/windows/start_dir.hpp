@@ -15,11 +15,20 @@
 
 namespace boost { namespace process { namespace detail { namespace windows {
 
-template<typename Executor>
-void apply_start_dir(Executor & exec, const std::string & path)
+struct start_dir_init : initializer_base_ext
 {
-    exec.work_dir = path.c_str();
-}
+public:
+    explicit start_dir_init(const std::string &s) : s_(s) {}
+
+    template <class Executor>
+    void on_setup(Executor& exec) const
+    {
+    	exec.work_dir = path.c_str();
+    }
+
+private:
+    std::string s_;
+};
 
 }}}}
 

@@ -7,8 +7,8 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BOOST_PROCESS_WINDOWS_INITIALIZERS_FILE_OUT_HPP
-#define BOOST_PROCESS_WINDOWS_INITIALIZERS_FILE_OUT_HPP
+#ifndef BOOST_PROCESS_DETAIL_WINDOWS_FILE_OUT_HPP
+#define BOOST_PROCESS_DETAIL_WINDOWS_FILE_OUT_HPP
 
 #include <boost/detail/winapi/process.hpp>
 #include <boost/detail/winapi/handles.hpp>
@@ -25,6 +25,8 @@ struct file_out : public ::boost::process::detail::handler_base
 
     template<typename T>
     file_out(T&& t) : file(std::forward<T>(t), boost::iostreams::never_close_handle) {}
+    file_out(FILE * f) : file(_get_osfhandle(_fileno(f)), boost::iostreams::never_close_handle) {}
+    file_out(const boost::iostreams::file_descriptor_sink &f) : file(f.handle(), boost::iostreams::never_close_handle) {}
 
     template <typename WindowsExecutor>
     inline void on_setup(WindowsExecutor &e) const;

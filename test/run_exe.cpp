@@ -25,6 +25,9 @@ int main(int argc, char* argv[])
     auto c = bp::execute(argv[1], ec);
     BOOST_TEST(!ec);
 
+    if (ec)
+        std::cerr << ec.message() << std::endl;
+
     auto c2 = bp::execute("doesnt-exist", ec);
     BOOST_TEST(ec);
 

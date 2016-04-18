@@ -25,9 +25,7 @@ struct pipe_out : public ::boost::process::detail::handler_base
 {
     boost::iostreams::file_descriptor_sink file;
 
-    pipe_out(FILE * f) : file(_get_osfhandle(_fileno(f)), boost::iostreams::never_close_handle) {}
     pipe_out(const boost::process::pipe & p) : file(p.sink().handle(), boost::iostreams::never_close_handle) {}
-    pipe_out(const boost::iostreams::file_descriptor_sink &f) : file(f.handle(), boost::iostreams::never_close_handle) {}
 
     template <typename WindowsExecutor>
     void on_setup(WindowsExecutor &e) const;

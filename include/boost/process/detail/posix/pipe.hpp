@@ -26,31 +26,40 @@ class pipe
 {
     int _source;
     int _sink;
+    std::string _pipe_name;
 protected:
     pipe(int source, int sink) : _source(source), _sink(sink) {}
+    pipe(int source, int sink, const std::string & name) : _source(source), _sink(sink), _pipe_name(name) {}
 public:
     pipe() : pipe(create()) {}
     pipe(const pipe& ) = delete;
-    pipe(pipe&& lhs)  : _source(lhs._source), _sink(lhs._sink)
+    pipe(pipe&& lhs)  : _source(lhs._source), _sink(lhs._sink), _pipe_name(std::move(lhs._pipe_name))
     {
         lhs._source = 0;
         lhs._sink = 0;
+        lhs._pipe_name.clear();
     }
     pipe& operator=(const pipe& ) = delete;
     pipe& operator=(pipe&& lhs)
     {
-        lhs._source = _source;
-        lhs._sink   = _sink;
         _source = 0;
         _sink   = 0;
+        _pipe_name.clear();
+
+        lhs._source = _source;
+        lhs._sink   = _sink;
+        lhs._pipe_name.clear();
+
         return *this;
     }
     ~pipe()
     {
         if (_sink   != 0)
-            close(_sink);
+            ::close(_sink);
         if (_source != 0)
-            close(_source);
+            ::close(_source);
+        if (!_pipe_name.empty())
+            ::unlink(_pipe_name.c_str());
     }
     int source() const {return _source;}
     int sink  () const {return _sink;}
@@ -125,7 +134,7 @@ pipe pipe::create_named(const std::string & name)
     if (write_fd == -1)
         boost::process::detail::throw_last_error();
 
-    return pipe(read_fd, write_fd);
+    return pipe(read_fd, write_fd, name);
 
 }
 
@@ -147,7 +156,7 @@ pipe pipe::create_named(const std::string & name, std::error_code & ec)
     if (write_fd == -1)
         ec = boost::process::detail::get_last_error();
     
-    return pipe(read_fd, write_fd);
+    return pipe(read_fd, write_fd, name);
 }
 
 typedef boost::asio::posix::stream_descriptor async_pipe_handle;

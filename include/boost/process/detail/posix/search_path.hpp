@@ -10,7 +10,7 @@
 #ifndef BOOST_PROCESS_POSIX_SEARCH_PATH_HPP
 #define BOOST_PROCESS_POSIX_SEARCH_PATH_HPP
 
-#include <boost/process/config.hpp>
+#include <boost/process/detail/config.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/tokenizer.hpp>
 #include <string>
@@ -18,7 +18,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-namespace boost { namespace process { namespace posix {
+namespace boost { namespace process { namespace detail { namespace posix {
 
 inline std::string search_path(const std::string &filename,
     std::string path = "")
@@ -27,8 +27,8 @@ inline std::string search_path(const std::string &filename,
     {
         path = ::getenv("PATH");
         if (path.empty())
-            BOOST_PROCESS_THROW(std::runtime_error(
-                "Environment variable PATH not found"));
+             throw std::runtime_error(
+                "Environment variable PATH not found");
     }
 
     std::string result;
@@ -48,6 +48,6 @@ inline std::string search_path(const std::string &filename,
     return result;
 }
 
-}}}
+}}}}
 
 #endif

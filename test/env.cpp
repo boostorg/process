@@ -103,11 +103,13 @@ BOOST_AUTO_TEST_CASE(modifided_env)
     namespace bio = boost::iostreams;
 
     bp::pipe p;
-    boost::process::environment env = boost::this_process::environment(); //empty env, that would fail.
 
+    boost::process::environment env = boost::this_process::environment(); //empty env, that would fail.
+    std::cerr << "XYZ" << std::endl;
     std::string value = "TestString";
     env["BOOST_PROCESS_TEST_2"] = value;
 
+    std::cerr << "XYZ" << std::endl;
 
     std::error_code ec;
     bp::execute(
@@ -127,16 +129,3 @@ BOOST_AUTO_TEST_CASE(modifided_env)
     BOOST_CHECK(boost::algorithm::starts_with(s, "TestString"));
 }
 
-BOOST_AUTO_TEST_CASE(this_env)
-{
-    /*auto env = boost::this_process::environment();
-
-    for (auto e : env)
-    {
-        cout << e.get_name() << " : " << e.to_string() << endl;
-    }
-
-    BOOST_CHECK(false);*/
-
-
-}

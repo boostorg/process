@@ -114,8 +114,8 @@ struct executor : startup_info_impl<char>
     {
     }
 
-    void internal_throw(std:: true_type, std::error_code &ec ) {}
-    void internal_throw(std::false_type, std::error_code &ec ) {throw std::system_error(ec);}
+    void internal_throw(boost::mpl::true_, std::error_code &ec ) {}
+    void internal_throw(boost::mpl::false_, std::error_code &ec ) {throw std::system_error(ec);}
 
     struct on_setup_t
     {

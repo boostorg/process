@@ -13,6 +13,7 @@
 
 #include <boost/process/error.hpp>
 #include <boost/process/execute.hpp>
+#include <boost/process/async.hpp>
 
 #include <boost/system/error_code.hpp>
 #include <boost/asio.hpp>
@@ -96,7 +97,7 @@ BOOST_AUTO_TEST_CASE(async_wait)
         "test", "--exit-code", "123",
         ec
 #if defined(BOOST_POSIX_API)
-        , bpi::notify_io_service(io_service)
+        , io_service
 #endif
     );
     BOOST_REQUIRE(!ec);

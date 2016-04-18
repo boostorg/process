@@ -3,17 +3,18 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BOOST_PROCESS_POSIX_IS_RUNNING_HPP
-#define BOOST_PROCESS_POSIX_IS_RUNNING_HPP
+#ifndef BOOST_PROCESS_DETAIL_POSIX_IS_RUNNING_HPP
+#define BOOST_PROCESS_DETAIL_POSIX_IS_RUNNING_HPP
 
-#include <boost/process/config.hpp>
-#include <boost/system/error_code.hpp>
+#include <boost/process/detail/config.hpp>
+#include <boost/process/detail/posix/child_handle.hpp>
+#include <system_error>
 #include <signal.h>
 
-namespace boost { namespace process { namespace posix {
+namespace boost { namespace process { namespace detail {namespace posix {
 
-template <class Process>
-bool is_running(const Process &p)
+
+inline bool is_running(const child_handle &p)
 {
     if (::kill(p.pid, 0) == -1)
     {
@@ -23,21 +24,15 @@ bool is_running(const Process &p)
         if (last_error == ESRCH)
             return false;
 
-        boost::system::error_code ec(errno, boost::system::system_category());
-        boost::throw_exception(
-                               boost::system::system_error(
-                                   ec, "is_running error"
-                               )
-                           );
-        //BOOST_PROCESS_THROW_LAST_SYSTEM_ERROR("kill(2) failed");
+        ::boost::process::detail::throw_last_error("is_running error");
+
     }
     else
         return true;
 
 }
 
-template <class Process>
-bool is_running(const Process &p, boost::system::error_code &ec)
+inline bool is_running(const child_handle &p, std::error_code &ec)
 {
     if (::kill(p.pid, 0) == -1)
     {
@@ -45,9 +40,7 @@ bool is_running(const Process &p, boost::system::error_code &ec)
         if (last_error == ESRCH)
             return false;
 
-        ec.assign(last_error, boost::system::system_category());
-
-        BOOST_PROCESS_RETURN_LAST_SYSTEM_ERROR(ec);
+        ec = ::boost::process::detail::get_last_error();
     }
     else
     {
@@ -56,6 +49,6 @@ bool is_running(const Process &p, boost::system::error_code &ec)
     }
 }
 
-}}}
+}}}}
 
 #endif

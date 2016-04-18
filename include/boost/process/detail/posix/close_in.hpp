@@ -7,19 +7,18 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BOOST_PROCESS_POSIX_INITIALIZERS_CLOSE_STDIN_HPP
-#define BOOST_PROCESS_POSIX_INITIALIZERS_CLOSE_STDIN_HPP
+#ifndef BOOST_PROCESS_WINDOWS_INITIALIZERS_CLOSE_IN_HPP
+#define BOOST_PROCESS_WINDOWS_INITIALIZERS_CLOSE_IN_HPP
 
-#include <boost/process/posix/initializers/initializer_base.hpp>
-#include <unistd.h>
 
-namespace boost { namespace process { namespace posix { namespace initializers {
+#include <boost/process/detail/posix/handler.hpp>
 
-class close_stdin : public initializer_base
+namespace boost { namespace process { namespace detail { namespace posix {
+
+struct close_in : handler_base_ext
 {
-public:
-    template <class PosixExecutor>
-    void on_exec_setup(PosixExecutor&) const
+    template <class Executor>
+    void on_exec_setup(Executor &e) const
     {
         ::close(STDIN_FILENO);
     }

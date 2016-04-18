@@ -23,7 +23,6 @@
 
 #include <boost/algorithm/string/predicate.hpp>
 
-#include <iostream>
 
 using namespace std;
 
@@ -57,6 +56,7 @@ BOOST_AUTO_TEST_CASE(async_wait)
     BOOST_CHECK_EQUAL(exit_code, 123);
 }
 
+
 BOOST_AUTO_TEST_CASE(async_out_stream)
 {
     using boost::unit_test::framework::master_test_suite;
@@ -68,20 +68,20 @@ BOOST_AUTO_TEST_CASE(async_out_stream)
 
     boost::asio::streambuf buf;
 
-    bp::execute(
-        master_test_suite().argv[1],
-        "test", "--echo-stdout", "abc",
-        bp::std_out > buf,
-        io_service,
-        ec
-    );
+    bp::execute(master_test_suite().argv[1],
+                "test", "--echo-stdout", "abc",
+                bp::std_out > buf,
+                io_service,
+                ec);
     BOOST_REQUIRE(!ec);
+
 
     io_service.run();
     std::istream istr(&buf);
 
     std::string line;
     std::getline(istr, line);
+    BOOST_REQUIRE_GE(line.size(), 3);
     BOOST_CHECK(boost::algorithm::starts_with(line, "abc"));
 }
 
@@ -89,6 +89,7 @@ BOOST_AUTO_TEST_CASE(async_out_stream)
 
 BOOST_AUTO_TEST_CASE(async_in_stream)
 {
+
     using boost::unit_test::framework::master_test_suite;
 
     boost::asio::io_service io_service;
@@ -99,7 +100,6 @@ BOOST_AUTO_TEST_CASE(async_in_stream)
     boost::asio::streambuf buf;
     boost::asio::streambuf in_buf;
 
-    std::string st = "test-";
 
     std::ostream ostr(&in_buf);
     ostr << "-string" << endl ;
@@ -114,14 +114,20 @@ BOOST_AUTO_TEST_CASE(async_in_stream)
     );
     BOOST_REQUIRE(!ec);
 
+
     io_service.run();
-
-
     std::istream istr(&buf);
 
     std::string line;
     std::getline(istr, line);
-    BOOST_CHECK(boost::algorithm::starts_with(line, "test-string"));
+
+    std::string val = "test-string";
+    BOOST_REQUIRE_GE(line.size(), val.size());
+    if (line >= val)
+        BOOST_CHECK(boost::algorithm::starts_with(line, val));
+
+    
+
 }
 
 

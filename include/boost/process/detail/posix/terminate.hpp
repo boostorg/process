@@ -7,31 +7,32 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BOOST_PROCESS_POSIX_TERMINATE_HPP
-#define BOOST_PROCESS_POSIX_TERMINATE_HPP
+#ifndef BOOST_PROCESS_DETAIL_POSIX_TERMINATE_HPP
+#define BOOST_PROCESS_DETAIL_POSIX_TERMINATE_HPP
 
-#include <boost/process/config.hpp>
-#include <boost/system/error_code.hpp>
+#include <boost/process/detail/config.hpp>
+#include <boost/process/detail/posix/child_handle.hpp>
+#include <system_error>
 #include <signal.h>
 
-namespace boost { namespace process { namespace posix {
 
-template <class Process>
-void terminate(const Process &p)
+namespace boost { namespace process { namespace detail { namespace posix {
+
+
+inline void terminate(const child_handle &p)
 {
     if (::kill(p.pid, SIGKILL) == -1)
-        BOOST_PROCESS_THROW_LAST_SYSTEM_ERROR("kill(2) failed");
+        boost::process::detail::throw_last_error("kill(2) failed");
 }
 
-template <class Process>
-void terminate(const Process &p, boost::system::error_code &ec)
+inline  void terminate(const child_handle &p, std::error_code &ec)
 {
     if (::kill(p.pid, SIGKILL) == -1)
-        BOOST_PROCESS_RETURN_LAST_SYSTEM_ERROR(ec);
+        ec = boost::process::detail::get_last_error();
     else
         ec.clear();
 }
 
-}}}
+}}}}
 
 #endif

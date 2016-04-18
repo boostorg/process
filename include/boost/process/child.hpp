@@ -26,10 +26,10 @@
 
 
 #if defined(BOOST_POSIX_API)
-#include <boost/process/posix/child_handle.hpp>
-#include <boost/process/posix/terminate.hpp>
-#include <boost/process/posix/wait_for_exit.hpp>
-#include <boost/process/posix/is_running.hpp>
+#include <boost/process/detail/posix/child_handle.hpp>
+#include <boost/process/detail/posix/terminate.hpp>
+#include <boost/process/detail/posix/wait_for_exit.hpp>
+#include <boost/process/detail/posix/is_running.hpp>
 #elif defined(BOOST_WINDOWS_API)
 #include <boost/process/detail/windows/child_handle.hpp>
 #include <boost/process/detail/windows/terminate.hpp>

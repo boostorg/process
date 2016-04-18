@@ -8,67 +8,44 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BOOST_PROCESS_WINDOWS_INITIALIZERS_SET_CMD_LINE_HPP
-#define BOOST_PROCESS_WINDOWS_INITIALIZERS_SET_CMD_LINE_HPP
+#ifndef BOOST_PROCESS_DETAIL_CMD_LINE_HPP
+#define BOOST_PROCESS_DETAIL_CMD_LINE_HPP
 
 #include <boost/detail/winapi/config.hpp>
 #include <boost/process/detail/config.hpp>
 #include <boost/process/detail/handler_base.hpp>
 #include <boost/process/detail/traits/cmd_or_exe.hpp>
+
+#if defined(BOOST_POSIX_API)
+#include <boost/process/detail/posix/cmd.hpp>
+#elif defined(BOOST_WINDOWS_API)
 #include <boost/process/detail/windows/cmd.hpp>
+#endif
+
 
 namespace boost { namespace process { namespace detail {
 
-template <class String>
-struct cmd_setter_ : ::boost::process::detail::handler_base
-{
-    cmd_setter_(String && cmd_line) : _cmd_line(std::move(cmd_line)) {}
-    cmd_setter_(const String & cmd_line) : _cmd_line(cmd_line) {}
-    template <class Executor>
-    void on_setup(Executor& exec) const
-    {
-        detail::api::apply_cmd(_cmd_line, exec);
-    }
-public:
-    String _cmd_line;
-};
 
 struct cmd_
 {
     constexpr cmd_() {}
-    inline cmd_setter_<const wchar_t *> operator()(const wchar_t *ws) const
+
+    inline api::cmd_setter_ operator()(const char *s) const
     {
-        return cmd_setter_<const wchar_t *>(ws);
+        return api::cmd_setter_(s);
     }
-    inline cmd_setter_<const wchar_t *> operator= (const wchar_t *ws) const
+    inline api::cmd_setter_ operator= (const char *s) const
     {
-        return cmd_setter_<const wchar_t *>(ws);
+        return api::cmd_setter_(s);
     }
 
-    inline cmd_setter_<std::wstring> operator()(const std::wstring &ws) const
+    inline api::cmd_setter_ operator()(const std::string &s) const
     {
-        return cmd_setter_<std::wstring>(ws);
+        return api::cmd_setter_(s);
     }
-    inline cmd_setter_<std::wstring> operator= (const std::wstring &ws) const
+    inline api::cmd_setter_ operator= (const std::string &s) const
     {
-        return cmd_setter_<std::wstring>(ws);
-    }
-    inline cmd_setter_<const char *> operator()(const char *s) const
-    {
-        return cmd_setter_<const char *>(s);
-    }
-    inline cmd_setter_<const char *> operator= (const char *s) const
-    {
-        return cmd_setter_<const char *>(s);
-    }
-
-    inline cmd_setter_<std::string> operator()(const std::string &s) const
-    {
-        return cmd_setter_<std::string>(s);
-    }
-    inline cmd_setter_<std::string> operator= (const std::string &s) const
-    {
-        return cmd_setter_<std::string>(s);
+        return api::cmd_setter_(s);
     }
 };
 

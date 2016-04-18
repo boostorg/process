@@ -7,19 +7,20 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BOOST_PROCESS_POSIX_INITIALIZERS_START_IN_DIR_HPP
-#define BOOST_PROCESS_POSIX_INITIALIZERS_START_IN_DIR_HPP
+#ifndef BOOST_PROCESS_DETAIL_POSIX_START_DIR_HPP
+#define BOOST_PROCESS_DETAIL_POSIX_START_DIR_HPP
 
-#include <boost/process/posix/initializers/initializer_base.hpp>
+#include <boost/process/detail/posix/handler.hpp>
 #include <string>
 #include <unistd.h>
 
-namespace boost { namespace process { namespace posix { namespace initializers {
+namespace boost { namespace process { namespace detail { namespace posix {
 
-class start_in_dir : public initializer_base
+
+struct start_dir_init : handler_base_ext
 {
 public:
-    explicit start_in_dir(const std::string &s) : s_(s) {}
+    explicit start_dir_init(const std::string &s) : s_(s) {}
 
     template <class PosixExecutor>
     void on_exec_setup(PosixExecutor&) const
