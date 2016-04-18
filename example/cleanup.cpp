@@ -18,20 +18,21 @@ using namespace boost::process::initializers;
 int main()
 {
 //[cleanup
-    child c = execute(run_exe("test.exe"));
-    wait_for_exit(c);
+	{
+    	child c = execute("test.exe");
+    	//wait for exit
+	}
 //]
 
-//[cleanup_posix
-#if defined(BOOST_POSIX_API)
-    signal(SIGCHLD, SIG_IGN);
-#endif
-    execute(run_exe("test.exe"));
+//[cleanup_detach_short
+
+    execute("test.exe").detach();
 //]
 
-//[cleanup_windows
+//[cleanup_detach
     {
         child c = execute(run_exe("test.exe"));
+        c.detach()
     }
 //]
 }

@@ -17,16 +17,16 @@ int main()
 {
 //[work_dir
     execute(
-        run_exe("test.exe"),
-        start_in_dir("../foo")
+        "test.exe",
+        start_dir="../foo"
     );
 //]
 
 //[work_dir_abs
     boost::filesystem::path exe = "test.exe";
     execute(
-        run_exe(boost::filesystem::absolute(exe)),
-        start_in_dir("../foo")
+        boost::filesystem::absolute(exe),
+        start_dir="../foo"
     );
 //]
 }

@@ -11,10 +11,9 @@
 #include <boost/process.hpp>
 
 using namespace boost::process;
-using namespace boost::process::initializers;
 
 int main()
 {
-    execute(run_exe("test.exe"));
+    execute("test.exe");
 }
 //]

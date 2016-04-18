@@ -15,11 +15,11 @@ using namespace boost::process::initializers;
 int main()
 {
 //[execute
-    execute(run_exe("test.exe"));
+    execute("test.exe");
 //]
 
 //[execute_path
     boost::filesystem::path exe = "../test.exe";
-    execute(run_exe(exe));
+    execute(exe);
 //]
 }

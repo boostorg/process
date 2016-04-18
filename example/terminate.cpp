@@ -14,8 +14,8 @@ using namespace boost::process::initializers;
 
 int main()
 {
-//[terminate
-    child c = execute(run_exe("test.exe"));
-    terminate(c);
+//[c_terminate
+    child c = execute("test.exe");
+    c.terminate();
 //]
 }

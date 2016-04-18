@@ -32,29 +32,12 @@ int main()
 //[async
     boost::asio::io_service io_service;
 
-#if defined(BOOST_POSIX_API)
-    int status;
-    boost::asio::signal_set set(io_service, SIGCHLD);
-    set.async_wait(
-        [&status](const boost::system::error_code&, int) { ::wait(&status); }
+    child c;
+    c = execute(
+        run_exe("test.exe"), 
+        io_service,
+        on_exit([&](int exit, const std::error_code& ec_in){c.set_exit(exit);})
     );
-#endif
-
-    child c = execute(
-        run_exe("test.exe")
-#if defined(BOOST_POSIX_API)
-        , notify_io_service(io_service)
-#endif
-    );
-
-#if defined(BOOST_WINDOWS_API)
-    DWORD exit_code;
-    boost::asio::windows::object_handle handle(io_service, c.process_handle());
-    handle.async_wait(
-        [&handle, &exit_code](const boost::system::error_code&)
-            { ::GetExitCodeProcess(handle.native(), &exit_code); }
-    );
-#endif
 
     io_service.run();
 //]

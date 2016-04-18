@@ -8,7 +8,7 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include <boost/process.hpp>
-#include <boost/system/error_code.hpp>
+#include <system_error>
 
 using namespace boost::process;
 using namespace boost::process::initializers;
@@ -16,17 +16,11 @@ using namespace boost::process::initializers;
 int main()
 {
 //[set_on_error
-    boost::system::error_code ec;
-    execute(
-        run_exe("test.exe"),
-        set_on_error(ec)
-    );
+    std::error_code ec;
+    execute("test.exe", ec);
 //]
 
-//[throw_on_error
-    execute(
-        run_exe("test.exe"),
-        throw_on_error()
-    );
+//[ignore_error
+    execute("test.exe", ignore_error);
 //]
 }
