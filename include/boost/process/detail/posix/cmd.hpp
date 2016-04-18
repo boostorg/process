@@ -7,6 +7,7 @@
 #ifndef BOOST_PROCESS_DETAIL_POSIX_CMD_HPP_
 #define BOOST_PROCESS_DETAIL_POSIX_CMD_HPP_
 
+#include <boost/process/detail/posix/handler.hpp>
 #include <string>
 #include <vector>
 
@@ -48,7 +49,7 @@ inline std::vector<std::string> build_cmd(const std::string & value)
     return ret;
 }
 
-struct cmd_setter_ : ::boost::process::detail::handler_base
+struct cmd_setter_ : handler_base_ext
 {
     cmd_setter_(std::string && cmd_line)      : _cmd_line(api::build_cmd(std::move(cmd_line))) {}
     cmd_setter_(const std::string & cmd_line) : _cmd_line(api::build_cmd(cmd_line)) {}
@@ -58,18 +59,18 @@ struct cmd_setter_ : ::boost::process::detail::handler_base
         exec.cmd_line = &_cmd_impl.front();
     }
 private:
-    static std::vector<const char*> make_cmd(const std::vector<std::string> & args);
+    static std::vector<char*> make_cmd(std::vector<std::string> & args);
     std::vector<std::string> _cmd_line;
-    std::vector<const char*> _cmd_impl  = make_cmd(_cmd_line);
+    std::vector<char*> _cmd_impl  = make_cmd(_cmd_line);
 };
 
 
-std::vector<const char*> cmd_setter_::make_cmd(const std::vector<std::string> & args)
+std::vector<char*> cmd_setter_::make_cmd(std::vector<std::string> & args)
 {
-    std::vector<const char*> vec;
+    std::vector<char*> vec;
 
     for (auto & v : args)
-        vec.push_back(v.c_str());
+        vec.push_back(&v.front());
 
     vec.push_back(nullptr);
 

@@ -52,6 +52,6 @@ test-suite ts :
     [ run show_window.cpp iostreams system : : sparring_partner  : <build>no <target-os>windows:<build>yes ]
     [ run start_dir.cpp iostreams filesystem system : : sparring_partner ]
     [ run terminate.cpp system filesystem : : sparring_partner       ]
-    [ run throw_on_error.cpp system : : sparring_partner  ]
+    [ run throw_on_error.cpp system filesystem : : sparring_partner  ]
     [ run wait.cpp system filesystem : : sparring_partner ]
 	;
