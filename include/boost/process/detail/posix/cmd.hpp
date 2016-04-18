@@ -53,9 +53,9 @@ struct cmd_setter_ : ::boost::process::detail::handler_base
     cmd_setter_(std::string && cmd_line)      : _cmd_line(api::build_cmd(std::move(cmd_line))) {}
     cmd_setter_(const std::string & cmd_line) : _cmd_line(api::build_cmd(cmd_line)) {}
     template <class Executor>
-    void on_setup(Executor& exec) const
+    void on_setup(Executor& exec) 
     {
-        exec.cmd_line = _cmd_impl.data();
+        exec.cmd_line = &_cmd_impl.front();
     }
 private:
     static std::vector<const char*> make_cmd(const std::vector<std::string> & args);
