@@ -25,7 +25,7 @@ struct file_out : public ::boost::process::detail::handler_base
 
     template<typename T>
     file_out(T&& t) : file(std::forward<T>(t), boost::iostreams::never_close_handle) {}
-    file_out(FILE * f) : file(_get_osfhandle(_fileno(f)), boost::iostreams::never_close_handle) {}
+    file_out(FILE * f) : file(reinterpret_cast<void*>(_get_osfhandle(_fileno(f))), boost::iostreams::never_close_handle) {}
     file_out(const boost::iostreams::file_descriptor_sink &f) : file(f.handle(), boost::iostreams::never_close_handle) {}
 
     template <typename WindowsExecutor>

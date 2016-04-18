@@ -25,7 +25,7 @@ struct file_in : public ::boost::process::detail::handler_base
     template<typename T>
     file_in(T&& t) : file(std::forward<T>(t)) {}
     file_in(const boost::iostreams::file_descriptor_source &f) : file(f) {}
-    file_in(FILE * f) : file(_get_osfhandle(_fileno(f)), boost::iostreams::never_close_handle) {}
+    file_in(FILE * f) : file(reinterpret_cast<void*>(_get_osfhandle(_fileno(f))), boost::iostreams::never_close_handle) {}
 
     template <class WindowsExecutor>
     void on_setup(WindowsExecutor &e) const
