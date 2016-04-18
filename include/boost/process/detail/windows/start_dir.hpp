@@ -11,19 +11,18 @@
 #define BOOST_PROCESS_DETAIL_WINDOWS_START_DIR_HPP
 
 #include <string>
-
+#include <boost/process/detail/windows/handler.hpp>
 
 namespace boost { namespace process { namespace detail { namespace windows {
 
-struct start_dir_init : initializer_base_ext
+struct start_dir_init : handler_base_ext
 {
-public:
     explicit start_dir_init(const std::string &s) : s_(s) {}
 
     template <class Executor>
     void on_setup(Executor& exec) const
     {
-    	exec.work_dir = path.c_str();
+    	exec.work_dir = s_.c_str();
     }
 
 private:

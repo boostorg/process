@@ -335,8 +335,8 @@ namespace this_process
 
 typedef ::boost::process::detail::api::native_handle_t native_handle_t;
 
-inline int get_id()                   { return detail::api::get_id();}
-inline int native_handle()            { return detail::api::native_handle();}
+inline int get_id()                               { return detail::api::get_id();}
+inline native_handle_t native_handle()            { return detail::api::native_handle();}
 inline native_environment environment() { return native_environment(); }
 inline std::vector<std::string> path()  { return native_environment()["PATH"].to_vector();}
 inline std::string pwd()                { return native_environment()["PWD"].to_string();}

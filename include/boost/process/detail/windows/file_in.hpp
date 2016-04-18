@@ -14,6 +14,7 @@
 #include <boost/detail/winapi/handles.hpp>
 #include <boost/process/detail/handler_base.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
+#include <io.h>
 
 namespace boost { namespace process { namespace detail { namespace windows {
 

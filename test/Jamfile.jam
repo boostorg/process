@@ -13,7 +13,6 @@ project : requirements
   <toolset>msvc:<define>_SCL_5SECURE_NO_WARNINGS
   <target-os>windows:<define>WIN32_LEAN_AND_MEAN
   <target-os>linux:<linkflags>-lpthread
-  <toolset>gcc:<cxxflags>-std=gnu++11
 ;
 
 searched-lib shell32 ;
@@ -34,7 +33,7 @@ exe sparring_partner : sparring_partner.cpp program_options system filesystem io
 test-suite ts :
     [ run pipe.cpp iostreams system filesystem ]
     [ run async.cpp iostreams system thread filesystem : : sparring_partner	]
-    [ run bind_stderr.cpp iostreams filesystem 			      : : sparring_partner ]l
+    [ run bind_stderr.cpp iostreams filesystem 			      : : sparring_partner ]
     [ run bind_stdin.cpp iostreams system filesystem 		  : : sparring_partner ]
   	[ run bind_stdin_stdout.cpp iostreams system filesystem   : : sparring_partner ]
     [ run bind_stdout.cpp iostreams system filesystem 		  : : sparring_partner ]

@@ -68,12 +68,20 @@ struct exe_cmd_init : handler_base_ext
     {
 
         if (cmd_only && args.empty())
-            e.cmd_line = exe.c_str();
+            exec.cmd_line = exe.c_str();
         else
         {
-            e.exe = exe.c_str();
-            e.cmd_line = data.c_str();
+            exec.exe = exe.c_str();
+            exec.cmd_line = args.c_str();
         }
+    }
+    static exe_cmd_init exe_args(std::string&& exe, std::vector<std::string> && args)
+    {
+        return exe_cmd_init(std::move(exe), std::move(args));
+    }
+    static exe_cmd_init cmd(std::string&& cmd)
+    {
+        return exe_cmd_init(std::move(cmd), true);
     }
 private:
     std::string exe;

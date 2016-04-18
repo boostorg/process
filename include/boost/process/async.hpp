@@ -41,7 +41,7 @@ struct is_io_service<api::io_service_ref> : std::true_type {};
 template<typename Tuple>
 inline asio::io_service& get_io_service(const Tuple & tup)
 {
-    boost::process::detail::posix::io_service_ref& ref = *boost::fusion::find_if<is_io_service<boost::mpl::_>>(tup);
+    boost::process::detail::api::io_service_ref& ref = *boost::fusion::find_if<is_io_service<boost::mpl::_>>(tup);
     return ref.get();
 }
 

@@ -12,7 +12,7 @@
 
 namespace boost { namespace process { namespace detail { namespace windows {
 
-struct async_handler : handler_ext
+struct async_handler : handler_base_ext
 {
 };
 

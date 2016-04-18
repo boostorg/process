@@ -277,6 +277,8 @@ std::vector<Char*> basic_environment_impl<Char>::_load_var(Char* p)
 inline int   get_id()         {return boost::detail::winapi::GetCurrentProcessId();}
 inline void* native_handle()  {return boost::detail::winapi::GetCurrentProcess(); }
 
+typedef void* native_handle_t;
+
 }
 
 }
