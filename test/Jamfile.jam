@@ -30,12 +30,11 @@ exe sparring_partner : sparring_partner.cpp program_options system filesystem io
 	<warnings>off
 	;
 	
-exe sub_launch : sub_launcher.cpp program_options : <warnings>off ;	
+exe sub_launcher : sub_launcher.cpp program_options filesystem system : <warnings>off ;	
 	
-
 test-suite ts :
     [ run pipe.cpp iostreams system filesystem ]
-    [ run attachment.cpp iostreams system thread : : sub_launch          ]
+    [ run attachment.cpp iostreams system thread filesystem  : : sub_launcher     ]
     [ run async.cpp iostreams system thread filesystem       : : sparring_partner ]
     [ run bind_stderr.cpp iostreams filesystem 			     : : sparring_partner ]
     [ run bind_stdin.cpp iostreams system filesystem 		 : : sparring_partner ]
