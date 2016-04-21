@@ -27,6 +27,11 @@ struct child_handle
                                   job_object(job_object)
     {}
 
+    explicit child_handle(::boost::detail::winapi::HANDLE_ handle) :
+                                  proc_info{handle, nullptr, 0,0},
+                                  job_object(job_object)
+    {}
+
     child_handle() = default;
     ~child_handle()
     {

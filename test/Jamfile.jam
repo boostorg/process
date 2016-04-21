@@ -29,18 +29,22 @@ alias thread   			: /boost//thread   		  ;
 exe sparring_partner : sparring_partner.cpp program_options system filesystem iostreams :
 	<warnings>off
 	;
+	
+exe sub_launch : sub_launcher.cpp program_options : <warnings>off ;	
+	
 
 test-suite ts :
     [ run pipe.cpp iostreams system filesystem ]
-    [ run async.cpp iostreams system thread filesystem : : sparring_partner	]
-    [ run bind_stderr.cpp iostreams filesystem 			      : : sparring_partner ]
-    [ run bind_stdin.cpp iostreams system filesystem 		  : : sparring_partner ]
-  	[ run bind_stdin_stdout.cpp iostreams system filesystem   : : sparring_partner ]
-    [ run bind_stdout.cpp iostreams system filesystem 		  : : sparring_partner ]
-    [ run bind_stdout_stderr.cpp iostreams system filesystem  : : sparring_partner ]
-    [ run close_stderr.cpp iostreams system filesystem        : : sparring_partner ]
-    [ run close_stdin.cpp iostreams  system filesystem       : : sparring_partner  ]
-    [ run close_stdout.cpp iostreams system filesystem       : : sparring_partner  ]
+    [ run attachment.cpp iostreams system thread : : sub_launch          ]
+    [ run async.cpp iostreams system thread filesystem       : : sparring_partner ]
+    [ run bind_stderr.cpp iostreams filesystem 			     : : sparring_partner ]
+    [ run bind_stdin.cpp iostreams system filesystem 		 : : sparring_partner ]
+  	[ run bind_stdin_stdout.cpp iostreams system filesystem  : : sparring_partner ]
+    [ run bind_stdout.cpp iostreams system filesystem 		 : : sparring_partner ]
+    [ run bind_stdout_stderr.cpp iostreams system filesystem : : sparring_partner ]
+    [ run close_stderr.cpp iostreams system filesystem       : : sparring_partner ]
+    [ run close_stdin.cpp iostreams  system filesystem       : : sparring_partner ]
+    [ run close_stdout.cpp iostreams system filesystem       : : sparring_partner ]
     [ run exit_code.cpp iostreams program_options system filesystem : : sparring_partner  ]
 #    [ run extensions.cpp system filesystem : : sparring_partner   ]
     [ run env.cpp iostreams program_options system filesystem : : sparring_partner ]

@@ -21,7 +21,7 @@ public:
     template <class WindowsExecutor>
     void on_setup(WindowsExecutor &e) const
     {
-        e.job_object = ::boost::detail::winapi::create_job_object(e.proc_attrs, nullptr);
+        e.job_object = ::boost::detail::winapi::create_job_object(e.proc_attrs, static_cast<const char*>(nullptr));
     }
 };
 

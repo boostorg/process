@@ -60,7 +60,7 @@ public:
     typedef ::boost::process::detail::api::child_handle child_handle;
     typedef child_handle::process_handle_t native_handle_t;
     explicit child(child_handle &&ch) : _child_handle(std::move(ch)) {}
-
+    explicit child(native_handle_t & handle) : _child_handle(handle) {};
     child(const child&) = delete;
     child(child && lhs)
         : _child_handle(std::move(lhs._child_handle)),
