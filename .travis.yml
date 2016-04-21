@@ -18,7 +18,7 @@ env:
 
         # Files, which coverage results must be ignored (files from other projects).
         # Example: - IGNORE_COVERAGE='*/boost/progress.hpp */filesystem/src/*'
-        - IGNORE_COVERAGE='*/detail/pe_info.hpp */detail/macho_info.hpp */boost/progress.hpp */filesystem/src/*'
+        - IGNORE_COVERAGE=''
 
         # Explicitly remove the following library from Boost. This may be usefull, if you're for example running Travis
         # from `Boost.DLL` repo, while Boost already has `dll`.
@@ -94,11 +94,7 @@ after_success:
     - find ../../../bin.v2/ -name "*.gcno" -exec cp "{}" $TRAVIS_BUILD_DIR/coverals/ \;
 
     # Preparing Coveralls data by changind data format to a readable one
-    - git clone https://github.com/linux-test-project/lcov.git lcov_dir
-    - GCOV_VERSION=""
-    - if [[ "$TOOLSET" == *"-"* ]]; then GCOV_VERSION="--gcov-tool gcov-${TOOLSET#*-}"; fi
-    - LCOV="$BOOST/libs/$PROJECT_TO_TEST/test/lcov_dir/bin/lcov $GCOV_VERSION"
-    - $LCOV --directory $TRAVIS_BUILD_DIR/coverals --base-directory ./ --capture --output-file $TRAVIS_BUILD_DIR/coverals/coverage.info
+    - lcov --directory $TRAVIS_BUILD_DIR/coverals --base-directory ./ --capture --output-file $TRAVIS_BUILD_DIR/coverals/coverage.info
 
     # ... erasing /test/ /example/ folder data
     - cd $BOOST
@@ -107,7 +103,7 @@ after_success:
     # ... erasing data that is not related to this project directly
     - OTHER_LIBS=`grep "submodule .*" .gitmodules | sed 's/\[submodule\ "\(.*\)"\]/"\*\/boost\/\1\.hpp" "\*\/boost\/\1\/\*"/g'| sed "/\"\*\/boost\/$PROJECT_TO_TEST\/\*\"/d" | sed ':a;N;$!ba;s/\n/ /g'`
     - echo $OTHER_LIBS
-    - eval "$LCOV --remove $TRAVIS_BUILD_DIR/coverals/coverage.info $OTHER_LIBS -o $TRAVIS_BUILD_DIR/coverals/coverage.info"
+    - eval "lcov --remove $TRAVIS_BUILD_DIR/coverals/coverage.info $OTHER_LIBS -o $TRAVIS_BUILD_DIR/coverals/coverage.info"
 
     # Sending data to Coveralls
     - cd $TRAVIS_BUILD_DIR
