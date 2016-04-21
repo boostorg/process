@@ -45,7 +45,7 @@ test-suite ts :
     [ run close_stdin.cpp iostreams  system filesystem       : : sparring_partner ]
     [ run close_stdout.cpp iostreams system filesystem       : : sparring_partner ]
     [ run exit_code.cpp iostreams program_options system filesystem : : sparring_partner  ]
-#    [ run extensions.cpp system filesystem : : sparring_partner   ]
+    [ run extensions.cpp system filesystem : : sparring_partner   ]
     [ run env.cpp iostreams program_options system filesystem : : sparring_partner ]
     [ run posix_specific.cpp iostreams system filesystem : : sparring_partner : <build>no <target-os>linux:<build>yes   ]
     [ run run_exe.cpp filesystem : : sparring_partner        ]

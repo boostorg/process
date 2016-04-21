@@ -13,6 +13,7 @@
 
 #include <chrono>
 
+
 int main(int argc, char *argv[])
 {
     using namespace std;
@@ -34,14 +35,16 @@ int main(int argc, char *argv[])
     store(parser.options(desc).allow_unregistered().run(), vm);
     notify(vm);
 
-    child c;
+    child c1;
+    child c2;
 
 
     if (launch_attached)
     {
-        c = execute(argv[0], attached);
+        c1 = execute(argv[0], attached);
 #if defined ( BOOST_POSIX_API)
-        cout << c.native_handle();
+        auto h = c1.native_handle();
+        cout << h << std::endl;
 #elif defined ( BOOST_WINDOWS_API )
         auto h = reinterpret_cast<std::intptr_t>(c.native_handle());
         cout << h << endl;
@@ -51,9 +54,10 @@ int main(int argc, char *argv[])
 
     if (launch_detached)
     {
-        c = execute(argv[0]);
+        c2 = execute(argv[0]);
 #if defined ( BOOST_POSIX_API)
-        cout << c.native_handle();
+        auto h = c2.native_handle();
+        cout << h << std::endl;
 #elif defined ( BOOST_WINDOWS_API )
         auto h = reinterpret_cast<std::intptr_t>(c.native_handle());
         cout << h << endl;

@@ -10,6 +10,9 @@
 
 #include <boost/process/detail/posix/handler.hpp>
 #include <signal.h>
+#include <sys/prctl.h>
+
+#include <iostream>
 
 namespace boost { namespace process { namespace detail { namespace posix {
 
@@ -22,6 +25,7 @@ struct attached : handler_base_ext
     {
     	signal(SIGCHLD, SIG_IGN);
     }
+
 };
 
 
