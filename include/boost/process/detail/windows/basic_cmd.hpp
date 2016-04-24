@@ -12,6 +12,7 @@
 
 #include <vector>
 #include <string>
+#include <iostream>
 
 
 namespace boost
@@ -26,9 +27,9 @@ namespace windows
 typedef std::string native_args;
 
 
-inline std::string build_args(std::vector<std::string> && data)
+inline std::string build_args(const std::string & exe, std::vector<std::string> && data)
 {
-    std::string st;
+    std::string st = exe;
     for (auto & arg : data)
     {
         //don't need the argument afterwards so,
@@ -62,7 +63,7 @@ struct exe_cmd_init : handler_base_ext
                 : exe(std::move(exe)), args({}), cmd_only(cmd_only) {};
 
     exe_cmd_init(std::string && exe, std::vector<std::string> && args)
-            : exe(std::move(exe)), args(build_args(std::move(args))), cmd_only(false) {};
+            : exe(std::move(exe)), args(build_args(this->exe, std::move(args))), cmd_only(false) {};
     template <class Executor>
     void on_setup(Executor& exec) const
     {
