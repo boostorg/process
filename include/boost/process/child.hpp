@@ -41,7 +41,7 @@ namespace boost {
 
 namespace process {
 
-
+using ::boost::process::detail::api::pid_t;
 
 /**
  * Represents a child process.
@@ -54,13 +54,12 @@ class child
     ::boost::process::detail::api::child_handle _child_handle;
     std::atomic<bool> _exited{ false };
     std::atomic<int> _exit_code{ -1 };
-    bool _attached = false;
+    bool _attached = true;
 public:
-    typedef std::unique_ptr<void, void(*)(void*)> resource_t;
     typedef ::boost::process::detail::api::child_handle child_handle;
     typedef child_handle::process_handle_t native_handle_t;
     explicit child(child_handle &&ch) : _child_handle(std::move(ch)) {}
-    explicit child(native_handle_t & handle) : _child_handle(handle) {};
+    explicit child(pid_t & pid) : _child_handle(pid) {};
     child(const child&) = delete;
     child(child && lhs)
         : _child_handle(std::move(lhs._child_handle)),
@@ -68,7 +67,8 @@ public:
           _exit_code(lhs._exit_code.load()),
           _attached (lhs._attached)
     {
-
+        lhs._child_handle.proc_info.hProcess = ::boost::detail::winapi::INVALID_HANDLE_VALUE_;
+        lhs._attached = false;
     }
 
     child() = default;
@@ -79,19 +79,23 @@ public:
         _exited   .store(lhs._exited.load()   );
         _exit_code.store(lhs._exit_code.load());
         _attached    = lhs._attached;
+        lhs._child_handle.proc_info.hProcess = ::boost::detail::winapi::INVALID_HANDLE_VALUE_;
+        lhs._attached = false;
         return *this;
     };
 
+    void detach() {_attached = false; }
+
     ~child()
     {
-        if (!_exited.load() && _attached)
-            wait();
+        if (!_exited.load() && _attached && running())
+            terminate();
     }
     native_handle_t native_handle() const { return _child_handle.process_handle(); }
 
 
     int exit_code() const {return _exit_code.load();}
-    int get_pid()   const;
+    pid_t id()      const {return _child_handle.id(); }
 
     bool running()
     {
@@ -102,12 +106,15 @@ public:
 
     void terminate()
     {
-        boost::process::detail::api::terminate(_child_handle);
+        if (valid())
+            boost::process::detail::api::terminate(_child_handle);
+
+        _exited.store(true);
     }
 
     void wait()
     {
-        if (!_exited.load())
+        if (!_exited.load() && valid())
         {
             int exit_code = 0;
             boost::process::detail::api::wait(_child_handle, exit_code);
@@ -158,7 +165,14 @@ public:
         _exited.store(true);
     }
 
-
+    bool in_group() const
+    {
+        return _child_handle.in_group();
+    }
+    bool in_group(std::error_code &ec) const
+    {
+        return _child_handle.in_group(ec);
+    }
 };
 
 }}

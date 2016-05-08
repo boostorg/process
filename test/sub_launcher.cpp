@@ -11,6 +11,8 @@
 #include <iostream>
 #include <cstdint>
 
+#include <fstream>
+
 #include <chrono>
 
 
@@ -19,7 +21,6 @@ int main(int argc, char *argv[])
     using namespace std;
     using namespace boost::program_options;
     using namespace boost::process;
-
 
     bool launch_detached = false;
     bool launch_attached = false;
@@ -38,31 +39,41 @@ int main(int argc, char *argv[])
     child c1;
     child c2;
 
+    std::error_code ec;
 
     if (launch_attached)
     {
-        c1 = execute(argv[0], attached);
-#if defined ( BOOST_POSIX_API)
-        auto h = c1.native_handle();
-        cout << h << std::endl;
-#elif defined ( BOOST_WINDOWS_API )
-        auto h = reinterpret_cast<std::intptr_t>(c.native_handle());
-        cout << h << endl;
-#endif
-    }
+        c1 = execute(argv[0], ec,  std_out > null, std_err > null, std_in < null);
+        if (ec)
+        {
+            cout << -1 << endl;
+            cerr << ec.message() << endl;
+            return 1;
+        }
 
+        cout << c1.id() << endl;
+    }
+    else
+        cout << -1 << endl;
 
     if (launch_detached)
     {
-        c2 = execute(argv[0]);
-#if defined ( BOOST_POSIX_API)
-        auto h = c2.native_handle();
-        cout << h << std::endl;
-#elif defined ( BOOST_WINDOWS_API )
-        auto h = reinterpret_cast<std::intptr_t>(c.native_handle());
-        cout << h << endl;
-#endif
+        group g;
+
+        c2 = execute(argv[0], ec, g, std_out > null, std_err > null, std_in < null);
+        if (ec)
+        {
+            cout << -1 << endl;
+            cerr << ec.message() << endl;
+            return 1;
+        }
+        else
+            cout << c2.id() << endl;
+
+        g.detach();
     }
+    else
+        cout << -1 << endl;
 
     while (true)
         this_thread::sleep_for(chrono::milliseconds(100));

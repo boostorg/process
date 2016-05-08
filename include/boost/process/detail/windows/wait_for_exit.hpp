@@ -20,7 +20,7 @@
 
 namespace boost { namespace process { namespace detail { namespace windows {
 
-inline void wait(const child_handle &p, int & exit_code)
+inline void wait(child_handle &p, int & exit_code)
 {
     if (::boost::detail::winapi::WaitForSingleObject(p.process_handle(),
         ::boost::detail::winapi::infinite) == ::boost::detail::winapi::wait_failed)
@@ -38,10 +38,12 @@ inline void wait(const child_handle &p, int & exit_code)
                  std::system_category()),
                 "GetExitCodeProcess() failed");
 
+    ::boost::detail::winapi::CloseHandle(p.proc_info.hProcess);
+    p.proc_info.hProcess = ::boost::detail::winapi::INVALID_HANDLE_VALUE_;
     exit_code = static_cast<int>(_exit_code);
 }
 
-inline void wait(const child_handle &p, int & exit_code, std::error_code &ec)
+inline void wait(child_handle &p, int & exit_code, std::error_code &ec)
 {
 	::boost::detail::winapi::DWORD_ _exit_code = 1;
 
@@ -57,13 +59,15 @@ inline void wait(const child_handle &p, int & exit_code, std::error_code &ec)
     else
         ec.clear();
 
+    ::boost::detail::winapi::CloseHandle(p.proc_info.hProcess);
+    p.proc_info.hProcess = ::boost::detail::winapi::INVALID_HANDLE_VALUE_;
     exit_code = static_cast<int>(_exit_code);
 }
 
 
 template< class Rep, class Period >
 inline bool wait_for(
-        const child_handle &p,
+        child_handle &p,
         int & exit_code,
         const std::chrono::duration<Rep, Period>& rel_time)
 {
@@ -90,13 +94,15 @@ inline bool wait_for(
                 "GetExitCodeProcess() failed");
 
     exit_code = static_cast<int>(_exit_code);
+    ::boost::detail::winapi::CloseHandle(p.proc_info.hProcess);
+    p.proc_info.hProcess = ::boost::detail::winapi::INVALID_HANDLE_VALUE_;
     return true;
 }
 
 
 template< class Rep, class Period >
 inline bool wait_for(
-        const child_handle &p,
+        child_handle &p,
         int & exit_code,
         const std::chrono::duration<Rep, Period>& rel_time,
         std::error_code &ec)
@@ -126,15 +132,17 @@ inline bool wait_for(
         ec.clear();
 
     exit_code = static_cast<int>(_exit_code);
+    ::boost::detail::winapi::CloseHandle(p.proc_info.hProcess);
+    p.proc_info.hProcess = ::boost::detail::winapi::INVALID_HANDLE_VALUE_;
     return true;
 ;
 }
 
 template< class Clock, class Duration >
 inline bool wait_until(
-        const child_handle &p,
+        child_handle &p,
         int & exit_code,
-       const std::chrono::time_point<Clock, Duration>& timeout_time)
+        const std::chrono::time_point<Clock, Duration>& timeout_time)
 {
     std::chrono::milliseconds ms =
             std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -161,14 +169,15 @@ inline bool wait_until(
             "GetExitCodeProcess() failed");
 
     exit_code = static_cast<int>(_exit_code);
-
+    ::boost::detail::winapi::CloseHandle(p.proc_info.hProcess);
+    p.proc_info.hProcess = ::boost::detail::winapi::INVALID_HANDLE_VALUE_;
     return true;
 }
 
 
 template< class Clock, class Duration >
 inline bool wait_until(
-        const child_handle &p,
+        child_handle &p,
         int & exit_code,
         const std::chrono::time_point<Clock, Duration>& timeout_time,
         std::error_code &ec)
@@ -192,6 +201,8 @@ inline bool wait_until(
         ec.clear();
 
     exit_code = static_cast<int>(exit_code);
+    ::boost::detail::winapi::CloseHandle(p.proc_info.hProcess);
+    p.proc_info.hProcess = ::boost::detail::winapi::INVALID_HANDLE_VALUE_;
     return true;
 ;
 }

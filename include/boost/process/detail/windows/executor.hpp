@@ -144,6 +144,7 @@ struct executor : startup_info_impl<char>
 
     child operator()()
     {
+
         on_setup_t on_setup(*this);
         boost::fusion::for_each(seq, on_setup);
 
@@ -173,13 +174,12 @@ struct executor : startup_info_impl<char>
             boost::fusion::for_each(seq, on_success);
         }
         return
-                child(child_handle(std::move(proc_info), job_object));
+                child(child_handle(std::move(proc_info)));
     }
 
     ::boost::detail::winapi::LPSECURITY_ATTRIBUTES_ proc_attrs   = nullptr;
     ::boost::detail::winapi::LPSECURITY_ATTRIBUTES_ thread_attrs = nullptr;
     ::boost::detail::winapi::BOOL_ inherit_handles = false;
-    ::boost::detail::winapi::HANDLE_ job_object = nullptr;
     const char * work_dir = nullptr;
     const char * cmd_line = nullptr;
     const char * exe      = nullptr;
