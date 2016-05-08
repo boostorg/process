@@ -20,19 +20,29 @@ namespace boost { namespace process { namespace detail { namespace windows {
 
 struct child_handle;
 
-inline void terminate(const child_handle &p)
+inline void terminate(child_handle &p)
 {
     if (!::boost::detail::winapi::TerminateProcess(p.process_handle(), EXIT_FAILURE))
         boost::process::detail::throw_last_error("TerminateProcess() failed");
+
+    ::boost::detail::winapi::CloseHandle(p.proc_info.hProcess);
+    p.proc_info.hProcess = ::boost::detail::winapi::INVALID_HANDLE_VALUE_;
 }
 
-inline void terminate(const child_handle &p, std::error_code &ec)
+inline void terminate(child_handle &p, std::error_code &ec)
 {
     if (!::boost::detail::winapi::TerminateProcess(p.process_handle(), EXIT_FAILURE))
         ec = boost::process::detail::get_last_error();
     else
+    {
         ec.clear();
+        ::boost::detail::winapi::CloseHandle(p.proc_info.hProcess);
+        p.proc_info.hProcess = ::boost::detail::winapi::INVALID_HANDLE_VALUE_;
+    }
 }
+
+
+
 
 }}}}
 

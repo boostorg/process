@@ -63,7 +63,6 @@ int main(int argc, char *argv[])
         ("windows-print-showwindow", bool_switch())
         ("windows-print-flags", bool_switch());
 #endif
-
     variables_map vm;
     command_line_parser parser(argc, argv);
     store(parser.options(desc).allow_unregistered().run(), vm);

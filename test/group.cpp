@@ -21,11 +21,13 @@
 #include <boost/process/io.hpp>
 #include <boost/process/args.hpp>
 #include <boost/process/child.hpp>
+#include <boost/process/group.hpp>
 #include <boost/process/execute.hpp>
 #include <system_error>
 
 #include <string>
 #include <istream>
+#include <iostream>
 #include <cstdlib>
 #if defined(BOOST_WINDOWS_API)
 #   include <Windows.h>
@@ -39,135 +41,122 @@ typedef boost::asio::posix::stream_descriptor pipe_end;
 namespace bp = boost::process;
 namespace bio = boost::iostreams;
 
-BOOST_AUTO_TEST_CASE(attached)
+BOOST_AUTO_TEST_CASE(group_test)
+{
+    cout << "group_test" << endl;
+    using boost::unit_test::framework::master_test_suite;
+
+    std::error_code ec;
+    bp::group g;
+    auto c = bp::execute(
+        master_test_suite().argv[1],
+        g,
+        ec
+    );
+    BOOST_REQUIRE(!ec);
+    BOOST_REQUIRE(c.in_group());
+    BOOST_CHECK(c);
+    BOOST_CHECK(c.running());
+
+    g.terminate();
+
+    BOOST_CHECK(!c.running());
+    if (c.running())
+        c.terminate();
+}
+#define L() cout << __FILE__ "(" << __LINE__ << ")" << endl;
+BOOST_AUTO_TEST_CASE(attached, *boost::unit_test::timeout(2))
 {
     using boost::unit_test::framework::master_test_suite;
 
     bp::pipe p;
+
+    bp::group g;
 
     std::error_code ec;
     auto c = bp::execute(
         master_test_suite().argv[1],
         bp::args+={"--launch-attached"},
         bp::std_out>p,
+        g,
         ec
     );
     BOOST_REQUIRE(!ec);
+    BOOST_REQUIRE(c.in_group());
+    BOOST_CHECK(c);
 
     bio::stream<bio::file_descriptor_source> is(p.source());
 
-#if defined( BOOST_WINDOWS_API )
-    std::intptr_t handle_p;
-    is >> handle_p;
-    auto handle = reinterpret_cast<void*>(handle_p);
-    bp::child sub_c(handle);
-#elif defined( BOOST_POSIX_API )
-    pid_t pid;
+
+    bp::pid_t pid;
     is >> pid;
     bp::child sub_c(pid);
-#endif
-    c.terminate();
+    is >> pid; //invalid pid.
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(100)); //just to be sure.
 
+    BOOST_REQUIRE(sub_c);
+    std::this_thread::sleep_for(std::chrono::milliseconds(50)); //just to be sure.
+    g.terminate();
+    BOOST_CHECK(sub_c);
+    std::this_thread::sleep_for(std::chrono::milliseconds(50)); //just to be sure.
+
+    BOOST_CHECK(!c.running());
     auto still_runs = sub_c.running();
     BOOST_CHECK(!still_runs);
     if (still_runs)
         sub_c.terminate();
+    BOOST_CHECK(!c.running());
+    if (c.running())
+        c.terminate();
 
 }
 
 
 
-BOOST_AUTO_TEST_CASE(detached)
+BOOST_AUTO_TEST_CASE(detached, *boost::unit_test::timeout(2))
 {
+    std::cerr << "detached" << std::endl;
+
     using boost::unit_test::framework::master_test_suite;
 
     bp::pipe p;
 
+    bp::group g;
+
+
     std::error_code ec;
     auto c = bp::execute(
         master_test_suite().argv[1],
-        bp::args+={"--launch-attached"},
+        bp::args+={"--launch-detached"},
         bp::std_out>p,
+        g,
         ec
     );
-    BOOST_REQUIRE(!ec);
 
+    BOOST_REQUIRE(!ec);
+    BOOST_CHECK(c);
     bio::stream<bio::file_descriptor_source> is(p.source());
 
-#if defined( BOOST_WINDOWS_API )
-    std::intptr_t handle_p;
-    is >> handle_p;
-    auto handle = reinterpret_cast<void*>(handle_p);
-    bp::child sub_c(handle);
-#elif defined( BOOST_POSIX_API )
-    pid_t pid;
+    bp::pid_t pid;
+    is >> pid;
     is >> pid;
     bp::child sub_c(pid);
-#endif
 
-    c.terminate();
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(100)); //just to be sure.
-
+    std::this_thread::sleep_for(std::chrono::milliseconds(50)); //just to be sure.
     BOOST_CHECK(sub_c.running());
 
-    sub_c.terminate();
-}
+    g.terminate();
+    BOOST_CHECK(sub_c);
+    std::this_thread::sleep_for(std::chrono::milliseconds(50)); //just to be sure.
 
-
-
-BOOST_AUTO_TEST_CASE(attached_detached)
-{
-    using boost::unit_test::framework::master_test_suite;
-
-    bp::pipe p;
-
-    std::error_code ec;
-    auto c = bp::execute(
-        master_test_suite().argv[1],
-        bp::args+={"--launch-attached", "--launch-detached"},
-        bp::std_out>p,
-        ec
-    );
-    BOOST_REQUIRE(!ec);
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(100)); //just to be sure.
-
-    bio::stream<bio::file_descriptor_source> is(p.source());
-#if defined( BOOST_WINDOWS_API )
-    std::intptr_t handle_p;
-    is >> handle_p;
-    auto handle = reinterpret_cast<void*>(handle_p);
-    bp::child sub_c_a(handle);
-    is >> handle_p;
-    handle = reinterpret_cast<void*>(handle_p);
-    bp::child sub_c_d(handle);
-
-#elif defined( BOOST_POSIX_API )
-    pid_t pid;
-    is >> pid;
-    bp::child sub_c_a(pid);
-    is >> pid;
-    bp::child sub_c_d(pid);
-#endif
-
-
-    c.terminate();
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(100)); //just to be sure.
-
-    auto still_runs = sub_c_a.running();
-    BOOST_CHECK(!still_runs);
+    auto still_runs = sub_c.running();
+    BOOST_CHECK(still_runs);
     if (still_runs)
-        sub_c_a.terminate();
+        sub_c.terminate();
 
-
-    BOOST_CHECK(sub_c_d.running());
-
-    sub_c_d.terminate();
-
-
-
+    BOOST_CHECK(!c.running());
+    if (c.running())
+        c.terminate();
 }
+
+

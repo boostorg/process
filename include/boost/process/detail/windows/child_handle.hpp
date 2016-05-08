@@ -13,32 +13,39 @@
 #include <boost/move/move.hpp>
 #include <boost/detail/winapi/handles.hpp>
 #include <boost/detail/winapi/process.hpp>
+#include <boost/detail/winapi/jobs.hpp>
 
 namespace boost { namespace process { namespace detail { namespace windows {
+
+typedef int pid_t;
 
 struct child_handle
 {
     ::boost::detail::winapi::PROCESS_INFORMATION_ proc_info{nullptr, nullptr, 0,0};
-    ::boost::detail::winapi::HANDLE_ job_object = nullptr;
 
-    explicit child_handle(const ::boost::detail::winapi::PROCESS_INFORMATION_ &pi,
-                                ::boost::detail::winapi::HANDLE_ job_object = nullptr) :
-                                  proc_info(pi),
-                                  job_object(job_object)
+    explicit child_handle(const ::boost::detail::winapi::PROCESS_INFORMATION_ &pi) :
+                                  proc_info(pi)
     {}
 
-    explicit child_handle(::boost::detail::winapi::HANDLE_ handle) :
-                                  proc_info{handle, nullptr, 0,0},
-                                  job_object(job_object)
-    {}
+    explicit child_handle(pid_t pid) :
+                                  proc_info{nullptr, nullptr, 0,0}
+    {
+        auto h = ::boost::detail::winapi::OpenProcess(
+                ::boost::detail::winapi::PROCESS_ALL_ACCESS_,
+                static_cast<::boost::detail::winapi::BOOL_>(1),
+                 pid);
+
+        if (h == nullptr)
+            throw_last_error("OpenProcess() failed");
+        proc_info.hProcess = h;
+        proc_info.dwProcessId = pid;
+    }
 
     child_handle() = default;
     ~child_handle()
     {
         ::boost::detail::winapi::CloseHandle(proc_info.hProcess);
         ::boost::detail::winapi::CloseHandle(proc_info.hThread);
-        if (job_object != nullptr)
-            ::boost::detail::winapi::CloseHandle(job_object);
     }
     child_handle(const child_handle & c) = delete;
     child_handle(child_handle && c) : proc_info(c.proc_info)
@@ -57,7 +64,7 @@ struct child_handle
         return *this;
     }
 
-    int get_pid() const
+    pid_t id() const
     {
         return static_cast<int>(proc_info.dwProcessId);
     }
@@ -67,7 +74,22 @@ struct child_handle
 
     bool valid() const
     {
-        return (proc_info.hProcess != nullptr);
+        return (proc_info.hProcess != nullptr) &&
+               (proc_info.hProcess != ::boost::detail::winapi::INVALID_HANDLE_VALUE_);
+    }
+    bool in_group() const
+    {
+        ::boost::detail::winapi::BOOL_ value;
+        if (!::boost::detail::winapi::IsProcessInJob(proc_info.hProcess, nullptr, &value))
+            throw_last_error("IsProcessinJob Failed");
+        return value;
+    }
+    bool in_group(std::error_code &ec) const
+    {
+        ::boost::detail::winapi::BOOL_ value;
+        if (!::boost::detail::winapi::IsProcessInJob(proc_info.hProcess, nullptr, &value))
+            ec = get_last_error();
+        return value;
     }
 };
 
