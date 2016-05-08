@@ -9,14 +9,85 @@
 #include <boost/process/detail/windows/handler.hpp>
 #include <boost/detail/winapi/jobs.hpp>
 #include <boost/process/detail/windows/child_handle.hpp>
-
+#include <boost/process/detail/windows/job_workaround.hpp>
+#include <system_error>
 
 namespace boost { namespace process { namespace detail { namespace windows {
 
-void enable_break_away(::boost::detail::winapi::HANDLE_ h);
-void enable_break_away(::boost::detail::winapi::HANDLE_ h, std::error_code & ec);
+inline bool break_away_enabled(::boost::detail::winapi::HANDLE_ h)
+{
+    workaround::JOBOBJECT_EXTENDED_LIMIT_INFORMATION_ info;
 
-bool break_away_enabled(::boost::detail::winapi::HANDLE_ h);
+    if (!workaround::query_information_job_object(
+                    h,
+                    workaround::JobObjectExtendedLimitInformation_,
+                    static_cast<void*>(&info),
+                    sizeof(info),
+                    nullptr))
+        throw_last_error("QueryInformationJobObject() failed");
+
+    return (info.BasicLimitInformation.LimitFlags & workaround::JOB_OBJECT_LIMIT_BREAKAWAY_OK_) != 0;
+}
+
+inline void enable_break_away(::boost::detail::winapi::HANDLE_ h)
+{
+    workaround::JOBOBJECT_EXTENDED_LIMIT_INFORMATION_ info;
+
+    if (!workaround::query_information_job_object(
+                    h,
+                    workaround::JobObjectExtendedLimitInformation_,
+                    static_cast<void*>(&info),
+                    sizeof(info),
+                    nullptr))
+        throw_last_error("QueryInformationJobObject() failed");
+
+    if ((info.BasicLimitInformation.LimitFlags & workaround::JOB_OBJECT_LIMIT_BREAKAWAY_OK_) != 0)
+        return;
+
+    info.BasicLimitInformation.LimitFlags |= workaround::JOB_OBJECT_LIMIT_BREAKAWAY_OK_;
+
+    if (!workaround::set_information_job_object(
+                h,
+                workaround::JobObjectExtendedLimitInformation_,
+                static_cast<void*>(&info),
+                sizeof(info)))
+        throw_last_error("SetInformationJobObject() failed");
+}
+
+inline void enable_break_away(::boost::detail::winapi::HANDLE_ h, std::error_code & ec)
+{
+    workaround::JOBOBJECT_EXTENDED_LIMIT_INFORMATION_ info;
+
+
+    if (!workaround::query_information_job_object(
+                    h,
+                    workaround::JobObjectExtendedLimitInformation_,
+                    static_cast<void*>(&info),
+                    sizeof(info),
+                    nullptr))
+    {
+        ec = get_last_error();
+        return;
+    }
+
+    if ((info.BasicLimitInformation.LimitFlags & workaround::JOB_OBJECT_LIMIT_BREAKAWAY_OK_) != 0)
+        return;
+
+    info.BasicLimitInformation.LimitFlags |= workaround::JOB_OBJECT_LIMIT_BREAKAWAY_OK_;
+
+    if (!workaround::set_information_job_object(
+                h,
+                workaround::JobObjectExtendedLimitInformation_,
+                static_cast<void*>(&info),
+                sizeof(info)))
+    {
+        ec = get_last_error();
+        return;
+    }
+
+
+}
+
 
 struct group_handle
 {
