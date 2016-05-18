@@ -11,8 +11,11 @@
 #define BOOST_PROCESS_POSIX_CHILD_HPP
 
 #include <utility>
+#include <system_error>
 
 namespace boost { namespace process { namespace detail { namespace posix {
+
+typedef ::pid_t pid_t;
 
 struct child_handle
 {
@@ -36,10 +39,12 @@ struct child_handle
         return *this;
     }
 
-    int get_pid() const
+    int id() const
     {
         return pid;
     }
+    bool in_group() const {return true;}
+    bool in_group(std::error_code &ec) const {return true;}
 
     typedef int process_handle_t;
     process_handle_t process_handle() const { return pid; }

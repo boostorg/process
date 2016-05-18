@@ -53,13 +53,11 @@ BOOST_AUTO_TEST_CASE(extensions)
     set_on_error se;
     std::error_code ec;
     bp::execute(
-#if defined(BOOST_WINDOWS_API)
         "Wrong-Command",
         "test",
         bp::on_setup=re,
         bp::on_error=se,
         bp::ignore_error
-#endif
     );
     BOOST_CHECK(!se.ec);
 }

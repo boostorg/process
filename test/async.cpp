@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(async_out_stream)
 
     boost::asio::streambuf buf;
 
-    bp::execute(master_test_suite().argv[1],
+    auto c = bp::execute(master_test_suite().argv[1],
                 "test", "--echo-stdout", "abc",
                 bp::std_out > buf,
                 io_service,
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE(async_in_stream)
     std::ostream ostr(&in_buf);
     ostr << "-string" << endl ;
 
-    bp::execute(
+    auto c = bp::execute(
         master_test_suite().argv[1],
         "test", "--prefix-once", "test",
         bp::std_in  < in_buf,

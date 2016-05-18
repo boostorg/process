@@ -25,7 +25,7 @@ inline bool is_running(const child_handle &p)
             return false;
 
         ::boost::process::detail::throw_last_error("is_running error");
-
+        return false;
     }
     else
         return true;

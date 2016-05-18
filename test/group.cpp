@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(group_test)
     BOOST_CHECK(c);
     BOOST_CHECK(c.running());
 
-    g.terminate();
+    g.terminate(); 
 
     BOOST_CHECK(!c.running());
     if (c.running())

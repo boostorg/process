@@ -29,7 +29,7 @@
 
 namespace bp = boost::process;
 
-BOOST_AUTO_TEST_CASE(inherit_env)
+BOOST_AUTO_TEST_CASE(inherit_env, *boost::unit_test::timeout(2))
 {
     using boost::unit_test::framework::master_test_suite;
     namespace bio = boost::iostreams;
@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(inherit_env)
     bp::pipe p;
 
     std::error_code ec;
-    bp::execute(
+    auto c = bp::execute(
         master_test_suite().argv[1],
         "test", "--query ", "PATH",
         bp::std_out>p,
@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(inherit_env)
 }
 
 
-BOOST_AUTO_TEST_CASE(inherit_mod_env)
+BOOST_AUTO_TEST_CASE(inherit_mod_env, *boost::unit_test::timeout(2))
 {
     using boost::unit_test::framework::master_test_suite;
     namespace bio = boost::iostreams;
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE(inherit_mod_env)
     bp::pipe p;
 
     std::error_code ec;
-    bp::execute(
+    auto c = bp::execute(
         master_test_suite().argv[1],
         "test", "--query", "BOOST_PROCESS_TEST_1",
         bp::std_out>p,
@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE(inherit_mod_env)
 }
 
 
-BOOST_AUTO_TEST_CASE(modifided_env)
+BOOST_AUTO_TEST_CASE(modifided_env, *boost::unit_test::timeout(2))
 {
     using boost::unit_test::framework::master_test_suite;
     namespace bio = boost::iostreams;
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(modifided_env)
 
 
     std::error_code ec;
-    bp::execute(
+    auto c = bp::execute(
         master_test_suite().argv[1],
         "test", "--query", "BOOST_PROCESS_TEST_2",
         bp::std_out>p,

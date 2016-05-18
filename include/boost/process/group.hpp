@@ -35,7 +35,9 @@ namespace boost {
 
 namespace process {
 
-
+namespace detail {
+    struct group_builder;
+}
 
 /**
  * Represents a group process.
@@ -57,7 +59,6 @@ public:
         : _group_handle(std::move(lhs._group_handle)),
           _attached (lhs._attached)
     {
-        lhs._group_handle._job_object = ::boost::detail::winapi::INVALID_HANDLE_VALUE_;
         lhs._attached = false;
     }
 
@@ -128,6 +129,8 @@ public:
         return _group_handle.has(c.native_handle(), ec);
 
     }
+
+    friend struct detail::group_builder;
 };
 
 //for now it'll just be declared here.
@@ -142,7 +145,7 @@ struct group_builder
     void operator()(group & grp) {this->group_p = &grp;};
 
     typedef api::group_ref result_type;
-    api::group_ref get_initializer() {return api::group_ref (group_p->native_handle());};
+    api::group_ref get_initializer() {return api::group_ref (group_p->_group_handle);};
 };
 
 template<>

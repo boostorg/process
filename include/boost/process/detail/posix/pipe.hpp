@@ -17,15 +17,14 @@
 #include <array>
 #include <unistd.h>
 
-
 namespace boost { namespace process { namespace detail { namespace posix {
 
 
 
 class pipe
 {
-    int _source;
-    int _sink;
+    int _source = 0;
+    int _sink   = 0;
     std::string _pipe_name;
 protected:
     pipe(int source, int sink) : _source(source), _sink(sink) {}
@@ -42,12 +41,12 @@ public:
     pipe& operator=(const pipe& ) = delete;
     pipe& operator=(pipe&& lhs)
     {
-        _source = 0;
-        _sink   = 0;
-        _pipe_name.clear();
+        _source = lhs._source;
+        _sink   = lhs._sink ;
+        _pipe_name = lhs._pipe_name;
 
-        lhs._source = _source;
-        lhs._sink   = _sink;
+        lhs._source = 0;
+        lhs._sink   = 0;
         lhs._pipe_name.clear();
 
         return *this;
@@ -70,7 +69,7 @@ public:
         if (::pipe(fds) == -1)
             boost::process::detail::throw_last_error("pipe(2) failed");
 
-        return pipe(fds[0], fds[1]);
+        return {fds[0], fds[1]};
     }
 
     static pipe create(std::error_code &ec)

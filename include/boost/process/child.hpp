@@ -67,7 +67,7 @@ public:
           _exit_code(lhs._exit_code.load()),
           _attached (lhs._attached)
     {
-        lhs._child_handle.proc_info.hProcess = ::boost::detail::winapi::INVALID_HANDLE_VALUE_;
+        lhs._child_handle = child_handle();
         lhs._attached = false;
     }
 
@@ -79,7 +79,7 @@ public:
         _exited   .store(lhs._exited.load()   );
         _exit_code.store(lhs._exit_code.load());
         _attached    = lhs._attached;
-        lhs._child_handle.proc_info.hProcess = ::boost::detail::winapi::INVALID_HANDLE_VALUE_;
+        lhs._child_handle = child_handle();
         lhs._attached = false;
         return *this;
     };

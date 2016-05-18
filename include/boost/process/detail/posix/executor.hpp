@@ -115,7 +115,7 @@ struct executor
     void internal_throw(boost::mpl::false_, std::error_code &ec ) {throw std::system_error(ec);}
 
     typedef typename ::boost::process::detail::has_error_handler<Sequence>::type has_error_handler;
-        typedef typename has_ignore_error<Sequence>::type ignore_error;
+    typedef typename has_ignore_error<Sequence>::type ignore_error;
 
 
     void invoke(boost::mpl::true_) //ignore errors

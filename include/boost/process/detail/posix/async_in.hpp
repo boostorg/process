@@ -104,10 +104,7 @@ struct async_in_buffer : ::boost::process::detail::posix::async_handler
     template <typename Executor>
     void on_exec_setup(Executor &exec)
     {
-        ::close(STDIN_FILENO);
         ::dup2(source.handle(), STDIN_FILENO);
-        pipe->sink().close();
-
     }
 };
 

@@ -25,15 +25,16 @@
 namespace bp = boost::process;
 namespace bio = boost::iostreams;
 
-BOOST_AUTO_TEST_CASE(bind_fd)
+BOOST_AUTO_TEST_CASE(bind_fd, *boost::unit_test::timeout(2))
 {
     using boost::unit_test::framework::master_test_suite;
 
     bp::pipe p;
 
+    bp::child c;
     {
         std::error_code ec;
-        bp::execute(
+        c = bp::execute(
             master_test_suite().argv[1],
             "test", "--posix-echo-one", "3", "hello",
             bp::posix::fd.bind(3, p.sink()),
@@ -49,17 +50,19 @@ BOOST_AUTO_TEST_CASE(bind_fd)
     BOOST_CHECK_EQUAL(s, "hello");
 }
 
-BOOST_AUTO_TEST_CASE(bind_fds)
+BOOST_AUTO_TEST_CASE(bind_fds, *boost::unit_test::timeout(2))
 {
     using boost::unit_test::framework::master_test_suite;
 
     bp::pipe p1;
     bp::pipe p2;
 
+    bp::child c;
+
     {
 
         std::error_code ec;
-        bp::execute(
+        c = bp::execute(
             master_test_suite().argv[1],
             "test","--posix-echo-two","3","hello","99","bye",
             bp::posix::fd.bind(3,  p1.sink()),
@@ -82,7 +85,7 @@ BOOST_AUTO_TEST_CASE(bind_fds)
     BOOST_CHECK_EQUAL(s2, "bye");
 }
 
-BOOST_AUTO_TEST_CASE(execve_set_on_error)
+BOOST_AUTO_TEST_CASE(execve_set_on_error, *boost::unit_test::timeout(2))
 {
     std::error_code ec;
     bp::execute(
@@ -93,7 +96,7 @@ BOOST_AUTO_TEST_CASE(execve_set_on_error)
     BOOST_CHECK_EQUAL(ec.value(), ENOENT);
 }
 
-BOOST_AUTO_TEST_CASE(execve_throw_on_error)
+BOOST_AUTO_TEST_CASE(execve_throw_on_error, *boost::unit_test::timeout(2))
 {
     try
     {

@@ -50,7 +50,6 @@ template<>
 template<typename Executor>
 void file_out<1,2>::on_exec_setup(Executor &e) const
 {
-    
     ::dup2(file.handle(), STDOUT_FILENO);
     ::dup2(file.handle(), STDERR_FILENO);
 

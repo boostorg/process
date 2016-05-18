@@ -37,7 +37,7 @@ typedef boost::asio::posix::stream_descriptor pipe_end;
 namespace bp = boost::process;
 namespace bio = boost::iostreams;
 
-BOOST_AUTO_TEST_CASE(sync_io)
+BOOST_AUTO_TEST_CASE(sync_io, *boost::unit_test::timeout(2))
 {
     using boost::unit_test::framework::master_test_suite;
 
@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(sync_io)
     bp::pipe p2;
 
     std::error_code ec;
-    bp::execute(
+    auto c = bp::execute(
         master_test_suite().argv[1],
         "test", "--echo-stdout-stderr", "hello",
         bp::std_out>p1,
@@ -85,7 +85,7 @@ struct read_handler
     }
 };
 
-BOOST_AUTO_TEST_CASE(async_io)
+BOOST_AUTO_TEST_CASE(async_io, *boost::unit_test::timeout(2))
 {
     using boost::unit_test::framework::master_test_suite;
     boost::asio::io_service io_service;
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE(async_io)
     bp::async_pipe p2(io_service);
 
     std::error_code ec;
-    bp::execute(
+    auto c = bp::execute(
         master_test_suite().argv[1],
         bp::args={"test", "--echo-stdout-stderr", "abc"},
         bp::std_out > p1,
@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE(async_io)
     io_service.run();
 }
 
-BOOST_AUTO_TEST_CASE(nul)
+BOOST_AUTO_TEST_CASE(nul, *boost::unit_test::timeout(2))
 {
     using boost::unit_test::framework::master_test_suite;
     std::error_code ec;

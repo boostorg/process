@@ -28,20 +28,16 @@ namespace boost { namespace process { namespace detail { namespace posix {
 
 inline void apply_out_handles(int handle, std::integral_constant<int, 1>, std::integral_constant<int, -1>)
 {
-    ::close(STDOUT_FILENO);
     ::dup2(handle, STDOUT_FILENO);
 }
 
 inline void apply_out_handles(int handle, std::integral_constant<int, 2>, std::integral_constant<int, -1>)
 {
-    ::close(STDERR_FILENO);
     ::dup2(handle, STDERR_FILENO);
 }
 
 inline void apply_out_handles(int handle, std::integral_constant<int, 1>, std::integral_constant<int, 2>)
 {
-    ::close(STDOUT_FILENO);
-    ::close(STDERR_FILENO);
     ::dup2(handle, STDOUT_FILENO);
     ::dup2(handle, STDERR_FILENO);
 }
@@ -174,8 +170,6 @@ struct async_out_future : ::boost::process::detail::posix::async_handler
     void on_exec_setup(Executor &exec)
     {
         apply_out_handles(exec, sink.handle(), std::integral_constant<int, p1>(), std::integral_constant<int, p2>());
-
-        pipe->source().close();
     }
 
 };

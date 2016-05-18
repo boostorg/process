@@ -44,13 +44,12 @@ struct pipe
     {
     }
 
-    pipe() : pipe(boost::process::detail::api::pipe::create()) {}
+    pipe() : pipe(boost::process::detail::api::pipe::create()) { }
 
     pipe(const std::string & name) : pipe(native_pipe::create_named(name)) {}
 
     pipe(      pipe&&) = default;
     pipe(const pipe& ) = delete;
-
     pipe& operator=(      pipe&&) = default;
     pipe& operator=(const pipe& ) = delete;
 
@@ -164,10 +163,10 @@ struct async_pipe : pipe
                _sink  (ios, pipe::sink().  handle()),
                _source(ios, pipe::source().handle())
        {}
-    async_pipe(const async_pipe &) = default;
+    async_pipe(const async_pipe &) = delete;
     async_pipe(async_pipe &&) = default;
 
-    async_pipe& operator=(const async_pipe &) = default;
+    async_pipe& operator=(const async_pipe &) = delete;
     async_pipe& operator=(async_pipe &&) = default;
 
 private:

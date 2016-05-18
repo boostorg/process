@@ -27,7 +27,7 @@
 namespace bp = boost::process;
 namespace bio = boost::iostreams;
 
-BOOST_AUTO_TEST_CASE(sync_io)
+BOOST_AUTO_TEST_CASE(sync_io, *boost::unit_test::timeout(5))
 {
     using boost::unit_test::framework::master_test_suite;
 
@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(sync_io)
     bp::pipe p2;
 
     std::error_code ec;
-    bp::execute(
+    auto c = bp::execute(
         master_test_suite().argv[1],
         bp::args+={"test", "--stdin-to-stdout"},
         bp::std_in<p1,

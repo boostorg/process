@@ -41,7 +41,7 @@ typedef boost::asio::posix::stream_descriptor pipe_end;
 namespace bp = boost::process;
 namespace bio = boost::iostreams;
 
-BOOST_AUTO_TEST_CASE(sync_io)
+BOOST_AUTO_TEST_CASE(sync_io, *boost::unit_test::timeout(2))
 {
     using boost::unit_test::framework::master_test_suite;
 
@@ -79,7 +79,7 @@ struct read_handler
     }
 };
 
-BOOST_AUTO_TEST_CASE(async_io)
+BOOST_AUTO_TEST_CASE(async_io, *boost::unit_test::timeout(2))
 {
     using boost::unit_test::framework::master_test_suite;
     boost::asio::io_service io_service;
@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(async_io)
     io_service.run();
 }
 
-BOOST_AUTO_TEST_CASE(nul)
+BOOST_AUTO_TEST_CASE(nul, *boost::unit_test::timeout(2))
 {
     using boost::unit_test::framework::master_test_suite;
     std::error_code ec;

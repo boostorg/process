@@ -34,31 +34,22 @@ template<>
 template<typename Executor>
 void pipe_out<1,-1>::on_exec_setup(Executor &e) const
 {
-    ::close(STDOUT_FILENO);
     ::dup2(pipe.sink().handle(), STDOUT_FILENO);
-    ::close(pipe.source().handle());
 }
 
 template<>
 template<typename Executor>
 void pipe_out<2,-1>::on_exec_setup(Executor &e) const
 {
-    ::close(STDERR_FILENO);
-
     ::dup2(pipe.sink().handle(), STDERR_FILENO);
-    ::close(pipe.source().handle());
 }
 
 template<>
 template<typename Executor>
 void pipe_out<1,2>::on_exec_setup(Executor &e) const
 {
-    ::close(STDOUT_FILENO);
-    ::close(STDERR_FILENO);
-
     ::dup2(pipe.sink().handle(), STDOUT_FILENO);
     ::dup2(pipe.sink().handle(), STDERR_FILENO);
-    ::close(pipe.source().handle());
 }
 
 }}}}

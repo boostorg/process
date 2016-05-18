@@ -29,9 +29,7 @@ struct pipe_in : handler_base_ext
     template <class Executor>
     void on_exec_setup(Executor &e) const
     {
-    	::close(STDIN_FILENO);
         ::dup2(pipe.source().handle(), STDIN_FILENO);
-        ::close(pipe.sink().handle());
     }
 };
 
