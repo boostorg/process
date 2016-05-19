@@ -15,6 +15,7 @@
 #include <boost/process/exe.hpp>
 #include <boost/process/args.hpp>
 #include <system_error>
+#include <thread>
 
 namespace bp = boost::process;
 
@@ -30,8 +31,11 @@ BOOST_AUTO_TEST_CASE(terminate_set_on_error)
     );
     BOOST_REQUIRE(!ec);
 
+    BOOST_CHECK(c.running());
     c.terminate(); //throws on error
+    std::this_thread::sleep_for(std::chrono::milliseconds(5)); 
 
+    BOOST_CHECK(!c.running());
     BOOST_CHECK(!ec);
 }
 
@@ -47,6 +51,8 @@ BOOST_AUTO_TEST_CASE(terminate_throw_on_error)
         ec
     );
     BOOST_REQUIRE(!ec);
-
-    BOOST_CHECK_NO_THROW(c.terminate());
+    BOOST_CHECK(c.running());
+    c.terminate();
+    std::this_thread::sleep_for(std::chrono::milliseconds(5)); 
+    BOOST_CHECK(!c.running());
 }

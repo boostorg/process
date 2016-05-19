@@ -100,7 +100,16 @@ public:
     bool running()
     {
         if (valid())
-            return boost::process::detail::api::is_running(_child_handle);
+        {
+            int code; 
+            auto res = boost::process::detail::api::is_running(_child_handle, code);
+            if (!res && !_exited.load())
+            {
+                _exited.store(true);
+                _exit_code.store(code);
+            }
+            return res;
+        }
         return false;
     }
 

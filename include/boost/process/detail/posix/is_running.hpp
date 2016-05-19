@@ -9,43 +9,55 @@
 #include <boost/process/detail/config.hpp>
 #include <boost/process/detail/posix/child_handle.hpp>
 #include <system_error>
-#include <signal.h>
+#include <sys/wait.h>
 
 namespace boost { namespace process { namespace detail {namespace posix {
 
 
-inline bool is_running(const child_handle &p)
+inline bool is_running(const child_handle &p, int & exit_code)
 {
-    if (::kill(p.pid, 0) == -1)
+    int status; 
+    auto ret = ::waitpid(p.pid, &status, WNOHANG|WUNTRACED);
+    
+    if (ret == -1)
     {
-        auto last_error = errno;
+        if (errno != ECHILD) //because it no child is running, than this one isn't either, obviously.
+            ::boost::process::detail::throw_last_error("is_running error");
 
-
-        if (last_error == ESRCH)
-            return false;
-
-        ::boost::process::detail::throw_last_error("is_running error");
         return false;
     }
-    else
+    else if (ret == 0)
         return true;
+    else //exited
+    {
+        if (WIFEXITED(status))
+            exit_code = WEXITSTATUS(status);
 
+        return false;
+    }
 }
 
-inline bool is_running(const child_handle &p, std::error_code &ec)
+inline bool is_running(const child_handle &p, int & exit_code, std::error_code &ec)
 {
-    if (::kill(p.pid, 0) == -1)
+    int status;
+    auto ret = ::waitpid(p.pid, &status, WNOHANG|WUNTRACED); 
+    
+    if (ret == -1)
     {
-        auto last_error = errno;
-        if (last_error == ESRCH)
-            return false;
-
-        ec = ::boost::process::detail::get_last_error();
+        if (errno != ECHILD) //because it no child is running, than this one isn't either, obviously.
+            ec = ::boost::process::detail::get_last_error();
+        return false;
     }
+    else if (ret == 0)
+        return true;
     else
     {
         ec.clear();
-        return true;
+        
+        if (WIFEXITED(status))
+            exit_code = WEXITSTATUS(status);
+        
+        return false;
     }
 }
 

@@ -77,7 +77,7 @@ public:
 
     ~group()
     {
-        if ( _attached)
+        if ( _attached && valid())
             terminate();
     }
     native_handle_t native_handle() const { return _group_handle.handle(); }

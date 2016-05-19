@@ -26,6 +26,7 @@
 #include <system_error>
 
 #include <string>
+#include <thread>
 #include <istream>
 #include <iostream>
 #include <cstdlib>
@@ -41,31 +42,36 @@ typedef boost::asio::posix::stream_descriptor pipe_end;
 namespace bp = boost::process;
 namespace bio = boost::iostreams;
 
-BOOST_AUTO_TEST_CASE(group_test)
+BOOST_AUTO_TEST_CASE(group_test, *boost::unit_test::timeout(5))
 {
     cout << "group_test" << endl;
     using boost::unit_test::framework::master_test_suite;
 
     std::error_code ec;
     bp::group g;
+
+
     auto c = bp::execute(
         master_test_suite().argv[1],
         g,
         ec
     );
+    BOOST_CHECK(c.running());
+
     BOOST_REQUIRE(!ec);
     BOOST_REQUIRE(c.in_group());
     BOOST_CHECK(c);
     BOOST_CHECK(c.running());
 
-    g.terminate(); 
+    BOOST_REQUIRE_NO_THROW(g.terminate()); 
+    std::this_thread::sleep_for(std::chrono::milliseconds(1)); 
 
     BOOST_CHECK(!c.running());
     if (c.running())
         c.terminate();
 }
-#define L() cout << __FILE__ "(" << __LINE__ << ")" << endl;
-BOOST_AUTO_TEST_CASE(attached, *boost::unit_test::timeout(2))
+
+BOOST_AUTO_TEST_CASE(attached, *boost::unit_test::timeout(5))
 {
     using boost::unit_test::framework::master_test_suite;
 
@@ -96,12 +102,27 @@ BOOST_AUTO_TEST_CASE(attached, *boost::unit_test::timeout(2))
 
     BOOST_REQUIRE(sub_c);
     std::this_thread::sleep_for(std::chrono::milliseconds(50)); //just to be sure.
-    g.terminate();
+    
+
+#if defined( BOOST_POSIX_API )
+    BOOST_CHECK(kill(sub_c.id(), 0) == 0);
+#else
+    BOOST_CHECK(sub_c.running());
+#endif
+    
+    BOOST_REQUIRE_NO_THROW(g.terminate()); 
+    
     BOOST_CHECK(sub_c);
     std::this_thread::sleep_for(std::chrono::milliseconds(50)); //just to be sure.
 
     BOOST_CHECK(!c.running());
-    auto still_runs = sub_c.running();
+
+#if defined( BOOST_POSIX_API )
+    bool still_runs = kill(sub_c.id(), 0) == 0;
+#else 
+    bool still_runs = sub_c.running();
+#endif
+
     BOOST_CHECK(!still_runs);
     if (still_runs)
         sub_c.terminate();
@@ -113,7 +134,7 @@ BOOST_AUTO_TEST_CASE(attached, *boost::unit_test::timeout(2))
 
 
 
-BOOST_AUTO_TEST_CASE(detached, *boost::unit_test::timeout(2))
+BOOST_AUTO_TEST_CASE(detached, *boost::unit_test::timeout(5))
 {
     std::cerr << "detached" << std::endl;
 
@@ -143,13 +164,24 @@ BOOST_AUTO_TEST_CASE(detached, *boost::unit_test::timeout(2))
     bp::child sub_c(pid);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(50)); //just to be sure.
-    BOOST_CHECK(sub_c.running());
 
-    g.terminate();
+#if defined( BOOST_POSIX_API )
+    BOOST_CHECK(kill(sub_c.id(), 0) == 0);
+#else
+    BOOST_CHECK(sub_c.running());
+#endif
+
+    BOOST_REQUIRE_NO_THROW(g.terminate()); 
+
     BOOST_CHECK(sub_c);
     std::this_thread::sleep_for(std::chrono::milliseconds(50)); //just to be sure.
 
-    auto still_runs = sub_c.running();
+#if defined( BOOST_POSIX_API )
+    bool still_runs = kill(sub_c.id(), 0) == 0;
+#else 
+    bool still_runs = sub_c.running();
+#endif
+
     BOOST_CHECK(still_runs);
     if (still_runs)
         sub_c.terminate();
@@ -158,5 +190,3 @@ BOOST_AUTO_TEST_CASE(detached, *boost::unit_test::timeout(2))
     if (c.running())
         c.terminate();
 }
-
-

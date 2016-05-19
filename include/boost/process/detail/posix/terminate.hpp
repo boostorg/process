@@ -25,7 +25,7 @@ inline void terminate(const child_handle &p)
         boost::process::detail::throw_last_error("kill(2) failed");
 }
 
-inline  void terminate(const child_handle &p, std::error_code &ec)
+inline void terminate(const child_handle &p, std::error_code &ec)
 {
     if (::kill(p.pid, SIGKILL) == -1)
         ec = boost::process::detail::get_last_error();
