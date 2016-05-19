@@ -15,7 +15,7 @@ namespace boost { namespace process { namespace detail { namespace windows {
 
 struct child_handle;
 
-inline bool is_running(const child_handle &p)
+inline bool is_running(const child_handle &p, int & exit_code)
 {
     ::boost::detail::winapi::DWORD_ code;
     //single value, not needed in the winapi.
@@ -24,11 +24,16 @@ inline bool is_running(const child_handle &p)
     if (!::boost::detail::winapi::GetExitCodeProcess(p.process_handle(), &code))
         ::boost::process::detail::throw_last_error("GetExitCodeProcess() failed");
 
-
-    return code == still_active;
+	if (code == still_active)
+		return true;
+	else
+	{
+		exit_code = code;
+		return false;
+	}	
 }
 
-inline bool is_running(const child_handle &p, std::error_code &ec)
+inline bool is_running(const child_handle &p, int & exit_code, std::error_code &ec)
 {
     ::boost::detail::winapi::DWORD_ code;
     //single value, not needed in the winapi.
@@ -39,7 +44,13 @@ inline bool is_running(const child_handle &p, std::error_code &ec)
     else
         ec.clear();
 
-    return code == still_active;
+	if (code == still_active)
+		return true;
+	else
+	{
+		exit_code = code;
+		return false;
+	}	
 }
 
 }}}}

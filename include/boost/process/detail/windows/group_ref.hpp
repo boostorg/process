@@ -21,14 +21,25 @@ struct group_ref : handler_base_ext
 {
     ::boost::detail::winapi::HANDLE_ handle;
 
-    explicit group_ref(::boost::detail::winapi::HANDLE_ h) :
-                handle(h)
+    explicit group_ref(group_handle &g) :
+                handle(g.handle())
     {}
 
     template <class Executor>
-    void on_fork_success(Executor& exec) const
+    void on_setup(Executor& exec) const
     {
-        
+        //I can only enable this if the current process supports breakaways.
+        if (in_group() && break_away_enabled(nullptr))
+            exec.creation_flags  |= boost::detail::winapi::CREATE_BREAKAWAY_FROM_JOB_;
+    }
+
+
+    template <class Executor>
+    void on_success(Executor& exec) const
+    {
+        if (!::boost::detail::winapi::AssignProcessToJobObject(handle, exec.proc_info.hProcess))
+            throw_last_error("AssignProcessToJobObject() failed.");
+
     }
 
 };
