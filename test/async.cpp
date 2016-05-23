@@ -54,6 +54,7 @@ BOOST_AUTO_TEST_CASE(async_wait)
     io_service.run();
     BOOST_CHECK(exit_called);
     BOOST_CHECK_EQUAL(exit_code, 123);
+    c.wait();
 }
 
 
@@ -83,6 +84,7 @@ BOOST_AUTO_TEST_CASE(async_out_stream)
     std::getline(istr, line);
     BOOST_REQUIRE_GE(line.size(), 3);
     BOOST_CHECK(boost::algorithm::starts_with(line, "abc"));
+    c.wait();
 }
 
 
@@ -127,7 +129,7 @@ BOOST_AUTO_TEST_CASE(async_in_stream)
         BOOST_CHECK(boost::algorithm::starts_with(line, val));
 
     
-
+    c.wait();
 }
 
 

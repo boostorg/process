@@ -62,6 +62,7 @@ BOOST_AUTO_TEST_CASE(inherit_env, *boost::unit_test::timeout(2))
             path.begin(), path.begin() + size
             );
     }
+    c.wait();
 }
 
 
@@ -96,6 +97,7 @@ BOOST_AUTO_TEST_CASE(inherit_mod_env, *boost::unit_test::timeout(2))
             s.begin(),     s.    begin() + size,
             value.begin(), value.begin() + size
             );
+    c.wait();
 }
 
 
@@ -127,5 +129,6 @@ BOOST_AUTO_TEST_CASE(modifided_env, *boost::unit_test::timeout(2))
     std::getline(st, s);
 
     BOOST_CHECK(boost::algorithm::starts_with(s, "TestString"));
+    c.wait();
 }
 

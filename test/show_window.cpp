@@ -25,11 +25,11 @@ BOOST_AUTO_TEST_CASE(show_window)
     namespace bio = boost::iostreams;
 
     bp::pipe p;
-
+    bp::child c;
     {
 
         std::error_code ec;
-        bp::execute(
+        c = bp::execute(
             master_test_suite().argv[1],
             "test", "--windows-print-showwindow",
             bp::show_normal,

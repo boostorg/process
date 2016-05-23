@@ -73,4 +73,5 @@ BOOST_AUTO_TEST_CASE(async_wait)
 #endif
 
     io_service.run();
+    c.wait();
 }

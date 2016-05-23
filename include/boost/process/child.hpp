@@ -67,7 +67,6 @@ public:
           _exit_code(lhs._exit_code.load()),
           _attached (lhs._attached)
     {
-        lhs._child_handle = child_handle();
         lhs._attached = false;
     }
 
@@ -79,7 +78,6 @@ public:
         _exited   .store(lhs._exited.load()   );
         _exit_code.store(lhs._exit_code.load());
         _attached    = lhs._attached;
-        lhs._child_handle = child_handle();
         lhs._attached = false;
         return *this;
     };
@@ -99,7 +97,7 @@ public:
 
     bool running()
     {
-        if (valid())
+        if (valid() && !_exited.load())
         {
             int code; 
             auto res = boost::process::detail::api::is_running(_child_handle, code);

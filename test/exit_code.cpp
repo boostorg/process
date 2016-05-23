@@ -46,6 +46,7 @@ BOOST_AUTO_TEST_CASE(sync_wait)
 #elif defined(BOOST_POSIX_API)
     BOOST_CHECK_EQUAL(123, WEXITSTATUS(exit_code));
 #endif
+    c.wait();
 }
 
 #if defined(BOOST_WINDOWS_API)
@@ -108,4 +109,5 @@ BOOST_AUTO_TEST_CASE(async_wait)
 #endif
 
     io_service.run();
+    c.wait();
 }
