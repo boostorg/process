@@ -10,13 +10,9 @@
 project : requirements
  # <source>/boost//headers
  # <source>/boost//system
- <include>../include
- 
-  <toolset>msvc:<define>_SCL_SECURE_NO_WARNINGS
+  <toolset>msvc:<define>_SCL_5SECURE_NO_WARNINGS
   <target-os>windows:<define>WIN32_LEAN_AND_MEAN
   <target-os>linux:<linkflags>-lpthread
-  <toolset>gcc:<linkflags>-lws2_32
-  <library-path>F:/boost_1_60_0/stage/lib
 ;
 
 searched-lib shell32 ;
@@ -24,43 +20,42 @@ searched-lib shell32 ;
 import testing ;
 
 
-lib program_options 	: : <toolset>gcc:<file>F:/boost-git/lib64/libboost_program_options-mgw-mt-d-1_60.a <toolset>msvc:<file>F:/boost_1_60_0/stage/lib/libboost_program_options-vc140-mt-gd-1_60.lib ;
-lib filesystem 	    	: : <toolset>gcc:<file>F:/boost-git/lib64/libboost_filesystem-mgw-mt-d-1_60.a 	   <toolset>msvc:<file>F:/boost_1_60_0/stage/lib/libboost_filesystem-vc140-mt-gd-1_60.lib ;
-lib system   			: : <toolset>gcc:<file>F:/boost-git/lib64/libboost_system-mgw-mt-d-1_60.a   	   <toolset>msvc:<file>F:/boost_1_60_0/stage/lib/libboost_system-vc140-mt-gd-1_60.lib ;
-lib thread   			: : <toolset>gcc:<file>F:/boost-git/lib64/libboost_thread-mgw-mt-d-1_60.a   	   <toolset>msvc:<file>F:/boost_1_60_0/stage/lib/libboost_thread-vc140-mt-gd-1_60.lib ;
-lib iostreams 			: : <toolset>gcc:<file>F:/boost-git/lib64/libboost_iostreams-mgw-mt-d-1_60.a 	   
-							<toolset>msvc:<file>F:/boost_1_60_0/stage/lib/libboost_iostreams-vc140-mt-gd-1_60.lib
-							 ;
+alias program_options 	: /boost//program_options ;
+alias filesystem 	    : /boost//filesystem 	  ;
+alias iostreams 		: /boost//iostreams 	  ;
+alias system   			: /boost//system   		  ;
+alias thread   			: /boost//thread   		  ;
 
-#exe sparring_partner : sparring_partner.cpp program_options :
-#	<warnings>off
-#	;
+exe sparring_partner : sparring_partner.cpp program_options system filesystem iostreams :
+	<warnings>off
+	;
+	
+exe sub_launch : sub_launcher.cpp program_options iostreams system filesystem : <warnings>off ;	
 
-#exe sub_launch : sub_launcher.cpp program_options iostreams : <warnings>off ;	
 
 test-suite ts :
-  	 [ run pipe.cpp iostreams ]
-#   [ run async.cpp iostreams system thread : : sparring_partner	]
-#   [ run bind_stderr.cpp iostreams : : sparring_partner 			]
-#   [ run bind_stdin.cpp iostreams system : : sparring_partner 	]
-#   [ run bind_stdin_stdout.cpp iostreams system : : sparring_partner ]
-#    [ run bind_stdout.cpp iostreams system : : sparring_partner  	]
-#   [ run bind_stdout_stderr.cpp iostreams system : : sparring_partner  ]
-#   [ run close_stderr.cpp iostreams system : : sparring_partner  ]
-#   [ run close_stdin.cpp iostreams  system : : sparring_partner  ]
-#   [ run close_stdout.cpp iostreams system : : sparring_partner  ]
-#   [ run exit_code.cpp iostreams program_options system : : sparring_partner  ]
-#   [ run extensions.cpp system : : sparring_partner   ]
-#   [ run env.cpp iostreams program_options system : : sparring_partner ]
-#   [ run group.cpp  iostreams system thread : : sub_launch : <build>no <target-os>windows:<build>yes	]
-#   [ run posix_specific.cpp iostreams system : : sparring_partner : <build>no <target-os>linux:<build>yes ]
-#   [ run run_exe.cpp  : : sparring_partner                                                                ]
-#   [ run run_exe_path.cpp : : sparring_partner                                                            ]
-#   [ run search_path.cpp filesystem system : : : <target-os>windows:<source>shell32                       ]
-#   [ run shell_path.cpp filesystem system                                                                 ]
-#   [ run show_window.cpp iostreams system : : sparring_partner  : <build>no <target-os>windows:<build>yes ]
-#   [ run start_dir.cpp iostreams filesystem system : : sparring_partner                                   ]
-#   [ run terminate.cpp system : : sparring_partner     		]
-#   [ run throw_on_error.cpp system : : sparring_partner        ]
-#   [ run wait.cpp system : : sparring_partner				    ]
+   [ run pipe.cpp iostreams system filesystem ]
+   [ run async.cpp iostreams system thread filesystem              : : sparring_partner ]
+   [ run bind_stderr.cpp iostreams filesystem 			            : : sparring_partner ]
+   [ run bind_stdin.cpp iostreams system filesystem 		        : : sparring_partner ]
+   [ run bind_stdin_stdout.cpp iostreams system filesystem         : : sparring_partner ]
+   [ run bind_stdout.cpp iostreams system filesystem 		        : : sparring_partner ]
+   [ run bind_stdout_stderr.cpp iostreams system filesystem        : : sparring_partner ]
+   [ run close_stderr.cpp iostreams system filesystem              : : sparring_partner ]
+   [ run close_stdin.cpp iostreams  system filesystem              : : sparring_partner ]
+   [ run close_stdout.cpp iostreams system filesystem              : : sparring_partner ]
+   [ run exit_code.cpp iostreams program_options system filesystem : : sparring_partner ]
+   [ run extensions.cpp system filesystem                          : : sparring_partner ]
+   [ run env.cpp iostreams program_options system filesystem       : : sparring_partner ]
+   [ run group.cpp iostreams system thread filesystem              : : sub_launch       ]
+   [ run posix_specific.cpp iostreams system filesystem            : : sparring_partner : <build>no <target-os>linux:<build>yes   ]
+   [ run run_exe.cpp filesystem                                    : : sparring_partner ]
+   [ run run_exe_path.cpp filesystem                               : : sparring_partner ]
+   [ run search_path.cpp filesystem system                         : : : <target-os>windows:<source>shell32 ]
+   [ run shell_path.cpp filesystem system                          : ]
+   [ run show_window.cpp iostreams system                          : : sparring_partner  : <build>no <target-os>windows:<build>yes ]
+   [ run start_dir.cpp iostreams filesystem system                 : : sparring_partner ]
+   [ run terminate.cpp system filesystem                           : : sparring_partner ]
+   [ run throw_on_error.cpp system filesystem                      : : sparring_partner ]
+   [ run wait.cpp system filesystem                                : : sparring_partner ]
 	;
