@@ -13,10 +13,8 @@
 #include <boost/detail/winapi/get_last_error.hpp>
 #include <boost/detail/winapi/access_rights.hpp>
 #include <boost/detail/winapi/process.hpp>
-#include <boost/asio/windows/stream_handle.hpp>
 #include <boost/process/detail/windows/compare_handles.hpp>
 #include <system_error>
-#include <array>
 #include <string>
 
 

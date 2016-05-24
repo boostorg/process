@@ -16,7 +16,7 @@
 #include <streambuf>
 #include <istream>
 #include <ostream>
-#include <array>
+#include <vector>
 
 #if defined(BOOST_POSIX_API)
 #include <boost/process/detail/posix/basic_pipe.hpp>
@@ -46,27 +46,27 @@ struct basic_pipebuf : std::basic_streambuf<CharT, Traits>
     typedef  typename Traits::off_type off_type   ;
 
 
-    basic_pipebuf()
+    basic_pipebuf() : _write(1024), _read(1024)
     {
-        this->setg(_read.begin(),  _read.begin()+ 10,  _read.begin() + 10);
-        this->setp(_write.begin(), _write.begin());
+        this->setg(_read.data(),  _read.data()+ 10,  _read.data() + 10);
+        this->setp(_write.data(), _write.data());
     }
     basic_pipebuf(const basic_pipebuf & ) = default;
     basic_pipebuf(basic_pipebuf && ) = default;
 
-    basic_pipebuf(pipe_type && p) : _pipe(std::move(p))
+    basic_pipebuf(pipe_type && p) : _pipe(std::move(p)), _write(1024), _read(1024)
     {
-        this->setg(_read.begin(),  _read.begin()+ 10,  _read.begin() + 10);
-        this->setp(_write.begin(), _write.begin());
+        this->setg(_read.data(),  _read.data()+ 10,  _read.data() + 10);
+        this->setp(_write.data(), _write.data());
     }
 
-    basic_pipebuf(const pipe_type & p) : _pipe(p)
+    basic_pipebuf(const pipe_type & p) : _pipe(p), _write(1024), _read(1024)
     {
-        this->setg(_read.begin(),  _read.begin()+ 10,  _read.begin() + 10);
-        this->setp(_write.begin(), _write.begin());
+        this->setg(_read.data(),  _read.data()+ 10,  _read.data() + 10);
+        this->setp(_write.data(), _write.data());
     }
 
-    basic_pipebuf& operator=(const basic_pipebuf & ) = default;
+    basic_pipebuf& operator=(const basic_pipebuf & ) = delete;
     basic_pipebuf& operator=(basic_pipebuf && ) = default;
 
     basic_pipebuf& operator=(pipe_type && p)
@@ -100,7 +100,7 @@ struct basic_pipebuf : std::basic_streambuf<CharT, Traits>
         if (!_pipe.is_open())
             return traits_type::eof();
 
-        auto len = _read.end() - this->egptr() ;
+        auto len = &_read.back() - this->egptr() ;
         auto res = _pipe.read(this->egptr(), len);
 
         this->setg(this->eback(), this->gptr(), this->egptr() + res);
@@ -117,8 +117,8 @@ struct basic_pipebuf : std::basic_streambuf<CharT, Traits>
     pipe_type       &pipe()       {return _pipe;}
 private:
     pipe_type _pipe;
-    std::array<char_type, 1024> _write;
-    std::array<char_type, 1024> _read;
+    std::vector<char_type> _write;
+    std::vector<char_type> _read;
 
     bool _write_impl()
     {
