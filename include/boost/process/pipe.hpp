@@ -16,6 +16,7 @@
 #include <streambuf>
 #include <istream>
 #include <ostream>
+#include <array>
 
 #if defined(BOOST_POSIX_API)
 #include <boost/process/detail/posix/basic_pipe.hpp>
@@ -45,12 +46,25 @@ struct basic_pipebuf : std::basic_streambuf<CharT, Traits>
     typedef  typename Traits::off_type off_type   ;
 
 
-    basic_pipebuf() = default;
+    basic_pipebuf()
+    {
+        this->setg(_read.begin(),  _read.begin()+ 10,  _read.begin() + 10);
+        this->setp(_write.begin(), _write.begin());
+    }
     basic_pipebuf(const basic_pipebuf & ) = default;
     basic_pipebuf(basic_pipebuf && ) = default;
 
-    basic_pipebuf(pipe_type && p) : _pipe(std::move(p)) {}
-    basic_pipebuf(const pipe_type & p) : _pipe(p) {}
+    basic_pipebuf(pipe_type && p) : _pipe(std::move(p))
+    {
+        this->setg(_read.begin(),  _read.begin()+ 10,  _read.begin() + 10);
+        this->setp(_write.begin(), _write.begin());
+    }
+
+    basic_pipebuf(const pipe_type & p) : _pipe(p)
+    {
+        this->setg(_read.begin(),  _read.begin()+ 10,  _read.begin() + 10);
+        this->setp(_write.begin(), _write.begin());
+    }
 
     basic_pipebuf& operator=(const basic_pipebuf & ) = default;
     basic_pipebuf& operator=(basic_pipebuf && ) = default;
@@ -66,24 +80,36 @@ struct basic_pipebuf : std::basic_streambuf<CharT, Traits>
         return *this;
     }
 
-    virtual std::streamsize xsputn( const char_type* s, std::streamsize count ) override
+    int_type overflow(int_type ch = traits_type::eof()) override
     {
-       return _pipe.write(s, count);
+        if ((ch != traits_type::eof()) && _pipe.is_open())
+        {
+            *this->pptr() = ch;
+            this->pbump(1);
+            if (this->_write_impl())
+                return ch;
+        }
+        return traits_type::eof();
     }
-    virtual int_type overflow( int_type ch = Traits::eof() ) override
+    int sync() override
     {
-        return _pipe.write(&ch, 1);
+        return this->_write_impl() ? 0 : -1;
     }
-    virtual int_type underflow() override
+    int_type underflow() override
     {
-        char_type data;
-        _pipe.read(&data, 1);
-        return data;
+        if (!_pipe.is_open())
+            return traits_type::eof();
+
+        auto len = _read.end() - this->egptr() ;
+        auto res = _pipe.read(this->egptr(), len);
+
+        this->setg(this->eback(), this->gptr(), this->egptr() + res);
+        auto val = *this->gptr();
+
+        return  traits_type::to_int_type(val);
     }
-    virtual std::streamsize xsgetn( char_type* s, std::streamsize count ) override
-    {
-        return _pipe.read(s, count);
-    }
+
+
 
     void pipe(pipe_type&& p)      {_pipe = std::move(p); }
     void pipe(const pipe_type& p) {_pipe = p; }
@@ -91,6 +117,26 @@ struct basic_pipebuf : std::basic_streambuf<CharT, Traits>
     pipe_type       &pipe()       {return _pipe;}
 private:
     pipe_type _pipe;
+    std::array<char_type, 1024> _write;
+    std::array<char_type, 1024> _read;
+
+    bool _write_impl()
+    {
+        if (!_pipe.is_open())
+            return false;
+
+        auto base = this->pbase();
+
+        auto wrt = _pipe.write(base, this->pptr() - base);
+        std::ptrdiff_t diff = this->pptr() - base;
+
+        if (wrt < diff)
+            std::move(base + wrt, base + diff, base);
+
+        this->pbump(-wrt);
+
+        return true;
+    }
 };
 
 typedef basic_pipebuf<char>     pipebuf;
@@ -100,7 +146,7 @@ template<
     class CharT,
     class Traits = std::char_traits<CharT>
 >
-class basic_ipstream : std::basic_istream<CharT, Traits>
+class basic_ipstream : public std::basic_istream<CharT, Traits>
 {
     basic_pipebuf<CharT, Traits> _buf;
 public:
@@ -114,12 +160,12 @@ public:
 
     basic_pipebuf<CharT, Traits>* rdbuf() const {return _buf;};
 
-    basic_ipstream() = default;
+    basic_ipstream() : std::basic_istream<CharT, Traits>(&_buf) {};
     basic_ipstream(const basic_ipstream & ) = delete;
     basic_ipstream(basic_ipstream && ) = default;
 
-    basic_ipstream(pipe_type && p) : _buf(std::move(p)) {}
-    basic_ipstream(const pipe_type & p) : _buf(p) {}
+    basic_ipstream(pipe_type && p)      : std::basic_istream<CharT, Traits>(&_buf), _buf(std::move(p)) {}
+    basic_ipstream(const pipe_type & p) : std::basic_istream<CharT, Traits>(&_buf), _buf(p) {}
 
     basic_ipstream& operator=(const basic_ipstream & ) = delete;
     basic_ipstream& operator=(basic_ipstream && ) = default;
@@ -147,7 +193,7 @@ template<
     class CharT,
     class Traits = std::char_traits<CharT>
 >
-class basic_opstream : std::basic_istream<CharT, Traits>
+class basic_opstream : public std::basic_ostream<CharT, Traits>
 {
     basic_pipebuf<CharT, Traits> _buf;
 public:
@@ -162,12 +208,12 @@ public:
 
     basic_pipebuf<CharT, Traits>* rdbuf() const {return _buf;};
 
-    basic_opstream() = default;
+    basic_opstream() : std::basic_ostream<CharT, Traits>(&_buf)  {}
     basic_opstream(const basic_opstream & ) = delete;
     basic_opstream(basic_opstream && ) = default;
 
-    basic_opstream(pipe_type && p) : _buf(std::move(p)) {}
-    basic_opstream(const pipe_type & p) : _buf(p) {}
+    basic_opstream(pipe_type && p)      : std::basic_ostream<CharT, Traits>(&_buf), _buf(std::move(p)) {}
+    basic_opstream(const pipe_type & p) : std::basic_ostream<CharT, Traits>(&_buf), _buf(p) {}
 
     basic_opstream& operator=(const basic_opstream & ) = delete;
     basic_opstream& operator=(basic_opstream && ) = default;
@@ -195,7 +241,7 @@ template<
     class CharT,
     class Traits = std::char_traits<CharT>
 >
-class basic_pstream : std::basic_istream<CharT, Traits>
+class basic_pstream : public std::basic_iostream<CharT, Traits>
 {
     basic_pipebuf<CharT, Traits> _buf;
 public:
@@ -209,12 +255,12 @@ public:
 
     basic_pipebuf<CharT, Traits>* rdbuf() const {return _buf;};
 
-    basic_pstream() = default;
+    basic_pstream() : std::basic_iostream<CharT, Traits>(&_buf) {}
     basic_pstream(const basic_pstream & ) = delete;
     basic_pstream(basic_pstream && ) = default;
 
-    basic_pstream(pipe_type && p) : _buf(std::move(p)) {}
-    basic_pstream(const pipe_type & p) : _buf(p) {}
+    basic_pstream(pipe_type && p)      : std::basic_iostream<CharT, Traits>(&_buf), _buf(std::move(p)) {}
+    basic_pstream(const pipe_type & p) : std::basic_iostream<CharT, Traits>(&_buf), _buf(p) {}
 
     basic_pstream& operator=(const basic_pstream & ) = delete;
     basic_pstream& operator=(basic_pstream && ) = default;

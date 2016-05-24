@@ -72,23 +72,35 @@ public:
         if (!::boost::detail::winapi::WriteFile(
                 _sink, data, count * sizeof(char_type), &write_len, nullptr
                 ))
-            ::boost::process::detail::throw_last_error("WriteFile failed");
+        {
+            auto ec = ::boost::process::detail::get_last_error();
+            if (ec.value() == ::boost::detail::winapi::ERROR_BROKEN_PIPE_)
+                return 0;
+            else
+                throw std::system_error(ec, "WriteFile failed");
+        }
         return write_len;
     }
     int_type read(char_type * data, int_type count)
     {
         ::boost::detail::winapi::DWORD_ read_len;
         if (!::boost::detail::winapi::ReadFile(
-                _sink, data, count * sizeof(char_type), &read_len, nullptr
+                _source, data, count * sizeof(char_type), &read_len, nullptr
                 ))
-            ::boost::process::detail::throw_last_error("ReadFile failed");
+        {
+            auto ec = ::boost::process::detail::get_last_error();
+            if (ec.value() == ::boost::detail::winapi::ERROR_BROKEN_PIPE_)
+                return 0;
+            else
+                throw std::system_error(ec, "ReadFile failed");
+        }
         return read_len;
     }
 
     bool is_open()
     {
-        return (_source == ::boost::detail::winapi::INVALID_HANDLE_VALUE_) ||
-               (_sink   == ::boost::detail::winapi::INVALID_HANDLE_VALUE_);
+        return (_source != ::boost::detail::winapi::INVALID_HANDLE_VALUE_) ||
+               (_sink   != ::boost::detail::winapi::INVALID_HANDLE_VALUE_);
     }
 
     void close()
