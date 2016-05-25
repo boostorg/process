@@ -20,8 +20,7 @@
 
 #include <system_error>
 #include <boost/system/error_code.hpp>
-#include <boost/iostreams/device/file_descriptor.hpp>
-#include <boost/iostreams/stream.hpp>
+
 #include <boost/asio.hpp>
 #include <string>
 #include <cstdlib>
@@ -39,34 +38,30 @@ typedef boost::asio::posix::stream_descriptor pipe_end;
 
 
 namespace bp = boost::process;
-namespace bio = boost::iostreams;
 
 BOOST_AUTO_TEST_CASE(sync_io, *boost::unit_test::timeout(2))
 {
     std::cout << "sync_io" << std::endl;
     using boost::unit_test::framework::master_test_suite;
 
-    bp::pipe p1;
-    bp::pipe p2;
+    bp::opstream os;
+    bp::ipstream is;
 
     std::error_code ec;
   
     auto c = bp::execute(
         master_test_suite().argv[1],
         bp::args+={"test", "--prefix", "abc"},
-        bp::std_in <p1,
-        bp::std_out>p2,
+        bp::std_in <os,
+        bp::std_out>is,
         ec);
     
     BOOST_REQUIRE(!ec);
   
   
-    bio::stream<bio::file_descriptor_sink> os(p1.sink());
-
 
     os << "hello" << std::endl;
       
-    bio::stream<bio::file_descriptor_source> is(p2.source());
     std::string s;
 
 
@@ -84,9 +79,9 @@ BOOST_AUTO_TEST_CASE(sync_io, *boost::unit_test::timeout(2))
 
 struct write_handler
 {
-    bio::stream<bio::file_descriptor_source> &is_;
+    bp::ipstream &is_;
 
-    write_handler(bio::stream<bio::file_descriptor_source> &is) : is_(is) {}
+    write_handler(bp::ipstream &is) : is_(is) {}
 
     void operator()(const boost::system::error_code &ec, std::size_t size)
     {
@@ -106,22 +101,17 @@ BOOST_AUTO_TEST_CASE(async_io, *boost::unit_test::timeout(2))
     boost::asio::io_service io_service;
 
     bp::async_pipe p1(io_service);
-    bp::pipe p2 ;
+    bp::ipstream is;
 
     std::error_code ec;
     auto c = bp::execute(
         master_test_suite().argv[1],
         "test", "--prefix-once", "abc",
         bp::std_in<p1,
-        bp::std_out>p2,
+        bp::std_out>is,
         ec
     );
     BOOST_REQUIRE(!ec);
-
-
-
-    bio::stream<bio::file_descriptor_source> is(p2.source());
-
 
     std::string s = "hello\n";
     boost::asio::async_write(p1, boost::asio::buffer(s),

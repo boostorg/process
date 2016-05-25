@@ -27,9 +27,9 @@ inline std::string make_pipe_name()
     auto pid = ::boost::detail::winapi::GetCurrentProcessId();
 
     static unsigned long long cnt = 0;
-    name += pid;
+    name += std::to_string(pid);
     name += "_";
-    name += cnt;
+    name += std::to_string(cnt);
 
     return name;
 }
@@ -39,34 +39,32 @@ class async_pipe
     ::boost::asio::windows::stream_handle _source;
     ::boost::asio::windows::stream_handle _sink  ;
 public:
+    typedef ::boost::detail::winapi::HANDLE_ native_handle;
+
     inline async_pipe(boost::asio::io_service & ios, const std::string & name = make_pipe_name());
 
     inline explicit async_pipe(const std::string & name);
-    inline async_pipe(const basic_pipe& p);
     async_pipe(async_pipe&& lhs)  : _source(std::move(lhs._source)), _sink(std::move(lhs._sink))
     {
         lhs._source.assign (::boost::detail::winapi::INVALID_HANDLE_VALUE_);
         lhs._sink  .assign (::boost::detail::winapi::INVALID_HANDLE_VALUE_);
     }
     template<class CharT, class Traits = std::char_traits<CharT>>
-    explicit async_pipe(boost::asio::io_service & ios, const pipe<CharT, Traits> & p) : _source(ios, p.source()), _sink(ios, p.sink())
+    explicit async_pipe(boost::asio::io_service & ios, const basic_pipe<CharT, Traits> & p)
+            : _source(ios, p.native_source()), _sink(ios, p.native_sink())
     {
     }
+    template<class CharT, class Traits = std::char_traits<CharT>>
+    inline async_pipe& operator=(const basic_pipe<CharT, Traits>& p);
+    async_pipe& operator=(const async_pipe& lhs);
 
-    inline async_pipe& operator=(const basic_pipe& p);
-    async_pipe& operator=(async_pipe&& lhs)
-    {
-        _source = std::move(lhs._source);
-        _sink   = std::move(lhs._sink);
-        lhs._source .assign(::boost::detail::winapi::INVALID_HANDLE_VALUE_);
-        lhs._sink   .assign(::boost::detail::winapi::INVALID_HANDLE_VALUE_);
-        return *this;
-    }
+    async_pipe& operator=(async_pipe&& lhs);
+
     ~async_pipe()
     {
-        if (_sink   != ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
+        if (_sink .native()  != ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
             ::boost::detail::winapi::CloseHandle(_sink.native());
-        if (_source != ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
+        if (_source.native() != ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
             ::boost::detail::winapi::CloseHandle(_source.native());
     }
 
@@ -84,9 +82,18 @@ public:
     void close()
     {
         if (_sink.is_open())
-            _sink.cancel();
+            _sink.close();
         if (_source.is_open())
-            _source.cancel();}
+            _source.close();
+    }
+    void close(boost::system::error_code & ec)
+    {
+        if (_sink.is_open())
+            _sink.close(ec);
+        if (_source.is_open())
+            _source.close(ec);
+    }
+
 
     bool is_open() const
     {
@@ -111,9 +118,8 @@ public:
         return _sink.write_some(buffers);
     }
 
-
-    void* source() const {return _source.native();}
-    void* sink  () const {return _sink  .native();}
+    native_handle native_source() const {return const_cast<boost::asio::windows::stream_handle&>(_source).native();}
+    native_handle native_sink  () const {return const_cast<boost::asio::windows::stream_handle&>(_sink  ).native();}
 
 
     template<typename MutableBufferSequence,
@@ -133,7 +139,7 @@ public:
     {
         _sink.async_write_some(buffers, handler);
     }
-
+    boost::asio::io_service &get_io_service() {return _sink.get_io_service();}
 };
 
 
@@ -202,20 +208,20 @@ async_pipe& async_pipe::operator=(const async_pipe & p)
 
 async_pipe& async_pipe::operator=(async_pipe && lhs)
 {
-    if (_source == ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
+    if (_source.native_handle() == ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
         ::boost::detail::winapi::CloseHandle(_source.native());
 
-    if (_sink == ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
+    if (_sink.native_handle()   == ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
         ::boost::detail::winapi::CloseHandle(_sink.native());
 
-    _source = lhs._source;
-    _sink   = lhs._sink;
-    lhs._source = ::boost::detail::winapi::INVALID_HANDLE_VALUE_;
-    lhs._sink   = ::boost::detail::winapi::INVALID_HANDLE_VALUE_;
+    _source.assign(lhs._source.native_handle());
+    _sink  .assign(lhs._sink  .native_handle());
+    lhs._source.assign(::boost::detail::winapi::INVALID_HANDLE_VALUE_);
+    lhs._sink  .assign(::boost::detail::winapi::INVALID_HANDLE_VALUE_);
     return *this;
 }
 
-template<class CharT, class Traits = std::char_traits<CharT>>
+template<class CharT, class Traits>
 async_pipe::operator basic_pipe<CharT, Traits>() const
 {
     auto proc = ::boost::detail::winapi::GetCurrentProcess();
@@ -248,42 +254,42 @@ async_pipe::operator basic_pipe<CharT, Traits>() const
 
 inline bool operator==(const async_pipe & lhs, const async_pipe & rhs)
 {
-    return compare_handles(lhs.source(), rhs.source()) &&
-           compare_handles(lhs.sink(),   rhs.sink());
+    return compare_handles(lhs.native_source(), rhs.native_source()) &&
+           compare_handles(lhs.native_sink(),   rhs.native_sink());
 }
 
 inline bool operator!=(const async_pipe & lhs, const async_pipe & rhs)
 {
-    return !compare_handles(lhs.source(), rhs.source()) ||
-           !compare_handles(lhs.sink(),   rhs.sink());
+    return !compare_handles(lhs.native_source(), rhs.native_source()) ||
+           !compare_handles(lhs.native_sink(),   rhs.native_sink());
 }
 
 template<class Char, class Traits>
 inline bool operator==(const async_pipe & lhs, const basic_pipe<Char, Traits> & rhs)
 {
-    return compare_handles(lhs.source(), rhs.source()) &&
-           compare_handles(lhs.sink(),   rhs.sink());
+    return compare_handles(lhs.native_source(), rhs.native_source()) &&
+           compare_handles(lhs.native_sink(),   rhs.native_sink());
 }
 
 template<class Char, class Traits>
 inline bool operator!=(const async_pipe & lhs, const basic_pipe<Char, Traits> & rhs)
 {
-    return !compare_handles(lhs.source(), rhs.source()) ||
-           !compare_handles(lhs.sink(),   rhs.sink());
+    return !compare_handles(lhs.native_source(), rhs.native_source()) ||
+           !compare_handles(lhs.native_sink(),   rhs.native_sink());
 }
 
 template<class Char, class Traits>
 inline bool operator==(const basic_pipe<Char, Traits> & lhs, const async_pipe & rhs)
 {
-    return compare_handles(lhs.source(), rhs.source()) &&
-           compare_handles(lhs.sink(),   rhs.sink());
+    return compare_handles(lhs.native_source(), rhs.native_source()) &&
+           compare_handles(lhs.native_sink(),   rhs.native_sink());
 }
 
 template<class Char, class Traits>
 inline bool operator!=(const basic_pipe<Char, Traits> & lhs, const async_pipe & rhs)
 {
-    return !compare_handles(lhs.source(), rhs.source()) ||
-           !compare_handles(lhs.sink(),   rhs.sink());
+    return !compare_handles(lhs.native_source(), rhs.native_source()) ||
+           !compare_handles(lhs.native_sink(),   rhs.native_sink());
 }
 
 }}}}

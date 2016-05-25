@@ -13,19 +13,19 @@
 #include <boost/detail/winapi/process.hpp>
 #include <boost/detail/winapi/handles.hpp>
 #include <boost/process/detail/handler_base.hpp>
-#include <boost/iostreams/device/file_descriptor.hpp>
+#include <boost/process/detail/windows/file_descriptor.hpp>
 #include <io.h>
 
 namespace boost { namespace process { namespace detail { namespace windows {
 
 struct file_in : public ::boost::process::detail::handler_base
 {
-    boost::iostreams::file_descriptor_source file;
+    file_descriptor file;
+    ::boost::detail::winapi::HANDLE_ handle = file.handle();
 
     template<typename T>
-    file_in(T&& t) : file(std::forward<T>(t)) {}
-    file_in(const boost::iostreams::file_descriptor_source &f) : file(f) {}
-    file_in(FILE * f) : file(reinterpret_cast<void*>(_get_osfhandle(_fileno(f))), boost::iostreams::never_close_handle) {}
+    file_in(T&& t) : file(std::forward<T>(t), file_descriptor::read) {}
+    file_in(FILE * f) : handle(reinterpret_cast<void*>(_get_osfhandle(_fileno(f)))) {}
 
     template <class WindowsExecutor>
     void on_setup(WindowsExecutor &e) const

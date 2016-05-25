@@ -13,8 +13,7 @@
 #include <boost/process.hpp>
 #include <boost/process/windows.hpp>
 #include <boost/system/error_code.hpp>
-#include <boost/iostreams/device/file_descriptor.hpp>
-#include <boost/iostreams/stream.hpp>
+
 #include <string>
 
 namespace bp = boost::process;
@@ -22,9 +21,8 @@ namespace bp = boost::process;
 BOOST_AUTO_TEST_CASE(show_window)
 {
     using boost::unit_test::framework::master_test_suite;
-    namespace bio = boost::iostreams;
 
-    bp::pipe p;
+    bp::ipstream is;
     bp::child c;
     {
 
@@ -33,14 +31,11 @@ BOOST_AUTO_TEST_CASE(show_window)
             master_test_suite().argv[1],
             "test", "--windows-print-showwindow",
             bp::show_normal,
-            bp::std_out>p,
+            bp::std_out>is,
             ec
         );
         BOOST_REQUIRE(!ec);
     }
-
-
-    bio::stream<bio::file_descriptor_source> is(p.source());
 
     int i;
     is >> i;

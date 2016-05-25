@@ -13,27 +13,28 @@
 #include <boost/detail/winapi/process.hpp>
 #include <boost/detail/winapi/handles.hpp>
 #include <boost/process/pipe.hpp>
+#include <boost/process/async_pipe.hpp>
 #include <boost/process/detail/handler_base.hpp>
-#include <boost/iostreams/device/file_descriptor.hpp>
 #include <cstdio>
-#include <io.h>
 #include <iostream>
 
 namespace boost { namespace process { namespace detail { namespace windows {
 
 struct pipe_in : public ::boost::process::detail::handler_base
 {
-    boost::iostreams::file_descriptor_source file;
-    pipe_in(const boost::process::pipe & p) : file(p.source().handle(), boost::iostreams::never_close_handle) {}
+    ::boost::detail::winapi::HANDLE_ handle;
+    template<typename CharT, typename Traits>
+    pipe_in(const boost::process::basic_pipe<CharT, Traits> & p) : handle(p.native_source()) {}
+    pipe_in(const boost::process::async_pipe & p)                : handle(p.native_source()) {}
 
     template <class WindowsExecutor>
     void on_setup(WindowsExecutor &e) const
     {
-        boost::detail::winapi::SetHandleInformation(file.handle(),
+        boost::detail::winapi::SetHandleInformation(handle,
                 boost::detail::winapi::HANDLE_FLAG_INHERIT_,
                 boost::detail::winapi::HANDLE_FLAG_INHERIT_);
 
-        e.startup_info.hStdInput = file.handle();
+        e.startup_info.hStdInput = handle;
         e.startup_info.dwFlags  |= boost::detail::winapi::STARTF_USESTDHANDLES_;
         e.inherit_handles = true;
    }

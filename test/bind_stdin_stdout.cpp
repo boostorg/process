@@ -19,18 +19,18 @@
 #include <system_error>
 
 #include <boost/system/error_code.hpp>
-#include <boost/iostreams/device/file_descriptor.hpp>
-#include <boost/iostreams/stream.hpp>
 #include <string>
 #include <iostream>
 
 namespace bp = boost::process;
-namespace bio = boost::iostreams;
 
 BOOST_AUTO_TEST_CASE(sync_io, *boost::unit_test::timeout(5))
 {
     using boost::unit_test::framework::master_test_suite;
 
+
+    bp::opstream os;
+    bp::ipstream is;
     bp::pipe p1;
     bp::pipe p2;
 
@@ -38,15 +38,11 @@ BOOST_AUTO_TEST_CASE(sync_io, *boost::unit_test::timeout(5))
     auto c = bp::execute(
         master_test_suite().argv[1],
         bp::args+={"test", "--stdin-to-stdout"},
-        bp::std_in<p1,
-        bp::std_out>p2,
+        bp::std_in<os,
+        bp::std_out>is,
         ec
     );
     BOOST_REQUIRE(!ec);
-
-    bio::stream<bio::file_descriptor_sink> os(p1.sink());
-
-    bio::stream<bio::file_descriptor_source> is(p2.source());
 
     std::string s = "abcdefghi j";
     for (std::string::const_iterator it = s.begin(); it != s.end(); ++it)

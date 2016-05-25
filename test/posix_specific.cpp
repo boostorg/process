@@ -37,13 +37,13 @@ BOOST_AUTO_TEST_CASE(bind_fd, *boost::unit_test::timeout(2))
         c = bp::execute(
             master_test_suite().argv[1],
             "test", "--posix-echo-one", "3", "hello",
-            bp::posix::fd.bind(3, p.sink()),
+            bp::posix::fd.bind(3, p.native_sink()),
             ec
         );
         BOOST_CHECK(!ec);
     }
 
-    bio::stream<bio::file_descriptor_source> is(p.source());
+    bp::ipstream is(std::move(p));
 
     std::string s;
     is >> s;
@@ -65,20 +65,18 @@ BOOST_AUTO_TEST_CASE(bind_fds, *boost::unit_test::timeout(2))
         c = bp::execute(
             master_test_suite().argv[1],
             "test","--posix-echo-two","3","hello","99","bye",
-            bp::posix::fd.bind(3,  p1.sink()),
-            bp::posix::fd.bind(99, p2.sink()),
+            bp::posix::fd.bind(3,  p1.native_sink()),
+            bp::posix::fd.bind(99, p2.native_sink()),
             ec
         );
         BOOST_CHECK(!ec);
     }
-
-    bio::stream<bio::file_descriptor_source> is1(p1.source());
+    bp::ipstream is1(std::move(p1));
+    bp::ipstream is2(std::move(p2));
 
     std::string s1;
     is1 >> s1;
     BOOST_CHECK_EQUAL(s1, "hello");
-
-    bio::stream<bio::file_descriptor_source> is2(p2.source());
 
     std::string s2;
     is2 >> s2;

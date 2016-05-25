@@ -38,15 +38,6 @@ BOOST_AUTO_TEST_CASE(sync_wait)
 
 }
 
-struct wait_handler
-{
-#if defined(BOOST_WINDOWS_API)
-    void operator()(const boost::system::error_code&) {}
-#elif defined(BOOST_POSIX_API)
-    void operator()(const boost::system::error_code&, int) {}
-#endif
-};
-
 BOOST_AUTO_TEST_CASE(async_wait)
 {
     using boost::unit_test::framework::master_test_suite;
@@ -55,23 +46,19 @@ BOOST_AUTO_TEST_CASE(async_wait)
     boost::asio::io_service io_service;
 
     std::error_code ec;
+    bool called = false;
+
     bp::child c = bp::execute(
         master_test_suite().argv[1],
         bp::args+={"test", "--wait", "1"},
         ec,
-        io_service
+        io_service,
+        bp::on_exit([&](int, const std::error_code&){called = true;})
+
     );
     BOOST_REQUIRE(!ec);
 
-
-#if defined(BOOST_WINDOWS_API)
-    windows::object_handle handle(io_service, c.native_handle());
-    handle.async_wait(wait_handler());
-#elif defined(BOOST_POSIX_API)
-    signal_set set(io_service, SIGCHLD);
-    set.async_wait(wait_handler());
-#endif
-
     io_service.run();
-    c.wait();
+    BOOST_CHECK(called);
+
 }

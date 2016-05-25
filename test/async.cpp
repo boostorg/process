@@ -54,7 +54,6 @@ BOOST_AUTO_TEST_CASE(async_wait)
     io_service.run();
     BOOST_CHECK(exit_called);
     BOOST_CHECK_EQUAL(exit_code, 123);
-    c.wait();
 }
 
 

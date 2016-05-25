@@ -12,8 +12,7 @@
 #include <boost/test/included/unit_test.hpp>
 
 #include <boost/system/error_code.hpp>
-#include <boost/iostreams/device/file_descriptor.hpp>
-#include <boost/iostreams/stream.hpp>
+
 #include <boost/asio.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
@@ -40,7 +39,6 @@ typedef boost::asio::posix::stream_descriptor pipe_end;
 #endif
 
 namespace bp = boost::process;
-namespace bio = boost::iostreams;
 
 BOOST_AUTO_TEST_CASE(group_test, *boost::unit_test::timeout(5))
 {
@@ -75,7 +73,7 @@ BOOST_AUTO_TEST_CASE(attached, *boost::unit_test::timeout(5))
 {
     using boost::unit_test::framework::master_test_suite;
 
-    bp::pipe p;
+    bp::ipstream is;
 
     bp::group g;
 
@@ -83,7 +81,7 @@ BOOST_AUTO_TEST_CASE(attached, *boost::unit_test::timeout(5))
     auto c = bp::execute(
         master_test_suite().argv[1],
         bp::args+={"--launch-attached"},
-        bp::std_out>p,
+        bp::std_out>is,
         g,
         ec
     );
@@ -91,7 +89,6 @@ BOOST_AUTO_TEST_CASE(attached, *boost::unit_test::timeout(5))
     BOOST_REQUIRE(c.in_group());
     BOOST_CHECK(c);
 
-    bio::stream<bio::file_descriptor_source> is(p.source());
 
 
     bp::pid_t pid;
@@ -140,7 +137,7 @@ BOOST_AUTO_TEST_CASE(detached, *boost::unit_test::timeout(5))
 
     using boost::unit_test::framework::master_test_suite;
 
-    bp::pipe p;
+    bp::ipstream is;
 
     bp::group g;
 
@@ -149,14 +146,13 @@ BOOST_AUTO_TEST_CASE(detached, *boost::unit_test::timeout(5))
     auto c = bp::execute(
         master_test_suite().argv[1],
         bp::args+={"--launch-detached"},
-        bp::std_out>p,
+        bp::std_out>is,
         g,
         ec
     );
 
     BOOST_REQUIRE(!ec);
     BOOST_CHECK(c);
-    bio::stream<bio::file_descriptor_source> is(p.source());
 
     bp::pid_t pid;
     is >> pid;

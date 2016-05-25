@@ -14,9 +14,9 @@
 #include <boost/detail/winapi/handles.hpp>
 #include <boost/process/detail/handler_base.hpp>
 #include <boost/process/detail/windows/async_handler.hpp>
-#include <boost/iostreams/device/file_descriptor.hpp>
 #include <boost/asio/windows/stream_handle.hpp>
 #include <boost/asio/write.hpp>
+#include <boost/process/async_pipe.hpp>
 #include <memory>
 
 
@@ -33,22 +33,16 @@ namespace boost { namespace process { namespace detail { namespace windows {
 template<typename Buffer>
 struct async_in_buffer : ::boost::process::detail::windows::async_handler
 {
-    std::shared_ptr<boost::asio::windows::stream_handle> stream_handle;
-
     Buffer & buf;
 
-#if defined (BOOST_PROCESS_USE_FUTURE)
     std::shared_ptr<std::promise<void>> promise;
     async_in_buffer operator<(std::future<void> & fut)
     {
         promise = std::make_shared<std::promise<void>>();
         fut = promise->get_future(); return std::move(*this);
     }
-#endif
 
-    std::shared_ptr<boost::process::pipe> pipe = std::make_shared<boost::process::pipe>(pipe::create_async());
-    //because the pipe will be moved later on, but i might need the source at another point.
-    boost::iostreams::file_descriptor_source source = pipe->source();
+    std::shared_ptr<boost::process::async_pipe> pipe;
 
     async_in_buffer(Buffer & buf) : buf(buf)
     {
@@ -57,15 +51,13 @@ struct async_in_buffer : ::boost::process::detail::windows::async_handler
     inline void on_success(Executor &exec) const
     {
         boost::asio::io_service &is_ser = get_io_service(exec.seq);
-        auto stream_handle = this->stream_handle;
         auto pipe = this->pipe;
 
-#if defined (BOOST_PROCESS_USE_FUTURE)
         if (this->promise)
         {
             auto promise = this->promise;
 
-            boost::asio::async_write(*stream_handle, buf,
+            boost::asio::async_write(*pipe, buf,
                 [promise](const boost::system::error_code & ec, std::size_t)
                 {
                     std::error_code e(ec.value(), std::system_category());
@@ -74,23 +66,21 @@ struct async_in_buffer : ::boost::process::detail::windows::async_handler
                 });
         }
         else
-#endif
-        boost::asio::async_write(*stream_handle, buf,
-                [stream_handle, pipe](const boost::system::error_code&ec, std::size_t size){});
+        boost::asio::async_write(*pipe, buf,
+                [pipe](const boost::system::error_code&ec, std::size_t size){});
     }
 
     template<typename Executor>
     std::function<void(const std::error_code&)> on_exit_handler(Executor & exec)
     {
-        auto stream_handle = this->stream_handle;
         auto pipe = this->pipe;
-        return [stream_handle, pipe](const std::error_code& ec)
+        return [pipe](const std::error_code& ec)
                {
-                  boost::asio::io_service & ios = stream_handle->get_io_service();
-                  ios.post([stream_handle]
+                  boost::asio::io_service & ios = pipe->get_io_service();
+                  ios.post([pipe]
                       {
                             boost::system::error_code ec;
-                            stream_handle->close(ec);
+                            pipe->close(ec);
                       });
                };
 
@@ -98,13 +88,15 @@ struct async_in_buffer : ::boost::process::detail::windows::async_handler
     template <typename WindowsExecutor>
     void on_setup(WindowsExecutor &exec)
     {
-        stream_handle = std::make_shared<boost::asio::windows::stream_handle>(get_io_service(exec.seq), pipe->sink().handle());
+        pipe = std::make_shared<boost::process::async_pipe>(get_io_service(exec.seq));
 
-        boost::detail::winapi::SetHandleInformation(source.handle(),
+        auto source_handle = pipe->native_source();
+
+        boost::detail::winapi::SetHandleInformation(source_handle,
                 boost::detail::winapi::HANDLE_FLAG_INHERIT_,
                 boost::detail::winapi::HANDLE_FLAG_INHERIT_);
 
-        exec.startup_info.hStdInput = source.handle();
+        exec.startup_info.hStdInput = source_handle;
         exec.startup_info.dwFlags  |= boost::detail::winapi::STARTF_USESTDHANDLES_;
         exec.inherit_handles = true;
     }

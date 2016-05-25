@@ -85,20 +85,38 @@ BOOST_AUTO_TEST_CASE(stream, *boost::unit_test::timeout(2))
 
     bp::pipe pipe;
 
-    bp::opstream os(pipe);
+    bp::pstream os(pipe);
     bp::ipstream is(pipe);
 
     int i = 42, j = 0;
 
-    os << i <<  " String" << std::endl;
+    os << i << std::endl;
     os << std::endl;
-    cout << "wrote" << endl;
     is >> j;
-    cout << "J: '" << j << "'" << endl;
-
 
     BOOST_CHECK_EQUAL(i, j);
 }
 
+BOOST_AUTO_TEST_CASE(stream_line, *boost::unit_test::timeout(2))
+{
+
+    bp::pstream os;
+
+    std::string s = "My Test String";
+
+    std::string out;
+
+    os << s <<  std::endl;
+
+    std::getline(os, out);
+
+    auto size = (out.size() < s.size()) ? out.size() : s.size();
+
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+               s.begin(),   s.  begin() + size,
+               out.begin(), out.begin() + size
+               );
+}
 
 

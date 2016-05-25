@@ -21,8 +21,7 @@
 #include <system_error>
 
 #include <boost/system/error_code.hpp>
-#include <boost/iostreams/device/file_descriptor.hpp>
-#include <boost/iostreams/stream.hpp>
+
 #include <boost/asio.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <string>
@@ -35,7 +34,6 @@ typedef boost::asio::posix::stream_descriptor pipe_end;
 #endif
 
 namespace bp = boost::process;
-namespace bio = boost::iostreams;
 
 BOOST_AUTO_TEST_CASE(sync_io, *boost::unit_test::timeout(2))
 {
@@ -44,25 +42,24 @@ BOOST_AUTO_TEST_CASE(sync_io, *boost::unit_test::timeout(2))
     bp::pipe p1;
     bp::pipe p2;
 
+    bp::ipstream is1;
+    bp::ipstream is2;
+
     std::error_code ec;
     auto c = bp::execute(
         master_test_suite().argv[1],
         "test", "--echo-stdout-stderr", "hello",
-        bp::std_out>p1,
-        bp::std_err>p2,
+        bp::std_out>is1,
+        bp::std_err>is2,
         ec
     );
     BOOST_REQUIRE(!ec);
 
 
 
-    bio::stream<bio::file_descriptor_source> is1(p1.source());
-
     std::string s;
     is1 >> s;
     BOOST_CHECK_EQUAL(s, "hello");
-
-    bio::stream<bio::file_descriptor_source> is2(p2.source());
 
     is2 >> s;
     BOOST_CHECK_EQUAL(s, "hello");

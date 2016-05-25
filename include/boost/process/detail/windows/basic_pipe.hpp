@@ -31,6 +31,7 @@ public:
     typedef typename Traits::int_type  int_type   ;
     typedef typename Traits::pos_type  pos_type   ;
     typedef typename Traits::off_type  off_type   ;
+    typedef ::boost::detail::winapi::HANDLE_ native_handle;
 
     basic_pipe(::boost::detail::winapi::HANDLE_ source, ::boost::detail::winapi::HANDLE_ sink)
             : _source(source), _sink(sink) {}
@@ -50,8 +51,8 @@ public:
         if (_source != ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
             ::boost::detail::winapi::CloseHandle(_source);
     }
-    void * source() const {return _source;}
-    void * sink  () const {return _sink;}
+   native_handle native_source() const {return _source;}
+   native_handle native_sink  () const {return _sink;}
 
     basic_pipe()
     {

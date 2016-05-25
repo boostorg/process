@@ -100,8 +100,13 @@ struct basic_pipebuf : std::basic_streambuf<CharT, Traits>
         if (!_pipe.is_open())
             return traits_type::eof();
 
+        if (this->egptr() == &_read.back()) //ok, so we're at the end of the buffer
+            this->setg(_read.data(),  _read.data()+ 10,  _read.data() + 10);
+
+
         auto len = &_read.back() - this->egptr() ;
         auto res = _pipe.read(this->egptr(), len);
+
 
         this->setg(this->eback(), this->gptr(), this->egptr() + res);
         auto val = *this->gptr();

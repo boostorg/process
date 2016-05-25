@@ -10,7 +10,6 @@
 #include <cstdio>
 #include <functional>
 #include <utility>
-#include <boost/iostreams/device/file_descriptor.hpp>
 #include <boost/process/detail/config.hpp>
 #include <boost/process/pipe.hpp>
 #include <boost/asio/buffer.hpp>
@@ -62,21 +61,26 @@ struct std_in_
     api::null_in operator=(const null_t &) const {return api::null_in();}
     api::null_in operator<(const null_t &) const {return api::null_in();}
 
-    api::file_in operator=(const boost::filesystem::path &p) const {return api::file_in(p);}
-    api::file_in operator=(const std::string &p)             const {return api::file_in(p);}
-    api::file_in operator=(const char*p)                     const {return api::file_in(p);}
+    api::file_in operator=(const boost::filesystem::path &p) const {return p;}
+    api::file_in operator=(const std::string &p)             const {return p;}
+    api::file_in operator=(const char*p)                     const {return p;}
 
-    api::file_in operator<(const boost::filesystem::path &p) const {return api::file_in(p);}
-    api::file_in operator<(const std::string &p)             const {return api::file_in(p);}
-    api::file_in operator<(const char*p)                     const {return api::file_in(p);}
+    api::file_in operator<(const boost::filesystem::path &p) const {return p;}
+    api::file_in operator<(const std::string &p)             const {return p;}
+    api::file_in operator<(const char*p)                     const {return p;}
 
-    api::file_in operator=(FILE * f)                                          const {return f;}
-    api::file_in operator<(FILE * f)                                          const {return f;}
-    api::file_in operator<(const boost::iostreams::file_descriptor_source &f) const {return f;}
-    api::file_in operator=(const boost::iostreams::file_descriptor_source &f) const {return f;}
-    
-    api::pipe_in operator=(const pipe & p)                                    const {return api::pipe_in(p);}
-    api::pipe_in operator<(const pipe & p)                                    const {return api::pipe_in(p);}
+    api::file_in operator=(FILE * f)                         const {return f;}
+    api::file_in operator<(FILE * f)                         const {return f;}
+
+    template<typename Char, typename Traits> api::pipe_in operator=(const basic_pipe<Char, Traits> & p)      const {return p;}
+    template<typename Char, typename Traits> api::pipe_in operator<(const basic_pipe<Char, Traits> & p)      const {return p;}
+    template<typename Char, typename Traits> api::pipe_in operator=(const basic_opstream<Char, Traits> & p)  const {return p.pipe();}
+    template<typename Char, typename Traits> api::pipe_in operator<(const basic_opstream<Char, Traits> & p)  const {return p.pipe();}
+    template<typename Char, typename Traits> api::pipe_in operator=(const basic_pstream <Char, Traits> & p)  const {return p.pipe();}
+    template<typename Char, typename Traits> api::pipe_in operator<(const basic_pstream <Char, Traits> & p)  const {return p.pipe();}
+
+    api::pipe_in operator=(const async_pipe & p) const {return api::pipe_in(p);}
+    api::pipe_in operator<(const async_pipe & p) const {return api::pipe_in(p);}
 
     api::async_in_buffer<const asio::mutable_buffer> operator=(const asio::mutable_buffer & buf) const {return buf;}
     api::async_in_buffer<const asio::const_buffer  > operator=(const asio::const_buffer   & buf) const {return buf;}
@@ -112,13 +116,18 @@ struct std_out_
     api::file_out<p1,p2> operator>(const std::string &p)             const {return api::file_out<p1,p2>(p);}
     api::file_out<p1,p2> operator>(const char*p)                     const {return api::file_out<p1,p2>(p);}
 
-    api::file_out<p1,p2> operator=(FILE * f)                                        const {return api::pipe_out<p1,p2>(f);}
-    api::file_out<p1,p2> operator=(const boost::iostreams::file_descriptor_sink &f) const {return api::pipe_out<p1,p2>(f);}
-    api::file_out<p1,p2> operator>(FILE * f)                                        const {return api::pipe_out<p1,p2>(f);}
-    api::file_out<p1,p2> operator>(const boost::iostreams::file_descriptor_sink &f) const {return api::pipe_out<p1,p2>(f);}
+    api::file_out<p1,p2> operator=(FILE * f)  const {return api::pipe_out<p1,p2>(f);}
+    api::file_out<p1,p2> operator>(FILE * f)  const {return api::pipe_out<p1,p2>(f);}
 
-    api::pipe_out<p1,p2> operator=(const pipe & p)                                  const {return api::pipe_out<p1,p2>(p);}
-    api::pipe_out<p1,p2> operator>(const pipe & p)                                  const {return api::pipe_out<p1,p2>(p);}
+    template<typename Char, typename Traits> api::pipe_out<p1,p2> operator=(const basic_pipe<Char, Traits> & p)      const {return p;}
+    template<typename Char, typename Traits> api::pipe_out<p1,p2> operator>(const basic_pipe<Char, Traits> & p)      const {return p;}
+    template<typename Char, typename Traits> api::pipe_out<p1,p2> operator=(const basic_ipstream<Char, Traits> & p)  const {return p.pipe();}
+    template<typename Char, typename Traits> api::pipe_out<p1,p2> operator>(const basic_ipstream<Char, Traits> & p)  const {return p.pipe();}
+    template<typename Char, typename Traits> api::pipe_out<p1,p2> operator=(const basic_pstream <Char, Traits> & p)  const {return p.pipe();}
+    template<typename Char, typename Traits> api::pipe_out<p1,p2> operator>(const basic_pstream <Char, Traits> & p)  const {return p.pipe();}
+
+    api::pipe_out<p1, p2> operator=(const async_pipe & p) const {return api::pipe_out<p1, p2>(p);}
+    api::pipe_out<p1, p2> operator>(const async_pipe & p) const {return api::pipe_out<p1, p2>(p);}
 
     api::async_out_buffer<p1, p2, asio::mutable_buffer> operator=(asio::mutable_buffer & buf) const {return buf;}
     api::async_out_buffer<p1, p2, asio::streambuf>      operator=(asio::streambuf & os)       const {return os ;}
@@ -126,12 +135,10 @@ struct std_out_
     api::async_out_buffer<p1, p2, asio::mutable_buffer> operator>(asio::mutable_buffer & buf) const {return buf;}
     api::async_out_buffer<p1, p2, asio::streambuf>      operator>(asio::streambuf & os)       const {return os ;}
 
-#if defined (BOOST_PROCESS_USE_FUTURE)
     api::async_out_future<p1,p2, std::string>       operator=(std::future<std::string> & fut) const;
     api::async_out_future<p1,p2, std::string>       operator>(std::future<std::string> & fut) const;
     api::async_out_future<p1,p2, std::vector<char>> operator=(std::future<std::vector<char>> & fut) const;
     api::async_out_future<p1,p2, std::vector<char>> operator>(std::future<std::vector<char>> & fut) const;
-#endif
 
     template<int pin, typename = typename std::enable_if<
             (((p1 == 1) && (pin == 2)) ||

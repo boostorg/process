@@ -12,16 +12,13 @@
 #include <boost/test/included/unit_test.hpp>
 #include <boost/process.hpp>
 #include <boost/system/error_code.hpp>
-#include <boost/iostreams/device/file_descriptor.hpp>
-#include <boost/iostreams/filter/newline.hpp>
-#include <boost/iostreams/filtering_stream.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string/compare.hpp>
 #include <string>
 #include <iostream>
 
 namespace bp  = boost::process;
-namespace bio = boost::iostreams;
+
 
 struct test_dir
 {
@@ -34,25 +31,20 @@ struct test_dir
 BOOST_AUTO_TEST_CASE(start_in_dir)
 {
     using boost::unit_test::framework::master_test_suite;
-    namespace bio = boost::iostreams;
 
     test_dir dir("start_in_dir_test");
 
-    bp::pipe p;
+    bp::ipstream is;
 
     std::error_code ec;
     bp::child c = bp::execute(
         bp::exe=boost::filesystem::absolute(master_test_suite().argv[1]).string(),
         bp::args +={"test", "--pwd"},
         bp::start_dir = dir.s_,
-        bp::std_out>p,
+        bp::std_out>is,
         ec
     );
     BOOST_REQUIRE(!ec);
-
-    bio::stream<bio::file_descriptor_source> is(p.source());
-
-    p.sink().close();
 
 
     std::string s;
