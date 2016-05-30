@@ -29,7 +29,7 @@ inline std::string make_pipe_name()
     static unsigned long long cnt = 0;
     name += std::to_string(pid);
     name += "_";
-    name += std::to_string(cnt);
+    name += std::to_string(cnt++);
 
     return name;
 }
@@ -155,8 +155,9 @@ async_pipe::async_pipe(boost::asio::io_service & ios, const std::string & name) 
             | FILE_FLAG_OVERLAPPED_, //write flag
             0, 1, 8192, 8192, 0, nullptr);
 
+
     if (source == boost::detail::winapi::INVALID_HANDLE_VALUE_)
-        ::boost::process::detail::throw_last_error("create_named_pipe() failed");
+        ::boost::process::detail::throw_last_error("create_named_pipe(" + name + ") failed");
 
     _source.assign(source);
 

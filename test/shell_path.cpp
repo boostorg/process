@@ -18,13 +18,13 @@ namespace bp = boost::process;
 BOOST_AUTO_TEST_CASE(shell_set_on_error)
 {
     std::error_code ec;
-    boost::filesystem::path p = bp::shell_path(ec);
+    boost::filesystem::path p = bp::shell(ec);
     BOOST_CHECK(!ec);
     BOOST_CHECK(boost::filesystem::exists(p));
 }
 
 BOOST_AUTO_TEST_CASE(shell_throw_on_error)
 {
-    BOOST_CHECK_NO_THROW(bp::shell_path());
-    BOOST_CHECK(boost::filesystem::exists(bp::shell_path()));
+    BOOST_CHECK_NO_THROW(bp::shell());
+    BOOST_CHECK(boost::filesystem::exists(bp::shell()));
 }

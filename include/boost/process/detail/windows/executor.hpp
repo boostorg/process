@@ -12,6 +12,7 @@
 #define BOOST_PROCESS_WINDOWS_EXECUTOR_HPP
 
 #include <boost/process/child.hpp>
+#include <boost/process/detail/windows/is_running.hpp>
 #include <boost/process/detail/traits.hpp>
 #include <boost/process/error.hpp>
 #include <boost/fusion/algorithm/iteration/for_each.hpp>
@@ -20,6 +21,7 @@
 #include <boost/none.hpp>
 #include <system_error>
 #include <memory>
+#include <atomic>
 #include <cstring>
 
 
@@ -113,15 +115,19 @@ struct executor : startup_info_impl<char>
     executor(Sequence & seq) : seq(seq)
     {
     }
-
     void internal_error_handle(const std::error_code &ec, const char* msg, boost::mpl::true_ )
     {
-
+        this->ec = ec;
     }
     void internal_error_handle(const std::error_code &ec, const char* msg, boost::mpl::false_ )
     {
         throw std::system_error(ec, msg);
     }
+
+    void internal_throw(boost::mpl::true_,  std::error_code &ec ) {}
+    void internal_throw(boost::mpl::false_, std::error_code &ec ) {throw std::system_error(ec);}
+
+
 
     struct on_setup_t
     {
@@ -148,11 +154,20 @@ struct executor : startup_info_impl<char>
         void operator()(T & t) const {t.on_success(exec);}
     };
 
+
     child operator()()
     {
-
         on_setup_t on_setup(*this);
         boost::fusion::for_each(seq, on_setup);
+
+        if (ec)
+        {
+            on_error_t on_error(*this, ec);
+            boost::fusion::for_each(seq, on_error);
+            return child();
+        }
+
+
 
         //NOTE: The non-cast cmd-line string can only be modified by the wchar_t variant which is currently disabled.
         int err_code = ::boost::detail::winapi::create_process(
@@ -167,20 +182,27 @@ struct executor : startup_info_impl<char>
             &this->startup_info,                        //       LPSTARTUPINFOA_ lpStartupInfo,
             &proc_info);                                //       LPPROCESS_INFORMATION_ lpProcessInformation)
 
-        if (err_code == 0)
+        child c{child_handle(proc_info), exit_status};
+
+        if (err_code != 0)
         {
-            auto last_error = boost::process::detail::get_last_error();
-            on_error_t on_error(*this, last_error);
-            boost::fusion::for_each(seq, on_error);
-            internal_throw(has_error_handler(), last_error);
-        }
-        else
-        {
+            ec.clear();
             on_success_t on_success(*this);
             boost::fusion::for_each(seq, on_success);
         }
-        return
-                child(child_handle(std::move(proc_info)));
+
+        if ((err_code == 0) || ec)
+        {
+            auto last_error = (err_code == 0) ? boost::process::detail::get_last_error() : ec;
+
+            on_error_t on_error(*this, last_error);
+            boost::fusion::for_each(seq, on_error);
+            internal_throw(has_error_handler(), last_error);
+            return child();
+        }
+        else
+            return c;
+
     }
 
     void handle_error(std::error_code & ec, const char* msg = "Unknown Error.")
@@ -196,9 +218,13 @@ struct executor : startup_info_impl<char>
     const char * exe      = nullptr;
     const char * env      = nullptr;
 
-    ::boost::detail::winapi::PROCESS_INFORMATION_ proc_info;
+    std::error_code ec{0, std::system_category()};
 
     Sequence & seq;
+    ::boost::detail::winapi::PROCESS_INFORMATION_ proc_info{nullptr, nullptr, 0,0};
+
+    std::shared_ptr<std::atomic<int>> exit_status = std::make_shared<std::atomic<int>>(still_active);
+
 };
 
 

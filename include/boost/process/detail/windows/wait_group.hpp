@@ -25,8 +25,6 @@ inline void wait(const group_handle &p)
 
 inline void wait(const group_handle &p, std::error_code &ec)
 {
-    ::boost::detail::winapi::DWORD_ _exit_code = 1;
-
     if (::boost::detail::winapi::WaitForSingleObject(p.handle(),
         ::boost::detail::winapi::infinite) == ::boost::detail::winapi::wait_failed)
             ec = get_last_error();

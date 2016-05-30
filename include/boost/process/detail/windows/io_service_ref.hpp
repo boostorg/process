@@ -11,6 +11,7 @@
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/windows/object_handle.hpp>
 #include <boost/detail/winapi/process.hpp>
+#include <boost/detail/winapi/handles.hpp>
 
 #include <boost/fusion/algorithm/iteration/for_each.hpp>
 #include <boost/fusion/algorithm/transformation/filter_if.hpp>
@@ -22,10 +23,10 @@
 #include <functional>
 #include <type_traits>
 #include <memory>
+#include <atomic>
 #include <vector>
 
 #include <boost/type_index.hpp>
-#include <iostream>
 
 namespace boost { namespace process { namespace detail { namespace windows {
 
@@ -54,11 +55,11 @@ template<typename Executor>
 struct async_handler_collector
 {
     Executor & exec;
-    std::vector<std::function<void(const std::error_code & ec)>> &handlers;
+    std::vector<std::function<void(int, const std::error_code & ec)>> &handlers;
 
 
     async_handler_collector(Executor & exec,
-            std::vector<std::function<void(const std::error_code & ec)>> &handlers)
+            std::vector<std::function<void(int, const std::error_code & ec)>> &handlers)
                 : exec(exec), handlers(handlers) {}
 
     template<typename T>
@@ -80,8 +81,16 @@ struct io_service_ref : boost::process::detail::handler_base
     void on_success(Executor& exec) const
     {
           ::boost::detail::winapi::PROCESS_INFORMATION_ & proc = exec.proc_info;
-          auto process_handle = proc.hProcess;
+          auto this_proc = ::boost::detail::winapi::GetCurrentProcess();
 
+          auto proc_in = proc.hProcess;;
+          ::boost::detail::winapi::HANDLE_ process_handle;
+
+          if (!::boost::detail::winapi::DuplicateHandle(
+                  this_proc, proc_in, this_proc, &process_handle, 0,
+                  static_cast<::boost::detail::winapi::BOOL_>(true),
+                   ::boost::detail::winapi::DUPLICATE_SAME_ACCESS_))
+              throw_last_error("Duplicate Pipe Failed");
 
           //must be on the heap so I can move it into the lambda.
           auto asyncs = boost::fusion::filter_if<
@@ -89,25 +98,30 @@ struct io_service_ref : boost::process::detail::handler_base
                           typename std::remove_reference< boost::mpl::_ > ::type
                           >>(exec.seq);
 
-          std::vector<std::function<void(const std::error_code & ec)>> funcs;
+          std::vector<std::function<void(int, const std::error_code & ec)>> funcs;
           funcs.reserve(boost::fusion::size(asyncs));
           boost::fusion::for_each(asyncs, async_handler_collector<Executor>(exec, funcs));
 
 
 
-          wait_handler wh(std::move(funcs), ios, process_handle);
+          wait_handler wh(std::move(funcs), ios, process_handle, exec.exit_status);
 
           auto handle_p = wh.handle.get();
           handle_p->async_wait(std::move(wh));
     }
     struct wait_handler
     {
+        std::vector<std::function<void(int, const std::error_code & ec)>> funcs;
         std::unique_ptr<boost::asio::windows::object_handle> handle;
-        std::vector<std::function<void(const std::error_code & ec)>> funcs;
+        std::shared_ptr<std::atomic<int>> exit_status;
         wait_handler(const wait_handler & ) = delete;
         wait_handler(wait_handler && ) = default;
-        wait_handler(std::vector<std::function<void(const std::error_code & ec)>> && funcs, boost::asio::io_service & ios, void * handle) : funcs(std::move(funcs)),
-                handle(new boost::asio::windows::object_handle(ios, handle))
+        wait_handler(std::vector<std::function<void(int, const std::error_code & ec)>> && funcs,
+                     boost::asio::io_service & ios, void * handle,
+                     const std::shared_ptr<std::atomic<int>> &exit_status)
+                : funcs(std::move(funcs)),
+                  handle(new boost::asio::windows::object_handle(ios, handle)),
+                  exit_status(exit_status)
         {
 
         }
@@ -117,8 +131,12 @@ struct io_service_ref : boost::process::detail::handler_base
             if (ec_in)
                 ec = std::error_code(ec_in.value(), std::system_category());
 
+            ::boost::detail::winapi::DWORD_ code;
+            ::boost::detail::winapi::GetExitCodeProcess(handle->native(), &code);
+            exit_status->store(code);
+
             for (auto & func : funcs)
-                func(ec);
+                func(code, ec);
         }
 
     };

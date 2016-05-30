@@ -12,11 +12,13 @@
 
 #include <boost/process/detail/config.hpp>
 #include <boost/filesystem/path.hpp>
+#include <boost/filesystem/operations.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/system/error_code.hpp>
 #include <string>
 #include <stdexcept>
 #include <array>
+#include <atomic>
 #include <cstdlib>
 #include <boost/detail/winapi/shell.hpp>
 

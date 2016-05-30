@@ -112,7 +112,7 @@ struct group_handle
         ::boost::detail::winapi::CloseHandle(_job_object);
     }
     group_handle(const group_handle & c) = delete;
-    group_handle(group_handle && c) : _job_object(_job_object)
+    group_handle(group_handle && c) : _job_object(c._job_object)
     {
         c._job_object = ::boost::detail::winapi::invalid_handle_value;
     }

@@ -148,7 +148,7 @@ template<typename ...Args>
 boost::fusion::tuple<typename get_initializers_result<Args>::type...>
         get_initializers(boost::fusion::set<Args...> & builders)
 {
-    typedef boost::fusion::tuple<typename get_initializers_result<Args>::type...> return_type;
+    //typedef boost::fusion::tuple<typename get_initializers_result<Args>::type...> return_type;
     typedef typename invoke_get_initializer_collect_keys<boost::fusion::vector<Args...>>::type keys;
     return invoke_get_initializer<keys>::call(builders);
 }
@@ -183,7 +183,7 @@ inline child execute(Args&& ... args)
 
    // typename detail::make_builders_from_view<decltype(others)>::type builders;
 
-    typedef typename boost::fusion::result_of::as_vector<decltype(inits)>::type  inits_t;
+    //typedef typename boost::fusion::result_of::as_vector<decltype(inits)>::type  inits_t;
     typedef typename boost::fusion::result_of::as_vector<decltype(others)>::type others_t;
     //  typedef decltype(others) others_t;
     typedef typename detail::make_builders_from_view<

@@ -43,29 +43,27 @@ namespace process {
 
 using ::boost::process::detail::api::pid_t;
 
-/**
- * Represents a child process.
- *
- * On Windows child is movable but non-copyable. The destructor
- * automatically closes handles to the child process.
- */
 class child
 {
     ::boost::process::detail::api::child_handle _child_handle;
-    std::shared_ptr<std::atomic<int>> _exit_status;
-    std::atomic<bool> _exited{ false };
-    std::atomic<int> _exit_code{ -1 };
+    std::shared_ptr<std::atomic<int>> _exit_status = std::make_shared<std::atomic<int>>(boost::process::detail::api::still_active);
     bool _attached = true;
+    bool _terminated = false;
+
+    bool _exited()
+    {
+    	return _terminated || !::boost::process::detail::api::is_running(_exit_status->load());
+    };
 public:
     typedef ::boost::process::detail::api::child_handle child_handle;
     typedef child_handle::process_handle_t native_handle_t;
+    explicit child(child_handle &&ch, const std::shared_ptr<std::atomic<int>> &ptr) : _child_handle(std::move(ch)), _exit_status(ptr) {}
     explicit child(child_handle &&ch) : _child_handle(std::move(ch)) {}
     explicit child(pid_t & pid) : _child_handle(pid) {};
     child(const child&) = delete;
     child(child && lhs)
         : _child_handle(std::move(lhs._child_handle)),
-          _exited   (lhs._exited.load()),
-          _exit_code(lhs._exit_code.load()),
+          _exit_status(std::move(lhs._exit_status)),
           _attached (lhs._attached)
     {
         lhs._attached = false;
@@ -76,37 +74,36 @@ public:
     child& operator=(child && lhs)
     {
         _child_handle= std::move(lhs._child_handle);
-        _exited   .store(lhs._exited.load()   );
-        _exit_code.store(lhs._exit_code.load());
+        _exit_status = std::move(lhs._exit_status);
         _attached    = lhs._attached;
         lhs._attached = false;
         return *this;
     };
 
     void detach() {_attached = false; }
+    void join() {wait();}
+    bool joinable() { return _attached;}
 
     ~child()
     {
-        if (!_exited.load() && _attached && running())
+        if (_attached && !_exited() && running())
             terminate();
     }
     native_handle_t native_handle() const { return _child_handle.process_handle(); }
 
 
-    int exit_code() const {return _exit_code.load();}
+    int exit_code() const {return _exit_status->load();}
     pid_t id()      const {return _child_handle.id(); }
 
     bool running()
     {
-        if (valid() && !_exited.load())
+        if (valid() && !_exited())
         {
             int code; 
             auto res = boost::process::detail::api::is_running(_child_handle, code);
-            if (!res && !_exited.load())
-            {
-                _exited.store(true);
-                _exit_code.store(code);
-            }
+            if (!res && !_exited())
+                _exit_status->store(code);
+
             return res;
         }
         return false;
@@ -117,31 +114,29 @@ public:
         if (valid())
             boost::process::detail::api::terminate(_child_handle);
 
-        _exited.store(true);
+        _terminated = true;
     }
 
     void wait()
     {
-        if (!_exited.load() && valid())
+        if (!_exited() && valid())
         {
             int exit_code = 0;
             boost::process::detail::api::wait(_child_handle, exit_code);
-            _exited.store(true);
-            _exit_code.store(exit_code);
+            _exit_status->store(exit_code);
         }
     }
 
     template< class Rep, class Period >
     bool wait_for  (const std::chrono::duration<Rep, Period>& rel_time)
     {
-        if (!_exited.load())
+        if (!_exited())
         {
             int exit_code = 0;
-            auto b = boost::process::detail::api::wait_for(_child_handle, _exit_code, rel_time);
-            _exited.store(b);
+            auto b = boost::process::detail::api::wait_for(_child_handle, exit_code, rel_time);
             if (!b)
                 return false;
-            _exit_code.store(exit_code);
+            _exit_status->store(exit_code);
         }
         return true;
     }
@@ -149,14 +144,13 @@ public:
     template< class Clock, class Duration >
     bool wait_until(const std::chrono::time_point<Clock, Duration>& timeout_time )
     {
-        if (!_exited.load())
+        if (!_exited())
         {
             int exit_code = 0;
-            auto b = boost::process::detail::api::wait_until(_child_handle, _exit_code, timeout_time);
-            _exited.store(b);
+            auto b = boost::process::detail::api::wait_until(_child_handle, exit_code, timeout_time);
             if (!b)
                 return false;
-            _exit_code.store(exit_code);
+            _exit_status->store(exit_code);
         }
         return true;
     }
@@ -166,12 +160,6 @@ public:
         return _child_handle.valid();
     }
     operator bool() const {return valid();}
-
-    void set_exited(int code)
-    {
-        _exit_code.store(code);
-        _exited.store(true);
-    }
 
     bool in_group() const
     {
