@@ -18,6 +18,7 @@
 namespace boost { namespace process { namespace detail {
 
 struct cmd_or_exe_tag {};
+struct shell_;
 
 template<> struct initializer_tag<boost::filesystem::path> { typedef cmd_or_exe_tag type;};
 
@@ -70,6 +71,7 @@ template<> struct initializer_tag<std::initializer_list<wchar_t *>> { typedef cm
 template<> struct initializer_tag<std::initializer_list<char16_t*>> { typedef cmd_or_exe_tag type;};
 template<> struct initializer_tag<std::initializer_list<char32_t*>> { typedef cmd_or_exe_tag type;};
 
+template<> struct initializer_tag<shell_> { typedef cmd_or_exe_tag type; };
 
 struct exe_setter_;
 template <class String, bool Append = false>

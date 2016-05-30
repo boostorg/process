@@ -3,6 +3,7 @@
 // Copyright (c) 2009 Boris Schaeling
 // Copyright (c) 2010 Felipe Tanus, Boris Schaeling
 // Copyright (c) 2011, 2012 Jeff Flinn, Boris Schaeling
+// Copyright (c) 2016 Klemens D. Morgenstern
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -24,34 +25,29 @@
 #include <boost/process/detail/windows/shell_path.hpp>
 #endif
 
-namespace boost { namespace process {
+namespace boost { namespace process { namespace detail {
 
-using boost::process::detail::api::shell_path;
 
-}}
+struct shell_
+{
+    constexpr shell_() {}
 
-#if defined(BOOST_PROCESS_DOXYGEN)
-namespace boost { namespace process {
+    boost::filesystem::path operator()() const
+    {
+        return boost::process::detail::api::shell_path();
+    }
+    boost::filesystem::path operator()(std::error_code & ec) const noexcept
+    {
+        return boost::process::detail::api::shell_path(ec);
+    }
+};
 
-/**
- * Returns the absolute path to a shell executable.
- *
- * \returns the path to cmd.exe on Windows and /bin/sh on POSIX.
- *
- * \throws std::system_error in case of an error
- */
-boost::filesystem::path shell_path();
+}
 
-/**
- * Returns the absolute path to a shell executable.
- *
- * \returns the path to cmd.exe on Windows and /bin/sh on POSIX.
- */
-boost::filesystem::path shell_path(std::error_code &ec);
-
+constexpr static ::boost::process::detail::shell_ shell;
 
 }}
-#endif
+
 
 
 #endif

@@ -52,6 +52,7 @@ using ::boost::process::detail::api::pid_t;
 class child
 {
     ::boost::process::detail::api::child_handle _child_handle;
+    std::shared_ptr<std::atomic<int>> _exit_status;
     std::atomic<bool> _exited{ false };
     std::atomic<int> _exit_code{ -1 };
     bool _attached = true;

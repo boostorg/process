@@ -11,7 +11,7 @@
 #define BOOST_PROCESS_WINDOWS_SEARCH_PATH_HPP
 
 #include <boost/process/detail/config.hpp>
-#include <boost/filesystem.hpp>
+#include <boost/filesystem/path.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/system/error_code.hpp>
 #include <string>

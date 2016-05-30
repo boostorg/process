@@ -11,7 +11,7 @@
 #define BOOST_PROCESS_WINDOWS_TERMINATE_HPP
 
 #include <boost/process/detail/config.hpp>
-#include <boost/system/error_code.hpp>
+#include <system_error>
 #include <cstdlib>
 #include <boost/detail/winapi/process.hpp>
 #include <boost/detail/winapi/get_last_error.hpp>

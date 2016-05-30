@@ -114,8 +114,14 @@ struct executor : startup_info_impl<char>
     {
     }
 
-    void internal_throw(boost::mpl::true_, std::error_code &ec ) {}
-    void internal_throw(boost::mpl::false_, std::error_code &ec ) {throw std::system_error(ec);}
+    void internal_error_handle(const std::error_code &ec, const char* msg, boost::mpl::true_ )
+    {
+
+    }
+    void internal_error_handle(const std::error_code &ec, const char* msg, boost::mpl::false_ )
+    {
+        throw std::system_error(ec, msg);
+    }
 
     struct on_setup_t
     {
@@ -175,6 +181,11 @@ struct executor : startup_info_impl<char>
         }
         return
                 child(child_handle(std::move(proc_info)));
+    }
+
+    void handle_error(std::error_code & ec, const char* msg = "Unknown Error.")
+    {
+        internal_error_handle(ec, msg, has_error_handler());
     }
 
     ::boost::detail::winapi::LPSECURITY_ATTRIBUTES_ proc_attrs   = nullptr;
