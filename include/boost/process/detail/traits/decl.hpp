@@ -33,6 +33,18 @@ template<typename T>
 struct initializer_tag;// { typedef void type; };
 
 
+//remove const
+template<typename T>
+struct initializer_tag<const T> { typedef typename initializer_tag<T>::type type; };
+
+//remove &
+template<typename T>
+struct initializer_tag<T&> { typedef typename initializer_tag<T>::type type; };
+
+//remove const &
+template<typename T>
+struct initializer_tag<const T&> { typedef typename initializer_tag<T>::type type; };
+
 template<typename T>
 struct initializer_builder;
 

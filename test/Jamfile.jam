@@ -52,6 +52,7 @@ test-suite ts :
    [ run run_exe.cpp filesystem                              : : sparring_partner ]
    [ run run_exe_path.cpp filesystem                         : : sparring_partner ]
    [ run search_path.cpp filesystem system                   : : : <target-os>windows:<source>shell32 ]
+   [ run shell.cpp filesystem system                    	 : : sparring_partner ]
    [ run shell_path.cpp filesystem system                    : ]
    [ run show_window.cpp     system                          : : sparring_partner  : <build>no <target-os>windows:<build>yes ]
    [ run start_dir.cpp     filesystem system                 : : sparring_partner ]

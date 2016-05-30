@@ -8,10 +8,12 @@
 #define BOOST_PROCESS_DETAIL_WINDOWS_BASIC_CMD_HPP_
 
 #include <boost/algorithm/string/trim.hpp>
+#include <boost/process/shell.hpp>
 #include <boost/process/detail/windows/handler.hpp>
 
 #include <vector>
 #include <string>
+#include <iterator>
 
 
 namespace boost
@@ -82,6 +84,22 @@ struct exe_cmd_init : handler_base_ext
     static exe_cmd_init cmd(std::string&& cmd)
     {
         return exe_cmd_init(std::move(cmd), true);
+    }
+    static exe_cmd_init exe_args_shell(std::string&& exe, std::vector<std::string> && args)
+    {
+    	std::vector<std::string> args_ = {"/c"};
+    	args_.insert(args_.end(), std::make_move_iterator(args.begin()), std::make_move_iterator(args.end()));
+    	std::string sh = shell().string();
+        return exe_cmd_init(std::move(sh), std::move(args_));
+    }
+    static exe_cmd_init cmd_shell(std::string&& cmd)
+    {
+    	std::vector<std::string> args = {"/c", std::move(cmd)};
+    	std::string sh = shell().string();
+
+        return exe_cmd_init(
+        		std::move(sh),
+        		std::move(args));
     }
 private:
     std::string exe;

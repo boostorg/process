@@ -20,8 +20,9 @@
 #include <boost/process/detail/posix/cmd.hpp>
 #endif
 
+#include <boost/process/shell.hpp>
+
 #include <iterator>
-#include <iostream>
 
 
 namespace boost { namespace process { namespace detail {
@@ -71,6 +72,7 @@ struct exe_builder
 {
     //set by path, because that will not be interpreted as a cmd
     bool not_cmd = false;
+    bool shell 	 = false;
     std::string exe;
     std::vector<std::string> args;
 
@@ -100,6 +102,7 @@ struct exe_builder
         else
             args.push_back(data);
     }
+    void operator()(shell_) {shell = true;}
     void operator()(std::vector<std::string> & data)
     {
         if (data.empty())
@@ -152,10 +155,19 @@ struct exe_builder
 
     api::exe_cmd_init get_initializer()
     {
-        if (not_cmd || !args.empty())
-            return api::exe_cmd_init::exe_args(std::move(exe), std::move(args));
+    	if (not_cmd || !args.empty())
+    	{
+    		if (shell)
+    			return api::exe_cmd_init::exe_args_shell(std::move(exe), std::move(args));
+    		else
+    			return api::exe_cmd_init::exe_args(std::move(exe), std::move(args));
+    	}
         else
-            return api::exe_cmd_init::cmd(std::move(exe));
+    		if (shell)
+    			return api::exe_cmd_init::cmd_shell(std::move(exe));
+    		else
+                return api::exe_cmd_init::cmd(std::move(exe));
+
     }
     typedef api::exe_cmd_init result_type;
 };
