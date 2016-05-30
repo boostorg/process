@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
 {
     bool thrown = false;
     try {
-        bp::execute(
+        bp::child c(
             bp::cmd="doesnt-exist",
             bp::throw_on_error
         );

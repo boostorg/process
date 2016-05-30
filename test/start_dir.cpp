@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(start_in_dir)
     bp::ipstream is;
 
     std::error_code ec;
-    bp::child c = bp::execute(
+    bp::child c(
         bp::exe=boost::filesystem::absolute(master_test_suite().argv[1]).string(),
         bp::args +={"test", "--pwd"},
         bp::start_dir = dir.s_,

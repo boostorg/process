@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE(bind_fd, *boost::unit_test::timeout(2))
     bp::child c;
     {
         std::error_code ec;
-        c = bp::execute(
+        bp::child c(
             master_test_suite().argv[1],
             "test", "--posix-echo-one", "3", "hello",
             bp::posix::fd.bind(3, p.native_sink()),

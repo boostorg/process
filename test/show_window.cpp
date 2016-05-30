@@ -23,19 +23,16 @@ BOOST_AUTO_TEST_CASE(show_window)
     using boost::unit_test::framework::master_test_suite;
 
     bp::ipstream is;
-    bp::child c;
-    {
 
-        std::error_code ec;
-        c = bp::execute(
-            master_test_suite().argv[1],
-            "test", "--windows-print-showwindow",
-            bp::show_normal,
-            bp::std_out>is,
-            ec
-        );
-        BOOST_REQUIRE(!ec);
-    }
+	std::error_code ec;
+	bp::child c(
+		master_test_suite().argv[1],
+		"test", "--windows-print-showwindow",
+		bp::show_normal,
+		bp::std_out>is,
+		ec
+	);
+	BOOST_REQUIRE(!ec);
 
     int i;
     is >> i;

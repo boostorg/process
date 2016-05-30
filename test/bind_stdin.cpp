@@ -15,7 +15,6 @@
 #include <boost/process/io.hpp>
 #include <boost/process/child.hpp>
 #include <boost/process/args.hpp>
-#include <boost/process/execute.hpp>
 #include <boost/process/async.hpp>
 
 #include <system_error>
@@ -49,7 +48,7 @@ BOOST_AUTO_TEST_CASE(sync_io, *boost::unit_test::timeout(2))
 
     std::error_code ec;
   
-    auto c = bp::execute(
+    bp::child c(
         master_test_suite().argv[1],
         bp::args+={"test", "--prefix", "abc"},
         bp::std_in <os,
@@ -104,7 +103,7 @@ BOOST_AUTO_TEST_CASE(async_io, *boost::unit_test::timeout(2))
     bp::ipstream is;
 
     std::error_code ec;
-    auto c = bp::execute(
+    bp::child c(
         master_test_suite().argv[1],
         "test", "--prefix-once", "abc",
         bp::std_in<p1,
@@ -127,7 +126,7 @@ BOOST_AUTO_TEST_CASE(nul, *boost::unit_test::timeout(2))
     using boost::unit_test::framework::master_test_suite;
 
     std::error_code ec;
-    bp::child c = bp::execute(
+    bp::child c(
         master_test_suite().argv[1],
         "test", "--is-nul-stdin",
         bp::std_in<bp::null,

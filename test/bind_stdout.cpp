@@ -20,7 +20,6 @@
 #include <boost/process/io.hpp>
 #include <boost/process/args.hpp>
 #include <boost/process/child.hpp>
-#include <boost/process/execute.hpp>
 #include <system_error>
 
 #include <string>
@@ -44,7 +43,7 @@ BOOST_AUTO_TEST_CASE(sync_io, *boost::unit_test::timeout(5))
     bp::ipstream is;
     std::error_code ec;
 
-    auto c = bp::execute(
+    bp::child c(
         master_test_suite().argv[1],
         bp::args+={"test", "--echo-stdout", "hello"},
         bp::std_out > is,
@@ -88,7 +87,7 @@ BOOST_AUTO_TEST_CASE(async_io, *boost::unit_test::timeout(2))
     bp::async_pipe p(io_service);
 
     std::error_code ec;
-    auto c = bp::execute(
+    bp::child c(
         master_test_suite().argv[1],
         "test", "--echo-stdout", "abc",
         bp::std_out > p,
@@ -109,7 +108,7 @@ BOOST_AUTO_TEST_CASE(nul, *boost::unit_test::timeout(2))
 
 
     std::error_code ec;
-    bp::child c = bp::execute(
+    bp::child c(
         master_test_suite().argv[1],
         bp::args+={"test", "--is-nul-stdout"},
         bp::std_out>bp::null,

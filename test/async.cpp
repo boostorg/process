@@ -14,7 +14,7 @@
 #include <boost/process/error.hpp>
 #include <boost/process/async.hpp>
 #include <boost/process/io.hpp>
-#include <boost/process/execute.hpp>
+#include <boost/process/child.hpp>
 
 #include <boost/thread.hpp>
 #include <future>
@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(async_wait)
     bool exit_called = false;
     int exit_code = 0;
     std::error_code ec;
-    bp::child c = bp::execute(
+    bp::child c(
         master_test_suite().argv[1],
         "test", "--exit-code", "123",
         ec,
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(async_out_stream)
 
     boost::asio::streambuf buf;
 
-    auto c = bp::execute(master_test_suite().argv[1],
+    bp::child c(master_test_suite().argv[1],
                 "test", "--echo-stdout", "abc",
                 bp::std_out > buf,
                 io_service,
@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE(async_in_stream)
     std::ostream ostr(&in_buf);
     ostr << "-string" << endl ;
 
-    auto c = bp::execute(
+    bp::child c(
         master_test_suite().argv[1],
         "test", "--prefix-once", "test",
         bp::std_in  < in_buf,

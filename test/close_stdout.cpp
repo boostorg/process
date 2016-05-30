@@ -14,7 +14,6 @@
 #include <boost/process/error.hpp>
 #include <boost/process/io.hpp>
 #include <boost/process/child.hpp>
-#include <boost/process/execute.hpp>
 #include <system_error>
 
 #include <boost/system/error_code.hpp>
@@ -30,7 +29,7 @@ BOOST_AUTO_TEST_CASE(closed)
     using boost::unit_test::framework::master_test_suite;
 
     std::error_code ec;
-    bp::child c = bp::execute(
+    bp::child c(
         master_test_suite().argv[1],
         "test", "--is-closed-stdout",
         bp::std_out.close(),

@@ -21,7 +21,6 @@
 #include <boost/process/args.hpp>
 #include <boost/process/child.hpp>
 #include <boost/process/group.hpp>
-#include <boost/process/execute.hpp>
 #include <system_error>
 
 #include <string>
@@ -49,7 +48,7 @@ BOOST_AUTO_TEST_CASE(group_test, *boost::unit_test::timeout(5))
     bp::group g;
 
 
-    auto c = bp::execute(
+    bp::child c(
         master_test_suite().argv[1],
         g,
         ec
@@ -78,7 +77,7 @@ BOOST_AUTO_TEST_CASE(attached, *boost::unit_test::timeout(5))
     bp::group g;
 
     std::error_code ec;
-    auto c = bp::execute(
+    bp::child c(
         master_test_suite().argv[1],
         bp::args+={"--launch-attached"},
         bp::std_out>is,
@@ -143,7 +142,7 @@ BOOST_AUTO_TEST_CASE(detached, *boost::unit_test::timeout(5))
 
 
     std::error_code ec;
-    auto c = bp::execute(
+    bp::child c(
         master_test_suite().argv[1],
         bp::args+={"--launch-detached"},
         bp::std_out>is,

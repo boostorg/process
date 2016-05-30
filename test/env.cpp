@@ -14,8 +14,8 @@
 #include <boost/process/environment.hpp>
 #include <boost/process/error.hpp>
 #include <boost/process/io.hpp>
+#include <boost/process/child.hpp>
 #include <boost/process/env.hpp>
-#include <boost/process/execute.hpp>
 
 #include <boost/algorithm/string/predicate.hpp>
 
@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(inherit_env, *boost::unit_test::timeout(2))
 
     std::error_code ec;
 
-    auto c = bp::execute(
+    bp::child c(
         master_test_suite().argv[1],
         "test", "--query ", "PATH",
         bp::std_out>st,
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(inherit_mod_env, *boost::unit_test::timeout(2))
     bp::ipstream st;
 
     std::error_code ec;
-    auto c = bp::execute(
+    bp::child c(
         master_test_suite().argv[1],
         "test", "--query", "BOOST_PROCESS_TEST_1",
         bp::std_out>st,
@@ -110,7 +110,7 @@ BOOST_AUTO_TEST_CASE(modifided_env, *boost::unit_test::timeout(2))
 
 
     std::error_code ec;
-    auto c = bp::execute(
+    bp::child c(
         master_test_suite().argv[1],
         "test", "--query", "BOOST_PROCESS_TEST_2",
         bp::std_out>st,

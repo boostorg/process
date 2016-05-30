@@ -15,7 +15,6 @@
 #include <boost/process/io.hpp>
 #include <boost/process/child.hpp>
 #include <boost/process/args.hpp>
-#include <boost/process/execute.hpp>
 #include <system_error>
 
 #include <boost/system/error_code.hpp>
@@ -35,7 +34,7 @@ BOOST_AUTO_TEST_CASE(sync_io, *boost::unit_test::timeout(5))
     bp::pipe p2;
 
     std::error_code ec;
-    auto c = bp::execute(
+    bp::child c(
         master_test_suite().argv[1],
         bp::args+={"test", "--stdin-to-stdout"},
         bp::std_in<os,

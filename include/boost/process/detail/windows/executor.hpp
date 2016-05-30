@@ -11,7 +11,7 @@
 #ifndef BOOST_PROCESS_WINDOWS_EXECUTOR_HPP
 #define BOOST_PROCESS_WINDOWS_EXECUTOR_HPP
 
-#include <boost/process/child.hpp>
+#include <boost/process/detail/child_decl.hpp>
 #include <boost/process/detail/windows/is_running.hpp>
 #include <boost/process/detail/traits.hpp>
 #include <boost/process/error.hpp>
@@ -25,7 +25,9 @@
 #include <cstring>
 
 
-namespace boost { namespace process { namespace detail { namespace windows {
+namespace boost { namespace process {
+
+namespace detail { namespace windows {
 
 template<typename CharType> struct startup_info;
 #if !defined( BOOST_NO_ANSI_APIS )

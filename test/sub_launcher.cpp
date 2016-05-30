@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 
     if (launch_attached)
     {
-        c1 = execute(argv[0], ec,  std_out > null, std_err > null, std_in < null);
+        c1 =     child(argv[0], ec,  std_out > null, std_err > null, std_in < null);
         if (ec)
         {
             cout << -1 << endl;
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
     {
         group g;
 
-        c2 = execute(argv[0], ec, g, std_out > null, std_err > null, std_in < null);
+        c2 = child(argv[0], ec, g, std_out > null, std_err > null, std_in < null);
         if (ec)
         {
             cout << -1 << endl;

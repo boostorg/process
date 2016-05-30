@@ -11,7 +11,7 @@
 #define BOOST_TEST_IGNORE_SIGCHLD
 #include <boost/test/included/unit_test.hpp>
 #include <boost/process/error.hpp>
-#include <boost/process/execute.hpp>
+#include <boost/process/child.hpp>
 #include <boost/process/args.hpp>
 #include <boost/process/async.hpp>
 #include <system_error>
@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_CASE(sync_wait)
     using boost::unit_test::framework::master_test_suite;
 
     std::error_code ec;
-    bp::child c = bp::execute(
+    bp::child c(
         master_test_suite().argv[1],
         bp::args+={"test", "--wait", "1"},
         ec
@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(async_wait)
     std::error_code ec;
     bool called = false;
 
-    bp::child c = bp::execute(
+    bp::child c(
         master_test_suite().argv[1],
         bp::args+={"test", "--wait", "1"},
         ec,

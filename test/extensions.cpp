@@ -10,12 +10,11 @@
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_IGNORE_SIGCHLD
 #include <boost/test/included/unit_test.hpp>
-#include <boost/process/execute.hpp>
 #include <boost/process/error.hpp>
 #include <system_error>
 #include <boost/bind.hpp>
 #include <boost/ref.hpp>
-
+#include <boost/process/child.hpp>
 
 
 namespace bp = boost::process;
@@ -52,7 +51,7 @@ BOOST_AUTO_TEST_CASE(extensions)
 
     set_on_error se;
     std::error_code ec;
-    bp::execute(
+    bp::child c(
         "Wrong-Command",
         "test",
         bp::on_setup=re,

@@ -16,7 +16,7 @@
 
 #include <boost/process/cmd.hpp>
 #include <boost/process/error.hpp>
-#include <boost/process/execute.hpp>
+#include <boost/process/child.hpp>
 
 namespace bp = boost::process;
 
@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_CASE(run_exe_success)
     boost::filesystem::path exe = master_test_suite().argv[1];
 
     std::error_code ec;
-    bp::execute(
+    bp::child c(
         exe,
         ec
     );
@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(run_exe_error)
     boost::filesystem::path exe = "doesnt-exist";
 
     std::error_code ec;
-    bp::execute(
+    bp::child c(
         exe,
         ec
     );

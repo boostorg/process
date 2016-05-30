@@ -12,8 +12,8 @@
 #include <boost/test/included/unit_test.hpp>
 
 #include <boost/process/error.hpp>
-#include <boost/process/execute.hpp>
 #include <boost/process/async.hpp>
+#include <boost/process/child.hpp>
 
 #include <boost/system/error_code.hpp>
 #include <boost/asio.hpp>
@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(sync_wait)
     using boost::unit_test::framework::master_test_suite;
 
     std::error_code ec;
-    bp::child c = bp::execute(
+    bp::child c(
         master_test_suite().argv[1],
         "test", "--exit-code", "123",
         ec
@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE(async_wait)
 #endif
 
     std::error_code ec;
-    bp::child c = bp::execute(
+    bp::child c(
         master_test_suite().argv[1],
         "test", "--exit-code", "123",
         ec
