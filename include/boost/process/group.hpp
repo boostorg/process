@@ -40,10 +40,16 @@ namespace detail {
 }
 
 /**
- * Represents a group process.
+ * Represents a process group.
  *
- * On Windows group is movable but non-copyable. The destructor
+ * Groups are movable but non-copyable. The destructor
  * automatically closes handles to the group process.
+ *
+ * The group will have the same interface as std::thread.
+ *
+ * \note If the destructor is called without a previous detach or wait, the group will be terminated.
+ *
+ * \attention If a default-constructed group is used before being used in a process launch, the behaviour is undefined.
  */
 class group
 {
@@ -51,19 +57,23 @@ class group
     bool _attached = true;
 public:
     typedef ::boost::process::detail::api::group_handle group_handle;
+    ///Native representation of the handle.
     typedef group_handle::handle_t native_handle_t;
     explicit group(group_handle &&ch) : _group_handle(std::move(ch)) {}
+    ///Construct the group from a native_handle
     explicit group(native_handle_t & handle) : _group_handle(handle) {};
     group(const group&) = delete;
+    ///Move constructor
     group(group && lhs)
         : _group_handle(std::move(lhs._group_handle)),
           _attached (lhs._attached)
     {
         lhs._attached = false;
     }
-
+    ///Defaul constructor
     group() = default;
     group& operator=(const group&) = delete;
+    ///Move assign
     group& operator=(group && lhs)
     {
         _group_handle= std::move(lhs._group_handle);
@@ -72,45 +82,62 @@ public:
         return *this;
     };
 
+    ///Detach the group
     void detach() {_attached = false; }
-    void attach() {_attached = true;}
 
+    /** Join the child. This just calls wait, but that way the naming is similar to std::thread */
+    void join() {wait();}
+    /** Check if the child is joinable. */
+    bool joinable() {return _attached;}
+
+    /** Destructor
+     *
+     * \note If the destructor is called without a previous detach or wait, the group will be terminated.
+     *
+     */
     ~group()
     {
         if ( _attached && valid())
             terminate();
     }
+
+    ///Obtain the native handle of the group.
     native_handle_t native_handle() const { return _group_handle.handle(); }
 
-
+    ///Wait for the process group to exit.
     void wait()
     {
         boost::process::detail::api::wait(_group_handle);
     }
-
+    /** Wait for the process group to exit for period of time. */
     template< class Rep, class Period >
     bool wait_for  (const std::chrono::duration<Rep, Period>& rel_time)
     {
         return boost::process::detail::api::wait_for(_group_handle, rel_time);
     }
 
+    /** Wait for the process group to exit until a point in time. */
     template< class Clock, class Duration >
     bool wait_until(const std::chrono::time_point<Clock, Duration>& timeout_time )
     {
         return boost::process::detail::api::wait_until(_group_handle, timeout_time);
     }
 
+    ///Check if the group has a valid handle.
     bool valid() const
     {
         return _group_handle.valid();
     }
-    operator bool() const {return valid();}
+    ///Convenience to call valid.
+    explicit operator bool() const {return valid();}
 
+    ///Terminate the process group, i.e. all processes in the group
     void terminate()
     {
         ::boost::process::detail::api::terminate(_group_handle);
     }
 
+    ///Assign a child process to the group
     void assign(const child &c)
     {
         _group_handle.assign(c.native_handle());
@@ -120,6 +147,7 @@ public:
         _group_handle.assign(c.native_handle(), ec);
     }
 
+    ///Check if the child process is in the group
     bool has(const child &c)
     {
         return _group_handle.has(c.native_handle());

@@ -8,6 +8,12 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
+/** \file boost/process/args.hpp
+ *
+ *	Header which provides the args property. It also provides the
+ *	alternative name argv.
+ */
+
 #ifndef BOOST_PROCESS_ARGS_HPP
 #define BOOST_PROCESS_ARGS_HPP
 
@@ -33,7 +39,7 @@ struct args_
     template <class Range>
     arg_setter_<Range, false>    operator= (Range &&range) const
     {
-        return arg_setter_<Range, true>(std::forward<Range>(range));
+        return arg_setter_<Range, false>(std::forward<Range>(range));
     }
     arg_setter_<std::string, true>     operator()(const char* str) const
     {

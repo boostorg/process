@@ -7,7 +7,24 @@
 
 #include <boost/process/detail/windows/show_window.hpp>
 
+/** \file boost/process/windows.hpp
+ *
+ *	Header which provides the windows extensions.
+ *	Those are all show_windows parameters:
+ *
+ *	  - hide
+ *	  - maximized
+ *	  - minimized
+ *	  - minimized_not_active
+ *	  - not_active
+ *	  - show
+ *	  - show_normal
+ */
+
 namespace boost { namespace process {
+
+///Namespace containing the windows exensions.
+namespace windows {
 
 
 using boost::process::detail::windows::hide;
@@ -19,6 +36,6 @@ using boost::process::detail::windows::show;
 using boost::process::detail::windows::show_normal;
 
 
-}}
+}}}
 
 #endif /* BOOST_PROCESS_WINDOWS_HPP_ */

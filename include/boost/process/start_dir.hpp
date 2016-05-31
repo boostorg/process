@@ -23,6 +23,11 @@
 #include <string>
 #include <boost/filesystem/path.hpp>
 
+/** \file boost/process/start_dir.hpp
+ *
+ *	Header which provides the start_dir property.
+ */
+
 namespace boost { namespace process { namespace detail {
 
 struct start_dir_

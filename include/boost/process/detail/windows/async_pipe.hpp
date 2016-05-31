@@ -43,7 +43,6 @@ public:
 
     inline async_pipe(boost::asio::io_service & ios, const std::string & name = make_pipe_name());
 
-    inline explicit async_pipe(const std::string & name);
     async_pipe(async_pipe&& lhs)  : _source(std::move(lhs._source)), _sink(std::move(lhs._sink))
     {
         lhs._source.assign (::boost::detail::winapi::INVALID_HANDLE_VALUE_);

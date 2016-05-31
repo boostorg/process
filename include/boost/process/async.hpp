@@ -3,6 +3,14 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
+/** \file boost/process/args.hpp
+ *
+  Header which provides the basic asynchrounous features.
+  It provides the on_exit property, which allows callbacks when the process exits.
+  It also implements the necessary traits for passing an boost::asio::io_service,
+  which is needed for asynchronous communication.
+  */
+
 #ifndef BOOST_PROCESS_DETAIL_ASYNC_HPP_
 #define BOOST_PROCESS_DETAIL_ASYNC_HPP_
 

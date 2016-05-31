@@ -22,6 +22,13 @@
 #include <boost/process/detail/windows/cmd.hpp>
 #endif
 
+/** \file boost/process/cmd.hpp
+ *
+ *	Header which provides the cmd property.
+ *
+ */
+
+
 
 namespace boost { namespace process { namespace detail {
 

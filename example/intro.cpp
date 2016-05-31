@@ -14,6 +14,15 @@ using namespace boost::process;
 
 int main()
 {
-    execute("test.exe");
+	pstream pipe_stream;
+    system("gcc.exe", "--version", std_out > pipe_stream);
+
+
+    while (pipe_stream)
+    {
+    	std::string value;
+    	std::getline(pipe_stream, value);
+    	std::cerr << value << std::endl;
+    }
 }
 //]

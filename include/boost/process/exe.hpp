@@ -13,7 +13,11 @@
 
 #include <boost/process/detail/basic_cmd.hpp>
 
-
+/** \file boost/process/exe.hpp
+ *
+ *	Header which provides the exe property.
+ *
+ */
 namespace boost { namespace process { namespace detail {
 
 struct exe_

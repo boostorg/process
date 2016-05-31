@@ -16,6 +16,13 @@
 #include <boost/process/detail/windows/env_init.hpp>
 #endif
 
+/** \file boost/process/env.hpp
+ *
+ *	Header which provides the env property. It allows the modification of the
+ *	environment the child process will run in, in a functional style.
+ */
+
+
 namespace boost { namespace process { namespace detail {
 
 

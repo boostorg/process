@@ -43,6 +43,18 @@
 #include <boost/process/detail/windows/async_out.hpp>
 #endif
 
+/** \file boost/process/io.hpp
+ *
+ *	Header which provides the io properties. It provides the following properties:
+ *
+ *   - close
+ *   - null
+ *   - std_out
+ *   - std_err
+ *   - std_in
+ *
+ *   It also pulls the boost::asio::buffer into the boost::process namespace for convenience.
+ */
 
 namespace boost { namespace process { namespace detail {
 

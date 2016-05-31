@@ -8,7 +8,16 @@
 #include <boost/process/detail/posix/fd.hpp>
 #include <boost/process/detail/posix/handler.hpp>
 
-namespace boost { namespace process { namespace posix {
+
+/** \file boost/process/posix.hpp
+ *
+ *	Header which provides the posix extensions. Those include fd, on_fork_error,
+ *	on_exec_setup and on_exec_error.
+ */
+namespace boost { namespace process {
+
+///Namespace containing the posix exensions.
+namespace posix {
 
 
 using ::boost::process::detail::posix::fd;
