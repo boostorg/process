@@ -1,0 +1,42 @@
+[section:design Design Rationale]
+[section Scope]
+This library is meant to give an wrapper around the different OS-specific methods
+to launch processes. Its aim is to provide all functionality that is available on 
+those systems and allow the user to do all related things, which require using the OS APIs.
+
+[*This library does not try to provide a full library for everything process related] 
+In many discussions the proposal was made to build boost.process into a DSEL of some sort. 
+This is not the goal, it rather provides the facilities to build such a DSEL-Library on top of it. 
+Therefore the library also does [*not] force any particular use (such as only asynchronous communication) on its user. 
+It rather could be integrated with such a library.  
+
+[endsect] 
+[section Interface Style]
+
+Boost.Process does use a very particular style when constructing a process.
+This is because a process holds many properties, which are not members of the actual child class. 
+Those properties are in many cases not accessible by the father process, for example when using environments. 
+Here the child process can modify its own environment, but there is no way for the father process to know.
+That means, that a child process has properties that cannot be accessed in C++.
+
+This now leads to the two styles supported and mixed by this library. Overloading and properties. 
+Consider that you may want to launch a process passing a number of arguments. This is supported in both styles, and would look like this:
+
+```
+system("gcc", "--version"); //overloading
+system("gcc", args={"--version"}); //property style.
+```
+
+Both styles can also be mixed in some cases.
+
+```
+system("gcc", "-c", args+={"main.cpp"});
+```
+
+In the following documention the avaible styles will be described. Note that the
+overload style is implemented via type traits, so the types will be listed. 
+
+[caution There is guarantee in which order the arguments will be executed!]
+
+[endsect]
+[endsect] 

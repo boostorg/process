@@ -17,10 +17,10 @@ int main()
 {
 //[set_on_error
     std::error_code ec;
-    execute("test.exe", ec);
+    child c("test.exe", ec);
 //]
 
 //[ignore_error
-    execute("test.exe", ignore_error);
+    child c("test.exe", ignore_error);
 //]
 }

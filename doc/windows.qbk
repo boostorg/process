@@ -1,6 +1,6 @@
 [section Windows specifics]
 
-[section Setting wShowWindow]
+[section Setting show_window]
 
 Use the initializer [classref boost::process::initializers::show_window show_window] to set the member variable `wShowWindow` in [@http://msdn.microsoft.com/en-us/library/windows/desktop/ms686331(v=vs.85).aspx `STARTUPINFO`]:
 
@@ -11,10 +11,9 @@ Use the initializer [classref boost::process::initializers::show_window show_win
 
 [section Unicode]
 
-Boost.Process supports Unicode on Windows. If the macro [macroref UNICODE] or `_UNICODE` is defined, the Unicode version of  [@http://msdn.microsoft.com/en-us/library/windows/desktop/ms682425(v=vs.85).aspx `CreateProcess`] is used:
-
-[import ../example/windows_unicode.cpp]
-[unicode]
+Boost.Process does currently NOT support UNICODE on windows. 
+Using wchar_t is not supported on posix, and would thus break the api.
+In later versions the windows implementation may be changed to use a codecvt underneath.
 
 [endsect]
 

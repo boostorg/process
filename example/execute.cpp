@@ -10,16 +10,15 @@
 #include <boost/process.hpp>
 
 using namespace boost::process;
-using namespace boost::process::initializers;
 
 int main()
 {
 //[execute
-    execute("test.exe");
+    child c("test.exe");
 //]
 
 //[execute_path
     boost::filesystem::path exe = "../test.exe";
-    execute(exe);
+    child c(exe);
 //]
 }

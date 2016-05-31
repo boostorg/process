@@ -13,170 +13,125 @@ Boost.Process is a header-only library. It comes with a convenience header file 
 
 [section Starting a program]
 
-The function Boost.Process provides to start a program is [funcref boost::process::execute execute]. The parameter list is built automatically from a variadic argument list. Some need to be used with initializers, but strings are determined automatically as commands.
+    #include <boost/process/child.hpp>
+
+To start a process in the regular way, the construction of a [classref boost::process::child], which will automatically launch a child process.
 
 [import ../example/execute.cpp]
 [execute]
 
-The same goes for boost::filesystem::path.
+There are three possibilities to launch a process in boost.process.
 
-[execute_path]
+[section Child]
 
-Boost.Process provides two utility functions to lookup executables: Call [funcref boost::this_process::path path] if you want to find an executable in the directories of the environment variable PATH. Or call [funcref boost::this_process::path shell_path] for the system's shell.
+The standard version is to create a child, which will spawn the process.
 
-[endsect]
+    child c("ls");
 
-[section Resources]
-
-Boost.Process implements the RAII Principle similar to std::thread. That is, the execute function returns a child which handles the resources of a the subprocess. By default, the desctructor of child will wait for the subprocess to exit. 
-
-[import ../example/cleanup.cpp]
-[cleanup]
-
-This behaviour may be changed at runtime by calling [funcref boost::proces::child::detach detach]. After detaching a process will survive the destruction of the child.
-
-[cleanup_detach]
-
-This of course allows a short-cut syntax:
-
-[cleanup_detach_short]
-
-Unlike std::thread, a terminate is also available:
-
-[import ../example/terminate.cpp]
-[c_terminate]
+This will create an attached child process.
 
 [endsect]
 
-[section Handling errors]
+[section System]
 
-Boost.Process provides three methods to detect errors: ignoring, set an error_code, throwing an error. The implementations for error handling is included in [headerref boost/process/error.hpp]
+As a convenience, the [funcref boost::process::system] function is provided. It works as std::system, though it allows
+all the properties boost.process provides. It will execute the process and wait for it's exit; then return the exit_code.
 
-By default (i.e. not provided error handler) the latter one is used, i.e. an instance of std::system_error is thrown. 
-
-If the error_code shall be used, a reference to std::error_code must be passed to the execute function.
-
-[import ../example/error_handling.cpp]
-[set_on_error]
-
-If no error shall be handled  boost::process::ignore_error can be passed to execute.
-
-[ignore_error]
-
-Use [classref boost::process::initializers::throw_on_error throw_on_error] if you want [funcref boost::process::execute execute] to throw an exception:
-
-
-[note On POSIX the error is handled via a pipe, except if ignore_error is passed. If `execve` fails the initializers send *errno* through a pipe from the child to the parent process. The pipe is automatically closed no matter whether `execve` succeeds or fails.]
+   int ret = system("ls");
+   
+[caution When used with Pipes it will almost always result in a dead-lock.]
 
 [endsect]
 
-[section Starting in a specific work directory]
+[section Spawn]
 
-Use the initializer [classref boost::process::start_dir start_dir] to set the work directory:
+Another function which is more then convenience is the  [funcref boost::process::spawn] function. 
+This function starts a process and immediately detaches it. It also prevents the system from creating a zombie process.
 
-[import ../example/work_dir.cpp]
-[work_dir]
-
-[classref boost::process::start_dir start_dir] also supports [classref boost::filesystem::path].
-
-For portability reasons you want to use an absolute path with [classref boost::process::initializers::run_exe run_exe] if you set the work directory with [classref boost::process::initializers::start_in_dir start_in_dir]:
-
-[work_dir_abs]
-
-On Windows a relative path is relative to the work directory of the parent process. On POSIX a relative path is relative to the work directory set with [classref boost::process::initializers::start_dir start_dir] as the directory is changed before the program starts.
-
-[tip Use an absolute path with the binary to run if you set the work directory with [classref boost::process::initializers::start_dir start_dir] to avoid portability problems.]
+   spawn("ls");
+   
+[caution There is no guarantee that the child process will survive the father process terminating. This is dependant on the Operating System.]   
 
 [endsect]
-
-[section Environment variables]
-
-Boost.Process provides faculties to modify the environment. By default the environment is inherited. It may be obtained by [funcref boost::this_process::environment] which stores it in the type [classref boost::process::native_environment] sharing the state of the environment of the current process with all other instances. This object may be copied into an instance of [classref boost::process::environment] which can be passed to [funcref boost::process::execute].
-
-[import ../example/env.cpp]
-[modifiy_env]
-
-Additionally the [classref boost::process::env] parameter may be used to modify the environment inside the execute call.
-
-[inherit_env]
-
 [endsect]
 
-[section I/O ]
+[section Arguments/Command Style]
 
-All I/O is concetrated in three parameters:
+When passing arguments to the process, two styles are provided, the cmd-style and the exe-/args-style. 
 
-  * std_in
-  * std_out
-  * std_err
+The cmd style will interpret the string as a sequence of the exe and arguments and parse them as such, while the exe-/args-style will
+interpret each string as an argument.
 
-They allow the following operations for each stream:
+[table:id Cmd vs Exe/Args
+    [[String]              [Cmd]       [Exe/Args]]
+    [["gcc --version"]     [{"gcc", "--version"}]     [{"\\"gcc --version\\""}]]
+] 
 
-  * redirecting to file/pipe/null
-  * implicit asynchronous operations
-  * closing
+When using the overloading variant, a single string will result in a cmd interpretation, several strings will yield a exe-args interpretation. Both version can be set explicitly:
 
-std_out and std_err may be combined via &.
+```
+system("grep -c false /etc/passwd"); //cmd style
+system("grep", "-c", "false", "/etc/passwd"); //exe-/args-
 
-[section Redirection]
-
-Closing can be done the following way.
-
-[import ../example/io.cpp]
-[close]
-
-Redirecting to null can be done in the following way.
-
-[null]
-
-
-Redirecting to files may be done via file_descriptors, filenames (as strings or boost::filesystem::path) and FILE*.
-
-[redirect]
+system(cmd="grep -c false /etc/passwd"); //cmd style
+system(exe="grep", args={"-c", "false", "/etc/passwd"}); //exe-/args-
+```
 
 [endsect]
 
 [section Synchronous I/O]
 
-Synchronous I/O may be done via pipes, as shown in the example. The sink/source are implemented via boost::iostreams::file_descriptor, so they can be put into a stream.
+The simplest way to communicate with a child-process is via pipes.
 
-[pipe]
+```
+opstream in;
+ipstream out;
 
-[endsect]
+child c("c++filt", std_out > out, std_in < in);
 
-[section Asynchrounous I/O]
+in << "_ZN5boost7process8tutorialE" << endl;
+std::string value;
+out >> value;
 
+c.terminate();
+```
 
-To enable asynchronous I/O the library needs boost.asio. Therefor a pipe class [classref boost::process::async_pipe] is provided which implements the properties to use it as an I/O Object for boost.asio. It is recommended to connect the async_close function to on_exit on initialization, so the pipe is closed when the process exits. The async_close function posts the close request in the io_service, so the current operation is finished.
-
-[async_pipe]
-
-For simple operations (i.e. writing one buffer, reading one buffer), a lazy syntax can be used. For convenience [funcref boost::asio::buffer] function is also available in 
-[funcref boost::process::buffer]
-
-[async_pipe_simple]
-
-Additionally, the values may be redirected to a std::future. 
-
-[async_pipe_future]
-
-[endsect]
+[caution This comes with the danger of dead-locks, so it should be used with care.]
 
 [endsect]
 
 
-[section Waiting for a program to exit]
+[section Asynchronous I/O]
 
-Call [funcref boost::process::wait_for_exit wait_for_exit] to wait for a program to exit:
+Boost.Process provides capacities to communicate in an asynchronous way using Boost.Asio.
+To do that, the [classref boost::process::async_pipe async_pipe] class is provided, which can be used
+as an I/O object directly:
 
-[import ../example/wait.cpp]
-[sync]
+```
+asio::io_service ios;
+async_pipe pipe;
+spawn("ls", std_out > pipe, ios);
 
-When working with an [classref boost::asio::io_service] the process may wait asynchrounously for the exit of the process. This allows the usage of the on_exit initializer.
+std::string buf;
 
-[async]
+boost::asio::async_read(p, buffer(buf), 
+            [](const boost::system::error_code &ec, std::size_t size){});
+
+ios.run();
+```
+
+The library also provides a shortcut for this:
+
+```
+asio::io_service ios;
+
+std::string buf;
+
+spawn("ls", std_out > buffer(buf), ios);
+
+ios.run();
+```
 
 [endsect]
-
 
 [endsect]

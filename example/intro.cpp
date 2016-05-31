@@ -14,7 +14,7 @@ using namespace boost::process;
 
 int main()
 {
-	pstream pipe_stream;
+    ipstream pipe_stream;
     system("gcc.exe", "--version", std_out > pipe_stream);
 
 
