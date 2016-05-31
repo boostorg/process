@@ -392,7 +392,7 @@ public:
         return *this;
     }
     ///Copy assignment of a pipe.
-    basic_opstream& operator=(const pipe_type & p)
+    basic_pstream& operator=(const pipe_type & p)
     {
         _buf = p;
         return *this;

@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(inherit_env, *boost::unit_test::timeout(2))
 
     std::getline(st, s);
 
-    auto path = bp::this_process::environment()["PATH"].to_string();
+    auto path = boost::this_process::environment()["PATH"].to_string();
 
     std::cout << "Path: '" << path << "'" << std::endl;
     std::cout << "Valu: '" << s << "'" << std::endl;
@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(inherit_mod_env, *boost::unit_test::timeout(2))
 {
     using boost::unit_test::framework::master_test_suite;
 
-    auto ie = bp::this_process::environment();
+    auto ie = boost::this_process::environment();
     std::string value = "TestString";
     ie["BOOST_PROCESS_TEST_1"] = value;
 

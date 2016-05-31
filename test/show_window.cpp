@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_CASE(show_window)
 	bp::child c(
 		master_test_suite().argv[1],
 		"test", "--windows-print-showwindow",
-		bp::show_normal,
+		bp::windows::show_normal,
 		bp::std_out>is,
 		ec
 	);

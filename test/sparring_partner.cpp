@@ -173,7 +173,7 @@ int main(int argc, char *argv[])
     {
         auto key = vm["query-env"].as<std::string>();
 
-        std::cout << boost::process::this_process::environment()[key].to_string() << std::endl;
+        std::cout << boost::this_process::environment()[key].to_string() << std::endl;
     }
     else if (vm["stdin-to-stdout"].as<bool>())
     {
