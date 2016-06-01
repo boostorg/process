@@ -18,7 +18,6 @@ class async_pipe
 {
     ::boost::asio::posix::stream_descriptor _source;
     ::boost::asio::posix::stream_descriptor _sink  ;
-    std::string _name;
 public:
     typedef int native_handle;
 
@@ -124,7 +123,7 @@ public:
 };
 
 
-async_pipe::async_pipe(boost::asio::io_service & ios, const std::string & name) : _source(ios), _sink(ios), _name(name)
+async_pipe::async_pipe(boost::asio::io_service & ios, const std::string & name) : _source(ios), _sink(ios)
 {
     auto fifo = mkfifo(name.c_str(), 0666 );
 
@@ -150,8 +149,8 @@ async_pipe& async_pipe::async_pipe(const async_pipe & p)
 {
 
     //cannot get the handle from a const object.
-    auto source_in = const_cast<::boost::asio::windows::stream_handle &>(_source).native();
-    auto sink_in   = const_cast<::boost::asio::windows::stream_handle &>(_sink).native();
+    auto source_in = const_cast<::boost::asio::posix::stream_descriptor &>(_source).native();
+    auto sink_in   = const_cast<::boost::asio::posix::stream_descriptor &>(_sink).native();
     if (source_in == -1)
         _source = -1;
     else
@@ -181,8 +180,8 @@ async_pipe& async_pipe::operator=(const async_pipe & p)
     int sink;
 
     //cannot get the handle from a const object.
-    auto source_in = const_cast<::boost::asio::windows::stream_handle &>(_source).native();
-    auto sink_in   = const_cast<::boost::asio::windows::stream_handle &>(_sink).native();
+    auto source_in = const_cast<::boost::asio::posix::stream_descriptor &>(_source).native();
+    auto sink_in   = const_cast<::boost::asio::posix::stream_descriptor &>(_sink).native();
     if (source_in == -1)
         source = -1;
     else
@@ -224,12 +223,12 @@ async_pipe& async_pipe::operator=(async_pipe && lhs)
 template<class CharT, class Traits>
 async_pipe::operator basic_pipe<CharT, Traits>() const
 {
-    int_ source;
-    int_ sink;
+    int source;
+    int sink;
 
     //cannot get the handle from a const object.
-    auto source_in = const_cast<::boost::asio::windows::stream_handle &>(_source).native();
-    auto sink_in   = const_cast<::boost::asio::windows::stream_handle &>(_sink).native();
+    auto source_in = const_cast<::boost::asio::posix::stream_descriptor &>(_source).native();
+    auto sink_in   = const_cast<::boost::asio::posix::stream_descriptor &>(_sink).native();
 
 
     if (source_in == -1)
@@ -256,7 +255,6 @@ async_pipe::operator basic_pipe<CharT, Traits>() const
 
 template<class CharT, class Traits>
 basic_pipe<CharT, Traits>::basic_pipe(const std::string & name)
-	: _pipe_name(std::make_shared<std::string>(name))
 {
     auto fifo = mkfifo(name.c_str(), 0666 );
 
@@ -274,7 +272,9 @@ basic_pipe<CharT, Traits>::basic_pipe(const std::string & name)
     if (write_fd == -1)
         boost::process::detail::throw_last_error();
 
-    return pipe(read_fd, write_fd, name);
+    ::unlink(name.c_str());
+
+    return pipe(read_fd, write_fd);
 
 }
 

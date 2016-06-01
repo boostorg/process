@@ -87,6 +87,8 @@ struct async_out_buffer : ::boost::process::detail::windows::async_handler
     template<typename Executor>
     std::function<void(int, const std::error_code&)> on_exit_handler(Executor & exec)
     {
+        if (!pipe)
+            pipe = std::make_shared<boost::process::async_pipe>(get_io_service(exec.seq));
 
         auto pipe = this->pipe;
         return [pipe](int, const std::error_code & ec)
@@ -98,13 +100,12 @@ struct async_out_buffer : ::boost::process::detail::windows::async_handler
                                     pipe->close(ec);
                               });
                 };
-
-
     };
     template <typename WindowsExecutor>
     void on_setup(WindowsExecutor &exec)
     {
-        pipe = std::make_shared<boost::process::async_pipe>(get_io_service(exec.seq));
+        if (!pipe)
+            pipe = std::make_shared<boost::process::async_pipe>(get_io_service(exec.seq));
         apply_out_handles(exec, pipe->native_sink(), std::integral_constant<int, p1>(), std::integral_constant<int, p2>());
     }
 };

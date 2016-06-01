@@ -15,9 +15,7 @@
 #include <boost/asio/buffer.hpp>
 #include <boost/asio/streambuf.hpp>
 
-#if defined (BOOST_PROCESS_USE_FUTURE)
 #include <future>
-#endif
 
 #if defined(BOOST_POSIX_API)
 #include <boost/process/detail/posix/close_in.hpp>
@@ -91,8 +89,8 @@ struct std_in_
     template<typename Char, typename Traits> api::pipe_in operator=(const basic_pstream <Char, Traits> & p)  const {return p.pipe();}
     template<typename Char, typename Traits> api::pipe_in operator<(const basic_pstream <Char, Traits> & p)  const {return p.pipe();}
 
-    api::pipe_in operator=(const async_pipe & p) const {return api::pipe_in(p);}
-    api::pipe_in operator<(const async_pipe & p) const {return api::pipe_in(p);}
+    api::pipe_in operator=(const async_pipe & p) const {return static_cast<pipe>(p);}
+    api::pipe_in operator<(const async_pipe & p) const {return static_cast<pipe>(p);}
 
     api::async_in_buffer<const asio::mutable_buffer> operator=(const asio::mutable_buffer & buf) const {return buf;}
     api::async_in_buffer<const asio::const_buffer  > operator=(const asio::const_buffer   & buf) const {return buf;}

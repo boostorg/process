@@ -61,6 +61,11 @@ inline bool is_running(const child_handle &p, int & exit_code, std::error_code &
     }
 }
 
+inline bool is_running(int code)
+{
+    return WIFEXITED(code) || WTERMSIG(code);
+}
+
 }}}}
 
 #endif

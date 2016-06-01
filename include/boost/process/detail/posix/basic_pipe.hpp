@@ -13,6 +13,7 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/asio/posix/stream_descriptor.hpp>
+#include <boost/process/detail/posix/compare_handles.hpp>
 #include <system_error>
 #include <array>
 #include <unistd.h>
@@ -24,12 +25,11 @@ namespace boost { namespace process { namespace detail { namespace posix {
 template<class CharT, class Traits = std::char_traits<CharT>>
 class basic_pipe
 {
-    int _source = 0;
-    int _sink   = 0;
-    std::string _pipe_name;
+    int _source = -1;
+    int _sink   = -1;
 public:
     basic_pipe(int source, int sink) : _source(source), _sink(sink) {}
-    basic_pipe(int source, int sink, const std::string & name) : _source(source), _sink(sink), _pipe_name(name) {}
+    basic_pipe(int source, int sink, const std::string & name) : _source(source), _sink(sink) {}
     typedef CharT                      char_type  ;
     typedef          Traits            traits_type;
     typedef typename Traits::int_type  int_type   ;
@@ -44,26 +44,23 @@ public:
 			boost::process::detail::throw_last_error("pipe(2) failed");
 
 		_source = fds[0];
-		_source = fds[1];
+		_sink   = fds[1];
     }
     basic_pipe(const basic_pipe& rhs);
     basic_pipe(const std::string& name);
-    basic_pipe(basic_pipe&& lhs)  : _source(lhs._source), _sink(lhs._sink), _pipe_name(std::move(lhs._pipe_name))
+    basic_pipe(basic_pipe&& lhs)  : _source(lhs._source), _sink(lhs._sink)
     {
         lhs._source = -1;
         lhs._sink   = -1;
-        lhs._pipe_name.clear();
     }
     basic_pipe& operator=(const basic_pipe& );
     basic_pipe& operator=(basic_pipe&& lhs)
     {
         _source = lhs._source;
         _sink   = lhs._sink ;
-        _pipe_name = lhs._pipe_name;
 
         lhs._source = -1;
         lhs._sink   = -1;
-        lhs._pipe_name.clear();
 
         return *this;
     }
@@ -73,8 +70,6 @@ public:
             ::close(_sink);
         if (_source != -1)
             ::close(_source);
-        if (!_pipe_name)
-            ::unlink(_pipe_name.c_str());
     }
     native_handle native_source() const {return _source;}
     native_handle native_sink  () const {return _sink;}
@@ -90,7 +85,7 @@ public:
     }
     int_type read(char_type * data, int_type count)
     {
-    	auto read_len = ::read(_sink, data, count * sizeof(char_type));
+    	auto read_len = ::read(_source, data, count * sizeof(char_type));
     	if (read_len == -1)
     		::boost::process::detail::throw_last_error();
 
@@ -114,17 +109,16 @@ public:
 
 template<class CharT, class Traits>
 basic_pipe<CharT, Traits>::basic_pipe(const basic_pipe & rhs)
-			: _pipe_name(rhs._pipe_name)
 {
-   	if (rhs._source)
+   	if (rhs._source != -1)
    	{
-   		_source = ::dup(_source);
+   		_source = ::dup(rhs._source);
    		if (_source == -1)
    			::boost::process::detail::throw_last_error("dup() failed");
    	}
-	if (rhs._sink)
+	if (rhs._sink != -1)
 	{
-		_sink = ::dup(_sink);
+		_sink = ::dup(rhs._sink);
 		if (_sink == -1)
 			::boost::process::detail::throw_last_error("dup() failed");
 
@@ -132,18 +126,17 @@ basic_pipe<CharT, Traits>::basic_pipe(const basic_pipe & rhs)
 }
 
 template<class CharT, class Traits>
-basic_pipe &basic_pipe<CharT, Traits>::operator=(const basic_pipe & rhs)
+basic_pipe<CharT, Traits> &basic_pipe<CharT, Traits>::operator=(const basic_pipe & rhs)
 {
-	_pipe_name = rhs._pipe_name;
-   	if (rhs._source)
+   	if (rhs._source != -1)
    	{
-   		_source = ::dup(_source);
+   		_source = ::dup(rhs._source);
    		if (_source == -1)
    			::boost::process::detail::throw_last_error("dup() failed");
    	}
-	if (rhs._sink)
+	if (rhs._sink != -1)
 	{
-		_sink = ::dup(_sink);
+		_sink = ::dup(rhs._sink);
 		if (_sink == -1)
 			::boost::process::detail::throw_last_error("dup() failed");
 
@@ -154,7 +147,6 @@ basic_pipe &basic_pipe<CharT, Traits>::operator=(const basic_pipe & rhs)
 
 template<class CharT, class Traits>
 basic_pipe<CharT, Traits>::basic_pipe(const std::string & name)
-	: _pipe_name(name)
 {
     auto fifo = mkfifo(name.c_str(), 0666 );
             
@@ -172,8 +164,9 @@ basic_pipe<CharT, Traits>::basic_pipe(const std::string & name)
     if (write_fd == -1)
         boost::process::detail::throw_last_error();
 
-    return pipe(read_fd, write_fd, name);
-
+    _sink = write_fd;
+    _source = read_fd;
+    ::unlink(name.c_str());
 }
 
 
