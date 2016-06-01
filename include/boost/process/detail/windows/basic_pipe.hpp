@@ -110,8 +110,8 @@ public:
     {
         ::boost::detail::winapi::CloseHandle(_source);
         ::boost::detail::winapi::CloseHandle(_sink);
-        _source == ::boost::detail::winapi::INVALID_HANDLE_VALUE_;
-        _sink   == ::boost::detail::winapi::INVALID_HANDLE_VALUE_;
+        _source = ::boost::detail::winapi::INVALID_HANDLE_VALUE_;
+        _sink   = ::boost::detail::winapi::INVALID_HANDLE_VALUE_;
     }
 };
 

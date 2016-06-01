@@ -12,7 +12,7 @@
 
 #include <boost/process/child.hpp>
 #include <boost/process/error.hpp>
-#include <boost/process/detail/posix/pipe.hpp>
+#include <boost/process/detail/posix/basic_pipe.hpp>
 #include <boost/fusion/algorithm/iteration/for_each.hpp>
 #include <cstdlib>
 #include <sys/types.h>
