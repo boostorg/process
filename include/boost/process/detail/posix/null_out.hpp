@@ -12,7 +12,7 @@
 #define BOOST_PROCESS_POSIX_PIPE_OUT_HPP
 
 #include <boost/process/detail/posix/handler.hpp>
-#include <boost/iostreams/device/file_descriptor.hpp>
+#include <boost/process/detail/posix/file_descriptor.hpp>
 
 #include <unistd.h>
 namespace boost { namespace process { namespace detail { namespace posix {
@@ -20,7 +20,7 @@ namespace boost { namespace process { namespace detail { namespace posix {
 template<int p1, int p2>
 struct null_out : handler_base_ext
 {
-    boost::iostreams::file_descriptor_sink file{"/dev/null"};
+    file_descriptor file{"/dev/null"};
     
     template <typename Executor>
     void on_exec_setup(Executor &e) const;

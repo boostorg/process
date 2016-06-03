@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(group_test, *boost::unit_test::timeout(5))
     BOOST_CHECK(c.running());
 
     BOOST_REQUIRE_NO_THROW(g.terminate()); 
-    std::this_thread::sleep_for(std::chrono::milliseconds(1)); 
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
     BOOST_CHECK(!c.running());
     if (c.running())

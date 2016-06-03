@@ -12,14 +12,14 @@
 
 #include <boost/process/pipe.hpp>
 #include <boost/process/detail/posix/handler.hpp>
-#include <boost/iostreams/device/file_descriptor.hpp>
+#include <boost/process/detail/posix/file_descriptor.hpp>
 #include <unistd.h>
 
 namespace boost { namespace process { namespace detail { namespace posix {
 
 struct null_in : handler_base_ext
 {
-    boost::iostreams::file_descriptor_source source{"/dev/null"};
+    file_descriptor source{"/dev/null"};
 
 public:
     template <class Executor>

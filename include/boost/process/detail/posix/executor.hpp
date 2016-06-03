@@ -12,6 +12,7 @@
 
 #include <boost/process/child.hpp>
 #include <boost/process/error.hpp>
+#include <boost/process/pipe.hpp>
 #include <boost/process/detail/posix/basic_pipe.hpp>
 #include <boost/fusion/algorithm/iteration/for_each.hpp>
 #include <cstdlib>
@@ -139,15 +140,13 @@ struct executor
 
         boost::fusion::for_each(seq, call_on_success(*this));
         this->pid = pid;
-
-        return child(pid);
     }
     void invoke(boost::mpl::false_)
     {
-        pipe p = pipe::create();
+        ::boost::process::pipe p;
 
 
-        if (::fcntl(p.sink(), F_SETFD, FD_CLOEXEC) == -1)
+        if (::fcntl(p.native_sink(), F_SETFD, FD_CLOEXEC) == -1)
             boost::process::detail::throw_last_error("fcntl(2) failed");
 
         boost::fusion::for_each(seq, call_on_setup(*this));
@@ -160,7 +159,7 @@ struct executor
         }
         else if (pid == 0)
         {
-            ::close(p.source());
+
             boost::fusion::for_each(seq, call_on_exec_setup(*this));
 
             ::execve(exe, cmd_line, env);
@@ -168,19 +167,19 @@ struct executor
             boost::fusion::for_each(seq, call_on_exec_error(*this, ec));
             auto err = ec.value();
 
-            while (::write(p.sink(), &err, sizeof(int)) == -1 && errno == EINTR);
-            ::close(p.sink());
+            while (::write(p.native_sink(), &err, sizeof(int)) == -1 && errno == EINTR);
+
             _exit(EXIT_FAILURE);
         }
 
         int exec_err;
         int count;
-        ::close(p.sink());
+        ::close(p.native_sink());
 
         do
         {
             //actually, this should block until it's read.
-            count = ::read(p.source(), &exec_err, sizeof(errno));
+            count = ::read(p.native_source(), &exec_err, sizeof(errno));
             auto err = errno;
             if (err == EBADF)//that should occur on success.
                 break;
@@ -214,7 +213,7 @@ struct executor
     {
         invoke(ignore_error());
 
-        return child(child_handle(pid));
+        return child(child_handle(pid), exit_status);
     }
 
     Sequence & seq;
@@ -222,6 +221,8 @@ struct executor
     char *const* cmd_line = nullptr;
     char **env      = nullptr;
     pid_t pid = -1;
+    std::shared_ptr<std::atomic<int>> exit_status = std::make_shared<std::atomic<int>>(still_active);
+
     
 };
 

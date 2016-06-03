@@ -23,20 +23,14 @@ struct on_exit_ : boost::process::detail::posix::async_handler
     }
 
     template<typename Executor>
-    std::function<void(const std::error_code&)> on_exit_handler(Executor & exec)
+    std::function<void(int, const std::error_code&)> on_exit_handler(Executor & exec)
     {
 
         auto handler = this->handler;
         auto & pid = exec.pid;
-        return [handler, pid](const std::error_code & ec_in)
+        return [handler, pid](int exit_code, const std::error_code & ec)
                {
-                    int status = 0;
-                    auto ec = ec_in;
-                    if (!ec)
-                    {
-                        ::wait(&status);
-                    }
-                    handler(WEXITSTATUS(status), ec);
+                    handler(exit_code, ec);
                };
 
     };

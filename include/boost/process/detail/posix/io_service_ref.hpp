@@ -22,6 +22,7 @@
 #include <type_traits>
 #include <memory>
 #include <vector>
+#include <wait.h>
 
 
 namespace boost { namespace process { namespace detail { namespace posix {
@@ -51,11 +52,11 @@ template<typename Executor>
 struct async_handler_collector
 {
     Executor & exec;
-    std::vector<std::function<void(const std::error_code & ec)>> &handlers;
+    std::vector<std::function<void(int, const std::error_code & ec)>> &handlers;
 
 
     async_handler_collector(Executor & exec,
-            std::vector<std::function<void(const std::error_code & ec)>> &handlers)
+            std::vector<std::function<void(int, const std::error_code & ec)>> &handlers)
                 : exec(exec), handlers(handlers) {}
 
     template<typename T>
@@ -82,13 +83,13 @@ struct io_service_ref : handler_base_ext
                           typename std::remove_reference< boost::mpl::_ > ::type
                           >>(exec.seq);
 
-          std::vector<std::function<void(const std::error_code & ec)>> funcs;
+          std::vector<std::function<void(int, const std::error_code & ec)>> funcs;
           funcs.reserve(boost::fusion::size(asyncs));
           boost::fusion::for_each(asyncs, async_handler_collector<Executor>(exec, funcs));
 
 
 
-          wait_handler wh(std::move(funcs), ios);
+          wait_handler wh(std::move(funcs), ios, exec.exit_status);
 
           auto signal_p = wh.signal_.get();
           signal_p->async_wait(std::move(wh));
@@ -96,23 +97,34 @@ struct io_service_ref : handler_base_ext
     struct wait_handler
     {
         std::shared_ptr<boost::asio::signal_set> signal_;
-        std::vector<std::function<void(const std::error_code & ec)>> funcs;
+        std::vector<std::function<void(int, const std::error_code & ec)>> funcs;
+        std::shared_ptr<std::atomic<int>> exit_status;
+
         wait_handler(const wait_handler & ) = default;
         wait_handler(wait_handler && )      = default;
-        wait_handler(std::vector<std::function<void(const std::error_code & ec)>> && funcs, boost::asio::io_service & ios) : 
-                funcs(std::move(funcs)),
-                signal_(new boost::asio::signal_set(ios, SIGCHLD))
+        wait_handler(
+        		std::vector<std::function<void(int, const std::error_code & ec)>> && funcs,
+				boost::asio::io_service & ios,
+		        const std::shared_ptr<std::atomic<int>> &exit_status)
+        	: signal_(new boost::asio::signal_set(ios, SIGCHLD)),
+			  funcs(std::move(funcs)),
+			  exit_status(exit_status)
+
+
         {
 
         }
         void operator()(const boost::system::error_code & ec_in, int /*signal*/)
         {
-            std::error_code ec;
-            if (ec_in)
-                ec = std::error_code(ec_in.value(), std::system_category());
+            int status;
+            ::wait(&status);
+
+            std::error_code ec(ec_in.value(), std::system_category());
+            int val = WEXITSTATUS(status);
+            exit_status->store(val);
 
             for (auto & func : funcs)
-                func(ec);
+                func(val, ec);
         }
 
     };

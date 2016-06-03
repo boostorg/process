@@ -16,14 +16,12 @@
 
 #include <system_error>
 
-#include <boost/iostreams/device/file_descriptor.hpp>
-#include <boost/iostreams/stream.hpp>
+
 #include <string>
 #include <sys/wait.h>
 #include <errno.h>
 
 namespace bp = boost::process;
-namespace bio = boost::iostreams;
 
 BOOST_AUTO_TEST_CASE(bind_fd, *boost::unit_test::timeout(2))
 {
@@ -31,17 +29,15 @@ BOOST_AUTO_TEST_CASE(bind_fd, *boost::unit_test::timeout(2))
 
     bp::pipe p;
 
-    bp::child c;
-    {
-        std::error_code ec;
-        bp::child c(
-            master_test_suite().argv[1],
-            "test", "--posix-echo-one", "3", "hello",
-            bp::posix::fd.bind(3, p.native_sink()),
-            ec
-        );
-        BOOST_CHECK(!ec);
-    }
+	std::error_code ec;
+	bp::child c(
+		master_test_suite().argv[1],
+		"test", "--posix-echo-one", "3", "hello",
+		bp::posix::fd.bind(3, p.native_sink()),
+		ec
+	);
+	BOOST_CHECK(!ec);
+
 
     bp::ipstream is(std::move(p));
 
@@ -57,20 +53,16 @@ BOOST_AUTO_TEST_CASE(bind_fds, *boost::unit_test::timeout(2))
     bp::pipe p1;
     bp::pipe p2;
 
-    bp::child c;
+	std::error_code ec;
+	bp::child c(
+		master_test_suite().argv[1],
+		"test","--posix-echo-two","3","hello","99","bye",
+		bp::posix::fd.bind(3,  p1.native_sink()),
+		bp::posix::fd.bind(99, p2.native_sink()),
+		ec
+	);
+	BOOST_CHECK(!ec);
 
-    {
-
-        std::error_code ec;
-        c = bp::execute(
-            master_test_suite().argv[1],
-            "test","--posix-echo-two","3","hello","99","bye",
-            bp::posix::fd.bind(3,  p1.native_sink()),
-            bp::posix::fd.bind(99, p2.native_sink()),
-            ec
-        );
-        BOOST_CHECK(!ec);
-    }
     bp::ipstream is1(std::move(p1));
     bp::ipstream is2(std::move(p2));
 
@@ -86,7 +78,7 @@ BOOST_AUTO_TEST_CASE(bind_fds, *boost::unit_test::timeout(2))
 BOOST_AUTO_TEST_CASE(execve_set_on_error, *boost::unit_test::timeout(2))
 {
     std::error_code ec;
-    bp::execute(
+    bp::spawn(
         "doesnt-exist",
         ec
     );
@@ -98,7 +90,7 @@ BOOST_AUTO_TEST_CASE(execve_throw_on_error, *boost::unit_test::timeout(2))
 {
     try
     {
-        bp::execute("doesnt-exist");
+        bp::spawn("doesnt-exist");
         BOOST_CHECK(false);
     }
     catch (std::system_error &e)

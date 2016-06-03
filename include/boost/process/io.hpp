@@ -89,8 +89,8 @@ struct std_in_
     template<typename Char, typename Traits> api::pipe_in operator=(const basic_pstream <Char, Traits> & p)  const {return p.pipe();}
     template<typename Char, typename Traits> api::pipe_in operator<(const basic_pstream <Char, Traits> & p)  const {return p.pipe();}
 
-    api::pipe_in operator=(const async_pipe & p) const {return static_cast<pipe>(p);}
-    api::pipe_in operator<(const async_pipe & p) const {return static_cast<pipe>(p);}
+    api::pipe_in operator=(const async_pipe & p) const {return p;}
+    api::pipe_in operator<(const async_pipe & p) const {return p;}
 
     api::async_in_buffer<const asio::mutable_buffer> operator=(const asio::mutable_buffer & buf) const {return buf;}
     api::async_in_buffer<const asio::const_buffer  > operator=(const asio::const_buffer   & buf) const {return buf;}

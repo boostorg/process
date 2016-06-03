@@ -58,7 +58,7 @@ public:
     template <class PosixExecutor>
     void on_exec_setup(PosixExecutor&) const
     {
-        ::dup2(fd_.handle(), id_);
+        ::dup2(fd_, id_);
     }
 
 private:

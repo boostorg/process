@@ -24,6 +24,8 @@
 #include <string>
 #include <cstdlib>
 #include <iostream>
+#include <thread>
+
 
 #if defined(BOOST_WINDOWS_API)
 #   include <Windows.h>
@@ -102,6 +104,9 @@ BOOST_AUTO_TEST_CASE(async_io, *boost::unit_test::timeout(2))
     bp::async_pipe p1(io_service);
     bp::ipstream is;
 
+    boost::asio::streambuf sb;
+    std::ostream os(&sb);
+
     std::error_code ec;
     bp::child c(
         master_test_suite().argv[1],
@@ -112,11 +117,15 @@ BOOST_AUTO_TEST_CASE(async_io, *boost::unit_test::timeout(2))
     );
     BOOST_REQUIRE(!ec);
 
-    std::string s = "hello\n";
-    boost::asio::async_write(p1, boost::asio::buffer(s),
+    os << "hello" << std::endl;
+
+  //  std::string s = "hello\n";
+    boost::asio::async_write(p1, sb,
         write_handler(is));
 
     io_service.run();
+
+    c.wait();
 }
 
 BOOST_AUTO_TEST_CASE(nul, *boost::unit_test::timeout(2))

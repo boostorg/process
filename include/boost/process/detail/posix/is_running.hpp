@@ -11,8 +11,11 @@
 #include <system_error>
 #include <sys/wait.h>
 
-namespace boost { namespace process { namespace detail {namespace posix {
+namespace boost { namespace process { namespace detail { namespace posix {
 
+
+constexpr static int still_active = 0x7F;
+static_assert(!WIFEXITED(still_active), "Internal Error");
 
 inline bool is_running(const child_handle &p, int & exit_code)
 {
@@ -31,8 +34,7 @@ inline bool is_running(const child_handle &p, int & exit_code)
     else //exited
     {
         if (WIFEXITED(status))
-            exit_code = WEXITSTATUS(status);
-
+            exit_code = status;
         return false;
     }
 }
@@ -55,7 +57,7 @@ inline bool is_running(const child_handle &p, int & exit_code, std::error_code &
         ec.clear();
         
         if (WIFEXITED(status))
-            exit_code = WEXITSTATUS(status);
+            exit_code = status;
         
         return false;
     }
@@ -63,7 +65,12 @@ inline bool is_running(const child_handle &p, int & exit_code, std::error_code &
 
 inline bool is_running(int code)
 {
-    return WIFEXITED(code) || WTERMSIG(code);
+    return !WIFEXITED(code);
+}
+
+inline int eval_exit_status(int code)
+{
+	return WEXITSTATUS(code);
 }
 
 }}}}

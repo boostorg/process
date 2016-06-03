@@ -9,6 +9,7 @@
 
 #include <boost/process/detail/posix/handler.hpp>
 #include <boost/process/detail/posix/cmd.hpp>
+#include <boost/process/shell.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <string>
 #include <vector>
@@ -77,6 +78,19 @@ struct exe_cmd_init : boost::process::detail::api::handler_base_ext
     }
     static exe_cmd_init exe_args(std::string && exe, std::vector<std::string> && args) {return exe_cmd_init(std::move(exe), std::move(args));}
     static exe_cmd_init cmd     (std::string && cmd) {return exe_cmd_init("", {std::move(cmd)});}
+    static exe_cmd_init exe_args_shell(std::string&& exe, std::vector<std::string> && args)
+    {
+    	std::string sh = shell().string();
+        return exe_cmd_init(std::move(sh), std::move(args));
+    }
+    static exe_cmd_init cmd_shell(std::string&& cmd)
+    {
+    	std::string sh = shell().string();
+
+        return exe_cmd_init(
+        		std::move(sh),
+        		{std::move(cmd)});
+    }
 private:
 	std::vector<char*> make_cmd();
     std::string exe;

@@ -61,13 +61,13 @@ struct async_out_buffer : ::boost::process::detail::posix::async_handler
     }
 
     template<typename Executor>
-    std::function<void(const std::error_code&)> on_exit_handler(Executor & exec)
+    std::function<void(int, const std::error_code&)> on_exit_handler(Executor & exec)
     {
         
         pipe = std::make_shared<boost::process::async_pipe>(get_io_service(exec.seq));
  
         auto pipe = this->pipe;
-        return [pipe](const std::error_code & ec)
+        return [pipe](int, const std::error_code & ec)
                 {
                     boost::asio::io_service & ios = pipe->get_io_service();
                     ios.post([pipe]
@@ -128,13 +128,13 @@ struct async_out_future : ::boost::process::detail::posix::async_handler
     }
 
     template<typename Executor>
-    std::function<void(const std::error_code&)> on_exit_handler(Executor & exec)
+    std::function<void(int, const std::error_code&)> on_exit_handler(Executor & exec)
     {
 
         pipe = std::make_shared<boost::process::async_pipe>(get_io_service(exec.seq));
 
         auto pipe = this->pipe;
-        return [pipe](const std::error_code & ec)
+        return [pipe](int, const std::error_code & ec)
                 {
                     boost::asio::io_service & ios = pipe->get_io_service();
                     ios.post([pipe]
@@ -150,7 +150,7 @@ struct async_out_future : ::boost::process::detail::posix::async_handler
     template <typename Executor>
     void on_exec_setup(Executor &exec)
     {
-        apply_out_handles(exec, sink.handle(), std::integral_constant<int, p1>(), std::integral_constant<int, p2>());
+        apply_out_handles(exec, pipe->native_sink(), std::integral_constant<int, p1>(), std::integral_constant<int, p2>());
     }
 
 };

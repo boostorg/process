@@ -19,7 +19,7 @@ typedef ::pid_t pid_t;
 
 struct child_handle
 {
-    int pid;
+    int pid {-1};
     explicit child_handle(int pid) : pid(pid)
     {}
 

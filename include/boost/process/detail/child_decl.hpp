@@ -24,7 +24,6 @@
 #include <boost/none.hpp>
 #include <atomic>
 
-
 #if defined(BOOST_POSIX_API)
 #include <boost/process/detail/posix/child_handle.hpp>
 #include <boost/process/detail/posix/terminate.hpp>
@@ -46,7 +45,7 @@ using ::boost::process::detail::api::pid_t;
 class child
 {
     ::boost::process::detail::api::child_handle _child_handle;
-    std::shared_ptr<std::atomic<int>> _exit_status = std::make_shared<std::atomic<int>>(boost::process::detail::api::still_active);
+    std::shared_ptr<std::atomic<int>> _exit_status = std::make_shared<std::atomic<int>>(::boost::process::detail::api::still_active);
     bool _attached = true;
     bool _terminated = false;
 
@@ -96,7 +95,7 @@ public:
     native_handle_t native_handle() const { return _child_handle.process_handle(); }
 
 
-    int exit_code() const {return _exit_status->load();}
+    int exit_code() const {return ::boost::process::detail::api::eval_exit_status(_exit_status->load());}
     pid_t id()      const {return _child_handle.id(); }
 
     bool running()
@@ -115,7 +114,7 @@ public:
 
     void terminate()
     {
-        if (valid())
+        if (valid() && !running())
             boost::process::detail::api::terminate(_child_handle);
 
         _terminated = true;

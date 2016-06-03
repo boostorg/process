@@ -21,9 +21,17 @@ class async_pipe
 public:
     typedef int native_handle;
 
-    inline async_pipe(boost::asio::io_service & ios);
-    inline async_pipe(boost::asio::io_service & ios, const std::string & name);
+    inline async_pipe(boost::asio::io_service & ios) : _source(ios), _sink(ios)
+    {
+		int fds[2];
+		if (::pipe(fds) == -1)
+			boost::process::detail::throw_last_error("pipe(2) failed");
 
+		_source.assign(fds[0]);
+		_sink  .assign(fds[1]);
+    };
+    inline async_pipe(boost::asio::io_service & ios, const std::string & name);
+    inline async_pipe(const async_pipe& lhs);
     async_pipe(async_pipe&& lhs)  : _source(std::move(lhs._source)), _sink(std::move(lhs._sink))
     {
         lhs._source.assign (-1);
@@ -145,33 +153,31 @@ async_pipe::async_pipe(boost::asio::io_service & ios, const std::string & name) 
     _sink  .assign(write_fd);
 }
 
-async_pipe& async_pipe::async_pipe(const async_pipe & p)
+async_pipe::async_pipe(const async_pipe & p) :
+		_source(const_cast<async_pipe&>(p)._source.get_io_service()),
+		_sink(  const_cast<async_pipe&>(p)._sink.get_io_service())
 {
 
     //cannot get the handle from a const object.
     auto source_in = const_cast<::boost::asio::posix::stream_descriptor &>(_source).native();
     auto sink_in   = const_cast<::boost::asio::posix::stream_descriptor &>(_sink).native();
     if (source_in == -1)
-        _source = -1;
+        _source.assign(-1);
     else
     {
-    	_source = ::dup(source_in);
-    	if (_source == -1)
+    	_source.assign(::dup(source_in));
+    	if (_source.native()== -1)
     		::boost::process::detail::throw_last_error("dup()");
     }
 
     if (sink_in   == -1)
-        _sink = -1;
+        _sink.assign(-1);
     else
     {
-    	_source = ::dup(source_in);
-    	if (_source == -1)
+    	_sink.assign(::dup(sink_in));
+    	if (_sink.native() == -1)
     		::boost::process::detail::throw_last_error("dup()");
     }
-    _source.assign(_source);
-    _sink.  assign(_sink);
-
-    return *this;
 }
 
 async_pipe& async_pipe::operator=(const async_pipe & p)
@@ -195,8 +201,8 @@ async_pipe& async_pipe::operator=(const async_pipe & p)
         sink = -1;
     else
     {
-    	source = ::dup(source_in);
-    	if (source == -1)
+    	sink  = ::dup(sink_in);
+    	if (sink == -1)
     		::boost::process::detail::throw_last_error("dup()");
     }
     _source.assign(source);
@@ -244,39 +250,14 @@ async_pipe::operator basic_pipe<CharT, Traits>() const
         sink = -1;
     else
     {
-    	source = ::dup(source_in);
-    	if (source == -1)
+    	sink = ::dup(sink_in);
+    	if (sink == -1)
     		::boost::process::detail::throw_last_error("dup()");
     }
 
     return {source, sink};
 }
 
-
-template<class CharT, class Traits>
-basic_pipe<CharT, Traits>::basic_pipe(const std::string & name)
-{
-    auto fifo = mkfifo(name.c_str(), 0666 );
-
-    if (fifo != 0)
-        boost::process::detail::throw_last_error("mkfifo() failed");
-
-
-    int  read_fd = open(name.c_str(), O_RDWR);
-
-    if (read_fd == -1)
-        boost::process::detail::throw_last_error();
-
-    int write_fd = dup(read_fd);
-
-    if (write_fd == -1)
-        boost::process::detail::throw_last_error();
-
-    ::unlink(name.c_str());
-
-    return pipe(read_fd, write_fd);
-
-}
 
 inline bool operator==(const async_pipe & lhs, const async_pipe & rhs)
 {
