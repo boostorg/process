@@ -20,9 +20,7 @@
 #include <memory>
 
 
-#if defined (BOOST_PROCESS_USE_FUTURE)
 #include <future>
-#endif
 
 
 using namespace std;

@@ -57,6 +57,8 @@ inline bool is_running(int code)
     return code == still_active;
 }
 
+inline int eval_exit_status(int in ) {return in;}
+
 }}}}
 
 #endif
