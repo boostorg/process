@@ -46,8 +46,6 @@ struct async_in_buffer : ::boost::process::detail::posix::async_handler
     template <typename Executor>
     inline void on_success(Executor &exec) const
     {
-        boost::asio::io_service &is_ser = get_io_service(exec.seq);
-
 
         auto  pipe              = this->pipe;
 
