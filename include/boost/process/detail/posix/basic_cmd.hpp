@@ -30,8 +30,9 @@ inline std::vector<std::string>  build_args(const std::string & data)
     bool in_quote = false;
 
     auto part_beg = data.cbegin();
+    auto itr = data.cbegin();
 
-    for (auto itr = data.cbegin(); itr != data.cend(); itr++)
+    for (; itr != data.cend(); itr++)
     {
     	if (*itr == '"')
     		in_quote ^= true;
@@ -42,9 +43,12 @@ inline std::vector<std::string>  build_args(const std::string & data)
 
     		if ((itr != data.cbegin()) && (*(itr -1) != ' ' ))
     			st.emplace_back(part_beg, itr);
+
     		part_beg = itr+1;
     	}
     }
+    if (part_beg != itr)
+    	st.emplace_back(part_beg, itr);
     return st;
 }
 
