@@ -24,7 +24,7 @@ struct file_out : handler_base_ext
 	int handle = file.handle();
 
     template<typename T>
-    file_out(T&& t) : file(std::forward<T>(t)) {}
+    file_out(T&& t) : file(std::forward<T>(t), file_descriptor::write), handle(file.handle()) {}
     file_out(FILE * f) : handle(fileno(f)) {}
 
 

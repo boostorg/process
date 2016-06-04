@@ -30,8 +30,6 @@ inline std::vector<std::string>  build_args(std::vector<std::string> && data)
     st.reserve(data.size());
     for (auto & arg : data)
     {
-        //don't need the argument afterwards so,
-        boost::trim(arg);
 
         if ((arg.front() != '"') && (arg.back() != '"'))
         {
@@ -57,7 +55,7 @@ struct exe_cmd_init : boost::process::detail::api::handler_base_ext
     exe_cmd_init(const exe_cmd_init & ) = delete;
     exe_cmd_init(exe_cmd_init && ) = default;
     exe_cmd_init(std::string && exe, std::vector<std::string> && args)
-            : exe(std::move(exe)), args(api::build_args(std::move(args))) {};
+            : exe(std::move(exe)), args(std::move(args)) {};
     template <class Executor>
     void on_setup(Executor& exec) 
     {

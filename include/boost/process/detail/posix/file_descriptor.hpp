@@ -20,20 +20,7 @@ struct file_descriptor
         write = 2,
         read_write = 3
     };
-    static int desired_access(mode_t mode)
-    {
-        switch(mode)
-        {
-        case read:
-            return O_RDONLY;
-        case write:
-            return O_WRONLY;
-        case read_write:
-            return O_RDWR;
-        default:
-            return 0u;
-        }
-    }
+
 
     file_descriptor() = default;
     file_descriptor(const boost::filesystem::path& p, mode_t mode = read_write)
@@ -46,7 +33,7 @@ struct file_descriptor
 
 
     file_descriptor(const char*    path, mode_t mode = read_write)
-        : _handle(::open(path, desired_access(mode)))
+        : _handle(create_file(path, mode))
     {
 
     }
@@ -66,6 +53,21 @@ struct file_descriptor
     int handle() const { return _handle;}
 
 private:
+    static int create_file(const char* name, mode_t mode )
+    {
+        switch(mode)
+        {
+        case read:
+            return ::open(name, O_RDONLY);
+        case write:
+            return ::open(name, O_WRONLY | O_CREAT, 0660);
+        case read_write:
+            return ::open(name, O_RDWR | O_CREAT, 0660);
+        default:
+            return -1;
+        }
+    }
+
     int _handle = -1;
 };
 
