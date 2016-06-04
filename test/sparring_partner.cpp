@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
     }
     else if (vm["echo-argv"].as<bool>())
     {
-        std::vector<std::string> args(argv+1, argv + argc);
+        std::vector<char*> args(argv+1, argv + argc);
         for (auto & arg : args)
         	std::cout << arg << std::endl;
     }

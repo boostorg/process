@@ -8,6 +8,7 @@
 #define BOOST_PROCESS_DETAIL_WINDOWS_BASIC_CMD_HPP_
 
 #include <boost/algorithm/string/trim.hpp>
+#include <boost/algorithm/string/replace.hpp>
 #include <boost/process/shell.hpp>
 #include <boost/process/detail/windows/handler.hpp>
 
@@ -33,18 +34,17 @@ inline std::string build_args(const std::string & exe, std::vector<std::string> 
     std::string st = exe;
     for (auto & arg : data)
     {
+    	boost::replace_all(arg, "\"", "\\\"");
 
-        if ((arg.front() != '"') && (arg.back() != '"'))
-        {
-            auto it = std::find(arg.begin(), arg.end(), ' ');//contains space?
-            if (it != arg.end())//ok, contains spaces.
-            {
-                //the first one is put directly onto the output,
-                //because then I don't have to copy the whole string
-                arg.insert(arg.begin(), '"');
-                arg += '"'; //thats the post one.
-            }
-        }
+		auto it = std::find(arg.begin(), arg.end(), ' ');//contains space?
+		if (it != arg.end())//ok, contains spaces.
+		{
+			//the first one is put directly onto the output,
+			//because then I don't have to copy the whole string
+			arg.insert(arg.begin(), '"');
+			arg += '"'; //thats the post one.
+		}
+
         if (!st.empty())//first one does not need a preceeding space
             st += ' ';
 

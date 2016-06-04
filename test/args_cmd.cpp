@@ -19,6 +19,8 @@
 #include <boost/process/error.hpp>
 #include <boost/process/child.hpp>
 
+#include <boost/algorithm/string/predicate.hpp>
+
 namespace bp = boost::process;
 
 namespace bp = boost::process;
@@ -32,7 +34,7 @@ BOOST_AUTO_TEST_CASE(args, *boost::unit_test::timeout(2))
     std::error_code ec;
     bp::child c(
         master_test_suite().argv[1],
-        "test", "--echo-args", "hello thingy", "\"stuff\"", "  spa ce  ",
+        "test", "--echo-argv", "hello thingy", "\"stuff\"", "  spa ce  ",
         bp::std_out>is,
         ec
     );
@@ -41,21 +43,26 @@ BOOST_AUTO_TEST_CASE(args, *boost::unit_test::timeout(2))
     std::string s;
 
     std::getline(is, s);
-    BOOST_CHECK_EQUAL(s, master_test_suite().argv[1]);
-
-    std::getline(is, s);
+    s.resize(4);
     BOOST_CHECK_EQUAL(s, "test");
 
     std::getline(is, s);
-    BOOST_CHECK_EQUAL(s, "--echo-args");
+    s.resize(11);
+    BOOST_CHECK_EQUAL(s, "--echo-argv");
 
     std::getline(is, s);
+    s.resize(12);
+
     BOOST_CHECK_EQUAL(s, "hello thingy");
 
     std::getline(is, s);
+    s.resize(7);
+
     BOOST_CHECK_EQUAL(s, "\"stuff\"");
 
     std::getline(is, s);
+    s.resize(10);
+
     BOOST_CHECK_EQUAL(s, "  spa ce  ");
 
 }
@@ -70,7 +77,7 @@ BOOST_AUTO_TEST_CASE(cmd, *boost::unit_test::timeout(2))
     std::error_code ec;
 
     std::string cmd = master_test_suite().argv[1];
-    cmd+= "test --echo-args \"hello thingy\" \\\"stuff\\\" \"  spa ce  \"";
+    cmd+= " test --echo-argv \"hello thingy\" \\\"stuff\\\" \"  spa ce  \"";
 
     bp::child c(cmd,
         bp::std_out>is,
@@ -79,22 +86,27 @@ BOOST_AUTO_TEST_CASE(cmd, *boost::unit_test::timeout(2))
     BOOST_REQUIRE(!ec);
 
     std::string s;
-    std::getline(is, s);
-    BOOST_CHECK_EQUAL(s, master_test_suite().argv[1]);
 
     std::getline(is, s);
+    s.resize(4);
     BOOST_CHECK_EQUAL(s, "test");
 
     std::getline(is, s);
-    BOOST_CHECK_EQUAL(s, "--echo-args");
+    s.resize(11);
+    BOOST_CHECK_EQUAL(s, "--echo-argv");
 
     std::getline(is, s);
+    s.resize(12);
+
     BOOST_CHECK_EQUAL(s, "hello thingy");
 
     std::getline(is, s);
+    s.resize(7);
+
     BOOST_CHECK_EQUAL(s, "\"stuff\"");
 
     std::getline(is, s);
-    BOOST_CHECK_EQUAL(s, "  spa ce  ");
+    s.resize(10);
 
+    BOOST_CHECK_EQUAL(s, "  spa ce  ");
 }
