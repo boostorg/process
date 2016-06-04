@@ -23,28 +23,28 @@ namespace detail
 namespace posix
 {
 
-inline std::vector<std::string>  build_args(std::vector<std::string> && data)
+inline std::vector<std::string>  build_args(const std::string & data)
 {
     std::vector<std::string>  st;
     
-    st.reserve(data.size());
-    for (auto & arg : data)
+    bool in_quote = false;
+
+    auto part_beg = data.cbegin();
+
+    for (auto itr = data.cbegin(); itr != data.cend(); itr++)
     {
+    	if (*itr == '"')
+    		in_quote ^= true;
 
-        if ((arg.front() != '"') && (arg.back() != '"'))
-        {
-            auto it = std::find(arg.begin(), arg.end(), ' ');//contains space?
-            if (it != arg.end())//ok, contains spaces.
-            {
-                //the first one is put directly onto the output,
-                //because then I don't have to copy the whole string
-                arg.insert(arg.begin(), '"');
-                arg += '"'; //thats the post one.
-            }
-        }
-        st.push_back(std::move(arg));
+    	if (!in_quote && (*itr == ' '))
+    	{
+    		//alright, got a space
+
+    		if ((itr != data.cbegin()) && (*(itr -1) != ' ' ))
+    			st.emplace_back(part_beg, itr);
+    		part_beg = itr+1;
+    	}
     }
-
     return st;
 }
 
@@ -75,7 +75,12 @@ struct exe_cmd_init : boost::process::detail::api::handler_base_ext
 
     }
     static exe_cmd_init exe_args(std::string && exe, std::vector<std::string> && args) {return exe_cmd_init(std::move(exe), std::move(args));}
-    static exe_cmd_init cmd     (std::string && cmd) {return exe_cmd_init("", {std::move(cmd)});}
+    static exe_cmd_init cmd     (std::string && cmd)
+    {
+    	auto args = build_args(cmd);
+    	return exe_cmd_init(std::move(args[0]), std::move(args));
+    }
+
     static exe_cmd_init exe_args_shell(std::string&& exe, std::vector<std::string> && args)
     {
     	std::string sh = shell().string();
