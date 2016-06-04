@@ -10,12 +10,11 @@
 #include <boost/process.hpp>
 
 using namespace boost::process;
-using namespace boost::process::initializers;
 
 int main()
 {
 //[c_terminate
-    child c = execute("test.exe");
+    child c("test.exe");
     c.terminate();
 //]
 }

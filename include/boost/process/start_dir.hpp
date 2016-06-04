@@ -36,10 +36,12 @@ struct start_dir_
 
     api::start_dir_init operator()(const std::string & st)             const {return api::start_dir_init(st); }
     api::start_dir_init operator()(std::string && s)                   const {return api::start_dir_init(std::move(s)); }
+    api::start_dir_init operator()(const char* s)                      const {return api::start_dir_init(s); }
     api::start_dir_init operator()(const boost::filesystem::path & st) const {return api::start_dir_init(st.string()); }
 
     api::start_dir_init operator=(const std::string & st)             const {return api::start_dir_init(st); }
     api::start_dir_init operator=(std::string && s)                   const {return api::start_dir_init(std::move(s)); }
+    api::start_dir_init operator=(const char* s)                      const {return api::start_dir_init(s); }
     api::start_dir_init operator=(const boost::filesystem::path & st) const {return api::start_dir_init(st.string()); }
 
 };

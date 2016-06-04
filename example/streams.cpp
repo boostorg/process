@@ -9,28 +9,20 @@
 
 #include <boost/process.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
-#include <boost/assign/list_of.hpp>
 
 using namespace boost::process;
-using namespace boost::process::initializers;
 using namespace boost::iostreams;
 
 int main()
 {
 //[stdout
-    file_descriptor_sink sink("stdout.txt");
-    execute(
-        run_exe("test.exe"),
-        bind_stdout(sink)
-    );
+    system("test.exe", std_out > "log.txt");
 //]
 
 //[close_in_err
-    execute(
-        run_exe("test.exe"),
-        bind_stdout(sink),
-        close_stdin(),
-        close_stderr()
-    );
+    system("test.exe",
+		std_out > null,
+		std_in  < null,
+		std_err.close());
 //]
 }

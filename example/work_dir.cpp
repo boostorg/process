@@ -11,12 +11,11 @@
 #include <boost/filesystem.hpp>
 
 using namespace boost::process;
-using namespace boost::process::initializers;
 
 int main()
 {
 //[work_dir
-    execute(
+    system(
         "test.exe",
         start_dir="../foo"
     );
@@ -24,7 +23,7 @@ int main()
 
 //[work_dir_abs
     boost::filesystem::path exe = "test.exe";
-    execute(
+    system(
         boost::filesystem::absolute(exe),
         start_dir="../foo"
     );

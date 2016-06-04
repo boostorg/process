@@ -8,8 +8,6 @@
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 project : requirements
- # <source>/boost//headers
- # <source>/boost//system
   <toolset>msvc:<define>_SCL_5SECURE_NO_WARNINGS
   <target-os>windows:<define>WIN32_LEAN_AND_MEAN
   <target-os>linux:<linkflags>-lpthread

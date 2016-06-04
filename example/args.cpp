@@ -12,16 +12,11 @@
 #include <string>
 
 using namespace boost::process;
-using namespace boost::process::initializers;
 
 int main()
 {
 //[args
-    std::vector<std::string> args;
-    args.push_back("test.exe");
-    args.push_back("--foo");
-    args.push_back("/bar");
-
-    execute(set_args(args));
+	child c("test.exe", "--foo", "/bar");
 //]
+	c.wait();
 }

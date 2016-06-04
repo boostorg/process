@@ -13,26 +13,24 @@
 #endif
 
 using namespace boost::process;
-using namespace boost::process::initializers;
 
 int main()
 {
 //[cleanup
 	{
-    	child c = execute("test.exe");
+    	child c("test.exe");
     	//wait for exit
 	}
 //]
 
 //[cleanup_detach_short
 
-    execute("test.exe").detach();
+    spawn("test.exe");
 //]
 
-//[cleanup_detach
+//[cleanup_system
     {
-        child c = execute(run_exe("test.exe"));
-        c.detach()
+        system("test.exe");
     }
 //]
 }

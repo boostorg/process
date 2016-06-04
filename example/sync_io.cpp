@@ -8,28 +8,24 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include <boost/process.hpp>
-#include <boost/iostreams/device/file_descriptor.hpp>
-#include <boost/iostreams/stream.hpp>
 #include <string>
 
 using namespace boost::process;
-using namespace boost::process::initializers;
-using namespace boost::iostreams;
 
 int main()
 {
 //[sync_io
-    boost::process::pipe p = create_pipe();
+    boost::process::ipstream p;
 
-    file_descriptor_sink sink(p.sink, close_handle);
-    execute(
-        run_exe("test.exe"),
-        bind_stdout(sink)
+    child c(
+        "test.exe",
+        std_out > p
     );
 
-    file_descriptor_source source(p.source, close_handle);
-    stream<file_descriptor_source> is(source);
+
     std::string s;
-    std::getline(is, s);
+    std::getline(p, s);
+
+    c.wait();
 //]
 }
