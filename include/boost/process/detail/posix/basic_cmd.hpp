@@ -9,6 +9,7 @@
 
 #include <boost/process/detail/posix/handler.hpp>
 #include <boost/process/detail/posix/cmd.hpp>
+#include <boost/algorithm/string/replace.hpp>
 #include <boost/process/shell.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <string>
@@ -27,6 +28,22 @@ inline std::vector<std::string>  build_args(const std::string & data)
 {
     std::vector<std::string>  st;
     
+    typedef std::string::const_iterator itr_t;
+
+    //normal quotes outside can be stripped, inside ones marked as \" will be replaced.
+    auto make_entry = [](const itr_t & begin, const itr_t & end)
+    {
+    	std::string data;
+    	if ((*begin == '"') && (*(end-1) == '"'))
+    		data.assign(begin+1, end-1);
+    	else
+    		data.assign(begin, end);
+
+    	boost::replace_all(data, "\\\"", "\"");
+    	return data;
+
+    };
+
     bool in_quote = false;
 
     auto part_beg = data.cbegin();
@@ -42,13 +59,15 @@ inline std::vector<std::string>  build_args(const std::string & data)
     		//alright, got a space
 
     		if ((itr != data.cbegin()) && (*(itr -1) != ' ' ))
-    			st.emplace_back(part_beg, itr);
+    			st.push_back(make_entry(part_beg, itr));
 
     		part_beg = itr+1;
     	}
     }
     if (part_beg != itr)
-    	st.emplace_back(part_beg, itr);
+    	st.emplace_back(make_entry(part_beg, itr));
+
+
     return st;
 }
 
@@ -74,15 +93,12 @@ struct exe_cmd_init : boost::process::detail::api::handler_base_ext
             cmd_impl = make_cmd();
             exec.cmd_line = cmd_impl.data();
         }
-
-
-
     }
     static exe_cmd_init exe_args(std::string && exe, std::vector<std::string> && args) {return exe_cmd_init(std::move(exe), std::move(args));}
     static exe_cmd_init cmd     (std::string && cmd)
     {
     	auto args = build_args(cmd);
-    	return exe_cmd_init(std::move(args[0]), std::move(args));
+    	return exe_cmd_init({}, std::move(args));
     }
 
     static exe_cmd_init exe_args_shell(std::string&& exe, std::vector<std::string> && args)
