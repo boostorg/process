@@ -83,11 +83,9 @@ int main(int argc, char *argv[])
     }
     else if (vm["echo-argv"].as<bool>())
     {
-        std::vector<std::string> v, v2;
-        boost::push_back(v, boost::make_iterator_range(argv, argv + argc));
-        boost::transform(v, std::back_inserter(v2),
-            "\"" + boost::lambda::_1 + "\"");
-        std::cout << boost::algorithm::join(v2, " ") << std::endl;
+        std::vector<std::string> args(argv+1, argv + argc);
+        for (auto & arg : args)
+        	std::cout << arg << std::endl;
     }
     else if (vm.count("exit-code"))
     {
