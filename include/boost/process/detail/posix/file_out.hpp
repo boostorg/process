@@ -12,7 +12,7 @@
 #define BOOST_PROCESS_POSIX_FILE_OUT_HPP
 
 #include <boost/process/detail/posix/handler.hpp>
-#include <boost/iostreams/device/file_descriptor.hpp>
+#include <boost/process/detail/posix/file_descriptor.hpp>
 
 #include <unistd.h>
 namespace boost { namespace process { namespace detail { namespace posix {
@@ -20,12 +20,12 @@ namespace boost { namespace process { namespace detail { namespace posix {
 template<int p1, int p2>
 struct file_out : handler_base_ext
 {
-    boost::iostreams::file_descriptor_sink file;
+	file_descriptor file;
+	int handle = file.handle();
 
     template<typename T>
     file_out(T&& t) : file(std::forward<T>(t)) {}
-    file_out(FILE * f) : file(fileno(f), boost::iostreams::never_close_handle) {}
-    file_out(const boost::iostreams::file_descriptor_sink &f) : file(f.handle(), boost::iostreams::never_close_handle) {}
+    file_out(FILE * f) : handle(fileno(f)) {}
 
 
     template <typename Executor>
@@ -36,22 +36,22 @@ template<>
 template<typename Executor>
 void file_out<1,-1>::on_exec_setup(Executor &e) const
 {
-    ::dup2(file.handle(), STDOUT_FILENO);
+    ::dup2(handle, STDOUT_FILENO);
 }
 
 template<>
 template<typename Executor>
 void file_out<2,-1>::on_exec_setup(Executor &e) const
 {
-    ::dup2(file.handle(), STDERR_FILENO);
+    ::dup2(handle, STDERR_FILENO);
 }
 
 template<>
 template<typename Executor>
 void file_out<1,2>::on_exec_setup(Executor &e) const
 {
-    ::dup2(file.handle(), STDOUT_FILENO);
-    ::dup2(file.handle(), STDERR_FILENO);
+    ::dup2(handle, STDOUT_FILENO);
+    ::dup2(handle, STDERR_FILENO);
 
 }
 

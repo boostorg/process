@@ -33,8 +33,6 @@ inline std::string build_args(const std::string & exe, std::vector<std::string> 
     std::string st = exe;
     for (auto & arg : data)
     {
-        //don't need the argument afterwards so,
-        boost::trim(arg);
 
         if ((arg.front() != '"') && (arg.back() != '"'))
         {

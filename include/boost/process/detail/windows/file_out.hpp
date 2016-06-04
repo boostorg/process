@@ -62,7 +62,7 @@ template<>
 template<typename WindowsExecutor>
 void file_out<1,2>::on_setup(WindowsExecutor &e) const
 {
-    boost::detail::winapi::SetHandleInformation(file.handle(),
+    boost::detail::winapi::SetHandleInformation(handle,
             boost::detail::winapi::HANDLE_FLAG_INHERIT_,
             boost::detail::winapi::HANDLE_FLAG_INHERIT_);
 

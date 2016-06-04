@@ -19,6 +19,7 @@
 
 #include <system_error>
 #include <boost/system/error_code.hpp>
+#include <boost/filesystem.hpp>
 
 #include <boost/asio.hpp>
 #include <string>
@@ -37,7 +38,7 @@ typedef boost::asio::posix::stream_descriptor pipe_end;
 #endif
 
 
-
+namespace fs = boost::filesystem;
 namespace bp = boost::process;
 
 BOOST_AUTO_TEST_CASE(sync_io, *boost::unit_test::timeout(2))
@@ -148,6 +149,98 @@ BOOST_AUTO_TEST_CASE(nul, *boost::unit_test::timeout(2))
 #if defined(BOOST_WINDOWS_API)
     BOOST_CHECK_EQUAL(EXIT_SUCCESS, exit_code);
 #elif defined(BOOST_POSIX_API)
-    BOOST_CHECK_EQUAL(EXIT_SUCCESS, WEXITSTATUS(exit_code));
+    BOOST_CHECK_EQUAL(EXIT_SUCCESS, exit_code);
 #endif
+}
+
+
+BOOST_AUTO_TEST_CASE(file_io, *boost::unit_test::timeout(2))
+{
+    std::cout << "file_io" << std::endl;
+    using boost::unit_test::framework::master_test_suite;
+
+
+    fs::path pth =
+    		fs::path(master_test_suite().argv[1]).parent_path() / "std_in_log_file.txt";
+    bp::ipstream is;
+
+    {
+    	boost::filesystem::ofstream fs(pth);
+    	fs << 321 << std::endl;
+    	fs << 1.2345 << std::endl;
+    	fs << "some_string" << std::endl;
+    }
+    std::error_code ec;
+
+    bp::child c(
+        master_test_suite().argv[1],
+        bp::args+={"test", "--prefix", "abc"},
+        bp::std_in <pth,
+        bp::std_out>is,
+        ec);
+
+    BOOST_REQUIRE(!ec);
+
+
+    std::string s;
+
+
+    is >> s;
+    BOOST_CHECK_EQUAL(s, "abc321");
+    is >> s;
+    BOOST_CHECK_EQUAL(s, "abc1.2345");
+    is >> s;
+    BOOST_CHECK_EQUAL(s, "abcsome_string");
+
+    c.wait();
+    boost::filesystem::remove(pth);
+}
+
+BOOST_AUTO_TEST_CASE(file_io_C, *boost::unit_test::timeout(2))
+{
+	//tested, since stdin also yields FILE*.
+    std::cout << "file_io_C" << std::endl;
+    using boost::unit_test::framework::master_test_suite;
+
+
+    fs::path pth =
+    		fs::path(master_test_suite().argv[1]).parent_path() / "std_in_log_file_2.txt";
+    bp::ipstream is;
+
+    {
+    	boost::filesystem::ofstream fs(pth);
+    	fs << 321 << std::endl;
+    	fs << 1.2345 << std::endl;
+    	fs << "some_string" << std::endl;
+    }
+
+    FILE * f = fopen(pth.string().c_str(), "r+");
+
+    BOOST_REQUIRE(f != nullptr);
+    std::error_code ec;
+
+    bp::child c(
+        master_test_suite().argv[1],
+        bp::args+={"test", "--prefix", "abc"},
+        bp::std_in <f,
+        bp::std_out>is,
+        ec);
+
+    fclose(f);
+
+    BOOST_REQUIRE(!ec);
+
+
+    std::string s;
+
+
+    is >> s;
+    BOOST_CHECK_EQUAL(s, "abc321");
+    is >> s;
+    BOOST_CHECK_EQUAL(s, "abc1.2345");
+    is >> s;
+    BOOST_CHECK_EQUAL(s, "abcsome_string");
+
+    c.wait();
+    boost::filesystem::remove(pth);
 }

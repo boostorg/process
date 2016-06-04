@@ -126,8 +126,8 @@ struct std_out_
     api::file_out<p1,p2> operator>(const std::string &p)             const {return api::file_out<p1,p2>(p);}
     api::file_out<p1,p2> operator>(const char*p)                     const {return api::file_out<p1,p2>(p);}
 
-    api::file_out<p1,p2> operator=(FILE * f)  const {return api::pipe_out<p1,p2>(f);}
-    api::file_out<p1,p2> operator>(FILE * f)  const {return api::pipe_out<p1,p2>(f);}
+    api::file_out<p1,p2> operator=(FILE * f)  const {return f;}
+    api::file_out<p1,p2> operator>(FILE * f)  const {return f;}
 
     template<typename Char, typename Traits> api::pipe_out<p1,p2> operator=(const basic_pipe<Char, Traits> & p)      const {return p;}
     template<typename Char, typename Traits> api::pipe_out<p1,p2> operator>(const basic_pipe<Char, Traits> & p)      const {return p;}

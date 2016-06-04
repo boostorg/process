@@ -41,6 +41,7 @@ test-suite ts :
    [ run bind_stdin_stdout.cpp     system filesystem         : : sparring_partner ]
    [ run bind_stdout.cpp     system filesystem 		         : : sparring_partner ]
    [ run bind_stdout_stderr.cpp     system filesystem        : : sparring_partner ]
+   [ run pipe_fwd.cpp         system filesystem              : : sparring_partner ]
    [ run close_stderr.cpp     system filesystem              : : sparring_partner ]
    [ run close_stdin.cpp      system filesystem              : : sparring_partner ]
    [ run close_stdout.cpp     system filesystem              : : sparring_partner ]

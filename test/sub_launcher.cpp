@@ -75,8 +75,8 @@ int main(int argc, char *argv[])
     else
         cout << -1 << endl;
 
-    while (true)
-        this_thread::sleep_for(chrono::milliseconds(100));
+
+    this_thread::sleep_for(chrono::seconds(10));
 
 
     return 0;

@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(inherit_env, *boost::unit_test::timeout(2))
 
     bp::child c(
         master_test_suite().argv[1],
-        "test", "--query ", "PATH",
+        "test", "--query", "PATH",
         bp::std_out>st,
         ec
     );

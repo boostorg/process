@@ -127,6 +127,6 @@ BOOST_AUTO_TEST_CASE(nul, *boost::unit_test::timeout(2))
 #if defined(BOOST_WINDOWS_API)
     BOOST_CHECK_EQUAL(EXIT_SUCCESS, exit_code);
 #elif defined(BOOST_POSIX_API)
-    BOOST_CHECK_EQUAL(EXIT_SUCCESS, WEXITSTATUS(exit_code));
+    BOOST_CHECK_EQUAL(EXIT_SUCCESS, exit_code);
 #endif
 }

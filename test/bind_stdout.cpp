@@ -22,6 +22,8 @@
 #include <boost/process/child.hpp>
 #include <system_error>
 
+#include <boost/filesystem.hpp>
+
 #include <string>
 #include <istream>
 #include <cstdlib>
@@ -34,6 +36,7 @@ typedef boost::asio::windows::stream_handle pipe_end;
 typedef boost::asio::posix::stream_descriptor pipe_end;
 #endif
 
+namespace fs = boost::filesystem;
 namespace bp = boost::process;
 
 BOOST_AUTO_TEST_CASE(sync_io, *boost::unit_test::timeout(5))
@@ -121,6 +124,42 @@ BOOST_AUTO_TEST_CASE(nul, *boost::unit_test::timeout(2))
 #if defined(BOOST_WINDOWS_API)
     BOOST_CHECK_EQUAL(EXIT_SUCCESS, exit_code);
 #elif defined(BOOST_POSIX_API)
-    BOOST_CHECK_EQUAL(EXIT_SUCCESS, WEXITSTATUS(exit_code));
+    BOOST_CHECK_EQUAL(EXIT_SUCCESS, exit_code);
 #endif
+}
+
+
+
+BOOST_AUTO_TEST_CASE(file_io, *boost::unit_test::timeout(2))
+{
+    using boost::unit_test::framework::master_test_suite;
+
+    fs::path pth =
+    		fs::path(master_test_suite().argv[1]).parent_path() / "std_out_log_file.txt";
+
+
+    FILE* f = fopen(pth.string().c_str(), "w");
+    BOOST_REQUIRE(f != nullptr);
+
+    std::error_code ec;
+    bp::child c(
+        master_test_suite().argv[1],
+        bp::args={"test", "--echo-stdout", "hello"},
+        bp::std_out>f,
+        ec
+    );
+    BOOST_REQUIRE(!ec);
+
+    fclose(f);
+
+    c.wait();
+    {
+    	fs::ifstream is{pth};
+
+    	std::string s;
+    	is >> s;
+    	BOOST_CHECK_EQUAL(s, "hello");
+    }
+    boost::filesystem::remove(pth);
+
 }

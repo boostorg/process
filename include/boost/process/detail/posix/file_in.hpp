@@ -12,7 +12,7 @@
 
 #include <boost/process/pipe.hpp>
 #include <boost/process/detail/posix/handler.hpp>
-#include <boost/iostreams/device/file_descriptor.hpp>
+#include <boost/process/detail/posix/file_descriptor.hpp>
 #include <cstdio>
 #include <unistd.h>
 
@@ -20,17 +20,17 @@ namespace boost { namespace process { namespace detail { namespace posix {
 
 struct file_in : handler_base_ext
 {
-    boost::iostreams::file_descriptor_source file;
+	file_descriptor file;
+	int handle = file.handle();
 
     template<typename T>
     file_in(T&& t) : file(std::forward<T>(t)) {}
-    file_in(const boost::iostreams::file_descriptor_source &f) : file(f) {}
-    file_in(FILE * f) : file(fileno(f), boost::iostreams::never_close_handle) {}
+    file_in(FILE * f) : handle(fileno(f)) {}
 
     template <class WindowsExecutor>
     void on_exec_setup(WindowsExecutor &e) const
     {
-        ::dup2(file.handle(), STDIN_FILENO);
+        ::dup2(handle, STDIN_FILENO);
     }
 };
 
