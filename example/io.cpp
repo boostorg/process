@@ -8,17 +8,15 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include <boost/process.hpp>
-#include <boost/iostreams/device/file_descriptor.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <string>
 
 using namespace boost::process;
-using namespace boost::iostreams;
 
 int main()
 {
 //[close
-    execute(
+    system(
         "test.exe",
         std_out.close(),
         std_err.close(),
@@ -26,7 +24,7 @@ int main()
     );
 //]
 //[null
-    execute(
+    system(
         "test.exe",
         (std_out & std_err) > null, 
         std_in < null
@@ -34,34 +32,37 @@ int main()
 //]
 //[redirect
     boost::filesystem::path p = "input.txt";
-    execute(
+    system(
         "test.exe",
         std_err > "log.txt",
         std_out > stderr,
         std_in < p
     );
 //]
+    {
 //[pipe
     pipe p1;
     pipe p2;
-    execute(
+    system(
         "test.exe",
         std_out > p2,
         std_in < p1
     );
     auto text = "my_text";
-    p1.write(test, 8);
+    p1.write(text, 8);
     boost::iostreams::stream<boost::iostreams::file_descriptor_source> istr(p2.source());
     
     int i = 0;
     p2 >> i;
 
 //]
+    }
+    {
 //[async_pipe
-    io_service io_service;
+    boost::asio::io_service io_service;
     async_pipe p1(io_service);
     async_pipe p2(io_service);
-    execute(
+    system(
         "test.exe",
         std_out > p2,
         std_in < p1,
@@ -74,26 +75,27 @@ int main()
     );
     std::vector<char> in_buf;
     std::string value = "my_string";
-    boost::asio::async_write(p1, boost::buffer(value),  []( const boost::system::error_code&, std::size_t){});
-    boost::asio::async_read (p2, boost::buffer(in_buf), []( const boost::system::error_code&, std::size_t){});   
+    boost::asio::async_write(p1, boost::asio::buffer(value),  []( const boost::system::error_code&, std::size_t){});
+    boost::asio::async_read (p2, boost::asio::buffer(in_buf), []( const boost::system::error_code&, std::size_t){});
 //]
+    }{
 //[async_pipe_simple
-    io_service io_service;
+    	boost::asio::io_service io_service;
     std::vector<char> in_buf;
     std::string value = "my_string";
-    execute(
+    system(
         "test.exe",
         std_out > buffer(in_buf),
         std_in  < buffer(value)    
         );
 //]
-
+    }{
 //[async_pipe_future
-    io_service io_service;
+	boost::asio::io_service io_service;
     std::future<std::vector<char>> in_buf;
     std::future<void> write_fut;
     std::string value = "my_string";
-    execute(
+    system(
         "test.exe",
         std_out > in_buf,
         std_in  < buffer(value) > write_fut 
@@ -102,4 +104,5 @@ int main()
     write_fut.get();
     in_buf.get();
 //]
+    }
 }

@@ -9,7 +9,6 @@
 
 project : requirements
   <include>../../..
-  <source>/boost//headers
   <toolset>msvc:<define>_SCL_SECURE_NO_WARNINGS
   <target-os>windows:<define>WIN32_LEAN_AND_MEAN
 ;
@@ -19,7 +18,6 @@ import testing ;
 compile args.cpp ;
 compile async_io.cpp ;
 compile cleanup.cpp ;
-compile cmd_line.cpp ;
 compile env.cpp ;
 compile error_handling.cpp ;
 compile execute.cpp ;

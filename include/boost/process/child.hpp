@@ -21,10 +21,6 @@
 #include <boost/process/detail/child_decl.hpp>
 #include <boost/process/detail/execute_impl.hpp>
 
-#if defined(BOOST_POSIX_API)
-#include <boost/process/detail/posix/signal.hpp>
-#endif
-
 namespace boost {
 
 namespace process {
@@ -39,8 +35,12 @@ child::child(Args&&...args)
 template<typename ...Args>
 inline void spawn(Args && ...args)
 {
+<<<<<<< HEAD
 	child c(
 			std::forward<Args>(args)...);
+=======
+	child c(std::forward<Args>(args)...);
+>>>>>>> e168a460c98f80d60920b8a3f325261890a99176
 	c.detach();
 }
 
@@ -48,11 +48,15 @@ inline void spawn(Args && ...args)
 template<typename ...Args>
 inline int system(Args && ...args)
 {
+<<<<<<< HEAD
 	child c(
 #if defined(BOOST_POSIX_API)
 			::boost::process::detail::posix::sig.ign(),
 #endif
 			std::forward<Args>(args)...);
+=======
+	child c(std::forward<Args>(args)...);
+>>>>>>> e168a460c98f80d60920b8a3f325261890a99176
 	c.wait();
 	return c.exit_code();
 }

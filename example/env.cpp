@@ -15,9 +15,9 @@ int main()
 {
 //[modifiy_env
 	boost::process::environment my_env = boost::this_process::environment(); //empty env, that would fail.
-	execute("test.exe", my_env);
+	system("test.exe", my_env);
 //]
 //[inherit_env
-    execute("test.exe", env["PATH"]+="/tmp");
+	system("test.exe", env["PATH"]+="/tmp");
 //]
 }

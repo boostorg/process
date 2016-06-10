@@ -11,16 +11,15 @@
 #include <system_error>
 
 using namespace boost::process;
-using namespace boost::process::initializers;
 
 int main()
 {
 //[set_on_error
     std::error_code ec;
-    child c("test.exe", ec);
+    child c1("test.exe", ec);
 //]
 
 //[ignore_error
-    child c("test.exe", ignore_error);
+    child c2("test.exe", ignore_error);
 //]
 }

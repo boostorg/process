@@ -106,7 +106,7 @@ struct env_
     {
         return {key};
     }
-    env_proxy operator[](const std::string & key)
+    env_proxy operator[](const std::string & key) const
     {
         return {key};
     }

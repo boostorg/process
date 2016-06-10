@@ -14,11 +14,11 @@ using namespace boost::process;
 int main()
 {
 //[execute
-    child c("test.exe");
+    child c1("test.exe");
 //]
 
 //[execute_path
     boost::filesystem::path exe = "../test.exe";
-    child c(exe);
+    child c2(exe);
 //]
 }

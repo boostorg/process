@@ -1,0 +1,106 @@
+[section Examples]
+
+Here are a few examples.
+
+
+
+[section Gcc Example]
+
+In this exmaple, we want to build a single source file (main.c) with gcc, and record the possible errors. 
+This needs no input, so we'll close stdin, we ignore output and we asynchronously read the error out. 
+
+[note This example expects the io_service to run already]
+
+```
+//declared somewhere else: boost::asio::io_service ios;
+
+std::vector<char> buf;
+buf.resize(10000);
+
+child c("gcc", "main.c", //set the input
+        "-o", "-main.exe" //set the output file 
+        std_in.close(), 
+        std_out > null, //so it can be written without anything
+        std_err > buffer(buf), 
+        ios);
+
+
+//do something else
+
+c.wait(); //wait until it's finished
+
+if (c.exit_code() != EXIT_SUCCESS)
+{
+    //handle the error
+}
+else
+{
+    //do something with the log
+}
+```
+  
+[endsect]
+
+[section nm & c++filt]
+
+Though we can just pass '--demangle' to nm, this example will show how this can
+be done by piping between nm and c++filt. C++filt will not end on it's own, but 
+wait for input. Se we will need to terminate it. The output will be read synchronously.
+
+```
+pipe p;
+ipstream is;
+
+std::vector<std::string> outline;
+
+//we just use the same pipe, so the 
+child nm("nm", std_out > p); 
+child filt("c++filt", std_in < p);
+
+while (nm.running()) //nm finishes automatically, so then we can terminate c++filt.
+{
+    std::string line;
+    std::getline(is, line);
+    outline.push_back(std::move(line));
+}
+//no need to wait for nm, running does that.
+filt.terminate(); 
+
+```  
+
+[endsect]
+
+[section b2]
+
+Ok, incredible simple example: we want to launch b2 and add our compiler path
+to the environment. Our gcc path is an input argument named `gcc_path`.
+
+```
+child b2("b2", "-j8", env["PATH"]+=gcc_path.string());
+
+//and wait
+b2.wait();
+
+```  
+
+[endsect]
+
+[section git hash]
+
+Now, we have a repository, and we want to get our current hash into the program. 
+We get the path as an input named `repo_path`. The output is written to stdout.
+
+```
+
+ipstream is;
+child c("git", "rev-parse", "HEAD", std_out>is, start_dir=repo_path);
+
+std::string hash;
+is >> hash;
+
+c.wait();
+
+```
+
+[endsect]
+[endsect]

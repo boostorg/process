@@ -8,28 +8,26 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include <boost/process.hpp>
+#include <boost/process/windows.hpp>
 #include <iostream>
-#include <Windows.h>
+
+#include <windows.h>
 
 using namespace boost::process;
-using namespace boost::process::initializers;
 
 int main()
 {
 //[show_window
-    execute(
-        run_exe("test.exe"),
-        show_window(SW_HIDE)
-    );
+    system("test.exe",
+    		windows::show);
 //]
 
 //[create_process
-    execute(
-        run_exe("test.exe"),
-        on_CreateProcess_setup([](executor &e)
+    system("test.exe",
+        on_setup([](auto &e)
             { e.startup_info.dwFlags = STARTF_RUNFULLSCREEN; }),
-        on_CreateProcess_error([](executor&)
-            { std::cerr << GetLastError() << std::endl; })
+        on_error([](auto&, const std::error_code & ec)
+            { std::cerr << ec.message() << std::endl; })
     );
 //]
 }

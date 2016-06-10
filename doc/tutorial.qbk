@@ -77,6 +77,8 @@ system(cmd="grep -c false /etc/passwd"); //cmd style
 system(exe="grep", args={"-c", "false", "/etc/passwd"}); //exe-/args-
 ```
 
+[note If a '"' sign is used in the argument style, it will be passed as part of the argument.
+If the same effect it wanted with the cmd syntax, it ought to be escaped, i.e. '\\\"'. ]
 [endsect]
 
 [section Synchronous I/O]

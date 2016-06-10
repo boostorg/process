@@ -17,14 +17,14 @@
 #endif
 
 using namespace boost::process;
-using namespace boost::process::initializers;
 
 int main()
 {
     {
 //[sync
-    child c = execute(run_exe("test.exe"));
-    auto exit_code = wait_for_exit(c);
+    child c("test.exe");
+    c.wait();
+    auto exit_code = c.exit_code();
 //]
     }
 
@@ -32,11 +32,10 @@ int main()
 //[async
     boost::asio::io_service io_service;
 
-    child c;
-    c = execute(
-        run_exe("test.exe"), 
+    child c(
+        "test.exe",
         io_service,
-        on_exit([&](int exit, const std::error_code& ec_in){c.set_exit(exit);})
+        on_exit([&](int exit, const std::error_code& ec_in){})
     );
 
     io_service.run();
