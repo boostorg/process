@@ -23,17 +23,16 @@ struct sig_init_ : handler_base_ext
     template <class PosixExecutor>
     void on_exec_setup(PosixExecutor&)
     {
-    	::sigaction(SIGCHLD, nullptr, &_action);
-    	::signal(SIGCHLD, _handler);
+    	_old = ::signal(SIGCHLD, _handler);
     }
+
     ~sig_init_()
     {
-    	::sigaction(SIGCHLD, &_action, nullptr);
+    	::signal(SIGCHLD, _old);
     }
 private:
-    ::sighandler_t _handler;
-    struct sigaction _action;
-
+    ::sighandler_t _old{0};
+    ::sighandler_t _handler{0};
 };
 
 struct sig_
