@@ -41,7 +41,7 @@ namespace bp = boost::process;
 
 BOOST_AUTO_TEST_CASE(group_test, *boost::unit_test::timeout(5))
 {
-    cout << "group_test" << endl;
+	std::cout << "group_test" << std::endl;
     using boost::unit_test::framework::master_test_suite;
 
     std::error_code ec;

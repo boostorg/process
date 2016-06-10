@@ -14,8 +14,6 @@
 #include <boost/detail/winapi/process.hpp>
 #include <boost/detail/winapi/handles.hpp>
 #include <boost/process/detail/handler_base.hpp>
-#include <boost/process/pipe.hpp>
-#include <boost/process/async_pipe.hpp>
 
 
 
@@ -26,9 +24,11 @@ struct pipe_out : public ::boost::process::detail::handler_base
 {
     ::boost::detail::winapi::HANDLE_ handle;
 
-    template<typename CharT, typename Traits>
-    pipe_out(const boost::process::basic_pipe<CharT, Traits> & p) : handle(p.native_sink()) {}
-    pipe_out(const boost::process::async_pipe & p)                : handle(p.native_sink()) {}
+    template<typename T>
+    pipe_out(const T & p) : handle(p.native_sink()) {}
+    //template<typename CharT, typename Traits>
+    //pipe_out(const boost::process::basic_pipe<CharT, Traits> & p) : handle(p.native_sink()) {}
+    //pipe_out(const boost::process::async_pipe & p)                : handle(p.native_sink()) {}
 
     template <typename WindowsExecutor>
     void on_setup(WindowsExecutor &e) const;

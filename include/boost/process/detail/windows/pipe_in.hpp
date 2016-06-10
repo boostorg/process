@@ -12,20 +12,19 @@
 
 #include <boost/detail/winapi/process.hpp>
 #include <boost/detail/winapi/handles.hpp>
-#include <boost/process/pipe.hpp>
-#include <boost/process/async_pipe.hpp>
 #include <boost/process/detail/handler_base.hpp>
 #include <cstdio>
-#include <iostream>
 
 namespace boost { namespace process { namespace detail { namespace windows {
 
 struct pipe_in : public ::boost::process::detail::handler_base
 {
     ::boost::detail::winapi::HANDLE_ handle;
-    template<typename CharT, typename Traits>
-    pipe_in(const boost::process::basic_pipe<CharT, Traits> & p) : handle(p.native_source()) {}
-    pipe_in(const boost::process::async_pipe & p)                : handle(p.native_source()) {}
+    template<typename T>
+    pipe_in(const T & p) : handle(p.native_source()) {}
+    //template<typename CharT, typename Traits>
+    //pipe_in(const boost::process::basic_pipe<CharT, Traits> & p) : handle(p.native_source()) {}
+    //pipe_in(const boost::process::async_pipe & p)                : handle(p.native_source()) {}
 
     template <class WindowsExecutor>
     void on_setup(WindowsExecutor &e) const

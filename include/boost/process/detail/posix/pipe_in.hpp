@@ -15,7 +15,6 @@
 #include <boost/process/detail/posix/handler.hpp>
 #include <unistd.h>
 
-#include <iostream>
 
 namespace boost { namespace process { namespace detail { namespace posix {
 

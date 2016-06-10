@@ -20,6 +20,7 @@
 #include <boost/process/io.hpp>
 #include <boost/process/args.hpp>
 #include <boost/process/child.hpp>
+#include <boost/process/async_pipe.hpp>
 #include <system_error>
 
 #include <boost/filesystem.hpp>

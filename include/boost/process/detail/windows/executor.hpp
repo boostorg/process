@@ -113,6 +113,7 @@ template<typename Sequence>
 struct executor : startup_info_impl<char>
 {
     typedef typename ::boost::process::detail::has_error_handler<Sequence>::type has_error_handler;
+    typedef typename ::boost::process::detail::has_ignore_error <Sequence>::type has_ignore_error;
 
     executor(Sequence & seq) : seq(seq)
     {

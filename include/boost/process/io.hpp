@@ -12,8 +12,6 @@
 #include <utility>
 #include <boost/process/detail/config.hpp>
 #include <boost/process/pipe.hpp>
-#include <boost/asio/buffer.hpp>
-#include <boost/asio/streambuf.hpp>
 
 #include <future>
 
@@ -37,8 +35,7 @@
 #include <boost/process/detail/windows/file_out.hpp>
 #include <boost/process/detail/windows/pipe_in.hpp>
 #include <boost/process/detail/windows/pipe_out.hpp>
-#include <boost/process/detail/windows/async_in.hpp>
-#include <boost/process/detail/windows/async_out.hpp>
+#include <boost/process/detail/windows/asio_fwd.hpp>
 #endif
 
 /** \file boost/process/io.hpp
@@ -56,9 +53,24 @@
 
 namespace boost { namespace process { namespace detail {
 
+
+template<typename T> using is_streambuf    = typename std::is_same<T, boost::asio::streambuf>::type;
+template<typename T> using is_const_buffer =
+		std::integral_constant<bool,
+			std::is_same<   boost::asio::const_buffer, T>::value |
+			std::is_base_of<boost::asio::const_buffer, T>::value
+		>;
+template<typename T> using is_mutable_buffer =
+		std::integral_constant<bool,
+			std::is_same<   boost::asio::mutable_buffer, T>::value |
+			std::is_base_of<boost::asio::mutable_buffer, T>::value
+		>;
+
+
 struct null_t  {constexpr null_t() {}};
 struct close_t;
 
+template<class>
 struct std_in_
 {
     constexpr std_in_() {}
@@ -92,13 +104,20 @@ struct std_in_
     api::pipe_in operator=(const async_pipe & p) const {return p;}
     api::pipe_in operator<(const async_pipe & p) const {return p;}
 
-    api::async_in_buffer<const asio::mutable_buffer> operator=(const asio::mutable_buffer & buf) const {return buf;}
-    api::async_in_buffer<const asio::const_buffer  > operator=(const asio::const_buffer   & buf) const {return buf;}
-    api::async_in_buffer<asio::streambuf     >       operator=(asio::streambuf            & buf) const {return buf;}
 
-    api::async_in_buffer<const asio::mutable_buffer> operator<(const asio::mutable_buffer & buf) const {return buf;}
-    api::async_in_buffer<const asio::const_buffer  > operator<(const asio::const_buffer   & buf) const {return buf;}
-    api::async_in_buffer<asio::streambuf     >       operator<(asio::streambuf            & buf) const {return buf;}
+    template<typename T, typename = typename std::enable_if<
+    		is_const_buffer<T>::value || is_mutable_buffer<T>::value
+    		>::type>
+    api::async_in_buffer<const T> operator=(const T & buf) const {return buf;}
+    template<typename T, typename = typename std::enable_if<is_streambuf<T>::value>::type >
+    api::async_in_buffer<T>       operator=(T       & buf) const {return buf;}
+
+    template<typename T, typename = typename std::enable_if<
+    		is_const_buffer<T>::value || is_mutable_buffer<T>::value
+    		>::type>
+    api::async_in_buffer<const T> operator<(const T & buf) const {return buf;}
+    template<typename T, typename = typename std::enable_if<is_streambuf<T>::value>::type >
+    api::async_in_buffer<T>       operator<(T       & buf) const {return buf;}
 
 };
 
@@ -170,13 +189,12 @@ struct close_t
 
 constexpr static close_t close;
 constexpr static null_t  null;
-constexpr static std_in_ std_in;
+constexpr static std_in_<void>   std_in;
 constexpr static std_out_<1> std_out;
 constexpr static std_out_<2> std_err;
 
 }
 
-using boost::asio::buffer;
 using boost::process::detail::close;
 using boost::process::detail::null;
 using boost::process::detail::std_out;

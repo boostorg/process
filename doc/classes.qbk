@@ -21,6 +21,8 @@ If the process exits, the exit_code will be stored inside the class.
 Another way to stop the process is to terminate it. This will also produce an 
 exit code which is platform-specific.
 
+It is implemented via `TerminateProcess` and `kill -9` on posix.
+
 [endsect]
 
 [section Exit Code]
@@ -28,6 +30,12 @@ exit code which is platform-specific.
 After a process has exited the exit code is stored either inside the class or the operating 
 system holds it. The return value of the exit code is undefined if the process did not exit.
 The latter can be checked by calling [funcref boost::process::child::is_running is_running].
+
+[endsect]
+
+[section RAII]
+
+The child will automatically terminate the child process on destruction, if it wasn't waited for or detached. 
 
 [endsect]
 

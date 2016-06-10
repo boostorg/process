@@ -30,7 +30,6 @@
 #include <boost/fusion/container/set/convert.hpp>
 
 #include <boost/type_index.hpp>
-#include <iostream>
 
 /** \file boost/process/error.hpp
  *
