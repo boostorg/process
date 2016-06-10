@@ -9,6 +9,9 @@
   It provides the on_exit property, which allows callbacks when the process exits.
   It also implements the necessary traits for passing an boost::asio::io_service,
   which is needed for asynchronous communication.
+
+  It also pulls the boost::asio::buffer into the boost::process namespace for convenience.
+
   */
 
 #ifndef BOOST_PROCESS_DETAIL_ASYNC_HPP_
@@ -24,6 +27,8 @@
 #if defined(BOOST_POSIX_API)
 #include <boost/process/detail/posix/on_exit.hpp>
 #include <boost/process/detail/posix/io_service_ref.hpp>
+#include <boost/process/detail/posix/async_in.hpp>
+#include <boost/process/detail/posix/async_out.hpp>
 #elif defined(BOOST_WINDOWS_API)
 #include <boost/process/detail/windows/on_exit.hpp>
 #include <boost/process/detail/windows/io_service_ref.hpp>

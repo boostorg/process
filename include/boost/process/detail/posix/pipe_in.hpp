@@ -11,7 +11,6 @@
 #define BOOST_PROCESS_POSIX_PIPE_IN_HPP
 
 #include <boost/process/pipe.hpp>
-#include <boost/process/async_pipe.hpp>
 #include <boost/process/detail/posix/handler.hpp>
 #include <unistd.h>
 
@@ -21,9 +20,12 @@ namespace boost { namespace process { namespace detail { namespace posix {
 struct pipe_in : handler_base_ext
 {
     int descr_;
-    template<typename CharT, typename Traits>
-    pipe_in(const boost::process::basic_pipe<CharT, Traits> & p) : descr_(p.native_source()) {}
-    pipe_in(const boost::process::async_pipe & p)                : descr_(p.native_source()) {}
+
+    template<typename T>
+    pipe_in(const T & p) : descr_(p.native_source()) {}
+//    template<typename CharT, typename Traits>
+//    pipe_in(const boost::process::basic_pipe<CharT, Traits> & p) : descr_(p.native_source()) {}
+//    pipe_in(const boost::process::async_pipe & p)                : descr_(p.native_source()) {}
 
 
     template <class Executor>

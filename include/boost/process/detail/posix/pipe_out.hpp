@@ -12,7 +12,6 @@
 #define BOOST_PROCESS_DETAIL_POSIX_PIPE_OUT_HPP
 
 #include <boost/process/pipe.hpp>
-#include <boost/process/async_pipe.hpp>
 #include <boost/process/detail/posix/handler.hpp>
 #include <unistd.h>
 
@@ -22,9 +21,14 @@ template<int p1, int p2>
 struct pipe_out : handler_base_ext
 {
     int descr_;
-    template<typename CharT, typename Traits>
-    pipe_out(const boost::process::basic_pipe<CharT, Traits> & p) : descr_(p.native_sink()) {}
-    pipe_out(const boost::process::async_pipe & p)                : descr_(p.native_sink()) {}
+
+    template<typename T>
+    pipe_out(const T & p) : descr_(p.native_sink()) {}
+
+
+    //template<typename CharT, typename Traits>
+    //pipe_out(const boost::process::basic_pipe<CharT, Traits> & p) : descr_(p.native_sink()) {}
+    //pipe_out(const boost::process::async_pipe & p)                : descr_(p.native_sink()) {}
 
 
     template <typename Executor>

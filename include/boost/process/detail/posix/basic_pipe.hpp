@@ -12,11 +12,11 @@
 
 
 #include <boost/filesystem.hpp>
-#include <boost/asio/posix/stream_descriptor.hpp>
 #include <boost/process/detail/posix/compare_handles.hpp>
 #include <system_error>
 #include <array>
 #include <unistd.h>
+#include <fcntl.h>
 #include <memory>
 
 namespace boost { namespace process { namespace detail { namespace posix {

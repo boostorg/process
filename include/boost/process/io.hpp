@@ -24,8 +24,7 @@
 #include <boost/process/detail/posix/file_out.hpp>
 #include <boost/process/detail/posix/pipe_in.hpp>
 #include <boost/process/detail/posix/pipe_out.hpp>
-#include <boost/process/detail/posix/async_in.hpp>
-#include <boost/process/detail/posix/async_out.hpp>
+#include <boost/process/detail/posix/asio_fwd.hpp>
 #elif defined(BOOST_WINDOWS_API)
 #include <boost/process/detail/windows/close_in.hpp>
 #include <boost/process/detail/windows/close_out.hpp>
@@ -48,7 +47,6 @@
  *   - std_err
  *   - std_in
  *
- *   It also pulls the boost::asio::buffer into the boost::process namespace for convenience.
  */
 
 namespace boost { namespace process { namespace detail {
