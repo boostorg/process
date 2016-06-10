@@ -21,7 +21,7 @@ struct sig_init_ : handler_base_ext
     sig_init_ (::sighandler_t handler) : _handler(handler) {}
 
     template <class PosixExecutor>
-    void on_exec_setup(PosixExecutor&) const
+    void on_exec_setup(PosixExecutor&)
     {
     	::sigaction(SIGCHLD, nullptr, &_action);
     	::signal(SIGCHLD, _handler);
