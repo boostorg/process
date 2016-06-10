@@ -16,34 +16,6 @@
 
 namespace boost { namespace process { namespace detail { namespace posix {
 
-struct sig_ign_ : handler_base_ext
-{
-    constexpr sig_ign_ () {}
-
-    template <class PosixExecutor>
-    void on_exec_setup(PosixExecutor&) const
-    {
-    	::signal(SIGCHLD, SIG_IGN);
-    }
-};
-
-
-constexpr static sig_ign_ sig_ign;
-
-struct sig_dfl_ : handler_base_ext
-{
-    constexpr sig_dfl_ () {}
-
-    template <class PosixExecutor>
-    void on_exec_setup(PosixExecutor&) const
-    {
-    	::signal(SIGCHLD, SIG_DFL);
-    }
-};
-
-
-constexpr static sig_dfl_ sig_dfl;
-
 struct sig_init_ : handler_base_ext
 {
     sig_init_ (::sighandler_t handler) : _handler(handler) {}
@@ -51,10 +23,17 @@ struct sig_init_ : handler_base_ext
     template <class PosixExecutor>
     void on_exec_setup(PosixExecutor&) const
     {
+    	::sigaction(SIGCHLD, nullptr, &_action);
     	::signal(SIGCHLD, _handler);
+    }
+    ~sig_init_()
+    {
+    	::sigaction(SIGCHLD, &_action, nullptr);
     }
 private:
     ::sighandler_t _handler;
+    struct sigaction _action;
+
 };
 
 struct sig_
@@ -63,6 +42,9 @@ struct sig_
 
 	sig_init_ operator()(::sighandler_t h) const {return h;}
 	sig_init_ operator= (::sighandler_t h) const {return h;}
+	sig_init_ dfl() const {return SIG_DFL;}
+	sig_init_ ign() const {return SIG_IGN;}
+
 };
 
 

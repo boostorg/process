@@ -40,9 +40,6 @@ template<typename ...Args>
 inline void spawn(Args && ...args)
 {
 	child c(
-#if defined(BOOST_POSIX_API)
-			::boost::process::detail::posix::sig_dfl,
-#endif
 			std::forward<Args>(args)...);
 	c.detach();
 }
@@ -53,7 +50,7 @@ inline int system(Args && ...args)
 {
 	child c(
 #if defined(BOOST_POSIX_API)
-			::boost::process::detail::posix::sig_ign,
+			::boost::process::detail::posix::sig.ign(),
 #endif
 			std::forward<Args>(args)...);
 	c.wait();

@@ -25,8 +25,6 @@ using ::boost::process::detail::posix::fd;
 using ::boost::process::detail::posix::on_fork_error;
 using ::boost::process::detail::posix::on_exec_setup;
 using ::boost::process::detail::posix::on_exec_error;
-using ::boost::process::detail::posix::sig_dfl;
-using ::boost::process::detail::posix::sig_ign;
 using ::boost::process::detail::posix::sig;
 
 }}}
