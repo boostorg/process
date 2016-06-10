@@ -16,6 +16,8 @@
 
 #include <boost/process/detail/traits.hpp>
 #include <boost/asio/io_service.hpp>
+#include <boost/asio/streambuf.hpp>
+#include <boost/asio/buffer.hpp>
 #include <type_traits>
 #include <boost/fusion/iterator/deref.hpp>
 
@@ -25,6 +27,8 @@
 #elif defined(BOOST_WINDOWS_API)
 #include <boost/process/detail/windows/on_exit.hpp>
 #include <boost/process/detail/windows/io_service_ref.hpp>
+#include <boost/process/detail/windows/async_in.hpp>
+#include <boost/process/detail/windows/async_out.hpp>
 #endif
 
 namespace boost { namespace process { namespace detail {
@@ -73,6 +77,7 @@ struct initializer_builder<async_tag>
 }
 
 using ::boost::process::detail::on_exit;
+using ::boost::asio::buffer;
 
 }}
 

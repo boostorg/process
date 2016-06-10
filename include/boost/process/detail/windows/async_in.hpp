@@ -12,18 +12,15 @@
 
 #include <boost/detail/winapi/process.hpp>
 #include <boost/detail/winapi/handles.hpp>
+#include <boost/detail/winapi/handle_info.hpp>
+#include <boost/asio/write.hpp>
 #include <boost/process/detail/handler_base.hpp>
 #include <boost/process/detail/windows/async_handler.hpp>
-#include <boost/asio/windows/stream_handle.hpp>
-#include <boost/asio/write.hpp>
+#include <boost/process/detail/windows/asio_fwd.hpp>
 #include <boost/process/async_pipe.hpp>
 #include <memory>
-
-
 #include <future>
 
-
-using namespace std;
 
 namespace boost { namespace process { namespace detail { namespace windows {
 

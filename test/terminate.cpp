@@ -22,7 +22,6 @@ namespace bp = boost::process;
 BOOST_AUTO_TEST_CASE(terminate_set_on_error)
 {
     using boost::unit_test::framework::master_test_suite;
-
     std::error_code ec;
     bp::child c(
         bp::exe(master_test_suite().argv[1]),

@@ -16,6 +16,7 @@
 #include <boost/process/child.hpp>
 #include <boost/process/exe.hpp>
 #include <boost/process/args.hpp>
+#include <boost/process/async_pipe.hpp>
 
 #include <system_error>
 

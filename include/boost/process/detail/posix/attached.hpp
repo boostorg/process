@@ -12,7 +12,6 @@
 #include <signal.h>
 #include <sys/prctl.h>
 
-#include <iostream>
 
 namespace boost { namespace process { namespace detail { namespace posix {
 

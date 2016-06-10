@@ -12,17 +12,15 @@
 
 #include <boost/detail/winapi/process.hpp>
 #include <boost/detail/winapi/handles.hpp>
-#include <boost/process/async_pipe.hpp>
-#include <boost/process/detail/handler_base.hpp>
-#include <boost/asio/windows/stream_handle.hpp>
+#include <boost/detail/winapi/handle_info.hpp>
 #include <boost/asio/read.hpp>
+#include <boost/process/detail/handler_base.hpp>
+#include <boost/process/detail/windows/asio_fwd.hpp>
 #include <istream>
 #include <memory>
 #include <exception>
-
-#if defined (BOOST_PROCESS_USE_FUTURE)
 #include <future>
-#endif
+
 
 namespace boost { namespace process { namespace detail { namespace windows {
 
@@ -119,7 +117,7 @@ struct async_out_future : ::boost::process::detail::windows::async_handler
 
     std::shared_ptr<boost::asio::streambuf> buffer = std::make_shared<boost::asio::streambuf>();
 
-    std::shared_ptr<boost::process::pipe> pipe;
+    std::shared_ptr<boost::process::async_pipe> pipe;
 
     async_out_future(std::future<Type> & fut)
     {
