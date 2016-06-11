@@ -49,7 +49,7 @@ struct group_handle
         if (::setpgid(proc, grp))
             throw_last_error();
     }
-    void assign(handle_t proc, std::error_code & ec)
+    void assign(handle_t proc, std::error_code & ec) noexcept
     {
         if (::setpgid(proc, grp))
             ec = get_last_error();
@@ -59,7 +59,7 @@ struct group_handle
     {
         return ::getpgid(proc) == grp;
     }
-    bool has(handle_t proc, std::error_code & ec)
+    bool has(handle_t proc, std::error_code & ec) noexcept
     {
         return ::getpgid(proc) == grp;
 
@@ -79,7 +79,7 @@ inline void terminate(group_handle &p)
     p.grp = -1;
 }
 
-inline  void terminate(group_handle &p, std::error_code &ec)
+inline  void terminate(group_handle &p, std::error_code &ec) noexcept
 {
     if (::killpg(p.grp, SIGKILL) == -1)
         ec = boost::process::detail::get_last_error();

@@ -30,7 +30,7 @@ inline void wait(const group_handle &p)
         boost::process::detail::throw_last_error("waitpid(2) failed");
 }
 
-inline void wait(const group_handle &p, std::error_code &ec)
+inline void wait(const group_handle &p, std::error_code &ec) noexcept
 {
     pid_t ret;
     int status;
@@ -86,7 +86,7 @@ template< class Rep, class Period >
 inline bool wait_for(
         const group_handle &p,
         const std::chrono::duration<Rep, Period>& rel_time,
-        std::error_code & ec)
+        std::error_code & ec) noexcept
 {
 
     pid_t ret;
@@ -156,7 +156,7 @@ template< class Rep, class Period >
 inline bool wait_until(
         const group_handle &p,
         const std::chrono::duration<Rep, Period>& time_out,
-        std::error_code & ec)
+        std::error_code & ec) noexcept
 {
 
     pid_t ret;

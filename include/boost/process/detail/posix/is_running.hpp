@@ -39,7 +39,7 @@ inline bool is_running(const child_handle &p, int & exit_code)
     }
 }
 
-inline bool is_running(const child_handle &p, int & exit_code, std::error_code &ec)
+inline bool is_running(const child_handle &p, int & exit_code, std::error_code &ec) noexcept
 {
     int status;
     auto ret = ::waitpid(p.pid, &status, WNOHANG|WUNTRACED); 

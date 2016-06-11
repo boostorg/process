@@ -131,7 +131,7 @@ struct group_handle
         if (!::boost::detail::winapi::AssignProcessToJobObject(_job_object, proc))
             throw_last_error();
     }
-    void assign(handle_t proc, std::error_code & ec)
+    void assign(handle_t proc, std::error_code & ec) noexcept
     {
         if (!::boost::detail::winapi::AssignProcessToJobObject(_job_object, proc))
             ec = get_last_error();
@@ -145,7 +145,7 @@ struct group_handle
 
         return is;
     }
-    bool has(handle_t proc, std::error_code & ec)
+    bool has(handle_t proc, std::error_code & ec) noexcept
     {
         ::boost::detail::winapi::BOOL_ is;
         if (!::boost::detail::winapi::IsProcessInJob(proc, _job_object,  &is))
@@ -166,7 +166,7 @@ inline void terminate(const group_handle &p)
         boost::process::detail::throw_last_error("TerminateJobObject() failed");
 }
 
-inline void terminate(const group_handle &p, std::error_code &ec)
+inline void terminate(const group_handle &p, std::error_code &ec) noexcept
 {
     if (!::boost::detail::winapi::TerminateJobObject(p.handle(), EXIT_FAILURE))
         ec = boost::process::detail::get_last_error();

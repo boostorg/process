@@ -32,7 +32,7 @@ inline void wait(const child_handle &p, int & exit_code)
      exit_code = status;
 }
 
-inline void wait(const child_handle &p, int & exit_code, std::error_code &ec)
+inline void wait(const child_handle &p, int & exit_code, std::error_code &ec) noexcept
 {
     pid_t ret;
     int status;
@@ -95,7 +95,7 @@ inline bool wait_for(
         const child_handle &p,
         int & exit_code,
         const std::chrono::duration<Rep, Period>& rel_time,
-        std::error_code & ec)
+        std::error_code & ec) noexcept
 {
 
     pid_t ret;
@@ -171,7 +171,7 @@ inline bool wait_until(
         const child_handle &p,
         int & exit_code,
         const std::chrono::duration<Rep, Period>& time_out,
-        std::error_code & ec)
+        std::error_code & ec) noexcept
 {
 
     pid_t ret;

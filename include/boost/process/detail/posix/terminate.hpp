@@ -30,7 +30,7 @@ inline void terminate(const child_handle &p)
     ::waitpid(p.pid, &status, 0);
 }
 
-inline void terminate(const child_handle &p, std::error_code &ec)
+inline void terminate(const child_handle &p, std::error_code &ec) noexcept
 {
     if (::kill(p.pid, SIGKILL) == -1)
         ec = boost::process::detail::get_last_error();
