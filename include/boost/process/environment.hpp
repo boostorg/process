@@ -336,7 +336,7 @@ public:
     typedef std::basic_string<Char> string_type;
     typedef boost::transform_iterator<      entry_maker, Char**> iterator       ;
     typedef boost::transform_iterator<const_entry_maker, Char**> const_iterator ;
-    typedef std::size_t											 size_type      ;
+    typedef std::size_t                                             size_type      ;
 
     iterator       begin()        ; ///<Returns an iterator to the beginning
     const_iterator begin()  const ; ///<Returns an iterator to the beginning
@@ -346,7 +346,7 @@ public:
     const_iterator end()  const; ///<Returns an iterator to the end
     const_iterator cend() const; ///<Returns an iterator to the end
 
-    iterator        find( const string_type& key );			///<Find a variable by its name
+    iterator        find( const string_type& key );            ///<Find a variable by its name
     const_iterator  find( const string_type& key ) const;   ///<Find a variable by its name
 
     std::size_t count(const string_type & st) const; ///<Number of variables

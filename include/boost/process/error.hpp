@@ -33,13 +33,13 @@
 
 /** \file boost/process/error.hpp
  *
- *	Header which provides the error properties. It allows to explicitly set the error handling, the properties are:
+ *    Header which provides the error properties. It allows to explicitly set the error handling, the properties are:
  *
- *	 - ignore_error
- *	 - error
- *	 - throw_on_error
+ *     - ignore_error
+ *     - error
+ *     - throw_on_error
  *
- *	 For error there are two aliases: error_ref and error_code
+ *     For error there are two aliases: error_ref and error_code
  */
 
 namespace boost { namespace process {

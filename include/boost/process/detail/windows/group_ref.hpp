@@ -38,7 +38,8 @@ struct group_ref : handler_base_ext
     void on_success(Executor& exec) const
     {
         if (!::boost::detail::winapi::AssignProcessToJobObject(handle, exec.proc_info.hProcess))
-            throw_last_error("AssignProcessToJobObject() failed.");
+            exec.set_error(::boost::process::detail::get_last_error(),
+                           "AssignProcessToJobObject() failed.");
 
     }
 

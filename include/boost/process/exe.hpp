@@ -15,7 +15,7 @@
 
 /** \file boost/process/exe.hpp
  *
- *	Header which provides the exe property.
+ *    Header which provides the exe property.
  *
  */
 namespace boost { namespace process { namespace detail {

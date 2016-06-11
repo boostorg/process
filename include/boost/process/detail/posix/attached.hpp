@@ -22,7 +22,7 @@ struct attached : handler_base_ext
     template <class Executor>
     void on_setup(Executor &e) const
     {
-    	signal(SIGCHLD, SIG_IGN);
+        signal(SIGCHLD, SIG_IGN);
     }
 
 };

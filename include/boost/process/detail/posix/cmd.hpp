@@ -24,27 +24,27 @@ namespace posix
 
 inline std::vector<std::string> build_cmd(const std::string & value) 
 {
-   	std::vector<std::string>  ret;
+       std::vector<std::string>  ret;
     
 
-   	bool in_quotes = false;
-   	auto beg = value.begin();
+       bool in_quotes = false;
+       auto beg = value.begin();
     for (auto itr = value.begin(); itr != value.end(); itr++)
     {
         if (*itr == '"')
-        	in_quotes = !in_quotes;
+            in_quotes = !in_quotes;
 
         if (!in_quotes && (*itr == ' '))
         {
-        	if (itr != beg)
-        	{
-        		ret.emplace_back(beg, itr);
-        		beg = itr + 1;
-        	}
+            if (itr != beg)
+            {
+                ret.emplace_back(beg, itr);
+                beg = itr + 1;
+            }
         }
     }
     if (beg != value.end())
-    	ret.emplace_back(beg, value.end());
+        ret.emplace_back(beg, value.end());
 
     return ret;
 }

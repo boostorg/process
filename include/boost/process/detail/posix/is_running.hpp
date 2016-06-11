@@ -70,7 +70,7 @@ inline bool is_running(int code)
 
 inline int eval_exit_status(int code)
 {
-	return WEXITSTATUS(code);
+    return WEXITSTATUS(code);
 }
 
 }}}}

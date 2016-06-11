@@ -37,10 +37,10 @@ namespace boost { namespace process {
 class async_pipe
 {
 public:
-	/** Typedef for the native handle representation.
-	 * \note This is the handle on the system, not the boost.asio class.
-	 *
-	 */
+    /** Typedef for the native handle representation.
+     * \note This is the handle on the system, not the boost.asio class.
+     *
+     */
     typedef platform_specific native_handle;
 
     /** Construct a new async_pipe, does automatically open the pipe.

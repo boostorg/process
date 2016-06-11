@@ -9,16 +9,16 @@
 
 /** \file boost/process/windows.hpp
  *
- *	Header which provides the windows extensions.
- *	Those are all show_windows parameters:
+ *    Header which provides the windows extensions.
+ *    Those are all show_windows parameters:
  *
- *	  - hide
- *	  - maximized
- *	  - minimized
- *	  - minimized_not_active
- *	  - not_active
- *	  - show
- *	  - show_normal
+ *      - hide
+ *      - maximized
+ *      - minimized
+ *      - minimized_not_active
+ *      - not_active
+ *      - show
+ *      - show_normal
  */
 
 namespace boost { namespace process {

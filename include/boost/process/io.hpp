@@ -39,7 +39,7 @@
 
 /** \file boost/process/io.hpp
  *
- *	Header which provides the io properties. It provides the following properties:
+ *    Header which provides the io properties. It provides the following properties:
  *
  *   - close
  *   - null
@@ -54,15 +54,15 @@ namespace boost { namespace process { namespace detail {
 
 template<typename T> using is_streambuf    = typename std::is_same<T, boost::asio::streambuf>::type;
 template<typename T> using is_const_buffer =
-		std::integral_constant<bool,
-			std::is_same<   boost::asio::const_buffer, T>::value |
-			std::is_base_of<boost::asio::const_buffer, T>::value
-		>;
+        std::integral_constant<bool,
+            std::is_same<   boost::asio::const_buffer, T>::value |
+            std::is_base_of<boost::asio::const_buffer, T>::value
+        >;
 template<typename T> using is_mutable_buffer =
-		std::integral_constant<bool,
-			std::is_same<   boost::asio::mutable_buffer, T>::value |
-			std::is_base_of<boost::asio::mutable_buffer, T>::value
-		>;
+        std::integral_constant<bool,
+            std::is_same<   boost::asio::mutable_buffer, T>::value |
+            std::is_base_of<boost::asio::mutable_buffer, T>::value
+        >;
 
 
 struct null_t  {constexpr null_t() {}};
@@ -104,15 +104,15 @@ struct std_in_
 
 
     template<typename T, typename = typename std::enable_if<
-    		is_const_buffer<T>::value || is_mutable_buffer<T>::value
-    		>::type>
+            is_const_buffer<T>::value || is_mutable_buffer<T>::value
+            >::type>
     api::async_in_buffer<const T> operator=(const T & buf) const {return buf;}
     template<typename T, typename = typename std::enable_if<is_streambuf<T>::value>::type >
     api::async_in_buffer<T>       operator=(T       & buf) const {return buf;}
 
     template<typename T, typename = typename std::enable_if<
-    		is_const_buffer<T>::value || is_mutable_buffer<T>::value
-    		>::type>
+            is_const_buffer<T>::value || is_mutable_buffer<T>::value
+            >::type>
     api::async_in_buffer<const T> operator<(const T & buf) const {return buf;}
     template<typename T, typename = typename std::enable_if<is_streambuf<T>::value>::type >
     api::async_in_buffer<T>       operator<(T       & buf) const {return buf;}

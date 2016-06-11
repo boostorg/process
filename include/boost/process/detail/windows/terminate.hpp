@@ -29,7 +29,7 @@ inline void terminate(child_handle &p)
     p.proc_info.hProcess = ::boost::detail::winapi::INVALID_HANDLE_VALUE_;
 }
 
-inline void terminate(child_handle &p, std::error_code &ec)
+inline void terminate(child_handle &p, std::error_code &ec) noexcept
 {
     if (!::boost::detail::winapi::TerminateProcess(p.process_handle(), EXIT_FAILURE))
         ec = boost::process::detail::get_last_error();

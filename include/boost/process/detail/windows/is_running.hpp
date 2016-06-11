@@ -25,16 +25,16 @@ inline bool is_running(const child_handle &p, int & exit_code)
     if (!::boost::detail::winapi::GetExitCodeProcess(p.process_handle(), &code))
         ::boost::process::detail::throw_last_error("GetExitCodeProcess() failed");
 
-	if (code == still_active)
-		return true;
-	else
-	{
-		exit_code = code;
-		return false;
-	}	
+    if (code == still_active)
+        return true;
+    else
+    {
+        exit_code = code;
+        return false;
+    }    
 }
 
-inline bool is_running(const child_handle &p, int & exit_code, std::error_code &ec)
+inline bool is_running(const child_handle &p, int & exit_code, std::error_code &ec) noexcept
 {
     ::boost::detail::winapi::DWORD_ code;
     //single value, not needed in the winapi.
@@ -43,13 +43,13 @@ inline bool is_running(const child_handle &p, int & exit_code, std::error_code &
     else
         ec.clear();
 
-	if (code == still_active)
-		return true;
-	else
-	{
-		exit_code = code;
-		return false;
-	}	
+    if (code == still_active)
+        return true;
+    else
+    {
+        exit_code = code;
+        return false;
+    }    
 }
 
 inline bool is_running(int code)

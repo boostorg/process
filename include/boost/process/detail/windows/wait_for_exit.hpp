@@ -43,9 +43,9 @@ inline void wait(child_handle &p, int & exit_code)
     exit_code = static_cast<int>(_exit_code);
 }
 
-inline void wait(child_handle &p, int & exit_code, std::error_code &ec)
+inline void wait(child_handle &p, int & exit_code, std::error_code &ec) noexcept
 {
-	::boost::detail::winapi::DWORD_ _exit_code = 1;
+    ::boost::detail::winapi::DWORD_ _exit_code = 1;
 
     if (::boost::detail::winapi::WaitForSingleObject(p.process_handle(),
         ::boost::detail::winapi::infinite) == ::boost::detail::winapi::wait_failed)
@@ -105,7 +105,7 @@ inline bool wait_for(
         child_handle &p,
         int & exit_code,
         const std::chrono::duration<Rep, Period>& rel_time,
-        std::error_code &ec)
+        std::error_code &ec) noexcept
 {
 
     std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(rel_time);
@@ -180,7 +180,7 @@ inline bool wait_until(
         child_handle &p,
         int & exit_code,
         const std::chrono::time_point<Clock, Duration>& timeout_time,
-        std::error_code &ec)
+        std::error_code &ec) noexcept
 {
     std::chrono::milliseconds ms =
             std::chrono::duration_cast<std::chrono::milliseconds>(

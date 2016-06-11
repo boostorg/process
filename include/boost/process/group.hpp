@@ -97,8 +97,9 @@ public:
      */
     ~group()
     {
+    	std::error_code ec;
         if ( _attached && valid())
-            terminate();
+            terminate(ec);
     }
 
     ///Obtain the native handle of the group.
@@ -109,6 +110,11 @@ public:
     {
         boost::process::detail::api::wait(_group_handle);
     }
+    ///\overload void wait()
+    void wait(std::error_code & ec) noexcept
+    {
+        boost::process::detail::api::wait(_group_handle, ec);
+    }
     /** Wait for the process group to exit for period of time. */
     template< class Rep, class Period >
     bool wait_for  (const std::chrono::duration<Rep, Period>& rel_time)
@@ -116,11 +122,24 @@ public:
         return boost::process::detail::api::wait_for(_group_handle, rel_time);
     }
 
+    /** \overload bool wait_for(const std::chrono::duration<Rep, Period>& timeout_time ) */
+    template< class Rep, class Period >
+    bool wait_for  (const std::chrono::duration<Rep, Period>& rel_time, std::error_code & ec) noexcept
+    {
+        return boost::process::detail::api::wait_for(_group_handle, rel_time, ec);
+    }
+
     /** Wait for the process group to exit until a point in time. */
     template< class Clock, class Duration >
     bool wait_until(const std::chrono::time_point<Clock, Duration>& timeout_time )
     {
         return boost::process::detail::api::wait_until(_group_handle, timeout_time);
+    }
+    /** \overload bool wait_until(const std::chrono::time_point<Clock, Duration>& timeout_time ) */
+    template< class Clock, class Duration >
+    bool wait_until(const std::chrono::time_point<Clock, Duration>& timeout_time, std::error_code & ec) noexcept
+    {
+        return boost::process::detail::api::wait_until(_group_handle, timeout_time, ec);
     }
 
     ///Check if the group has a valid handle.
@@ -136,13 +155,19 @@ public:
     {
         ::boost::process::detail::api::terminate(_group_handle);
     }
+    ///\overload void terminate()
+    void terminate(std::error_code & ec) noexcept
+    {
+        ::boost::process::detail::api::terminate(_group_handle, ec);
+    }
 
     ///Assign a child process to the group
     void assign(const child &c)
     {
         _group_handle.assign(c.native_handle());
     }
-    void assign(const child &c, std::error_code & ec)
+    ///\overload void assign(const child & c)
+    void assign(const child &c, std::error_code & ec) noexcept
     {
         _group_handle.assign(c.native_handle(), ec);
     }
@@ -152,7 +177,8 @@ public:
     {
         return _group_handle.has(c.native_handle());
     }
-    bool has(const child &c, std::error_code & ec)
+    ///\overload bool has(const child &)
+    bool has(const child &c, std::error_code & ec) noexcept
     {
         return _group_handle.has(c.native_handle(), ec);
 

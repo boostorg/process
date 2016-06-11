@@ -72,7 +72,7 @@ struct exe_builder
 {
     //set by path, because that will not be interpreted as a cmd
     bool not_cmd = false;
-    bool shell 	 = false;
+    bool shell      = false;
     std::string exe;
     std::vector<std::string> args;
 
@@ -155,17 +155,17 @@ struct exe_builder
 
     api::exe_cmd_init get_initializer()
     {
-    	if (not_cmd || !args.empty())
-    	{
-    		if (shell)
-    			return api::exe_cmd_init::exe_args_shell(std::move(exe), std::move(args));
-    		else
-    			return api::exe_cmd_init::exe_args(std::move(exe), std::move(args));
-    	}
+        if (not_cmd || !args.empty())
+        {
+            if (shell)
+                return api::exe_cmd_init::exe_args_shell(std::move(exe), std::move(args));
+            else
+                return api::exe_cmd_init::exe_args(std::move(exe), std::move(args));
+        }
         else
-    		if (shell)
-    			return api::exe_cmd_init::cmd_shell(std::move(exe));
-    		else
+            if (shell)
+                return api::exe_cmd_init::cmd_shell(std::move(exe));
+            else
                 return api::exe_cmd_init::cmd(std::move(exe));
 
     }

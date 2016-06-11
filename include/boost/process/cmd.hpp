@@ -24,7 +24,7 @@
 
 /** \file boost/process/cmd.hpp
  *
- *	Header which provides the cmd property.
+ *    Header which provides the cmd property.
  *
  */
 

@@ -34,16 +34,16 @@ inline std::string build_args(const std::string & exe, std::vector<std::string> 
     std::string st = exe;
     for (auto & arg : data)
     {
-    	boost::replace_all(arg, "\"", "\\\"");
+        boost::replace_all(arg, "\"", "\\\"");
 
-		auto it = std::find(arg.begin(), arg.end(), ' ');//contains space?
-		if (it != arg.end())//ok, contains spaces.
-		{
-			//the first one is put directly onto the output,
-			//because then I don't have to copy the whole string
-			arg.insert(arg.begin(), '"');
-			arg += '"'; //thats the post one.
-		}
+        auto it = std::find(arg.begin(), arg.end(), ' ');//contains space?
+        if (it != arg.end())//ok, contains spaces.
+        {
+            //the first one is put directly onto the output,
+            //because then I don't have to copy the whole string
+            arg.insert(arg.begin(), '"');
+            arg += '"'; //thats the post one.
+        }
 
         if (!st.empty())//first one does not need a preceeding space
             st += ' ';
@@ -85,19 +85,19 @@ struct exe_cmd_init : handler_base_ext
     }
     static exe_cmd_init exe_args_shell(std::string&& exe, std::vector<std::string> && args)
     {
-    	std::vector<std::string> args_ = {"/c"};
-    	args_.insert(args_.end(), std::make_move_iterator(args.begin()), std::make_move_iterator(args.end()));
-    	std::string sh = shell().string();
+        std::vector<std::string> args_ = {"/c"};
+        args_.insert(args_.end(), std::make_move_iterator(args.begin()), std::make_move_iterator(args.end()));
+        std::string sh = shell().string();
         return exe_cmd_init(std::move(sh), std::move(args_));
     }
     static exe_cmd_init cmd_shell(std::string&& cmd)
     {
-    	std::vector<std::string> args = {"/c", std::move(cmd)};
-    	std::string sh = shell().string();
+        std::vector<std::string> args = {"/c", std::move(cmd)};
+        std::string sh = shell().string();
 
         return exe_cmd_init(
-        		std::move(sh),
-        		std::move(args));
+                std::move(sh),
+                std::move(args));
     }
 private:
     std::string exe;

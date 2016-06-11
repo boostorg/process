@@ -33,14 +33,14 @@ inline std::vector<std::string>  build_args(const std::string & data)
     //normal quotes outside can be stripped, inside ones marked as \" will be replaced.
     auto make_entry = [](const itr_t & begin, const itr_t & end)
     {
-    	std::string data;
-    	if ((*begin == '"') && (*(end-1) == '"'))
-    		data.assign(begin+1, end-1);
-    	else
-    		data.assign(begin, end);
+        std::string data;
+        if ((*begin == '"') && (*(end-1) == '"'))
+            data.assign(begin+1, end-1);
+        else
+            data.assign(begin, end);
 
-    	boost::replace_all(data, "\\\"", "\"");
-    	return data;
+        boost::replace_all(data, "\\\"", "\"");
+        return data;
 
     };
 
@@ -51,21 +51,21 @@ inline std::vector<std::string>  build_args(const std::string & data)
 
     for (; itr != data.cend(); itr++)
     {
-    	if (*itr == '"')
-    		in_quote ^= true;
+        if (*itr == '"')
+            in_quote ^= true;
 
-    	if (!in_quote && (*itr == ' '))
-    	{
-    		//alright, got a space
+        if (!in_quote && (*itr == ' '))
+        {
+            //alright, got a space
 
-    		if ((itr != data.cbegin()) && (*(itr -1) != ' ' ))
-    			st.push_back(make_entry(part_beg, itr));
+            if ((itr != data.cbegin()) && (*(itr -1) != ' ' ))
+                st.push_back(make_entry(part_beg, itr));
 
-    		part_beg = itr+1;
-    	}
+            part_beg = itr+1;
+        }
     }
     if (part_beg != itr)
-    	st.emplace_back(make_entry(part_beg, itr));
+        st.emplace_back(make_entry(part_beg, itr));
 
 
     return st;
@@ -97,25 +97,25 @@ struct exe_cmd_init : boost::process::detail::api::handler_base_ext
     static exe_cmd_init exe_args(std::string && exe, std::vector<std::string> && args) {return exe_cmd_init(std::move(exe), std::move(args));}
     static exe_cmd_init cmd     (std::string && cmd)
     {
-    	auto args = build_args(cmd);
-    	return exe_cmd_init({}, std::move(args));
+        auto args = build_args(cmd);
+        return exe_cmd_init({}, std::move(args));
     }
 
     static exe_cmd_init exe_args_shell(std::string&& exe, std::vector<std::string> && args)
     {
-    	std::string sh = shell().string();
+        std::string sh = shell().string();
         return exe_cmd_init(std::move(sh), std::move(args));
     }
     static exe_cmd_init cmd_shell(std::string&& cmd)
     {
-    	std::string sh = shell().string();
+        std::string sh = shell().string();
 
         return exe_cmd_init(
-        		std::move(sh),
-        		{std::move(cmd)});
+                std::move(sh),
+                {std::move(cmd)});
     }
 private:
-	std::vector<char*> make_cmd();
+    std::vector<char*> make_cmd();
     std::string exe;
     std::vector<std::string> args;
     std::vector<char*> cmd_impl;
@@ -123,16 +123,16 @@ private:
 
 std::vector<char*> exe_cmd_init::make_cmd()
 {
-	std::vector<char*> vec;
-	if (!exe.empty())
-		vec.push_back(&exe.front());
+    std::vector<char*> vec;
+    if (!exe.empty())
+        vec.push_back(&exe.front());
 
-	for (auto & v : args)
-		vec.push_back(&v.front());
+    for (auto & v : args)
+        vec.push_back(&v.front());
 
-	vec.push_back(nullptr);
+    vec.push_back(nullptr);
 
-	return vec;
+    return vec;
 }
 
 

@@ -27,9 +27,9 @@
 
 /** \file boost/process/shell.hpp
  *
- *	Header which provides the shell property. This provides the
- *	property to launch a process through the system shell.
- *	It also allows the user to obtain the shell-path via shell().
+ *    Header which provides the shell property. This provides the
+ *    property to launch a process through the system shell.
+ *    It also allows the user to obtain the shell-path via shell().
  */
 
 namespace boost { namespace process { namespace detail {

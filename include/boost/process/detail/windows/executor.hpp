@@ -110,34 +110,34 @@ struct startup_info_impl
 
 
 template<typename Sequence>
-struct executor : startup_info_impl<char>
+class executor : public startup_info_impl<char>
 {
-    typedef typename ::boost::process::detail::has_error_handler<Sequence>::type has_error_handler;
-    typedef typename ::boost::process::detail::has_ignore_error <Sequence>::type has_ignore_error;
 
-    executor(Sequence & seq) : seq(seq)
-    {
-    }
     void internal_error_handle(const std::error_code &ec, const char* msg, boost::mpl::true_ )
     {
-        this->ec = ec;
+        this->_ec = ec;
     }
     void internal_error_handle(const std::error_code &ec, const char* msg, boost::mpl::false_ )
     {
         throw std::system_error(ec, msg);
     }
 
-    void internal_throw(boost::mpl::true_,  std::error_code &ec ) {}
-    void internal_throw(boost::mpl::false_, std::error_code &ec ) {throw std::system_error(ec);}
-
-
+    void internal_throw(boost::mpl::true_,  std::error_code &ec, const char * msg = "") {}
+    void internal_throw(boost::mpl::false_, std::error_code &ec, const char * msg = "Unknown error")
+    {
+        throw std::system_error(ec, msg);
+    }
 
     struct on_setup_t
     {
         executor & exec;
         on_setup_t(executor & exec) : exec(exec) {};
         template<typename T>
-        void operator()(T & t) const {t.on_setup(exec);}
+        void operator()(T & t) const
+        {
+            if (!exec.error())
+                t.on_setup(exec);
+        }
     };
 
     struct on_error_t
@@ -146,7 +146,10 @@ struct executor : startup_info_impl<char>
         const std::error_code & error;
         on_error_t(executor & exec, const std::error_code & error) : exec(exec), error(error) {};
         template<typename T>
-        void operator()(T & t) const {t.on_error(exec, error);}
+        void operator()(T & t) const
+        {
+            t.on_error(exec, error);
+        }
     };
 
     struct on_success_t
@@ -154,18 +157,34 @@ struct executor : startup_info_impl<char>
         executor & exec;
         on_success_t(executor & exec) : exec(exec) {};
         template<typename T>
-        void operator()(T & t) const {t.on_success(exec);}
+        void operator()(T & t) const
+        {
+            if (!exec.error())
+                t.on_success(exec);
+        }
     };
 
+    typedef typename ::boost::process::detail::has_error_handler<Sequence>::type has_error_handler;
+    typedef typename ::boost::process::detail::has_ignore_error <Sequence>::type has_ignore_error;
+
+    std::error_code _ec{0, std::system_category()};
+
+public:
+
+    std::shared_ptr<std::atomic<int>> exit_status = std::make_shared<std::atomic<int>>(still_active);
+
+    executor(Sequence & seq) : seq(seq)
+    {
+    }
 
     child operator()()
     {
         on_setup_t on_setup(*this);
         boost::fusion::for_each(seq, on_setup);
 
-        if (ec)
+        if (_ec)
         {
-            on_error_t on_error(*this, ec);
+            on_error_t on_error(*this, _ec);
             boost::fusion::for_each(seq, on_error);
             return child();
         }
@@ -189,14 +208,14 @@ struct executor : startup_info_impl<char>
 
         if (err_code != 0)
         {
-            ec.clear();
+            _ec.clear();
             on_success_t on_success(*this);
             boost::fusion::for_each(seq, on_success);
         }
 
-        if ((err_code == 0) || ec)
+        if ((err_code == 0) || _ec)
         {
-            auto last_error = (err_code == 0) ? boost::process::detail::get_last_error() : ec;
+            auto last_error = (err_code == 0) ? boost::process::detail::get_last_error() : _ec;
 
             on_error_t on_error(*this, last_error);
             boost::fusion::for_each(seq, on_error);
@@ -208,10 +227,16 @@ struct executor : startup_info_impl<char>
 
     }
 
-    void handle_error(std::error_code & ec, const char* msg = "Unknown Error.")
+    void set_error(const std::error_code & ec, const char* msg = "Unknown Error.")
     {
         internal_error_handle(ec, msg, has_error_handler());
     }
+    void set_error(const std::error_code & ec, const std::string msg = "Unknown Error.")
+    {
+        internal_error_handle(ec, msg.c_str(), has_error_handler());
+    }
+
+    const std::error_code& error() const {return _ec;}
 
     ::boost::detail::winapi::LPSECURITY_ATTRIBUTES_ proc_attrs   = nullptr;
     ::boost::detail::winapi::LPSECURITY_ATTRIBUTES_ thread_attrs = nullptr;
@@ -221,13 +246,9 @@ struct executor : startup_info_impl<char>
     const char * exe      = nullptr;
     const char * env      = nullptr;
 
-    std::error_code ec{0, std::system_category()};
 
     Sequence & seq;
     ::boost::detail::winapi::PROCESS_INFORMATION_ proc_info{nullptr, nullptr, 0,0};
-
-    std::shared_ptr<std::atomic<int>> exit_status = std::make_shared<std::atomic<int>>(still_active);
-
 };
 
 

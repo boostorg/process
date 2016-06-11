@@ -20,8 +20,8 @@ namespace boost { namespace process { namespace detail { namespace posix {
 template<int p1, int p2>
 struct file_out : handler_base_ext
 {
-	file_descriptor file;
-	int handle = file.handle();
+    file_descriptor file;
+    int handle = file.handle();
 
     template<typename T>
     file_out(T&& t) : file(std::forward<T>(t), file_descriptor::write), handle(file.handle()) {}

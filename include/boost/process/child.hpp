@@ -31,7 +31,7 @@ namespace process {
 
 template<typename ...Args>
 child::child(Args&&...args)
-	: child(detail::execute_impl(std::forward<Args>(args)...)) {}
+    : child(detail::execute_impl(std::forward<Args>(args)...)) {}
 
 /** Launch a process and detach it. Returns no handle.
  *
@@ -39,21 +39,21 @@ child::child(Args&&...args)
 template<typename ...Args>
 inline void spawn(Args && ...args)
 {
-	child c(
+    child c(
 #if defined(BOOST_POSIX_API)
-			::boost::process::posix::sig.ign(),
+            ::boost::process::posix::sig.ign(),
 #endif
-			std::forward<Args>(args)...);
-	c.detach();
+            std::forward<Args>(args)...);
+    c.detach();
 }
 
 /** Launches a process and waits for its exit. Similar to std::system. */
 template<typename ...Args>
 inline int system(Args && ...args)
 {
-	child c(std::forward<Args>(args)...);
-	c.wait();
-	return c.exit_code();
+    child c(std::forward<Args>(args)...);
+    c.wait();
+    return c.exit_code();
 }
 
 #if defined(BOOST_PROCESS_DOXYGEN)
@@ -66,7 +66,7 @@ inline int system(Args && ...args)
 
 class child
 {
-	/** Type definition for the native process handle. */
+    /** Type definition for the native process handle. */
     typedef platform_specific native_handle_t;
 
     /** Construct the child from a pid.
@@ -100,7 +100,7 @@ class child
      */
     ~child():
 
-	/** Get the native handle for the child process. */
+    /** Get the native handle for the child process. */
     native_handle_t native_handle() const;
 
     /** Get the exit_code. The return value is without any meaning if the child wasn't waited for. */
@@ -110,19 +110,25 @@ class child
 
     /** Check if the child process is running. */
     bool running();
-    /** Terminate the child process. */
-    void terminate();
+    /** \overload void running() */
+    bool running(std::error_code & ec) noexcept;
 
     /** Wait for the child process to exit. */
     void wait();
+    /** \overload void wait() */
+    void wait(std::error_code & ec) noexcept;
 
     /** Wait for the child process to exit for a period of time. */
     template< class Rep, class Period >
     bool wait_for  (const std::chrono::duration<Rep, Period>& rel_time);
+    /** \overload bool wait_for(const std::chrono::duration<Rep, Period>& rel_time) */
+    bool wait_for  (const std::chrono::duration<Rep, Period>& rel_time, std::error_code & ec) noexcept;
 
     /** Wait for the child process to exit until a point in time. */
     template< class Clock, class Duration >
     bool wait_until(const std::chrono::time_point<Clock, Duration>& timeout_time );
+    /** \overload bool wait_until(const std::chrono::time_point<Clock, Duration>& timeout_time )*/
+    bool wait_until(const std::chrono::time_point<Clock, Duration>& timeout_time, std::error_code & ec) noexcept;
 
     /** Check if this handle holds a child process.
      * @note That does not mean, that the process is still running. It only means, that the handle does or did exist.
@@ -133,6 +139,15 @@ class child
 
     /** Check if the the chlid process is in any process group. */
     bool in_group() const;
+
+    /** \overload bool in_group() const */
+    bool in_group(std::error_code & ec) const noexcept;
+
+    /** Terminate the child process. */
+    void terminate();
+
+    /** \overload void terminate() */
+    void terminate(std::error_code & ec) noexcept;
 };
 
 #endif

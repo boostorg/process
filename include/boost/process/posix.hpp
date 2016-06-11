@@ -12,8 +12,8 @@
 
 /** \file boost/process/posix.hpp
  *
- *	Header which provides the posix extensions. Those include fd, on_fork_error,
- *	on_exec_setup and on_exec_error.
+ *    Header which provides the posix extensions. Those include fd, on_fork_error,
+ *    on_exec_setup and on_exec_error.
  */
 namespace boost { namespace process {
 

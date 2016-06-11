@@ -51,7 +51,7 @@ class child
 
     bool _exited()
     {
-    	return _terminated || !::boost::process::detail::api::is_running(_exit_status->load());
+        return _terminated || !::boost::process::detail::api::is_running(_exit_status->load());
     };
 public:
     typedef ::boost::process::detail::api::child_handle child_handle;
@@ -89,8 +89,9 @@ public:
 
     ~child()
     {
-        if (_attached && !_exited() && running())
-            terminate();
+    	std::error_code ec;
+        if (_attached && !_exited() && running(ec))
+            terminate(ec);
     }
     native_handle_t native_handle() const { return _child_handle.process_handle(); }
 
@@ -158,6 +159,67 @@ public:
         return true;
     }
 
+    bool running(std::error_code & ec) noexcept
+    {
+        if (valid() && !_exited())
+        {
+            int code;
+            auto res = boost::process::detail::api::is_running(_child_handle, code, ec);
+            if (!res && !_exited())
+                _exit_status->store(code);
+
+            return res;
+        }
+        return false;
+    }
+
+    void terminate(std::error_code & ec) noexcept
+    {
+        if (valid() && !running(ec))
+            boost::process::detail::api::terminate(_child_handle, ec);
+
+        _terminated = true;
+    }
+
+    void wait(std::error_code & ec) noexcept
+    {
+        if (!_exited() && valid())
+        {
+            int exit_code = 0;
+            boost::process::detail::api::wait(_child_handle, exit_code, ec);
+            _exit_status->store(exit_code);
+        }
+    }
+
+    template< class Rep, class Period >
+    bool wait_for  (const std::chrono::duration<Rep, Period>& rel_time, std::error_code & ec) noexcept
+    {
+        if (!_exited())
+        {
+            int exit_code = 0;
+            auto b = boost::process::detail::api::wait_for(_child_handle, exit_code, rel_time, ec);
+            if (!b)
+                return false;
+            _exit_status->store(exit_code);
+        }
+        return true;
+    }
+
+    template< class Clock, class Duration >
+    bool wait_until(const std::chrono::time_point<Clock, Duration>& timeout_time, std::error_code & ec) noexcept
+    {
+        if (!_exited())
+        {
+            int exit_code = 0;
+            auto b = boost::process::detail::api::wait_until(_child_handle, exit_code, timeout_time, ec);
+            if (!b)
+                return false;
+            _exit_status->store(exit_code);
+        }
+        return true;
+    }
+
+
     bool valid() const
     {
         return _child_handle.valid();
@@ -168,7 +230,7 @@ public:
     {
         return _child_handle.in_group();
     }
-    bool in_group(std::error_code &ec) const
+    bool in_group(std::error_code &ec) const noexcept
     {
         return _child_handle.in_group(ec);
     }

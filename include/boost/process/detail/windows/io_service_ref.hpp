@@ -90,7 +90,8 @@ struct io_service_ref : boost::process::detail::handler_base
                   this_proc, proc_in, this_proc, &process_handle, 0,
                   static_cast<::boost::detail::winapi::BOOL_>(true),
                    ::boost::detail::winapi::DUPLICATE_SAME_ACCESS_))
-              throw_last_error("Duplicate Pipe Failed");
+              exec.set_error(::boost::process::detail::get_last_error(),
+                                     "Duplicate Pipe Failed");
 
           //must be on the heap so I can move it into the lambda.
           auto asyncs = boost::fusion::filter_if<

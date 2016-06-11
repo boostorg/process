@@ -10,8 +10,8 @@
 
 /** \file boost/process/args.hpp
  *
- *	Header which provides the args property. It also provides the
- *	alternative name argv.
+ *    Header which provides the args property. It also provides the
+ *    alternative name argv.
  */
 
 #ifndef BOOST_PROCESS_ARGS_HPP

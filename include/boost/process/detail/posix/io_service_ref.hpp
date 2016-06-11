@@ -103,12 +103,12 @@ struct io_service_ref : handler_base_ext
         wait_handler(const wait_handler & ) = default;
         wait_handler(wait_handler && )      = default;
         wait_handler(
-        		std::vector<std::function<void(int, const std::error_code & ec)>> && funcs,
-				boost::asio::io_service & ios,
-		        const std::shared_ptr<std::atomic<int>> &exit_status)
-        	: signal_(new boost::asio::signal_set(ios, SIGCHLD)),
-			  funcs(std::move(funcs)),
-			  exit_status(exit_status)
+                std::vector<std::function<void(int, const std::error_code & ec)>> && funcs,
+                boost::asio::io_service & ios,
+                const std::shared_ptr<std::atomic<int>> &exit_status)
+            : signal_(new boost::asio::signal_set(ios, SIGCHLD)),
+              funcs(std::move(funcs)),
+              exit_status(exit_status)
 
 
         {

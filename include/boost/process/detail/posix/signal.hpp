@@ -23,12 +23,12 @@ struct sig_init_ : handler_base_ext
     template <class PosixExecutor>
     void on_exec_setup(PosixExecutor&)
     {
-    	_old = ::signal(SIGCHLD, _handler);
+        _old = ::signal(SIGCHLD, _handler);
     }
 
     ~sig_init_()
     {
-    	::signal(SIGCHLD, _old);
+        ::signal(SIGCHLD, _old);
     }
 private:
     ::sighandler_t _old{0};
@@ -37,12 +37,12 @@ private:
 
 struct sig_
 {
-	constexpr sig_() {}
+    constexpr sig_() {}
 
-	sig_init_ operator()(::sighandler_t h) const {return h;}
-	sig_init_ operator= (::sighandler_t h) const {return h;}
-	sig_init_ dfl() const {return SIG_DFL;}
-	sig_init_ ign() const {return SIG_IGN;}
+    sig_init_ operator()(::sighandler_t h) const {return h;}
+    sig_init_ operator= (::sighandler_t h) const {return h;}
+    sig_init_ dfl() const {return SIG_DFL;}
+    sig_init_ ign() const {return SIG_IGN;}
 
 };
 

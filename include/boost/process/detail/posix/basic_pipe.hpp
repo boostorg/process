@@ -35,16 +35,16 @@ public:
     typedef typename Traits::int_type  int_type   ;
     typedef typename Traits::pos_type  pos_type   ;
     typedef typename Traits::off_type  off_type   ;
-    typedef 		 int			   native_handle;
+    typedef          int               native_handle;
 
     basic_pipe()
     {
-		int fds[2];
-		if (::pipe(fds) == -1)
-			boost::process::detail::throw_last_error("pipe(2) failed");
+        int fds[2];
+        if (::pipe(fds) == -1)
+            boost::process::detail::throw_last_error("pipe(2) failed");
 
-		_source = fds[0];
-		_sink   = fds[1];
+        _source = fds[0];
+        _sink   = fds[1];
     }
     basic_pipe(const basic_pipe& rhs);
     basic_pipe(const std::string& name);
@@ -77,17 +77,17 @@ public:
 
     int_type write(const char_type * data, int_type count)
     {
-    	auto write_len = ::write(_sink, data, count * sizeof(char_type));
-    	if (write_len == -1)
-    		::boost::process::detail::throw_last_error();
+        auto write_len = ::write(_sink, data, count * sizeof(char_type));
+        if (write_len == -1)
+            ::boost::process::detail::throw_last_error();
 
         return write_len;
     }
     int_type read(char_type * data, int_type count)
     {
-    	auto read_len = ::read(_source, data, count * sizeof(char_type));
-    	if (read_len == -1)
-    		::boost::process::detail::throw_last_error();
+        auto read_len = ::read(_source, data, count * sizeof(char_type));
+        if (read_len == -1)
+            ::boost::process::detail::throw_last_error();
 
         return read_len;
     }
@@ -110,38 +110,38 @@ public:
 template<class CharT, class Traits>
 basic_pipe<CharT, Traits>::basic_pipe(const basic_pipe & rhs)
 {
-   	if (rhs._source != -1)
-   	{
-   		_source = ::dup(rhs._source);
-   		if (_source == -1)
-   			::boost::process::detail::throw_last_error("dup() failed");
-   	}
-	if (rhs._sink != -1)
-	{
-		_sink = ::dup(rhs._sink);
-		if (_sink == -1)
-			::boost::process::detail::throw_last_error("dup() failed");
+       if (rhs._source != -1)
+       {
+           _source = ::dup(rhs._source);
+           if (_source == -1)
+               ::boost::process::detail::throw_last_error("dup() failed");
+       }
+    if (rhs._sink != -1)
+    {
+        _sink = ::dup(rhs._sink);
+        if (_sink == -1)
+            ::boost::process::detail::throw_last_error("dup() failed");
 
-	}
+    }
 }
 
 template<class CharT, class Traits>
 basic_pipe<CharT, Traits> &basic_pipe<CharT, Traits>::operator=(const basic_pipe & rhs)
 {
-   	if (rhs._source != -1)
-   	{
-   		_source = ::dup(rhs._source);
-   		if (_source == -1)
-   			::boost::process::detail::throw_last_error("dup() failed");
-   	}
-	if (rhs._sink != -1)
-	{
-		_sink = ::dup(rhs._sink);
-		if (_sink == -1)
-			::boost::process::detail::throw_last_error("dup() failed");
+       if (rhs._source != -1)
+       {
+           _source = ::dup(rhs._source);
+           if (_source == -1)
+               ::boost::process::detail::throw_last_error("dup() failed");
+       }
+    if (rhs._sink != -1)
+    {
+        _sink = ::dup(rhs._sink);
+        if (_sink == -1)
+            ::boost::process::detail::throw_last_error("dup() failed");
 
-	}
-	return *this;
+    }
+    return *this;
 }
 
 

@@ -62,8 +62,6 @@ struct wait_handler
         DWORD exit_code;
         BOOST_REQUIRE(GetExitCodeProcess(handle_, &exit_code));
         BOOST_CHECK_EQUAL(123, exit_code);
-        BOOST_REQUIRE(GetExitCodeProcess(handle_, &exit_code));
-        BOOST_CHECK_EQUAL(123, exit_code);
     }
 };
 #elif defined(BOOST_POSIX_API)
@@ -104,9 +102,7 @@ BOOST_AUTO_TEST_CASE(async_wait)
     windows::object_handle handle(io_service, c.native_handle());
     handle.async_wait(wait_handler(handle.native()));
 #endif
-
+    std::cout << "async_wait 1" << std::endl;
     io_service.run();
-    try {
-    	c.wait(); //this throws on linux...
-    } catch(...) {}
+    std::cout << "async_wait 2" << std::endl;
 }

@@ -23,12 +23,12 @@ public:
 
     inline async_pipe(boost::asio::io_service & ios) : _source(ios), _sink(ios)
     {
-		int fds[2];
-		if (::pipe(fds) == -1)
-			boost::process::detail::throw_last_error("pipe(2) failed");
+        int fds[2];
+        if (::pipe(fds) == -1)
+            boost::process::detail::throw_last_error("pipe(2) failed");
 
-		_source.assign(fds[0]);
-		_sink  .assign(fds[1]);
+        _source.assign(fds[0]);
+        _sink  .assign(fds[1]);
     };
     inline async_pipe(boost::asio::io_service & ios, const std::string & name);
     inline async_pipe(const async_pipe& lhs);
@@ -51,9 +51,9 @@ public:
     ~async_pipe()
     {
         if (_sink .native()  != -1)
-        	::close(_sink.native());
+            ::close(_sink.native());
         if (_source.native() != -1)
-        	::close(_source.native());
+            ::close(_source.native());
     }
 
     template<class CharT, class Traits = std::char_traits<CharT>>
@@ -154,8 +154,8 @@ async_pipe::async_pipe(boost::asio::io_service & ios, const std::string & name) 
 }
 
 async_pipe::async_pipe(const async_pipe & p) :
-		_source(const_cast<async_pipe&>(p)._source.get_io_service()),
-		_sink(  const_cast<async_pipe&>(p)._sink.get_io_service())
+        _source(const_cast<async_pipe&>(p)._source.get_io_service()),
+        _sink(  const_cast<async_pipe&>(p)._sink.get_io_service())
 {
 
     //cannot get the handle from a const object.
@@ -165,18 +165,18 @@ async_pipe::async_pipe(const async_pipe & p) :
         _source.assign(-1);
     else
     {
-    	_source.assign(::dup(source_in));
-    	if (_source.native()== -1)
-    		::boost::process::detail::throw_last_error("dup()");
+        _source.assign(::dup(source_in));
+        if (_source.native()== -1)
+            ::boost::process::detail::throw_last_error("dup()");
     }
 
     if (sink_in   == -1)
         _sink.assign(-1);
     else
     {
-    	_sink.assign(::dup(sink_in));
-    	if (_sink.native() == -1)
-    		::boost::process::detail::throw_last_error("dup()");
+        _sink.assign(::dup(sink_in));
+        if (_sink.native() == -1)
+            ::boost::process::detail::throw_last_error("dup()");
     }
 }
 
@@ -192,18 +192,18 @@ async_pipe& async_pipe::operator=(const async_pipe & p)
         source = -1;
     else
     {
-    	source = ::dup(source_in);
-    	if (source == -1)
-    		::boost::process::detail::throw_last_error("dup()");
+        source = ::dup(source_in);
+        if (source == -1)
+            ::boost::process::detail::throw_last_error("dup()");
     }
 
     if (sink_in   == -1)
         sink = -1;
     else
     {
-    	sink  = ::dup(sink_in);
-    	if (sink == -1)
-    		::boost::process::detail::throw_last_error("dup()");
+        sink  = ::dup(sink_in);
+        if (sink == -1)
+            ::boost::process::detail::throw_last_error("dup()");
     }
     _source.assign(source);
     _sink.  assign(sink);
@@ -214,7 +214,7 @@ async_pipe& async_pipe::operator=(const async_pipe & p)
 async_pipe& async_pipe::operator=(async_pipe && lhs)
 {
     if (_source.native_handle() == -1)
-    	 ::close(_source.native());
+         ::close(_source.native());
 
     if (_sink.native_handle()   == -1)
         ::close(_sink.native());
@@ -241,18 +241,18 @@ async_pipe::operator basic_pipe<CharT, Traits>() const
         source = -1;
     else
     {
-    	source = ::dup(source_in);
-    	if (source == -1)
-    		::boost::process::detail::throw_last_error("dup()");
+        source = ::dup(source_in);
+        if (source == -1)
+            ::boost::process::detail::throw_last_error("dup()");
     }
 
     if (sink_in   == -1)
         sink = -1;
     else
     {
-    	sink = ::dup(sink_in);
-    	if (sink == -1)
-    		::boost::process::detail::throw_last_error("dup()");
+        sink = ::dup(sink_in);
+        if (sink == -1)
+            ::boost::process::detail::throw_last_error("dup()");
     }
 
     return {source, sink};

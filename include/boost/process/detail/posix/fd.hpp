@@ -69,14 +69,14 @@ private:
 
 struct fd_
 {
-	constexpr fd_() {};
-	close_fd_ close(int _fd) const {return close_fd_(_fd);}
-	close_fds_<std::vector<int>> close(const std::initializer_list<int> & vec) const {return std::vector<int>(vec);}
-	template<typename Range>
-	close_fds_<Range> close(const Range & r) const {return r;}
+    constexpr fd_() {};
+    close_fd_ close(int _fd) const {return close_fd_(_fd);}
+    close_fds_<std::vector<int>> close(const std::initializer_list<int> & vec) const {return std::vector<int>(vec);}
+    template<typename Range>
+    close_fds_<Range> close(const Range & r) const {return r;}
 
-	template <class FileDescriptor>
-	bind_fd_<FileDescriptor> bind(int id, const FileDescriptor & fd) const {return {id, fd};}
+    template <class FileDescriptor>
+    bind_fd_<FileDescriptor> bind(int id, const FileDescriptor & fd) const {return {id, fd};}
 
 };
 

@@ -13,14 +13,14 @@ namespace boost { namespace process { namespace detail { namespace posix {
 //does not extend anything.
 struct handler_base_ext : handler_base 
 {
-	template<typename Executor>
-	void on_fork_error  (Executor &, const std::error_code&) const {}
+    template<typename Executor>
+    void on_fork_error  (Executor &, const std::error_code&) const {}
 
-	template<typename Executor>
-	void on_exec_setup  (Executor &) const {}
+    template<typename Executor>
+    void on_exec_setup  (Executor &) const {}
 
-	template<typename Executor>
-	void on_exec_error  (Executor &, const std::error_code&) const {}
+    template<typename Executor>
+    void on_exec_error  (Executor &, const std::error_code&) const {}
 
 };
 
@@ -72,7 +72,7 @@ private:
 
 constexpr boost::process::detail::make_handler_t<on_fork_error_  >   on_fork_error;
 constexpr boost::process::detail::make_handler_t<on_exec_setup_  >   on_exec_setup;
-constexpr boost::process::detail::make_handler_t<on_exec_error_	 >   on_exec_error;
+constexpr boost::process::detail::make_handler_t<on_exec_error_     >   on_exec_error;
 
 }}}}
 
