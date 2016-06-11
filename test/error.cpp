@@ -46,11 +46,10 @@ BOOST_AUTO_TEST_CASE(setup_error)
     {
     	es.ec.assign(42, std::system_category());
     	std::error_code ec;
-    	bp::child c("ls", ec, bp::on_setup(es));
+    	bp::child c(master_test_suite().argv[1], ec, bp::on_setup(es));
 
-
-
-    	BOOST_REQUIRE(ec);
+    	BOOST_CHECK(!c.running());
+    	BOOST_CHECK(ec);
     	BOOST_CHECK_EQUAL(ec.value(), 42);
     }
     bool has_thrown = false;
@@ -58,14 +57,13 @@ BOOST_AUTO_TEST_CASE(setup_error)
     {
     	es.ec.assign(24, std::system_category());
     	es.msg = "MyMessage";
-    	bp::child c("ls", bp::on_setup(es));
-
+    	bp::child c(master_test_suite().argv[1], bp::on_setup(es));
 
     }
     catch( std::system_error & se)
     {
     	has_thrown = true;
-    	BOOST_CHECK(se.code().value() == 24);
+    	BOOST_CHECK_EQUAL(se.code().value(), 24);
     	BOOST_CHECK(boost::starts_with(se.what(), "MyMessage"));
     }
     BOOST_CHECK(has_thrown);
@@ -78,28 +76,29 @@ BOOST_AUTO_TEST_CASE(success_error)
     err_set es;
 
     {
-    	es.ec.assign(42, std::system_category());
+    	es.ec.assign(22, std::system_category());
     	std::error_code ec;
-    	bp::child c("ls", ec, bp::on_success(es));
+    	bp::child c(master_test_suite().argv[1], ec, bp::on_success(es));
 
 
-
-    	BOOST_REQUIRE(ec);
-    	BOOST_CHECK_EQUAL(ec.value(), 42);
+    	BOOST_CHECK(!c.running());
+    	BOOST_CHECK(ec);
+    	BOOST_CHECK_EQUAL(ec.value(), 22);
+    	std::cout << "Value: " << ec.value() << std::endl;
     }
     bool has_thrown = false;
     try
     {
-    	es.ec.assign(24, std::system_category());
+    	es.ec.assign(23, std::system_category());
     	es.msg = "MyMessage";
-    	bp::child c("ls", bp::on_success(es));
+    	bp::child c(master_test_suite().argv[1], bp::on_success(es));
 
 
     }
     catch( std::system_error & se)
     {
     	has_thrown = true;
-    	BOOST_CHECK(se.code().value() == 24);
+    	BOOST_CHECK_EQUAL(se.code().value(), 23);
     	BOOST_CHECK(boost::starts_with(se.what(), "MyMessage"));
     }
     BOOST_CHECK(has_thrown);

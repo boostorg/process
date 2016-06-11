@@ -21,9 +21,10 @@ struct close_fd_ : handler_base_ext
     close_fd_(int fd) : fd_(fd) {}
 
     template <class PosixExecutor>
-    void on_exec_setup(PosixExecutor&) const
+    void on_exec_setup(PosixExecutor& e) const
     {
-        ::close(fd_);
+        if (::close(fd_) == -1)
+        	e.set_error(::boost::process::detail::get_last_error(), "close() failed");
     }
 
 private:
@@ -37,10 +38,14 @@ public:
     close_fds_(const Range &fds) : fds_(fds) {}
 
     template <class PosixExecutor>
-    void on_exec_setup(PosixExecutor&) const
+    void on_exec_setup(PosixExecutor& e) const
     {
         for (auto & fd_ : fds_)
-            ::close(fd_);
+            if (::close(fd_) == -1)
+            {
+             	e.set_error(::boost::process::detail::get_last_error(), "close() failed");
+             	break;
+            }
     }
 
 private:
@@ -56,9 +61,10 @@ public:
     bind_fd_(int id, const FileDescriptor &fd) : id_(id), fd_(fd) {}
 
     template <class PosixExecutor>
-    void on_exec_setup(PosixExecutor&) const
+    void on_exec_setup(PosixExecutor& e) const
     {
-        ::dup2(fd_, id_);
+        if (::dup2(fd_, id_) == -1)
+     		e.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
     }
 
 private:

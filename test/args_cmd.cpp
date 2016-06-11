@@ -38,6 +38,8 @@ BOOST_AUTO_TEST_CASE(args, *boost::unit_test::timeout(2))
         bp::std_out>is,
         ec
     );
+    if (ec)
+    	std::cout << "EC: " << ec.message() << std::endl;
     BOOST_REQUIRE(!ec);
 
     std::string s;

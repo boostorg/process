@@ -25,7 +25,8 @@ public:
     template <class Executor>
     void on_exec_setup(Executor &e) const
     {
-        ::dup2(source.handle(), STDIN_FILENO);
+        if (::dup2(source.handle(), STDIN_FILENO) == -1)
+     	    e.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
     }
 };
 

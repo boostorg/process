@@ -28,7 +28,7 @@ using namespace std;
 
 namespace bp = boost::process;
 
-BOOST_AUTO_TEST_CASE(async_wait)
+BOOST_AUTO_TEST_CASE(async_wait, *boost::unit_test::timeout(2))
 {
     using boost::unit_test::framework::master_test_suite;
     using namespace boost::asio;
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(async_wait)
 }
 
 
-BOOST_AUTO_TEST_CASE(async_out_stream)
+BOOST_AUTO_TEST_CASE(async_out_stream, *boost::unit_test::timeout(2))
 {
     using boost::unit_test::framework::master_test_suite;
 
@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(async_out_stream)
 
 
 
-BOOST_AUTO_TEST_CASE(async_in_stream)
+BOOST_AUTO_TEST_CASE(async_in_stream, *boost::unit_test::timeout(2))
 {
 
     using boost::unit_test::framework::master_test_suite;

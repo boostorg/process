@@ -31,7 +31,9 @@ struct pipe_in : handler_base_ext
     template <class Executor>
     void on_exec_setup(Executor &e) const
     {
-        ::dup2(descr_, STDIN_FILENO);
+        if (::dup2(descr_, STDIN_FILENO) == -1)
+     	    e.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
+
     }
 };
 

@@ -31,7 +31,11 @@ struct on_setup_t
     Executor & exec;
     on_setup_t(Executor & exec) : exec(exec) {};
     template<typename T>
-    void operator()(T & t) const {t.on_setup(exec);}
+    void operator()(T & t) const
+    {
+    	if (!exec.error())
+    		t.on_setup(exec);
+    }
 };
 
 template<typename Executor>
@@ -41,7 +45,10 @@ struct on_error_t
     const std::error_code & error;
     on_error_t(Executor & exec, const std::error_code & error) : exec(exec), error(error) {};
     template<typename T>
-    void operator()(T & t) const {t.on_error(exec, error);}
+    void operator()(T & t) const
+    {
+   		t.on_error(exec, error);
+    }
 };
 
 template<typename Executor>
@@ -72,7 +79,11 @@ struct on_exec_setup_t
     Executor & exec;
     on_exec_setup_t(Executor & exec) : exec(exec) {};
     template<typename T>
-    void operator()(T & t) const {t.on_exec_setup(exec);}
+    void operator()(T & t) const
+    {
+    	if (!exec.error())
+    		t.on_exec_setup(exec);
+    }
 };
 
 
@@ -106,28 +117,62 @@ template<typename Executor> on_exec_error_t  <Executor> call_on_exec_error  (Exe
 
 
 template<typename Sequence>
-struct executor
+class executor
 {
-    executor(Sequence & seq) : seq(seq)
+
+    void internal_error_handle(const std::error_code &ec, const char* msg, boost::mpl::false_, boost::mpl::true_) {}
+    void internal_error_handle(const std::error_code &ec, const char* msg, boost::mpl::true_,  boost::mpl::true_) {}
+
+    int _pipe_sink = -1;
+
+    void write_error(const std::error_code & ec, const char * msg)
     {
+		//I am the child
+		int len = ec.value();
+		::write(_pipe_sink, &len, sizeof(int));
+
+		len = std::strlen(msg) + 1;
+		::write(_pipe_sink, &len, sizeof(int));
+		::write(_pipe_sink, msg, len);
+    }
+
+    void internal_error_handle(const std::error_code &ec, const char* msg, boost::mpl::true_ , boost::mpl::false_)
+    {
+        if (this->pid == 0) //on the fork.
+        	write_error(ec, msg);
+        else
+        {
+        	this->_ec  = ec;
+        	this->_msg = msg;
+        }
+    }
+    void internal_error_handle(const std::error_code &ec, const char* msg, boost::mpl::false_, boost::mpl::false_)
+    {
+        if (this->pid == 0)
+        	write_error(ec, msg);
+        else
+            throw std::system_error(ec, msg);
     }
 
     void internal_throw(boost::mpl::true_, std::error_code &ec ) {}
     void internal_throw(boost::mpl::false_, std::error_code &ec ) {throw std::system_error(ec);}
 
     typedef typename ::boost::process::detail::has_error_handler<Sequence>::type has_error_handler;
-    typedef typename has_ignore_error<Sequence>::type ignore_error;
+    typedef typename ::boost::process::detail::has_ignore_error <Sequence>::type has_ignore_error;
 
 
-    void invoke(boost::mpl::true_) //ignore errors
+    child invoke(boost::mpl::true_) //ignore errors
     {
         boost::fusion::for_each(seq, call_on_setup(*this));
+        if (_ec)
+        	return child();
 
-        pid_t pid = ::fork();
+        this->pid = ::fork();
         if (pid == -1)
         {
             auto ec = boost::process::detail::get_last_error();
             boost::fusion::for_each(seq, call_on_fork_error(*this, ec));
+            return child();
         }
         else if (pid == 0)
         {
@@ -137,84 +182,153 @@ struct executor
             boost::fusion::for_each(seq, call_on_exec_error(*this, ec));
             _exit(EXIT_FAILURE);
         }
+
+        child c(child_handle(pid), exit_status);
 
         boost::fusion::for_each(seq, call_on_success(*this));
-        this->pid = pid;
+
+        return c;
     }
-    void invoke(boost::mpl::false_)
+
+    child invoke(boost::mpl::false_)
     {
-        ::boost::process::pipe p;
-
-
-        if (::fcntl(p.native_sink(), F_SETFD, FD_CLOEXEC) == -1)
-            boost::process::detail::throw_last_error("fcntl(2) failed");
-
+    	int p[2];
+    	if (::pipe(p)  == -1)
+    	{
+    		set_error(::boost::process::detail::get_last_error(), "pipe(2) failed");
+    		return child();
+    	}
+        if (::fcntl(p[1], F_SETFD, FD_CLOEXEC) == -1)
+		{
+			set_error(::boost::process::detail::get_last_error(), "fcntl(2) failed");
+			return child();
+		}
+        _ec.clear();
         boost::fusion::for_each(seq, call_on_setup(*this));
 
-        pid_t pid = ::fork();
+        if (_ec)
+        {
+            boost::fusion::for_each(seq, call_on_error(*this, _ec));
+            return child();
+        }
+
+        this->pid = ::fork();
         if (pid == -1)
         {
-            auto ec = boost::process::detail::get_last_error();
-            boost::fusion::for_each(seq, call_on_fork_error(*this, ec));
+            _ec = boost::process::detail::get_last_error();
+            _msg = "fork() failed";
+            boost::fusion::for_each(seq, call_on_fork_error(*this, _ec));
+            boost::fusion::for_each(seq, call_on_error(*this, _ec));
+
+            return child();
         }
         else if (pid == 0)
         {
+            _pipe_sink = p[1];
+            ::close(p[0]);
 
             boost::fusion::for_each(seq, call_on_exec_setup(*this));
 
             ::execve(exe, cmd_line, env);
-            std::error_code ec = boost::process::detail::get_last_error();
-            boost::fusion::for_each(seq, call_on_exec_error(*this, ec));
-            auto err = ec.value();
+            _ec = boost::process::detail::get_last_error();
+            _msg = "execve failed";
+            boost::fusion::for_each(seq, call_on_exec_error(*this, _ec));
 
-            while (::write(p.native_sink(), &err, sizeof(int)) == -1 && errno == EINTR);
+            _write_error(p[1]);
 
             _exit(EXIT_FAILURE);
+            return child();
         }
 
-        int exec_err;
-        int count;
-        ::close(p.native_sink());
+        child c(child_handle(pid), exit_status);
 
-        do
+
+        ::close(p[1]);
+        _read_error(p[0]);
+        ::close(p[0]);
+
+        if (_ec)
+            boost::fusion::for_each(seq, call_on_error(*this, _ec));
+        else
+            boost::fusion::for_each(seq, call_on_success(*this));
+
+        if (_ec)
+        {
+            boost::fusion::for_each(seq, call_on_error(*this, _ec));
+            return child();
+        }
+
+        return c;
+    }
+
+    void _write_error(int sink)
+    {
+        int data[2] = {_ec.value(),static_cast<int>(_msg.size())};
+        while (::write(sink, &data[0], sizeof(int) *2) == -1)
+        {
+        	auto err = errno;
+
+        	if (err == EBADF)
+        		return;
+        	else if ((err != EINTR) && (err != EAGAIN))
+        		break;
+        }
+        while (::write(sink, &_msg.front(), _msg.size()) == -1)
+        {
+        	auto err = errno;
+
+        	if (err == EBADF)
+        		return;
+        	else if ((err != EINTR) && (err != EAGAIN))
+        		break;
+        }
+    }
+
+    void _read_error(int source)
+    {
+    	int data[2];
+
+    	_ec.clear();
+    	int count = 0;
+        while ((count = ::read(source, &data[0], sizeof(int) *2 ) ) == -1)
         {
             //actually, this should block until it's read.
-            count = ::read(p.native_source(), &exec_err, sizeof(errno));
             auto err = errno;
-            if (err == EBADF)//that should occur on success.
-                break;
+            if ((err != EAGAIN ) && (err != EINTR))
+            	set_error(std::error_code(err, std::system_category()), "Error read pipe");
+        }
+        if (count == 0)
+        	return  ;
+
+        std::error_code ec(data[0], std::system_category());
+        std::string msg(data[1], ' ');
+
+        while (::read(source, &msg.front(), msg.size() ) == -1)
+        {
+            //actually, this should block until it's read.
+            auto err = errno;
+            if ((err == EBADF) || (err == EPERM))//that should occur on success, therefore return.
+                return;
             //EAGAIN not yet forked, EINTR interrupted, i.e. try again
-            else if ((err != EAGAIN ) && (err != EINTR)) {}
-            else //other error.
-                boost::process::detail::throw_last_error("Error read pipe");
+            else if ((err != EAGAIN ) && (err != EINTR))
+            	set_error(std::error_code(err, std::system_category()), "Error read pipe");
         }
-        while (count == -1); //wait until i can read
+        set_error(ec, std::move(msg));
+    }
 
-        if (count == 4)
-        {
-            //error
-            std::error_code ec(exec_err, std::system_category());
-            boost::fusion::for_each(seq, call_on_error(*this, ec));
 
-            internal_throw(has_error_handler(), ec);
-
-        }
-        else if (count > 0)
-            boost::process::detail::throw_last_error("Error reading the error pipe");
-        else
-        {
-            this->pid = pid;
-            boost::fusion::for_each(seq, call_on_success(*this));
-        }
-
+    std::error_code _ec;
+    std::string _msg;
+public:
+    executor(Sequence & seq) : seq(seq)
+    {
     }
 
     child operator()()
     {
-        invoke(ignore_error());
-
-        return child(child_handle(pid), exit_status);
+        return invoke(has_ignore_error());
     }
+
 
     Sequence & seq;
     const char * exe      = nullptr;
@@ -223,7 +337,14 @@ struct executor
     pid_t pid = -1;
     std::shared_ptr<std::atomic<int>> exit_status = std::make_shared<std::atomic<int>>(still_active);
 
-    
+    const std::error_code & error() const {return _ec;}
+
+    void set_error(const std::error_code &ec, const char* msg)
+    {
+    	internal_error_handle(ec, msg, has_error_handler(), has_ignore_error());
+    }
+    void set_error(const std::error_code &ec, const std::string &msg) {set_error(ec, msg.c_str());};
+
 };
 
 

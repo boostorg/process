@@ -24,20 +24,24 @@
 namespace boost { namespace process { namespace detail { namespace posix {
 
 
-inline void apply_out_handles(int handle, std::integral_constant<int, 1>, std::integral_constant<int, -1>)
+inline int apply_out_handles(int handle, std::integral_constant<int, 1>, std::integral_constant<int, -1>)
 {
-    ::dup2(handle, STDOUT_FILENO);
+    return ::dup2(handle, STDOUT_FILENO);
 }
 
-inline void apply_out_handles(int handle, std::integral_constant<int, 2>, std::integral_constant<int, -1>)
+inline int apply_out_handles(int handle, std::integral_constant<int, 2>, std::integral_constant<int, -1>)
 {
-    ::dup2(handle, STDERR_FILENO);
+    return ::dup2(handle, STDERR_FILENO);
 }
 
-inline void apply_out_handles(int handle, std::integral_constant<int, 1>, std::integral_constant<int, 2>)
+inline int apply_out_handles(int handle, std::integral_constant<int, 1>, std::integral_constant<int, 2>)
 {
-    ::dup2(handle, STDOUT_FILENO);
-    ::dup2(handle, STDERR_FILENO);
+	if (::dup2(handle, STDOUT_FILENO) == -1)
+		return -1;
+    if (::dup2(handle, STDERR_FILENO) == -1)
+    	return -1;
+
+    return 0;
 }
 
 template<int p1, int p2, typename Buffer>
@@ -81,7 +85,9 @@ struct async_out_buffer : ::boost::process::detail::posix::async_handler
     template <typename Executor>
     void on_exec_setup(Executor &exec)
     {
-        apply_out_handles(pipe->native_sink(), std::integral_constant<int, p1>(), std::integral_constant<int, p2>());
+        int res = apply_out_handles(pipe->native_sink(), std::integral_constant<int, p1>(), std::integral_constant<int, p2>());
+        if (res == -1)
+        	exec.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
     }
 };
 

@@ -26,22 +26,28 @@ template<>
 template<typename Executor>
 void close_out<1,-1>::on_exec_setup(Executor &e) const
 {
-    ::close(STDOUT_FILENO);
+    if (::close(STDOUT_FILENO) == -1)
+    	e.set_error(::boost::process::detail::get_last_error(), "close() failed");
+
 }
 
 template<>
 template<typename Executor>
 void close_out<2,-1>::on_exec_setup(Executor &e) const
 {
-    ::close(STDERR_FILENO);
+    if (::close(STDERR_FILENO) == -1)
+    	e.set_error(::boost::process::detail::get_last_error(), "close() failed");
 }
 
 template<>
 template<typename Executor>
 void close_out<1,2>::on_exec_setup(Executor &e) const
 {
-    ::close(STDOUT_FILENO);
-    ::close(STDERR_FILENO);
+    if (::close(STDOUT_FILENO) == -1)
+    	e.set_error(::boost::process::detail::get_last_error(), "close() failed");
+
+    if (::close(STDERR_FILENO) == -1)
+    	e.set_error(::boost::process::detail::get_last_error(), "close() failed");
 }
 
 }}}}
