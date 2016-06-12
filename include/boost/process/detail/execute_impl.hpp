@@ -29,8 +29,6 @@
 #include <boost/process/detail/basic_cmd.hpp>
 #include <boost/process/detail/handler.hpp>
 
-#include <boost/process/child.hpp>
-
 #include <boost/fusion/view.hpp>
 #include <boost/fusion/container.hpp>
 #include <boost/fusion/sequence.hpp>

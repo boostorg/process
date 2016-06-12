@@ -33,8 +33,8 @@ struct on_setup_t
     template<typename T>
     void operator()(T & t) const
     {
-    	if (!exec.error())
-    		t.on_setup(exec);
+        if (!exec.error())
+            t.on_setup(exec);
     }
 };
 
@@ -47,7 +47,7 @@ struct on_error_t
     template<typename T>
     void operator()(T & t) const
     {
-   		t.on_error(exec, error);
+           t.on_error(exec, error);
     }
 };
 
@@ -81,8 +81,8 @@ struct on_exec_setup_t
     template<typename T>
     void operator()(T & t) const
     {
-    	if (!exec.error())
-    		t.on_exec_setup(exec);
+        if (!exec.error())
+            t.on_exec_setup(exec);
     }
 };
 
@@ -127,29 +127,29 @@ class executor
 
     void write_error(const std::error_code & ec, const char * msg)
     {
-		//I am the child
-		int len = ec.value();
-		::write(_pipe_sink, &len, sizeof(int));
+        //I am the child
+        int len = ec.value();
+        ::write(_pipe_sink, &len, sizeof(int));
 
-		len = std::strlen(msg) + 1;
-		::write(_pipe_sink, &len, sizeof(int));
-		::write(_pipe_sink, msg, len);
+        len = std::strlen(msg) + 1;
+        ::write(_pipe_sink, &len, sizeof(int));
+        ::write(_pipe_sink, msg, len);
     }
 
     void internal_error_handle(const std::error_code &ec, const char* msg, boost::mpl::true_ , boost::mpl::false_)
     {
         if (this->pid == 0) //on the fork.
-        	write_error(ec, msg);
+            write_error(ec, msg);
         else
         {
-        	this->_ec  = ec;
-        	this->_msg = msg;
+            this->_ec  = ec;
+            this->_msg = msg;
         }
     }
     void internal_error_handle(const std::error_code &ec, const char* msg, boost::mpl::false_, boost::mpl::false_)
     {
         if (this->pid == 0)
-        	write_error(ec, msg);
+            write_error(ec, msg);
         else
             throw std::system_error(ec, msg);
     }
@@ -162,7 +162,7 @@ class executor
     {
         boost::fusion::for_each(seq, call_on_setup(*this));
         if (_ec)
-        	return child();
+            return child();
 
         this->pid = ::fork();
         if (pid == -1)
@@ -189,17 +189,17 @@ class executor
 
     child invoke(boost::mpl::false_)
     {
-    	int p[2];
-    	if (::pipe(p)  == -1)
-    	{
-    		set_error(::boost::process::detail::get_last_error(), "pipe(2) failed");
-    		return child();
-    	}
+        int p[2];
+        if (::pipe(p)  == -1)
+        {
+            set_error(::boost::process::detail::get_last_error(), "pipe(2) failed");
+            return child();
+        }
         if (::fcntl(p[1], F_SETFD, FD_CLOEXEC) == -1)
-		{
-			set_error(::boost::process::detail::get_last_error(), "fcntl(2) failed");
-			return child();
-		}
+        {
+            set_error(::boost::process::detail::get_last_error(), "fcntl(2) failed");
+            return child();
+        }
         _ec.clear();
         boost::fusion::for_each(seq, call_on_setup(*this));
 
@@ -263,39 +263,39 @@ class executor
         int data[2] = {_ec.value(),static_cast<int>(_msg.size())};
         while (::write(sink, &data[0], sizeof(int) *2) == -1)
         {
-        	auto err = errno;
+            auto err = errno;
 
-        	if (err == EBADF)
-        		return;
-        	else if ((err != EINTR) && (err != EAGAIN))
-        		break;
+            if (err == EBADF)
+                return;
+            else if ((err != EINTR) && (err != EAGAIN))
+                break;
         }
         while (::write(sink, &_msg.front(), _msg.size()) == -1)
         {
-        	auto err = errno;
+            auto err = errno;
 
-        	if (err == EBADF)
-        		return;
-        	else if ((err != EINTR) && (err != EAGAIN))
-        		break;
+            if (err == EBADF)
+                return;
+            else if ((err != EINTR) && (err != EAGAIN))
+                break;
         }
     }
 
     void _read_error(int source)
     {
-    	int data[2];
+        int data[2];
 
-    	_ec.clear();
-    	int count = 0;
+        _ec.clear();
+        int count = 0;
         while ((count = ::read(source, &data[0], sizeof(int) *2 ) ) == -1)
         {
             //actually, this should block until it's read.
             auto err = errno;
             if ((err != EAGAIN ) && (err != EINTR))
-            	set_error(std::error_code(err, std::system_category()), "Error read pipe");
+                set_error(std::error_code(err, std::system_category()), "Error read pipe");
         }
         if (count == 0)
-        	return  ;
+            return  ;
 
         std::error_code ec(data[0], std::system_category());
         std::string msg(data[1], ' ');
@@ -308,7 +308,7 @@ class executor
                 return;
             //EAGAIN not yet forked, EINTR interrupted, i.e. try again
             else if ((err != EAGAIN ) && (err != EINTR))
-            	set_error(std::error_code(err, std::system_category()), "Error read pipe");
+                set_error(std::error_code(err, std::system_category()), "Error read pipe");
         }
         set_error(ec, std::move(msg));
     }
@@ -338,7 +338,7 @@ public:
 
     void set_error(const std::error_code &ec, const char* msg)
     {
-    	internal_error_handle(ec, msg, has_error_handler(), has_ignore_error());
+        internal_error_handle(ec, msg, has_error_handler(), has_ignore_error());
     }
     void set_error(const std::error_code &ec, const std::string &msg) {set_error(ec, msg.c_str());};
 

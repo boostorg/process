@@ -131,4 +131,3 @@ BOOST_AUTO_TEST_CASE(async_in_stream, *boost::unit_test::timeout(2))
     c.wait();
 }
 
-

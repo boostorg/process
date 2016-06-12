@@ -81,9 +81,15 @@ public:
     void close()
     {
         if (_sink.is_open())
+        {
             _sink.close();
+            _sink.assign(::boost::detail::winapi::INVALID_HANDLE_VALUE_);
+        }
         if (_source.is_open())
+        {
             _source.close();
+            _sink.assign(::boost::detail::winapi::INVALID_HANDLE_VALUE_);
+        }
     }
     void close(boost::system::error_code & ec)
     {

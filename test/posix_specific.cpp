@@ -29,14 +29,14 @@ BOOST_AUTO_TEST_CASE(bind_fd, *boost::unit_test::timeout(2))
 
     bp::pipe p;
 
-	std::error_code ec;
-	bp::child c(
-		master_test_suite().argv[1],
-		"test", "--posix-echo-one", "3", "hello",
-		bp::posix::fd.bind(3, p.native_sink()),
-		ec
-	);
-	BOOST_CHECK(!ec);
+    std::error_code ec;
+    bp::child c(
+        master_test_suite().argv[1],
+        "test", "--posix-echo-one", "3", "hello",
+        bp::posix::fd.bind(3, p.native_sink()),
+        ec
+    );
+    BOOST_CHECK(!ec);
 
 
     bp::ipstream is(std::move(p));
@@ -53,15 +53,15 @@ BOOST_AUTO_TEST_CASE(bind_fds, *boost::unit_test::timeout(2))
     bp::pipe p1;
     bp::pipe p2;
 
-	std::error_code ec;
-	bp::child c(
-		master_test_suite().argv[1],
-		"test","--posix-echo-two","3","hello","99","bye",
-		bp::posix::fd.bind(3,  p1.native_sink()),
-		bp::posix::fd.bind(99, p2.native_sink()),
-		ec
-	);
-	BOOST_CHECK(!ec);
+    std::error_code ec;
+    bp::child c(
+        master_test_suite().argv[1],
+        "test","--posix-echo-two","3","hello","99","bye",
+        bp::posix::fd.bind(3,  p1.native_sink()),
+        bp::posix::fd.bind(99, p2.native_sink()),
+        ec
+    );
+    BOOST_CHECK(!ec);
 
     bp::ipstream is1(std::move(p1));
     bp::ipstream is2(std::move(p2));

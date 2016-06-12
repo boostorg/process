@@ -37,11 +37,11 @@ int main()
     env[0] = "LANG=de";
     system("test",
         on_setup([env](auto &e) { e.env = const_cast<char**>(env); }),
-		posix::on_fork_error([](auto&)
+        posix::on_fork_error([](auto&)
             { std::cerr << errno << std::endl; }),
         posix::on_exec_setup([](auto&)
             { ::chroot("/new/root/directory/"); }),
-		posix::on_exec_error([](auto&)
+        posix::on_exec_error([](auto&)
             { std::ofstream ofs("log.txt"); if (ofs) ofs << errno; })
     );
 //]

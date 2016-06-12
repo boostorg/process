@@ -17,10 +17,10 @@ using namespace boost::process;
 int main()
 {
 //[cleanup
-	{
-    	child c("test.exe");
-    	//wait for exit
-	}
+    {
+        child c("test.exe");
+        //wait for exit
+    }
 //]
 
 //[cleanup_detach_short

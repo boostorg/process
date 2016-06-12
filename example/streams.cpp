@@ -21,8 +21,8 @@ int main()
 
 //[close_in_err
     system("test.exe",
-		std_out > null,
-		std_in  < null,
-		std_err.close());
+        std_out > null,
+        std_in  < null,
+        std_err.close());
 //]
 }

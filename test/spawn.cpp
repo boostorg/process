@@ -10,23 +10,24 @@
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_IGNORE_SIGCHLD
 #include <boost/test/included/unit_test.hpp>
-#include <system_error>
+
+#include <boost/system/error_code.hpp>
 
 #include <boost/asio.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-#include <boost/process/args.hpp>
-#include <boost/process/exe.hpp>
 #include <boost/process/error.hpp>
 #include <boost/process/io.hpp>
-#include <boost/process/child.hpp>
+#include <boost/process/args.hpp>
+#include <boost/process/spawn.hpp>
 #include <boost/process/async_pipe.hpp>
+#include <boost/process/async.hpp>
+#include <system_error>
 
 #include <boost/filesystem.hpp>
 
 #include <string>
 #include <istream>
-#include <iostream>
 #include <cstdlib>
 #if defined(BOOST_WINDOWS_API)
 #   include <Windows.h>
@@ -40,26 +41,32 @@ typedef boost::asio::posix::stream_descriptor pipe_end;
 namespace fs = boost::filesystem;
 namespace bp = boost::process;
 
-BOOST_AUTO_TEST_CASE(sync_io, *boost::unit_test::timeout(2))
+BOOST_AUTO_TEST_CASE(sync_io, *boost::unit_test::timeout(5))
 {
     using boost::unit_test::framework::master_test_suite;
 
-
     bp::ipstream is;
-
     std::error_code ec;
-    bp::child c(
+
+    bp::spawn(
         master_test_suite().argv[1],
-        bp::args={"test", "--echo-stderr", "hello"},
-        bp::std_err>is,
+        bp::args+={"test", "--echo-stdout", "hello"},
+        bp::std_out > is,
         ec
-    );
-    BOOST_REQUIRE(!ec);
+    ); 
+
+    BOOST_CHECK(!ec);
+
 
     std::string s;
+
+    BOOST_TEST_CHECKPOINT("Starting read");
     is >> s;
+    BOOST_TEST_CHECKPOINT("Finished read");
+
     BOOST_CHECK_EQUAL(s, "hello");
 }
+
 
 struct read_handler
 {
@@ -80,73 +87,24 @@ struct read_handler
 BOOST_AUTO_TEST_CASE(async_io, *boost::unit_test::timeout(2))
 {
     using boost::unit_test::framework::master_test_suite;
-    boost::asio::io_service io_service;
 
+    boost::asio::io_service io_service;
     bp::async_pipe p(io_service);
+
     std::error_code ec;
-    bp::child c(
-            bp::exe=master_test_suite().argv[1],
-            bp::args+="test",
-            bp::args+={"--echo-stderr", "abc"},
-            bp::std_err>p,
-            ec
-        );
+    bp::spawn(
+        master_test_suite().argv[1],
+        "test", "--echo-stdout", "abc",
+        bp::std_out > p,
+        ec
+    );
     BOOST_REQUIRE(!ec);
 
-
     boost::asio::streambuf buffer;
-    boost::asio::async_read_until(p, buffer, '\n', read_handler(buffer));
+    boost::asio::async_read_until(p, buffer, '\n',
+        read_handler(buffer));
 
     io_service.run();
 }
 
-BOOST_AUTO_TEST_CASE(nul, *boost::unit_test::timeout(2))
-{
-    using boost::unit_test::framework::master_test_suite;
-    std::error_code ec;
-    bp::child c(
-        bp::exe(master_test_suite().argv[1]),
-        bp::args+={"test", "--is-nul-stderr"},
-        bp::std_err>bp::null,
-        ec
-    );
-    BOOST_REQUIRE(!ec);
 
-    c.wait();
-    int exit_code = c.exit_code();
-#if defined(BOOST_WINDOWS_API)
-    BOOST_CHECK_EQUAL(EXIT_SUCCESS, exit_code);
-#elif defined(BOOST_POSIX_API)
-    BOOST_CHECK_EQUAL(EXIT_SUCCESS, exit_code);
-#endif
-}
-
-
-BOOST_AUTO_TEST_CASE(file_io, *boost::unit_test::timeout(2))
-{
-    using boost::unit_test::framework::master_test_suite;
-
-    fs::path pth =
-            fs::path(master_test_suite().argv[1]).parent_path() / "std_err_log_file.txt";
-
-
-    std::error_code ec;
-    bp::child c(
-        master_test_suite().argv[1],
-        bp::args={"test", "--echo-stderr", "hello"},
-        bp::std_err>pth,
-        ec
-    );
-    BOOST_REQUIRE(!ec);
-
-    c.wait();
-    {
-        fs::ifstream is{pth};
-
-        std::string s;
-        is >> s;
-        BOOST_CHECK_EQUAL(s, "hello");
-    }
-    boost::filesystem::remove(pth);
-
-}

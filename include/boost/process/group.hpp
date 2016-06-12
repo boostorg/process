@@ -97,7 +97,7 @@ public:
      */
     ~group()
     {
-    	std::error_code ec;
+        std::error_code ec;
         if ( _attached && valid())
             terminate(ec);
     }

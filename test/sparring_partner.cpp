@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
     {
         std::vector<char*> args(argv+1, argv + argc);
         for (auto & arg : args)
-        	std::cout << arg << std::endl;
+            std::cout << arg << std::endl;
     }
     else if (vm.count("exit-code"))
     {

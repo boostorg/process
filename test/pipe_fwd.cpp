@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE(sync_io, *boost::unit_test::timeout(5))
     bp::child c1(
         master_test_suite().argv[1],
         bp::args={"test", "--prefix-once", "dear "},
-		bp::std_in<os,
+        bp::std_in<os,
         bp::std_out>p,
         ec
     );
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(sync_io, *boost::unit_test::timeout(5))
     bp::child c2(
         master_test_suite().argv[1],
         bp::args={"test", "--prefix-once", "hello "},
-		bp::std_in<p,
+        bp::std_in<p,
         bp::std_out>is,
         ec
     );

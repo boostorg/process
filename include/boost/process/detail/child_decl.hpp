@@ -72,7 +72,7 @@ public:
 
     template<typename ...Args>
     explicit child(Args&&...args);
-    child() = default;
+    child() {}
     child& operator=(const child&) = delete;
     child& operator=(child && lhs)
     {
@@ -89,7 +89,7 @@ public:
 
     ~child()
     {
-    	std::error_code ec;
+        std::error_code ec;
         if (_attached && !_exited() && running(ec))
             terminate(ec);
     }

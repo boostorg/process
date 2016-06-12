@@ -32,7 +32,7 @@ struct pipe_in : handler_base_ext
     void on_exec_setup(Executor &e) const
     {
         if (::dup2(descr_, STDIN_FILENO) == -1)
-     	    e.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
+             e.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
 
     }
 };

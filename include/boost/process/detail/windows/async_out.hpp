@@ -75,11 +75,14 @@ struct async_out_buffer : ::boost::process::detail::windows::async_handler
     {
     }
     template <typename Executor>
-    inline void on_success(Executor &exec) const
+    inline void on_success(Executor &exec)
     {
         auto pipe = this->pipe;
         boost::asio::async_read(*pipe, buf,
                 [pipe](const boost::system::error_code&, std::size_t size){});
+
+        this->pipe       = nullptr;
+
     }
 
     template<typename Executor>
@@ -98,6 +101,9 @@ struct async_out_buffer : ::boost::process::detail::windows::async_handler
                                     pipe->close(ec);
                               });
                 };
+
+
+
     };
     template <typename WindowsExecutor>
     void on_setup(WindowsExecutor &exec)
@@ -113,27 +119,28 @@ struct async_out_buffer : ::boost::process::detail::windows::async_handler
 template<int p1, int p2, typename Type>
 struct async_out_future : ::boost::process::detail::windows::async_handler
 {
+    std::shared_ptr<boost::process::async_pipe> pipe;
     std::shared_ptr<std::promise<Type>> promise = std::make_shared<std::promise<Type>>();
-
     std::shared_ptr<boost::asio::streambuf> buffer = std::make_shared<boost::asio::streambuf>();
 
-    std::shared_ptr<boost::process::async_pipe> pipe;
 
     async_out_future(std::future<Type> & fut)
     {
         fut = promise->get_future();
     }
     template <typename Executor>
-    inline void on_success(Executor &exec) const
+    inline void on_success(Executor &exec)
     {
-        boost::asio::io_service &is_ser = get_io_service(exec.seq);
+
         auto pipe    = this->pipe;
         auto buffer  = this->buffer;
         auto promise = this->promise;
         boost::asio::async_read(*pipe, *buffer,
                 [pipe, buffer, promise](const boost::system::error_code& ec, std::size_t size)
                 {
-                    if (ec)
+                    constexpr static ::boost::detail::winapi::DWORD_ ERROR_BROKEN_PIPE_ = 109;
+
+                    if (ec && (ec.value() != ERROR_BROKEN_PIPE_))
                     {
                         std::error_code e(ec.value(), std::system_category());
                         promise->set_exception(std::make_exception_ptr(std::system_error(e)));
@@ -146,32 +153,41 @@ struct async_out_future : ::boost::process::detail::windows::async_handler
                         is.read(&*arg.begin(), buffer->size());
 
                         promise->set_value(std::move(arg));
+
+
                     }
                 });
+        this->pipe       = nullptr;
+        this->buffer  = nullptr;
+        this->promise = nullptr;
+
     }
 
     template<typename Executor>
-    std::function<void(const std::error_code&)> on_exit_handler(Executor & exec)
+    std::function<void(int, const std::error_code&)> on_exit_handler(Executor & exec)
     {
+        if (!pipe)
+            pipe = std::make_shared<boost::process::async_pipe>(get_io_service(exec.seq));
 
         auto pipe = this->pipe;
-        return [pipe](const std::error_code & ec)
+        return [pipe](int, const std::error_code & ec)
                 {
                     boost::asio::io_service & ios = pipe->get_io_service();
                     ios.post([pipe]
                               {
                                     boost::system::error_code ec;
                                     pipe->close(ec);
+
                               });
                 };
-
-
     };
 
     template <typename WindowsExecutor>
     void on_setup(WindowsExecutor &exec)
     {
-        pipe = std::make_shared<boost::process::async_pipe>(get_io_service(exec.seq));
+        if (!pipe)
+            pipe = std::make_shared<boost::process::async_pipe>(get_io_service(exec.seq));
+
         apply_out_handles(exec, pipe->native_sink(), std::integral_constant<int, p1>(), std::integral_constant<int, p2>());
     }
 };

@@ -16,7 +16,7 @@ using namespace boost::process;
 int main()
 {
 //[args
-	child c("test.exe", "--foo", "/bar");
+    child c("test.exe", "--foo", "/bar");
 //]
-	c.wait();
+    c.wait();
 }

@@ -80,7 +80,7 @@ int main()
 //]
     }{
 //[async_pipe_simple
-    	boost::asio::io_service io_service;
+        boost::asio::io_service io_service;
     std::vector<char> in_buf;
     std::string value = "my_string";
     system(
@@ -91,7 +91,7 @@ int main()
 //]
     }{
 //[async_pipe_future
-	boost::asio::io_service io_service;
+    boost::asio::io_service io_service;
     std::future<std::vector<char>> in_buf;
     std::future<void> write_fut;
     std::string value = "my_string";

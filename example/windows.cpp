@@ -19,7 +19,7 @@ int main()
 {
 //[show_window
     system("test.exe",
-    		windows::show);
+            windows::show);
 //]
 
 //[create_process

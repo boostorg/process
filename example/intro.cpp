@@ -20,9 +20,9 @@ int main()
 
     while (pipe_stream)
     {
-    	std::string value;
-    	std::getline(pipe_stream, value);
-    	std::cerr << value << std::endl;
+        std::string value;
+        std::getline(pipe_stream, value);
+        std::cerr << value << std::endl;
     }
 }
 //]

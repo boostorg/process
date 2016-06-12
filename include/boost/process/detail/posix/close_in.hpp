@@ -21,7 +21,7 @@ struct close_in : handler_base_ext
     void on_exec_setup(Executor &e) const
     {
         if (::close(STDIN_FILENO) == -1)
-        	e.set_error(::boost::process::detail::get_last_error(), "close() failed");
+            e.set_error(::boost::process::detail::get_last_error(), "close() failed");
     }
 };
 

@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE(file_io, *boost::unit_test::timeout(2))
     using boost::unit_test::framework::master_test_suite;
 
     fs::path pth =
-    		fs::path(master_test_suite().argv[1]).parent_path() / "std_out_log_file.txt";
+            fs::path(master_test_suite().argv[1]).parent_path() / "std_out_log_file.txt";
 
 
     FILE* f = fopen(pth.string().c_str(), "w");
@@ -155,11 +155,11 @@ BOOST_AUTO_TEST_CASE(file_io, *boost::unit_test::timeout(2))
 
     c.wait();
     {
-    	fs::ifstream is{pth};
+        fs::ifstream is{pth};
 
-    	std::string s;
-    	is >> s;
-    	BOOST_CHECK_EQUAL(s, "hello");
+        std::string s;
+        is >> s;
+        BOOST_CHECK_EQUAL(s, "hello");
     }
     boost::filesystem::remove(pth);
 

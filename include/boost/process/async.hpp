@@ -18,6 +18,9 @@
 #define BOOST_PROCESS_DETAIL_ASYNC_HPP_
 
 #include <boost/process/detail/traits.hpp>
+#include <boost/process/detail/on_exit.hpp>
+#include <boost/process/detail/no_wait_io_service.hpp>
+
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/streambuf.hpp>
 #include <boost/asio/buffer.hpp>
@@ -25,12 +28,10 @@
 #include <boost/fusion/iterator/deref.hpp>
 
 #if defined(BOOST_POSIX_API)
-#include <boost/process/detail/posix/on_exit.hpp>
 #include <boost/process/detail/posix/io_service_ref.hpp>
 #include <boost/process/detail/posix/async_in.hpp>
 #include <boost/process/detail/posix/async_out.hpp>
 #elif defined(BOOST_WINDOWS_API)
-#include <boost/process/detail/windows/on_exit.hpp>
 #include <boost/process/detail/windows/io_service_ref.hpp>
 #include <boost/process/detail/windows/async_in.hpp>
 #include <boost/process/detail/windows/async_out.hpp>
@@ -40,25 +41,17 @@ namespace boost { namespace process { namespace detail {
 
 struct async_tag;
 
-struct on_exit_
-{
-    api::on_exit_ operator= (const std::function<void(int, const std::error_code&)> & f) const {return f;}
-    api::on_exit_ operator()(const std::function<void(int, const std::error_code&)> & f) const {return f;}
-};
-
-
-constexpr static on_exit_ on_exit;
-
-
 template<typename T>
 struct is_io_service : std::false_type {};
 template<>
 struct is_io_service<api::io_service_ref> : std::true_type {};
+template<>
+struct is_io_service<no_wait_io_service_ref> : std::true_type {};
 
 template<typename Tuple>
 inline asio::io_service& get_io_service(const Tuple & tup)
 {
-    boost::process::detail::api::io_service_ref& ref = *boost::fusion::find_if<is_io_service<boost::mpl::_>>(tup);
+    auto& ref = *boost::fusion::find_if<is_io_service<boost::mpl::_>>(tup);
     return ref.get();
 }
 
@@ -81,7 +74,6 @@ struct initializer_builder<async_tag>
 
 }
 
-using ::boost::process::detail::on_exit;
 using ::boost::asio::buffer;
 
 }}

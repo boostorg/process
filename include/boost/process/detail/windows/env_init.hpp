@@ -33,7 +33,7 @@ struct env_init : public ::boost::process::detail::handler_base
         {
             constexpr static ::boost::detail::winapi::DWORD_ ERROR_BAD_ENVIRONMENT_ = 0xA;
             exec.set_error(std::error_code(ERROR_BAD_ENVIRONMENT_, std::system_category()),
-            		"Bad Environment");
+                    "Bad Environment");
         }
 
         exec.env = e;

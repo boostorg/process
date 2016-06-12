@@ -40,7 +40,7 @@ template<typename Executor>
 void pipe_out<1,-1>::on_exec_setup(Executor &e) const
 {
     if (::dup2(descr_, STDOUT_FILENO) == -1)
- 	    e.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
+         e.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
 }
 
 template<>
@@ -48,7 +48,7 @@ template<typename Executor>
 void pipe_out<2,-1>::on_exec_setup(Executor &e) const
 {
     if (::dup2(descr_, STDERR_FILENO) == -1)
- 	    e.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
+         e.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
 }
 
 template<>
@@ -56,10 +56,10 @@ template<typename Executor>
 void pipe_out<1,2>::on_exec_setup(Executor &e) const
 {
     if (::dup2(descr_, STDOUT_FILENO) == -1)
- 	    e.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
+         e.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
 
     if (::dup2(descr_, STDERR_FILENO) == -1)
- 	    e.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
+         e.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
 }
 
 }}}}

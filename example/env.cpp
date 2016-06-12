@@ -14,10 +14,10 @@ using namespace boost::process;
 int main()
 {
 //[modifiy_env
-	boost::process::environment my_env = boost::this_process::environment(); //empty env, that would fail.
-	system("test.exe", my_env);
+    boost::process::environment my_env = boost::this_process::environment(); //empty env, that would fail.
+    system("test.exe", my_env);
 //]
 //[inherit_env
-	system("test.exe", env["PATH"]+="/tmp");
+    system("test.exe", env["PATH"]+="/tmp");
 //]
 }

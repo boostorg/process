@@ -31,30 +31,8 @@ namespace process {
 
 template<typename ...Args>
 child::child(Args&&...args)
-    : child(detail::execute_impl(std::forward<Args>(args)...)) {}
+    : child(::boost::process::detail::execute_impl(std::forward<Args>(args)...)) {}
 
-/** Launch a process and detach it. Returns no handle.
- *
- */
-template<typename ...Args>
-inline void spawn(Args && ...args)
-{
-    child c(
-#if defined(BOOST_POSIX_API)
-            ::boost::process::posix::sig.ign(),
-#endif
-            std::forward<Args>(args)...);
-    c.detach();
-}
-
-/** Launches a process and waits for its exit. Similar to std::system. */
-template<typename ...Args>
-inline int system(Args && ...args)
-{
-    child c(std::forward<Args>(args)...);
-    c.wait();
-    return c.exit_code();
-}
 
 #if defined(BOOST_PROCESS_DOXYGEN)
 /* The main class to hold a child process. It is simliar to std::thread,

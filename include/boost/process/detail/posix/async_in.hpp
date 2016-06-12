@@ -70,8 +70,8 @@ struct async_in_buffer : ::boost::process::detail::posix::async_handler
     template<typename Executor>
     std::function<void(int, const std::error_code&)> on_exit_handler(Executor & exec)
     {
-
-        pipe = std::make_shared<boost::process::async_pipe>(get_io_service(exec.seq));
+        if (!pipe)
+            pipe = std::make_shared<boost::process::async_pipe>(get_io_service(exec.seq));
 
         auto pipe = this->pipe;
         return [pipe](int, const std::error_code& ec)
@@ -88,8 +88,11 @@ struct async_in_buffer : ::boost::process::detail::posix::async_handler
     template <typename Executor>
     void on_exec_setup(Executor &exec)
     {
-    	if (::dup2(pipe->native_source(), STDIN_FILENO) == -1)
-    		exec.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
+        if (!pipe)
+            pipe = std::make_shared<boost::process::async_pipe>(get_io_service(exec.seq));
+
+        if (::dup2(pipe->native_source(), STDIN_FILENO) == -1)
+            exec.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
     }
 };
 

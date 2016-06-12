@@ -24,7 +24,7 @@ struct close_fd_ : handler_base_ext
     void on_exec_setup(PosixExecutor& e) const
     {
         if (::close(fd_) == -1)
-        	e.set_error(::boost::process::detail::get_last_error(), "close() failed");
+            e.set_error(::boost::process::detail::get_last_error(), "close() failed");
     }
 
 private:
@@ -43,8 +43,8 @@ public:
         for (auto & fd_ : fds_)
             if (::close(fd_) == -1)
             {
-             	e.set_error(::boost::process::detail::get_last_error(), "close() failed");
-             	break;
+                 e.set_error(::boost::process::detail::get_last_error(), "close() failed");
+                 break;
             }
     }
 
@@ -64,7 +64,7 @@ public:
     void on_exec_setup(PosixExecutor& e) const
     {
         if (::dup2(fd_, id_) == -1)
-     		e.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
+             e.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
     }
 
 private:

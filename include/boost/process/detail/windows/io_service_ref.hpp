@@ -72,43 +72,46 @@ struct async_handler_collector
 //Also set's up waiting for the exit, so it can close async stuff.
 struct io_service_ref : boost::process::detail::handler_base
 {
-    io_service_ref(boost::asio::io_service & ios) : ios(ios)
-    {
 
+    io_service_ref(boost::asio::io_service & ios)
+            : ios(ios)
+    {
     }
     boost::asio::io_service &get() {return ios;};
     template <class Executor>
     void on_success(Executor& exec) const
     {
-          ::boost::detail::winapi::PROCESS_INFORMATION_ & proc = exec.proc_info;
-          auto this_proc = ::boost::detail::winapi::GetCurrentProcess();
 
-          auto proc_in = proc.hProcess;;
-          ::boost::detail::winapi::HANDLE_ process_handle;
+        ::boost::detail::winapi::PROCESS_INFORMATION_ & proc = exec.proc_info;
+        auto this_proc = ::boost::detail::winapi::GetCurrentProcess();
 
-          if (!::boost::detail::winapi::DuplicateHandle(
-                  this_proc, proc_in, this_proc, &process_handle, 0,
-                  static_cast<::boost::detail::winapi::BOOL_>(true),
-                   ::boost::detail::winapi::DUPLICATE_SAME_ACCESS_))
-              exec.set_error(::boost::process::detail::get_last_error(),
-                                     "Duplicate Pipe Failed");
+        auto proc_in = proc.hProcess;;
+        ::boost::detail::winapi::HANDLE_ process_handle;
 
-          //must be on the heap so I can move it into the lambda.
-          auto asyncs = boost::fusion::filter_if<
-                          is_async_handler<
-                          typename std::remove_reference< boost::mpl::_ > ::type
-                          >>(exec.seq);
+        if (!::boost::detail::winapi::DuplicateHandle(
+              this_proc, proc_in, this_proc, &process_handle, 0,
+              static_cast<::boost::detail::winapi::BOOL_>(true),
+               ::boost::detail::winapi::DUPLICATE_SAME_ACCESS_))
 
-          std::vector<std::function<void(int, const std::error_code & ec)>> funcs;
-          funcs.reserve(boost::fusion::size(asyncs));
-          boost::fusion::for_each(asyncs, async_handler_collector<Executor>(exec, funcs));
+        exec.set_error(::boost::process::detail::get_last_error(),
+                                 "Duplicate Pipe Failed");
+
+        //must be on the heap so I can move it into the lambda.
+        auto asyncs = boost::fusion::filter_if<
+                      is_async_handler<
+                      typename std::remove_reference< boost::mpl::_ > ::type
+                      >>(exec.seq);
+
+        std::vector<std::function<void(int, const std::error_code & ec)>> funcs;
+        funcs.reserve(boost::fusion::size(asyncs));
+        boost::fusion::for_each(asyncs, async_handler_collector<Executor>(exec, funcs));
 
 
 
-          wait_handler wh(std::move(funcs), ios, process_handle, exec.exit_status);
+        wait_handler wh(std::move(funcs), ios, process_handle, exec.exit_status);
 
-          auto handle_p = wh.handle.get();
-          handle_p->async_wait(std::move(wh));
+        auto handle_p = wh.handle.get();
+        handle_p->async_wait(std::move(wh));
     }
     struct wait_handler
     {

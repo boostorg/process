@@ -161,14 +161,14 @@ BOOST_AUTO_TEST_CASE(file_io, *boost::unit_test::timeout(2))
 
 
     fs::path pth =
-    		fs::path(master_test_suite().argv[1]).parent_path() / "std_in_log_file.txt";
+            fs::path(master_test_suite().argv[1]).parent_path() / "std_in_log_file.txt";
     bp::ipstream is;
 
     {
-    	boost::filesystem::ofstream fs(pth);
-    	fs << 321 << std::endl;
-    	fs << 1.2345 << std::endl;
-    	fs << "some_string" << std::endl;
+        boost::filesystem::ofstream fs(pth);
+        fs << 321 << std::endl;
+        fs << 1.2345 << std::endl;
+        fs << "some_string" << std::endl;
     }
     std::error_code ec;
 
@@ -198,20 +198,20 @@ BOOST_AUTO_TEST_CASE(file_io, *boost::unit_test::timeout(2))
 
 BOOST_AUTO_TEST_CASE(file_io_C, *boost::unit_test::timeout(2))
 {
-	//tested, since stdin also yields FILE*.
+    //tested, since stdin also yields FILE*.
     std::cout << "file_io_C" << std::endl;
     using boost::unit_test::framework::master_test_suite;
 
 
     fs::path pth =
-    		fs::path(master_test_suite().argv[1]).parent_path() / "std_in_log_file_2.txt";
+            fs::path(master_test_suite().argv[1]).parent_path() / "std_in_log_file_2.txt";
     bp::ipstream is;
 
     {
-    	boost::filesystem::ofstream fs(pth);
-    	fs << 321 << std::endl;
-    	fs << 1.2345 << std::endl;
-    	fs << "some_string" << std::endl;
+        boost::filesystem::ofstream fs(pth);
+        fs << 321 << std::endl;
+        fs << 1.2345 << std::endl;
+        fs << "some_string" << std::endl;
     }
 
     FILE * f = fopen(pth.string().c_str(), "r+");

@@ -13,8 +13,9 @@
 
 namespace boost { namespace process { namespace detail { namespace windows {
 
-
-#if BOOST_USE_WINAPI_VERSION >= BOOST_WINAPI_VERSION_WIN10
+//Will be uncommented if the CompareObjectHandles is merged.
+//#if BOOST_USE_WINAPI_VERSION >= BOOST_WINAPI_VERSION_WIN10
+#if defined(BOOST_WILL_BE_ADDED_IF_MERGED_INTO_WINAPI)
 inline bool compare_handles(boost::detail::winapi::HANDLE_ lhs, boost::detail::winapi::HANDLE_ rhs)
 {
     return ::boost::detail::winapi::CompareObjectHandles(lhs, rhs);

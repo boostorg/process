@@ -43,7 +43,7 @@ struct async_in_buffer : ::boost::process::detail::windows::async_handler
     {
     }
     template <typename Executor>
-    inline void on_success(Executor &exec) const
+    inline void on_success(Executor &exec)
     {
         auto pipe = this->pipe;
 
@@ -54,19 +54,29 @@ struct async_in_buffer : ::boost::process::detail::windows::async_handler
             boost::asio::async_write(*pipe, buf,
                 [promise](const boost::system::error_code & ec, std::size_t)
                 {
-                    std::error_code e(ec.value(), std::system_category());
-                    promise->set_exception(std::make_exception_ptr(std::system_error(e)));
+                    constexpr static ::boost::detail::winapi::DWORD_ ERROR_BROKEN_PIPE_ = 109;
+
+                    if (ec && (ec.value() != ERROR_BROKEN_PIPE_))
+                    {
+                        std::error_code e(ec.value(), std::system_category());
+                        promise->set_exception(std::make_exception_ptr(std::system_error(e)));
+                    }
                     promise->set_value();
                 });
         }
         else
-        boost::asio::async_write(*pipe, buf,
+            boost::asio::async_write(*pipe, buf,
                 [pipe](const boost::system::error_code&ec, std::size_t size){});
+
+        this->pipe = nullptr;
     }
 
     template<typename Executor>
     std::function<void(int, const std::error_code&)> on_exit_handler(Executor & exec)
     {
+        if (!pipe)
+            pipe = std::make_shared<boost::process::async_pipe>(get_io_service(exec.seq));
+
         auto pipe = this->pipe;
         return [pipe](int, const std::error_code& ec)
                {
@@ -82,7 +92,8 @@ struct async_in_buffer : ::boost::process::detail::windows::async_handler
     template <typename WindowsExecutor>
     void on_setup(WindowsExecutor &exec)
     {
-        pipe = std::make_shared<boost::process::async_pipe>(get_io_service(exec.seq));
+        if (!pipe)
+            pipe = std::make_shared<boost::process::async_pipe>(get_io_service(exec.seq));
 
         auto source_handle = pipe->native_source();
 

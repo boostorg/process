@@ -11,7 +11,10 @@
 namespace boost { namespace asio {
 
 class mutable_buffer;
+class mutable_buffers_1;
+
 class const_buffer;
+class const_buffers_1;
 
 template<typename Allocator>
 class basic_streambuf;

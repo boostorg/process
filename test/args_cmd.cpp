@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(args, *boost::unit_test::timeout(2))
         ec
     );
     if (ec)
-    	std::cout << "EC: " << ec.message() << std::endl;
+        std::cout << "EC: " << ec.message() << std::endl;
     BOOST_REQUIRE(!ec);
 
     std::string s;

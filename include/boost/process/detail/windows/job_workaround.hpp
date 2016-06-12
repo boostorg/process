@@ -6,6 +6,7 @@
 #ifndef BOOST_PROCESS_DETAIL_WINDOWS_JOB_WORKAROUND_HPP_
 #define BOOST_PROCESS_DETAIL_WINDOWS_JOB_WORKAROUND_HPP_
 
+#include <boost/detail/winapi/config.hpp>
 #include <boost/detail/winapi/basic_types.hpp>
 #include <boost/detail/winapi/dll.hpp>
 
@@ -81,7 +82,7 @@ typedef struct _JOBOBJECT_EXTENDED_LIMIT_INFORMATION_ {
   _Out_opt_ LPDWORD            lpReturnLength
 );
  */
-typedef ::boost::detail::winapi::BOOL_ WINAPI (*query_information_job_object_p)(
+typedef ::boost::detail::winapi::BOOL_  ( WINAPI *query_information_job_object_p)(
         ::boost::detail::winapi::HANDLE_,
         JOBOBJECTINFOCLASS_,
         void *,
@@ -109,7 +110,7 @@ inline ::boost::detail::winapi::BOOL_ WINAPI query_information_job_object(
   _In_ DWORD              cbJobObjectInfoLength
 );*/
 
-typedef ::boost::detail::winapi::BOOL_ WINAPI (*set_information_job_object_p)(
+typedef ::boost::detail::winapi::BOOL_  ( WINAPI *set_information_job_object_p)(
         ::boost::detail::winapi::HANDLE_,
         JOBOBJECTINFOCLASS_,
         void *,

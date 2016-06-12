@@ -27,7 +27,7 @@ template<typename Executor>
 void close_out<1,-1>::on_exec_setup(Executor &e) const
 {
     if (::close(STDOUT_FILENO) == -1)
-    	e.set_error(::boost::process::detail::get_last_error(), "close() failed");
+        e.set_error(::boost::process::detail::get_last_error(), "close() failed");
 
 }
 
@@ -36,7 +36,7 @@ template<typename Executor>
 void close_out<2,-1>::on_exec_setup(Executor &e) const
 {
     if (::close(STDERR_FILENO) == -1)
-    	e.set_error(::boost::process::detail::get_last_error(), "close() failed");
+        e.set_error(::boost::process::detail::get_last_error(), "close() failed");
 }
 
 template<>
@@ -44,10 +44,10 @@ template<typename Executor>
 void close_out<1,2>::on_exec_setup(Executor &e) const
 {
     if (::close(STDOUT_FILENO) == -1)
-    	e.set_error(::boost::process::detail::get_last_error(), "close() failed");
+        e.set_error(::boost::process::detail::get_last_error(), "close() failed");
 
     if (::close(STDERR_FILENO) == -1)
-    	e.set_error(::boost::process::detail::get_last_error(), "close() failed");
+        e.set_error(::boost::process::detail::get_last_error(), "close() failed");
 }
 
 }}}}

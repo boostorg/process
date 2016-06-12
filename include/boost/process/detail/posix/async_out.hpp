@@ -36,10 +36,10 @@ inline int apply_out_handles(int handle, std::integral_constant<int, 2>, std::in
 
 inline int apply_out_handles(int handle, std::integral_constant<int, 1>, std::integral_constant<int, 2>)
 {
-	if (::dup2(handle, STDOUT_FILENO) == -1)
-		return -1;
+    if (::dup2(handle, STDOUT_FILENO) == -1)
+        return -1;
     if (::dup2(handle, STDERR_FILENO) == -1)
-    	return -1;
+        return -1;
 
     return 0;
 }
@@ -87,7 +87,7 @@ struct async_out_buffer : ::boost::process::detail::posix::async_handler
     {
         int res = apply_out_handles(pipe->native_sink(), std::integral_constant<int, p1>(), std::integral_constant<int, p2>());
         if (res == -1)
-        	exec.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
+            exec.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
     }
 };
 
@@ -110,7 +110,10 @@ struct async_out_future : ::boost::process::detail::posix::async_handler
     template <typename Executor>
     inline void on_success(Executor &exec) const
     {
-        auto& pipe = this->pipe;
+        if (!pipe)
+            pipe = std::make_shared<boost::process::async_pipe>(get_io_service(exec.seq));
+
+        auto pipe = this->pipe;
         auto buffer  = this->buffer;
         auto promise = this->promise;
         boost::asio::async_read(*pipe, *buffer,
@@ -136,8 +139,8 @@ struct async_out_future : ::boost::process::detail::posix::async_handler
     template<typename Executor>
     std::function<void(int, const std::error_code&)> on_exit_handler(Executor & exec)
     {
-
-        pipe = std::make_shared<boost::process::async_pipe>(get_io_service(exec.seq));
+        if (!pipe)
+            pipe = std::make_shared<boost::process::async_pipe>(get_io_service(exec.seq));
 
         auto pipe = this->pipe;
         return [pipe](int, const std::error_code & ec)

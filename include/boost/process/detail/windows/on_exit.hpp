@@ -8,7 +8,6 @@
 
 #include <boost/process/detail/config.hpp>
 #include <boost/process/detail/handler_base.hpp>
-#include <boost/process/detail/windows/on_exit.hpp>
 #include <boost/process/detail/windows/async_handler.hpp>
 #include <boost/detail/winapi/process.hpp>
 #include <system_error>
