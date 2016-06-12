@@ -113,17 +113,14 @@ template<typename Sequence>
 class executor : public startup_info_impl<char>
 {
 
-    void internal_error_handle(const std::error_code &ec, const char* msg, boost::mpl::true_ )
+    void internal_error_handle(const std::error_code &ec, const char* msg, boost::mpl::false_, boost::mpl::true_) {}
+    void internal_error_handle(const std::error_code &ec, const char* msg, boost::mpl::true_,  boost::mpl::true_) {}
+
+    void internal_error_handle(const std::error_code &ec, const char* msg, boost::mpl::true_,  boost::mpl::false_ )
     {
         this->_ec = ec;
     }
-    void internal_error_handle(const std::error_code &ec, const char* msg, boost::mpl::false_ )
-    {
-        throw std::system_error(ec, msg);
-    }
-
-    void internal_throw(boost::mpl::true_,  std::error_code &ec, const char * msg = "") {}
-    void internal_throw(boost::mpl::false_, std::error_code &ec, const char * msg = "Unknown error")
+    void internal_error_handle(const std::error_code &ec, const char* msg, boost::mpl::false_, boost::mpl::false_ )
     {
         throw std::system_error(ec, msg);
     }
@@ -212,14 +209,14 @@ public:
             on_success_t on_success(*this);
             boost::fusion::for_each(seq, on_success);
         }
+        else
+        	set_error(::boost::process::detail::get_last_error(),
+        			" CreateProcess failed");
 
-        if ((err_code == 0) || _ec)
+        if ( _ec)
         {
-            auto last_error = (err_code == 0) ? boost::process::detail::get_last_error() : _ec;
-
-            on_error_t on_error(*this, last_error);
+            on_error_t on_error(*this, _ec);
             boost::fusion::for_each(seq, on_error);
-            internal_throw(has_error_handler(), last_error);
             return child();
         }
         else
@@ -229,11 +226,11 @@ public:
 
     void set_error(const std::error_code & ec, const char* msg = "Unknown Error.")
     {
-        internal_error_handle(ec, msg, has_error_handler());
+        internal_error_handle(ec, msg, has_error_handler(), 		has_ignore_error());
     }
     void set_error(const std::error_code & ec, const std::string msg = "Unknown Error.")
     {
-        internal_error_handle(ec, msg.c_str(), has_error_handler());
+        internal_error_handle(ec, msg.c_str(), has_error_handler(), has_ignore_error());
     }
 
     const std::error_code& error() const {return _ec;}

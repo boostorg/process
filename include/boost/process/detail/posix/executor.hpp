@@ -154,9 +154,6 @@ class executor
             throw std::system_error(ec, msg);
     }
 
-    void internal_throw(boost::mpl::true_, std::error_code &ec ) {}
-    void internal_throw(boost::mpl::false_, std::error_code &ec ) {throw std::system_error(ec);}
-
     typedef typename ::boost::process::detail::has_error_handler<Sequence>::type has_error_handler;
     typedef typename ::boost::process::detail::has_ignore_error <Sequence>::type has_ignore_error;
 
