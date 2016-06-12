@@ -31,6 +31,8 @@
 #include <boost/process/pipe.hpp>
 #include <boost/process/shell.hpp>
 #include <boost/process/search_path.hpp>
+#include <boost/process/spawn.hpp>
+#include <boost/process/system.hpp>
 #include <boost/process/start_dir.hpp>
 
 #endif
