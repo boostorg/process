@@ -100,7 +100,7 @@ template<typename ...Args>
 inline int system_impl(
         std::false_type, /*has async */
         std::true_type, /*has io_service*/
-        Args & ...args)
+        Args && ...args)
 {
     child c(std::forward<Args>(args)...);
     if (!c.valid())
@@ -113,7 +113,7 @@ template<typename ...Args>
 inline int system_impl(
         std::false_type, /*has async */
         std::false_type, /*has io_service*/
-        Args & ...args)
+        Args && ...args)
 {
     child c(std::forward<Args>(args)...);
     if (!c.valid())
@@ -135,11 +135,10 @@ inline int system(Args && ...args)
 
     return ::boost::process::detail::system_impl(
             has_async(), has_ios(),
-            std::forward<Args>(args)...
 #if defined(BOOST_POSIX_API)
-            ,::boost::process::posix::sig.dfl()
+            ::boost::process::posix::sig.dfl(),
 #endif
-            );
+            std::forward<Args>(args)...);
 }
 
 

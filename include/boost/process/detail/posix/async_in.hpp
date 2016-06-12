@@ -44,7 +44,7 @@ struct async_in_buffer : ::boost::process::detail::posix::async_handler
     {
     }
     template <typename Executor>
-    inline void on_success(Executor &exec) const
+    inline void on_success(Executor &exec)
     {
 
         auto  pipe              = this->pipe;
@@ -56,15 +56,20 @@ struct async_in_buffer : ::boost::process::detail::posix::async_handler
             boost::asio::async_write(*pipe, buf,
                 [pipe, promise](const boost::system::error_code & ec, std::size_t)
                 {
-                    std::error_code e(ec.value(), std::system_category());
-                    promise->set_exception(std::make_exception_ptr(std::system_error(e)));
-                    promise->set_value();
+            		if (ec && (ec.value() != EBADF) && (ec.value() == EPERM))
+                    {
+                        std::error_code e(ec.value(), std::system_category());
+                        promise->set_exception(std::make_exception_ptr(std::system_error(e)));
+                    }
+            		else
+            			promise->set_value();
                 });
         }
         else
-
-        boost::asio::async_write(*pipe, buf,
+        	boost::asio::async_write(*pipe, buf,
                 [pipe](const boost::system::error_code&ec, std::size_t size){});
+
+        this->pipe = nullptr;
     }
 
     template<typename Executor>
@@ -83,7 +88,6 @@ struct async_in_buffer : ::boost::process::detail::posix::async_handler
                             pipe->close(ec);
                       });
                };
-
     };
     template <typename Executor>
     void on_exec_setup(Executor &exec)
