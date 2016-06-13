@@ -55,9 +55,9 @@ public:
     }
     template<class CharT, class Traits = std::char_traits<CharT>>
     inline async_pipe& operator=(const basic_pipe<CharT, Traits>& p);
-    async_pipe& operator=(const async_pipe& lhs);
+    inline async_pipe& operator=(const async_pipe& lhs);
 
-    async_pipe& operator=(async_pipe&& lhs);
+    inline async_pipe& operator=(async_pipe&& lhs);
 
     ~async_pipe()
     {

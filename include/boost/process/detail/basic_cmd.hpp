@@ -91,9 +91,9 @@ struct exe_builder
     void operator()(const std::string & data)
     {
         if (exe.empty())
-            exe = std::move(data);
+            exe = data;
         else
-            args.push_back(std::move(data));
+            args.push_back(data);
     }
     void operator()(const char* data)
     {
@@ -103,13 +103,29 @@ struct exe_builder
             args.push_back(data);
     }
     void operator()(shell_) {shell = true;}
-    void operator()(std::vector<std::string> & data)
+    void operator()(std::vector<std::string> && data)
     {
         if (data.empty())
             return;
 
         auto itr = std::make_move_iterator(data.begin());
         auto end = std::make_move_iterator(data.end());
+
+        if (exe.empty())
+        {
+            exe = *itr;
+            itr++;
+        }
+        args.insert(args.end(), itr, end);
+    }
+
+    void operator()(const std::vector<std::string> & data)
+    {
+        if (data.empty())
+            return;
+
+        auto itr = data.begin();
+        auto end = data.end();
 
         if (exe.empty())
         {
