@@ -74,8 +74,10 @@ inline bool compare_handles(boost::detail::winapi::HANDLE_ lhs, boost::detail::w
     if ((*f)(rhs, ObjectNameInformation, &rhs_info, sizeof(_OBJECT_NAME_INFORMATION), nullptr))
         ::boost::process::detail::throw_last_error("NtQueryObject failed");
 
+    if (lhs_info.Name.Length != rhs_info.Name.Length)
+        return false;
     return std::equal(lhs_info.Name.Buffer, lhs_info.Name.Buffer + lhs_info.Name.Length,
-                      rhs_info.Name.Buffer, rhs_info.Name.Buffer + rhs_info.Name.Length);
+                      rhs_info.Name.Buffer);
 }
 
 

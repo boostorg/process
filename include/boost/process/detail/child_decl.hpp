@@ -62,7 +62,7 @@ public:
 
     explicit child(pid_t & pid) : _child_handle(pid) {};
     child(const child&) = delete;
-    child(child && lhs)
+    child(child && lhs) noexcept
         : _child_handle(std::move(lhs._child_handle)),
           _exit_status(std::move(lhs._exit_status)),
           _attached (lhs._attached)

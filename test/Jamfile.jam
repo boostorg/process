@@ -63,4 +63,5 @@ test-suite ts :
      [ run terminate.cpp system filesystem                     : : sparring_partner ]
      [ run throw_on_error.cpp system filesystem                : : sparring_partner ]
      [ run wait.cpp system filesystem                          : : sparring_partner ]
+     [ compile-fail spawn_fail.cpp ]
     ;

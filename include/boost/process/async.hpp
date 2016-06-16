@@ -19,7 +19,6 @@
 
 #include <boost/process/detail/traits.hpp>
 #include <boost/process/detail/on_exit.hpp>
-#include <boost/process/detail/no_wait_io_service.hpp>
 
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/streambuf.hpp>
@@ -45,8 +44,6 @@ template<typename T>
 struct is_io_service : std::false_type {};
 template<>
 struct is_io_service<api::io_service_ref> : std::true_type {};
-template<>
-struct is_io_service<no_wait_io_service_ref> : std::true_type {};
 
 template<typename Tuple>
 inline asio::io_service& get_io_service(const Tuple & tup)

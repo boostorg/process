@@ -20,7 +20,7 @@
 #include <boost/process/detail/config.hpp>
 #include <boost/process/detail/child_decl.hpp>
 #include <boost/process/detail/execute_impl.hpp>
-#include <boost/process/detail/no_wait_io_service.hpp>
+#include <boost/process/detail/async_handler.hpp>
 
 #if defined(BOOST_POSIX_API)
 #include <boost/process/posix.hpp>
@@ -40,11 +40,21 @@ namespace detail {
 template<typename ...Args>
 inline void spawn(Args && ...args)
 {
+    typedef typename ::boost::process::detail::has_async_handler<Args...>::type
+            has_async;
+    typedef typename ::boost::process::detail::has_io_service<Args...>::type
+            has_ios;
+
+    static_assert(
+            (!has_async::value) && (!has_ios::value),
+            "Spawn cannot wait for exit, so implicit asyncs "
+            "and asio::io_service cannot be passed");
+
     auto c = ::boost::process::detail::execute_impl(
 #if defined(BOOST_POSIX_API)
             ::boost::process::posix::sig.ign(),
 #endif
-             ::boost::process::detail::make_no_wait_io_service_ref<Args>(args)...);
+             std::forward<Args>(args)...);
     c.detach();
 }
 

@@ -33,10 +33,10 @@ BOOST_AUTO_TEST_CASE(shell_simple, *boost::unit_test::timeout(5))
     bp::ipstream p;
 
     bp::child c(master_test_suite().argv[1],
-    		bp::shell,
-			bp::args+={"test", "--echo-stdout", "hello"},
-			ec,
-			bp::std_out > p);
+            bp::shell,
+            bp::args+={"test", "--echo-stdout", "hello"},
+            ec,
+            bp::std_out > p);
     BOOST_CHECK(!ec);
 
     if (ec)
