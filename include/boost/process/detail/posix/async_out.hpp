@@ -57,11 +57,13 @@ struct async_out_buffer : ::boost::process::detail::posix::async_handler
     }
 
     template <typename Executor>
-    inline void on_success(Executor &exec) const
+    inline void on_success(Executor &exec)
     {
         auto  pipe              = this->pipe;
         boost::asio::async_read(*pipe, buf,
                 [pipe](const boost::system::error_code&, std::size_t size){});
+
+        this->pipe = nullptr;
     }
 
     template<typename Executor>
@@ -85,6 +87,9 @@ struct async_out_buffer : ::boost::process::detail::posix::async_handler
     template <typename Executor>
     void on_exec_setup(Executor &exec)
     {
+        if (!pipe)
+            pipe = std::make_shared<boost::process::async_pipe>(get_io_service(exec.seq));
+
         int res = apply_out_handles(pipe->native_sink(), std::integral_constant<int, p1>(), std::integral_constant<int, p2>());
         if (res == -1)
             exec.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
@@ -108,7 +113,7 @@ struct async_out_future : ::boost::process::detail::posix::async_handler
         fut = promise->get_future();
     }
     template <typename Executor>
-    inline void on_success(Executor &exec) const
+    inline void on_success(Executor &exec)
     {
         if (!pipe)
             pipe = std::make_shared<boost::process::async_pipe>(get_io_service(exec.seq));
@@ -119,7 +124,7 @@ struct async_out_future : ::boost::process::detail::posix::async_handler
         boost::asio::async_read(*pipe, *buffer,
                 [pipe, buffer, promise](const boost::system::error_code& ec, std::size_t size)
                 {
-                    if (ec)
+                    if (ec && (ec.value() != EBADF) && (ec.value() == EPERM))
                     {
                         std::error_code e(ec.value(), std::system_category());
                         promise->set_exception(std::make_exception_ptr(std::system_error(e)));
@@ -134,6 +139,9 @@ struct async_out_future : ::boost::process::detail::posix::async_handler
                         promise->set_value(std::move(arg));
                     }
                 });
+
+        this->pipe = nullptr;
+
     }
 
     template<typename Executor>
@@ -159,7 +167,12 @@ struct async_out_future : ::boost::process::detail::posix::async_handler
     template <typename Executor>
     void on_exec_setup(Executor &exec)
     {
-        apply_out_handles(exec, pipe->native_sink(), std::integral_constant<int, p1>(), std::integral_constant<int, p2>());
+        if (!pipe)
+            pipe = std::make_shared<boost::process::async_pipe>(get_io_service(exec.seq));
+
+        int res = apply_out_handles(pipe->native_sink(), std::integral_constant<int, p1>(), std::integral_constant<int, p2>());
+        if (res == -1)
+            exec.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
     }
 
 };

@@ -10,7 +10,7 @@
 #ifndef BOOST_PROCESS_DETAIL_POSIX_EXECUTOR_HPP
 #define BOOST_PROCESS_POSIX_EXECUTOR_HPP
 
-#include <boost/process/child.hpp>
+#include <boost/process/detail/child_decl.hpp>
 #include <boost/process/error.hpp>
 #include <boost/process/pipe.hpp>
 #include <boost/process/detail/posix/basic_pipe.hpp>
