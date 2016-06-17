@@ -104,6 +104,7 @@ struct exe_cmd_init : boost::process::detail::api::handler_base_ext
     static exe_cmd_init exe_args_shell(std::string&& exe, std::vector<std::string> && args)
     {
         std::string sh = shell().string();
+        args.push_back(exe);
         return exe_cmd_init(std::move(sh), std::move(args));
     }
     static exe_cmd_init cmd_shell(std::string&& cmd)
