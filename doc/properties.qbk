@@ -97,6 +97,8 @@ obtain the path of the system shell.
 
     auto shell_cmd = shell();
     
+[caution Launching through the shell will NOT provide proper error handling, i.e.
+you will get an error via the return code]
 [endsect]
 
 
