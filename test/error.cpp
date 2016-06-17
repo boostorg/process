@@ -103,3 +103,11 @@ BOOST_AUTO_TEST_CASE(success_error)
     }
     BOOST_CHECK(has_thrown);
 }
+
+BOOST_AUTO_TEST_CASE(ignore_error)
+{
+
+    {
+        BOOST_CHECK_NO_THROW(bp::child c("doesnt-exit", bp::ignore_error));
+    }
+}

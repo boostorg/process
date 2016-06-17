@@ -28,7 +28,6 @@
 #include <boost/fusion/sequence/intrinsic/end.hpp>
 #include <boost/fusion/sequence/comparison/equal_to.hpp>
 #include <boost/fusion/container/set/convert.hpp>
-
 #include <boost/type_index.hpp>
 
 /** \file boost/process/error.hpp
@@ -102,11 +101,14 @@ struct has_error_handler
 {
     
     typedef typename boost::fusion::result_of::as_set<Sequence>::type set_type;
-    typedef typename boost::fusion::result_of::has_key<set_type, set_on_error>::type    t1;
-    typedef typename boost::fusion::result_of::has_key<set_type, throw_on_error_>::type t2;
-    typedef typename boost::fusion::result_of::has_key<set_type, ignore_error_>::type   t3;
+    typedef typename boost::fusion::result_of::has_key<set_type, set_on_error>::type   		 t1;
+    typedef typename boost::fusion::result_of::has_key<set_type, set_on_error&>::type    	 t2;
+    typedef typename boost::fusion::result_of::has_key<set_type, const set_on_error&>::type  t3;
 
-    typedef typename boost::mpl::or_<t1,t2,t3>::type type;
+    typedef typename boost::fusion::result_of::has_key<set_type, const throw_on_error_&>::type t4;
+    typedef typename boost::fusion::result_of::has_key<set_type, const ignore_error_&>::type   t5;
+
+    typedef typename boost::mpl::or_<t1,t2,t3, t4, t5>::type type;
 
 };
 
@@ -114,7 +116,11 @@ template<typename Sequence>
 struct has_ignore_error
 {
     typedef typename boost::fusion::result_of::as_set<Sequence>::type set_type;
-    typedef typename boost::fusion::result_of::has_key<set_type, ignore_error_>::type type;
+    typedef typename boost::fusion::result_of::has_key<set_type, ignore_error_>::type  type1;
+    typedef typename boost::fusion::result_of::has_key<set_type, ignore_error_&>::type type2;
+    typedef typename boost::fusion::result_of::has_key<set_type, const ignore_error_&>::type type3;
+    typedef typename boost::mpl::or_<type1,type2, type3>::type type;
+
 };
 
 struct error_builder
