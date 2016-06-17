@@ -27,7 +27,7 @@ template<typename Sequence>
 struct shall_use_vfork
 {
     typedef typename boost::fusion::result_of::as_set<Sequence>::type set_type;
-    typedef typename boost::fusion::result_of::has_key<set_type, ignore_error_>::type type;
+    typedef typename boost::fusion::result_of::has_key<set_type, use_vfork_>::type type;
 };
 
 
