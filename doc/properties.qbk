@@ -23,9 +23,7 @@ The overload form applies when only one string is passed to a launching function
 The string will be internally parsed and split at spaces.
 [endsect]
 
-
-
-[section Args]
+[section:args Args]
     
     #include <boost/process/args.hpp>
 
@@ -62,7 +60,7 @@ spawn("gcc", args="--version");
 
 
 
-[section Exe]
+[section:exe Exe]
     
     #include <boost/process/exe.hpp>
 
@@ -86,7 +84,7 @@ passed. It will be used from any position if a boost::filesystem::path is passed
 
 
 
-[section Shell]
+[section:shell Shell]
     
     #include <boost/process/shell.hpp>
 
@@ -103,7 +101,7 @@ obtain the path of the system shell.
 
 
 
-[section Error]
+[section:error Error]
     
     #include <boost/process/error.hpp>
 
@@ -126,7 +124,7 @@ The property has two aliases:
 
 
 
-[section Ignore_Error]
+[section:ignore_error Ignore_Error]
     
     #include <boost/process/error.hpp>
 
@@ -137,7 +135,7 @@ on linux, where error handling will require a pipe.
 
 
 
-[section Throw_On_Error]
+[section:throw_on_error Throw_On_Error]
     
     #include <boost/process/error.hpp>
 
@@ -146,7 +144,7 @@ It is unnecessary by default, but may be used, when an additional error_code is 
     
 [endsect]
 
-[section io_service]
+[section:io_service io_service]
 
     #include <boost/process/async.hpp>
 
@@ -157,7 +155,7 @@ It only exists in the explicit form.
 
 
 
-[section on_exit]
+[section:on_exit on_exit]
 
     #include <boost/process/async.hpp>
 
@@ -179,7 +177,7 @@ on_exit(function);
 
 [endsect]
 
-[section I/O]
+[section:io I/O]
 
     #include <boost/process/io.hpp>
 
@@ -206,7 +204,7 @@ Additionally, the output streams can be combined via &, i.e. the following code 
 
 This property has no overload variant.
 
-[section File I/O]
+[section:file_io File I/O]
 
 The file I/O simple redirects the stream to a file, where the valid types are
 
@@ -247,7 +245,7 @@ Here's an example:
 [endsect]
 
 
-[section Synchronous Pipe I/O]
+[section:sync_pipe_io Synchronous Pipe I/O]
 
 As explained in the corresponding section, the boost.process library provides a
 [classref boost::process::basic_pipe pipe] class which can be used to communicate 
@@ -288,7 +286,7 @@ Note that the pipe may also be used between several processes, like this:
 
 [endsect]
 
-[section Asynchronous Pipe I/O]
+[section:async_pipe_io Asynchronous Pipe I/O]
 
 Asynchronous Pipe I/O classifies communication which has automatically handling
 of the async operations by the process library. This means, that a pipe will be
@@ -326,7 +324,7 @@ std_err = buffer;
 [note `boost::asio::buffer` is also available in the `boost::process` namespace.] 
 [endsect]
 
-[section Closing]
+[section:closing Closing]
 
 Closing a stream means, that no data can be written or read from it. 
 
@@ -349,7 +347,7 @@ std_err.close();
 
 [endsect]
 
-[section Redirecting to null]
+[section:null Redirecting to null]
 
 Unlike closing a pipe, redirecting to null will allow to read and write data.
 Written data will disregarded, while read data will only consist of `EOF`.
@@ -376,7 +374,7 @@ std_err.close();
 
 
 
-[section start_dir]
+[section:start_dir start_dir]
 
     #include <boost/process/start_dir.hpp>
     
@@ -392,7 +390,7 @@ system("ls", start_dir="./bin");
 
 
 
-[section group]
+[section:group group]
 
     #include <boost/process/group.hpp>
     
@@ -416,7 +414,7 @@ There is no explicit property for this feature.
 [endsect]
 
 
-[section env]
+[section:env env]
 
     #include <boost/process/env.hpp>
     

@@ -1,10 +1,10 @@
 [section:class Classes]
-[section Child]
+[section:child Child]
 
 The child class holds a handle to the child process. It can be direclty used to 
 launch a process via the constructor. It is not copyable, but movable.
 
-[section Waiting]
+[section:wait Waiting]
 
 This class does provides three functions to wait for the process to exit.
 
@@ -16,7 +16,7 @@ If the process exits, the exit_code will be stored inside the class.
 
 [endsect]
 
-[section Termination]
+[section:terminate Termination]
 
 Another way to stop the process is to terminate it. This will also produce an 
 exit code which is platform-specific.
@@ -25,7 +25,7 @@ It is implemented via `TerminateProcess` and `kill -9` on posix.
 
 [endsect]
 
-[section Exit Code]
+[section:exit_code Exit Code]
 
 After a process has exited the exit code is stored either inside the class or the operating 
 system holds it. The return value of the exit code is undefined if the process did not exit.
@@ -33,7 +33,7 @@ The latter can be checked by calling [funcref boost::process::child::is_running 
 
 [endsect]
 
-[section RAII]
+[section:raii RAII]
 
 The child will automatically terminate the child process on destruction, if it wasn't waited for or detached. 
 

@@ -1,7 +1,16 @@
 [section:handbook Handbook]
+[section Header files]
 
+Boost.Process is a header-only library. It comes with a convenience header file which is the only one you need to include to make use of all library features:
+
+    #include <boost/process.hpp>
+
+[note The header files [headerref boost/process/posix.hpp] and [headerref boost/process/windows.hpp] are not included by [headerref boost/process.hpp]. They provide platform-specific extensions. ]
+
+[endsect]
 [include classes.qbk]
 [include this_process.qbk]
 [include properties.qbk]
+[include launching.qbk]
 
 [endsect]

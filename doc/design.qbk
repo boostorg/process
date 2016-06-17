@@ -36,7 +36,93 @@ system("gcc", "-c", args+={"main.cpp"});
 In the following documention the avaible styles will be described. Note that the
 overload style is implemented via type traits, so the types will be listed. 
 
-[caution There is guarantee in which order the arguments will be executed!]
+[caution There is guarantee in which order the arguments will be applied! 
+There is however a guarantee for arguments belonging together, i.e. the string 
+argument and the args property will be evaluated in the order given.]
 
 [endsect]
+ 
+
+
+[section Arguments/Command Style]
+
+When passing arguments to the process, two styles are provided, the cmd-style and the exe-/args-style. 
+
+The cmd style will interpret the string as a sequence of the exe and arguments and parse them as such, while the exe-/args-style will
+interpret each string as an argument.
+
+[table:id Cmd vs Exe/Args
+    [[String]              [Cmd]       [Exe/Args]]
+    [["gcc --version"]     [{"gcc", "--version"}]     [{"\\"gcc --version\\""}]]
+] 
+
+When using the overloading variant, a single string will result in a cmd interpretation, several strings will yield a exe-args interpretation. Both version can be set explicitly:
+
+```
+system("grep -c false /etc/passwd"); //cmd style
+system("grep", "-c", "false", "/etc/passwd"); //exe-/args-
+
+system(cmd="grep -c false /etc/passwd"); //cmd style
+system(exe="grep", args={"-c", "false", "/etc/passwd"}); //exe-/args-
+```
+
+[note If a '"' sign is used in the argument style, it will be passed as part of the argument.
+If the same effect it wanted with the cmd syntax, it ought to be escaped, i.e. '\\\"'. ]
+[endsect]
+
+
+[section Synchronous I/O]
+
+The simplest way to communicate with a child-process is via pipes.
+
+```
+opstream in;
+ipstream out;
+
+child c("c++filt", std_out > out, std_in < in);
+
+in << "_ZN5boost7process8tutorialE" << endl;
+std::string value;
+out >> value;
+
+c.terminate();
+```
+
+[caution This comes with the danger of dead-locks, so it should be used with care.]
+
+[endsect]
+
+[section Asynchronous I/O]
+
+Boost.Process provides capacities to communicate in an asynchronous way using Boost.Asio.
+To do that, the [classref boost::process::async_pipe async_pipe] class is provided, which can be used
+as an I/O object directly:
+
+```
+asio::io_service ios;
+async_pipe pipe;
+spawn("ls", std_out > pipe, ios);
+
+std::string buf;
+
+boost::asio::async_read(p, buffer(buf), 
+            [](const boost::system::error_code &ec, std::size_t size){});
+
+ios.run();
+```
+
+The library also provides a shortcut for this:
+
+```
+asio::io_service ios;
+
+std::string buf;
+
+spawn("ls", std_out > buffer(buf), ios);
+
+ios.run();
+```
+
+[endsect]
+
 [endsect] 
