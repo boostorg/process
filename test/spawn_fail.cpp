@@ -39,8 +39,6 @@ namespace bp = boost::process;
 
 int main()
 {
-    using boost::unit_test::framework::master_test_suite;
-
     std::error_code ec;
 
     boost::asio::io_service ios;
