@@ -62,6 +62,7 @@ test-suite ts :
      [ run start_dir.cpp   filesystem system                   : : sparring_partner ]
      [ run terminate.cpp system filesystem                     : : sparring_partner ]
      [ run throw_on_error.cpp system filesystem                : : sparring_partner ]
+     [ run vfork.cpp     system filesystem                     : : sparring_partner : <build>no <target-os>linux:<build>yes   ]
      [ run wait.cpp system filesystem                          : : sparring_partner ]
      [ compile-fail spawn_fail.cpp ]
     ;

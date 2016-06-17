@@ -24,6 +24,7 @@
 
 #if defined(BOOST_POSIX_API)
 #include <errno.h>
+#include <features.h>
 #elif defined(BOOST_WINDOWS_API)
 #include <boost/detail/winapi/get_last_error.hpp>
 #else
@@ -42,6 +43,12 @@ inline std::error_code get_last_error() noexcept
 {
     return std::error_code(errno, std::system_category());
 }
+
+//copied from linux spec.
+#if defined (__USE_XOPEN_EXTENDED) && !defined (__USE_XOPEN2K8) || defined( __USE_BSD)
+#define BOOST_POSIX_HAS_VFORK 1
+#endif
+
 #elif defined(BOOST_WINDOWS_API)
 namespace windows {namespace extensions {}}
 namespace api = windows;
@@ -64,12 +71,8 @@ inline void throw_last_error()
 
 }
 
-//#if defined(BOOST_POSIX_API)
-//namespace posix   = boost::process::detail::posix  ::extensions;
-//#elif defined(BOOST_WINDOWS_API)
-//namespace windows = boost::process::detail::windows::extensions;
-//#endif
-//
+
+
 
 template<typename Char> constexpr static Char null_char();
 template<> constexpr char     null_char<char>     (){return   '\0';}

@@ -7,6 +7,7 @@
 
 #include <boost/process/detail/posix/fd.hpp>
 #include <boost/process/detail/posix/handler.hpp>
+#include <boost/process/detail/posix/use_vfork.hpp>
 #include <boost/process/detail/posix/signal.hpp>
 
 
@@ -26,6 +27,7 @@ using ::boost::process::detail::posix::on_fork_error;
 using ::boost::process::detail::posix::on_exec_setup;
 using ::boost::process::detail::posix::on_exec_error;
 using ::boost::process::detail::posix::sig;
+using ::boost::process::detail::posix::use_vfork;
 
 }}}
 
