@@ -7,6 +7,7 @@
 #define BOOST_PROCESS_DETAIL_WINDOWS_PIPE_HPP
 
 #include <boost/detail/winapi/basic_types.hpp>
+#include <boost/detail/winapi/error_codes.hpp>
 #include <boost/detail/winapi/pipes.hpp>
 #include <boost/detail/winapi/handles.hpp>
 #include <boost/detail/winapi/file_management.hpp>
@@ -67,15 +68,13 @@ public:
 
     int_type write(const char_type * data, int_type count)
     {
-        constexpr static ::boost::detail::winapi::DWORD_ ERROR_BROKEN_PIPE_ = 109;
-
         ::boost::detail::winapi::DWORD_ write_len;
         if (!::boost::detail::winapi::WriteFile(
                 _sink, data, count * sizeof(char_type), &write_len, nullptr
                 ))
         {
             auto ec = ::boost::process::detail::get_last_error();
-            if (ec.value() == /*::boost::detail::winapi::*/ERROR_BROKEN_PIPE_)
+            if (ec.value() == ::boost::detail::winapi::ERROR_BROKEN_PIPE_)
                 return 0;
             else
                 throw std::system_error(ec, "WriteFile failed");
@@ -84,15 +83,13 @@ public:
     }
     int_type read(char_type * data, int_type count)
     {
-        constexpr static ::boost::detail::winapi::DWORD_ ERROR_BROKEN_PIPE_ = 109;
-
         ::boost::detail::winapi::DWORD_ read_len;
         if (!::boost::detail::winapi::ReadFile(
                 _source, data, count * sizeof(char_type), &read_len, nullptr
                 ))
         {
             auto ec = ::boost::process::detail::get_last_error();
-            if (ec.value() == /*::boost::detail::winapi::*/ERROR_BROKEN_PIPE_)
+            if (ec.value() == ::boost::detail::winapi::ERROR_BROKEN_PIPE_)
                 return 0;
             else
                 throw std::system_error(ec, "ReadFile failed");

@@ -7,6 +7,8 @@
 #ifndef BOOST_PROCESS_DETAIL_WINDOWS_ENV_INIT_HPP_
 #define BOOST_PROCESS_DETAIL_WINDOWS_ENV_INIT_HPP_
 
+#include <boost/detail/winapi/error_codes.hpp>
+
 
 #include <boost/process/detail/config.hpp>
 #include <boost/process/detail/handler_base.hpp>
@@ -31,8 +33,7 @@ struct env_init : public ::boost::process::detail::handler_base
 
         if (*e == null_char<char>())
         {
-            constexpr static ::boost::detail::winapi::DWORD_ ERROR_BAD_ENVIRONMENT_ = 0xA;
-            exec.set_error(std::error_code(ERROR_BAD_ENVIRONMENT_, std::system_category()),
+            exec.set_error(std::error_code(::boost::detail::winapi::ERROR_BAD_ENVIRONMENT_, std::system_category()),
                     "Bad Environment");
         }
 

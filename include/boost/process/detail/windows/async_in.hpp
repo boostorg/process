@@ -13,6 +13,8 @@
 #include <boost/detail/winapi/process.hpp>
 #include <boost/detail/winapi/handles.hpp>
 #include <boost/detail/winapi/handle_info.hpp>
+#include <boost/detail/winapi/error_codes.hpp>
+
 #include <boost/asio/write.hpp>
 #include <boost/process/detail/handler_base.hpp>
 #include <boost/process/detail/windows/async_handler.hpp>
@@ -54,9 +56,7 @@ struct async_in_buffer : ::boost::process::detail::windows::async_handler
             boost::asio::async_write(*pipe, buf,
                 [promise](const boost::system::error_code & ec, std::size_t)
                 {
-                    constexpr static ::boost::detail::winapi::DWORD_ ERROR_BROKEN_PIPE_ = 109;
-
-                    if (ec && (ec.value() != ERROR_BROKEN_PIPE_))
+                    if (ec && (ec.value() != ::boost::detail::winapi::ERROR_BROKEN_PIPE_))
                     {
                         std::error_code e(ec.value(), std::system_category());
                         promise->set_exception(std::make_exception_ptr(std::system_error(e)));

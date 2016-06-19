@@ -16,6 +16,8 @@
 #include <boost/asio/read.hpp>
 #include <boost/process/detail/handler_base.hpp>
 #include <boost/process/detail/windows/asio_fwd.hpp>
+#include <boost/detail/winapi/error_codes.hpp>
+
 #include <istream>
 #include <memory>
 #include <exception>
@@ -138,9 +140,7 @@ struct async_out_future : ::boost::process::detail::windows::async_handler
         boost::asio::async_read(*pipe, *buffer,
                 [pipe, buffer, promise](const boost::system::error_code& ec, std::size_t size)
                 {
-                    constexpr static ::boost::detail::winapi::DWORD_ ERROR_BROKEN_PIPE_ = 109;
-
-                    if (ec && (ec.value() != ERROR_BROKEN_PIPE_))
+                    if (ec && (ec.value() != ::boost::detail::winapi::ERROR_BROKEN_PIPE_))
                     {
                         std::error_code e(ec.value(), std::system_category());
                         promise->set_exception(std::make_exception_ptr(std::system_error(e)));
