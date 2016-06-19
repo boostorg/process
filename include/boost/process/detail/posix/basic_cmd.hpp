@@ -12,6 +12,7 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/process/shell.hpp>
 #include <boost/algorithm/string/trim.hpp>
+#include <boost/algorithm/string/join.hpp>
 #include <string>
 #include <vector>
 
@@ -23,6 +24,31 @@ namespace detail
 {
 namespace posix
 {
+
+
+inline std::string build_cmd_shell(const std::string & exe, std::vector<std::string> && data)
+{
+    std::string st = exe;
+    for (auto & arg : data)
+    {
+        boost::replace_all(arg, "\"", "\\\"");
+
+        auto it = std::find(arg.begin(), arg.end(), ' ');//contains space?
+        if (it != arg.end())//ok, contains spaces.
+        {
+            //the first one is put directly onto the output,
+            //because then I don't have to copy the whole string
+            arg.insert(arg.begin(), '"' );
+            arg += '"'; //thats the post one.
+        }
+
+        if (!st.empty())//first one does not need a preceeding space
+            st += ' ';
+
+        st += arg;
+    }
+    return  st ;
+}
 
 inline std::vector<std::string>  build_args(const std::string & data)
 {
@@ -103,14 +129,16 @@ struct exe_cmd_init : boost::process::detail::api::handler_base_ext
 
     static exe_cmd_init exe_args_shell(std::string&& exe, std::vector<std::string> && args)
     {
-        std::vector<std::string> args_ = {"-c", std::move(exe)};
-        args_.insert(args_.end(), std::make_move_iterator(args.begin()), std::make_move_iterator(args.end()));
+    	auto cmd = build_cmd_shell(std::move(exe), std::move(args));
+
+        std::vector<std::string> args_ = {"-c", std::move(cmd)};
         std::string sh = shell().string();
+
         return exe_cmd_init(std::move(sh), std::move(args_));
     }
     static exe_cmd_init cmd_shell(std::string&& cmd)
     {
-        std::vector<std::string> args = {"-c", std::move(cmd)};
+        std::vector<std::string> args = {"-c", "\"" + cmd + "\""};
         std::string sh = shell().string();
 
         return exe_cmd_init(
