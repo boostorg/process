@@ -28,8 +28,8 @@ int main()
         std_out > ios
     );
 
-    boost::array<char, 4096> buffer;
-    boost::asio::async_read(p, boost::asio::buffer(buffer),
+    boost::asio::streambuf buffer;
+    boost::asio::async_read_until(p, buffer, '\n',
         [](const boost::system::error_code&, std::size_t){});
 
     ios.run();

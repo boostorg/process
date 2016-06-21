@@ -1,0 +1,126 @@
+[section:plat_ext Extensions]
+
+The library in the current state provides a set of extensions. The are called
+extensions because they are not part of the core library (i.e. the portable part).
+
+[note The support for some of these features may well end in further versions, 
+while there will be more effort put on the core library not introducing breaking changes.]
+
+[section:handler Handlers]
+The simplest form to extend functionality is to provide another handler, which 
+will be called on the resprective events on process launching. The names are:
+
+- `boost::process::on_setup`
+- `boost::process::on_error`
+- `boost::process::on_success`
+
+
+As an example:
+
+```
+child c("ls", on_setup([](){cout << "On Setup" << endl;});
+```
+
+
+[note On posix all those callbacks will be handles by this process, not the created one.]
+[endsect]
+[section:posix_ext Posix Extensions]
+
+All posix extensions require the inclusion of `boost/process/posix.hpp` and are
+present in the `boost::process::posix` namespace. They are only provided in the property style.
+
+[section Handlers]
+
+The posix implementation provides two more handlers, that may be called after
+the fork from the child process - fork error will be triggered if the fork fails.
+
+- `boost::process::on_fork_error`
+- `boost::process::on_exec_setup`
+- `boost::process::on_exec_error`
+
+
+[endsect]
+
+[section Binding a file descriptor]
+
+For file-descriptor operations not covered by the `std_in/std_out/std_err`, the 
+posix extensions provides the fd-property. This allowsthe following operations:
+
+
+ - Closing a/the file descriptor(s)
+ - Bind the file descriptor  
+ 
+The following expressions are valid:
+
+```
+//close
+fd.close(1)
+fd.close({2,3,4,5}) 
+
+//bind 2 to 1.
+fd.bind(1,2)
+``` 
+[endsect]
+
+[section Signal Handling]
+
+The `SIGCHLD` can be set for the current process to launch with the `sig` posix
+extension. That will cause the applied signal to be reset the the previous value.
+
+[caution The `system` and `spawn` function do use the signals internally.]
+
+The following expressions can be used:
+
+```  
+//use SIG_IGN
+sig.ign() 
+sig(SIG_IGN)
+sig=SIG_IGN
+
+//use SIG_DFL
+sig.dfl() 
+sig(SIG_DFL)
+sig=SIG_DFL
+
+//custom signal handler
+sighandler_t h = &my_handler;
+sig(h)
+sig=h
+```
+
+[endsect]
+
+[section use vfork]
+
+Since `fork` can cause problems on systems with very little memory, `boost.process` 
+provides a way to use `vfork` instead. 
+
+The syntax is simple, just pass `posix::use_vfork` to `child`/`system` or `spawn`.
+
+[note `vfork` is no longer an official part of the posix standard.]
+
+[caution This should only be used if absolutely necessary, not as a form of
+premature optimization.]
+
+[endsect] 
+
+[endsect]
+
+[section Windows]
+
+Windows extensions only consists of values that can be uses for the `ShowWindow` parameter. 
+Those are the following, defined in the `boost::process::windows` namespace.
+
+[table Show Windows Parameters
+    [[Property] [Winapi Symbol] [Description]]
+    [[`hide`] [`SW_HIDE`] [Hides the window and activates another window.]]
+    [[`show`]        [`SW_SHOWNORMAL`] [Activates and displays a window. If the window is minimized or maximized, the system restores it to its original size and position. An application should specify this flag when displaying the window for the first time.]]
+    [[`show_normal`] [`SW_SHOWNORMAL`] [Activates and displays a window. If the window is minimized or maximized, the system restores it to its original size and position. An application should specify this flag when displaying the window for the first time.]]
+    [[`maximized`]   [`SW_SHOWMAXIMIZED`] [Activates the window and displays it as a maximized window.]]
+    [[`minimized`]   [`SW_SHOWMINIMIZED`] [Activates the window and displays it as a minimized window.]]
+    [[`minimized_not_active`]  [`SW_SHOWMINNOACTIVE`] [Displays the window as a minimized window. This value is similar to `SW_SHOWMINIMIZED`, except the window is not activated.]]
+    [[`not_active`]  [`SW_SHOWNOACTIVATE`] [Displays a window in its most recent size and position. This value is similar to SW_SHOWNORMAL, except that the window is not activated.]]
+]
+
+[endsect]
+[endsect]
