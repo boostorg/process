@@ -52,10 +52,10 @@ struct const_entry
             return string_type();
     }
     string_type get_name() const {return string_type(_name.begin(), _name.end());}
-    const_entry(string_type&& name, pointer data, environment_t & env) :
+    explicit const_entry(string_type&& name, pointer data, environment_t & env) :
         _name(std::move(name)), _data(data), _env(&env) {}
 
-    const_entry(string_type &&name, environment_t & env) :
+    explicit const_entry(string_type &&name, environment_t & env) :
         _name(std::move(name)), _data(nullptr), _env(&env) {}
     const_entry(const const_entry&) = default;
     const_entry& operator=(const const_entry&) = default;
@@ -88,10 +88,10 @@ struct entry : const_entry<Char, Environment>
     using pointer       = typename father::pointer;
     using environment_t = typename father::environment_t;
 
-    entry(string_type&& name, pointer data, environment_t & env) :
+    explicit entry(string_type&& name, pointer data, environment_t & env) :
         father(std::move(name), data, env) {}
 
-    entry(string_type &&name, environment_t & env) :
+    explicit entry(string_type &&name, environment_t & env) :
         father(std::move(name), env) {}
 
     entry(const entry&) = default;

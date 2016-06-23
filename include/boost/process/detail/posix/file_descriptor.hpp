@@ -23,16 +23,16 @@ struct file_descriptor
 
 
     file_descriptor() = default;
-    file_descriptor(const boost::filesystem::path& p, mode_t mode = read_write)
+    explicit file_descriptor(const boost::filesystem::path& p, mode_t mode = read_write)
         : file_descriptor(p.native(), mode)
     {
     }
 
-    file_descriptor(const std::string & path , mode_t mode = read_write)
+    explicit file_descriptor(const std::string & path , mode_t mode = read_write)
         : file_descriptor(path.c_str(), mode) {}
 
 
-    file_descriptor(const char*    path, mode_t mode = read_write)
+    explicit file_descriptor(const char*    path, mode_t mode = read_write)
         : _handle(create_file(path, mode))
     {
 

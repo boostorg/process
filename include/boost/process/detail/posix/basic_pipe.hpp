@@ -28,8 +28,8 @@ class basic_pipe
     int _source = -1;
     int _sink   = -1;
 public:
-    basic_pipe(int source, int sink) : _source(source), _sink(sink) {}
-    basic_pipe(int source, int sink, const std::string & name) : _source(source), _sink(sink) {}
+    explicit basic_pipe(int source, int sink) : _source(source), _sink(sink) {}
+    explicit basic_pipe(int source, int sink, const std::string & name) : _source(source), _sink(sink) {}
     typedef CharT                      char_type  ;
     typedef          Traits            traits_type;
     typedef typename Traits::int_type  int_type   ;
@@ -47,7 +47,7 @@ public:
         _sink   = fds[1];
     }
     basic_pipe(const basic_pipe& rhs);
-    basic_pipe(const std::string& name);
+    explicit basic_pipe(const std::string& name);
     basic_pipe(basic_pipe&& lhs)  : _source(lhs._source), _sink(lhs._sink)
     {
         lhs._source = -1;

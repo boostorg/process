@@ -21,7 +21,7 @@ class async_pipe
 public:
     typedef int native_handle;
 
-    inline async_pipe(boost::asio::io_service & ios) : _source(ios), _sink(ios)
+    inline explicit async_pipe(boost::asio::io_service & ios) : _source(ios), _sink(ios)
     {
         int fds[2];
         if (::pipe(fds) == -1)
@@ -30,7 +30,7 @@ public:
         _source.assign(fds[0]);
         _sink  .assign(fds[1]);
     };
-    inline async_pipe(boost::asio::io_service & ios, const std::string & name);
+    inline explicit async_pipe(boost::asio::io_service & ios, const std::string & name);
     inline async_pipe(const async_pipe& lhs);
     async_pipe(async_pipe&& lhs)  : _source(std::move(lhs._source)), _sink(std::move(lhs._sink))
     {

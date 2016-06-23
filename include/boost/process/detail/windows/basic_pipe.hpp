@@ -34,7 +34,7 @@ public:
     typedef typename Traits::off_type  off_type   ;
     typedef ::boost::detail::winapi::HANDLE_ native_handle;
 
-    basic_pipe(::boost::detail::winapi::HANDLE_ source, ::boost::detail::winapi::HANDLE_ sink)
+    explicit basic_pipe(::boost::detail::winapi::HANDLE_ source, ::boost::detail::winapi::HANDLE_ sink)
             : _source(source), _sink(sink) {}
     inline explicit basic_pipe(const std::string & name);
     inline basic_pipe(const basic_pipe& p);
