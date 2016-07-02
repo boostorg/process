@@ -26,11 +26,27 @@ struct sig_init_ : handler_base_ext
         _old = ::signal(SIGCHLD, _handler);
     }
 
-    ~sig_init_()
+    template <class Executor>
+    void on_error(Executor&, const std::error_code &) const
     {
-        ::signal(SIGCHLD, _old);
+    	if (!_reset)
+    	{
+    		::signal(SIGCHLD, _old);
+    		_reset = true;
+    	}
+    }
+
+    template <class Executor>
+    void on_success(Executor&) const
+    {
+    	if (!_reset)
+    	{
+    		::signal(SIGCHLD, _old);
+    		_reset = true;
+    	}
     }
 private:
+    bool _reset = false;
     ::sighandler_t _old{0};
     ::sighandler_t _handler{0};
 };
