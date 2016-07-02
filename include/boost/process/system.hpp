@@ -37,13 +37,13 @@ namespace process {
 namespace detail
 {
 
-template<typename ...Args>
+template<typename IoService, typename ...Args>
 inline int system_impl(
         std::true_type, /*has async */
         std::true_type, /*has io_service*/
         Args && ...args)
 {
-    boost::asio::io_service & ios = ::boost::process::detail::get_io_service_var(args...);
+    IoService & ios = ::boost::process::detail::get_io_service_var(args...);
 
     if (ios.stopped())
     {
@@ -80,13 +80,13 @@ inline int system_impl(
     }
 }
 
-template<typename ...Args>
+template<typename IoService, typename ...Args>
 inline int system_impl(
         std::true_type, /*has async */
         std::false_type, /*has io_service*/
         Args && ...args)
 {
-    boost::asio::io_service ios;
+    IoService ios;
     child c(ios, std::forward<Args>(args)...);
     if (!c.valid())
         return -1;
@@ -96,7 +96,7 @@ inline int system_impl(
 }
 
 
-template<typename ...Args>
+template<typename IoService, typename ...Args>
 inline int system_impl(
         std::false_type, /*has async */
         std::true_type, /*has io_service*/
@@ -109,7 +109,7 @@ inline int system_impl(
     return c.exit_code();
 }
 
-template<typename ...Args>
+template<typename IoService, typename ...Args>
 inline int system_impl(
         std::false_type, /*has async */
         std::false_type, /*has io_service*/
@@ -133,7 +133,7 @@ inline int system(Args && ...args)
     typedef typename ::boost::process::detail::has_io_service<Args...>::type
             has_ios;
 
-    return ::boost::process::detail::system_impl(
+    return ::boost::process::detail::system_impl<boost::asio::io_service>(
             has_async(), has_ios(),
 #if defined(BOOST_POSIX_API)
             ::boost::process::posix::sig.dfl(),
