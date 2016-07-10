@@ -12,5 +12,6 @@ Boost.Process is a header-only library. It comes with a convenience header file 
 [include this_process.qbk]
 [include properties.qbk]
 [include launching.qbk]
+[include coroutines.qbk]
 
 [endsect]

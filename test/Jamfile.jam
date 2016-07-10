@@ -18,11 +18,12 @@ searched-lib shell32 ;
 import testing ;
 
 
-alias program_options     : /boost//program_options ;
-alias filesystem         : /boost//filesystem       ;
-alias iostreams         : /boost//iostreams       ;
-alias system               : /boost//system             ;
-alias thread               : /boost//thread             ;
+alias program_options  : /boost//program_options ;
+alias filesystem       : /boost//filesystem      ;
+alias iostreams        : /boost//iostreams       ;
+alias system           : /boost//system          ;
+alias thread           : /boost//thread          ;
+alias coroutine        : /boost//coroutine       : <link>static ;
 
 exe sparring_partner : sparring_partner.cpp program_options system filesystem iostreams :
     <warnings>off
@@ -37,14 +38,15 @@ test-suite ts :
      [ run async_fut.cpp   system thread filesystem            : : sparring_partner ]
      [ run args_cmd.cpp    system filesystem                   : : sparring_partner ]
      [ run bind_stderr.cpp     filesystem                      : : sparring_partner ]
-     [ run bind_stdin.cpp     system filesystem                  : : sparring_partner ]
+     [ run bind_stdin.cpp     system filesystem                : : sparring_partner ]
      [ run bind_stdin_stdout.cpp     system filesystem         : : sparring_partner ]
-     [ run bind_stdout.cpp     system filesystem                  : : sparring_partner ]
+     [ run bind_stdout.cpp     system filesystem               : : sparring_partner ]
      [ run bind_stdout_stderr.cpp     system filesystem        : : sparring_partner ]
      [ run pipe_fwd.cpp         system filesystem              : : sparring_partner ]
      [ run close_stderr.cpp     system filesystem              : : sparring_partner ]
      [ run close_stdin.cpp      system filesystem              : : sparring_partner ]
      [ run close_stdout.cpp     system filesystem              : : sparring_partner ]
+     [ run coroutine_test.cpp   system filesystem coroutine    : : sparring_partner : <link>static ]
      [ run error.cpp            system filesystem              : : sparring_partner ]
      [ run exit_code.cpp program_options system filesystem     : : sparring_partner ]
      [ run extensions.cpp system filesystem                    : : sparring_partner ]
@@ -62,7 +64,7 @@ test-suite ts :
      [ run start_dir.cpp   filesystem system                   : : sparring_partner ]
      [ run terminate.cpp system filesystem                     : : sparring_partner ]
      [ run throw_on_error.cpp system filesystem                : : sparring_partner ]
-#    [ run vfork.cpp     system filesystem                     : : sparring_partner : <build>no <target-os>linux:<build>yes   ]
+     [ run vfork.cpp     system filesystem                     : : sparring_partner : <build>no <target-os>linux:<build>yes   ]
      [ run wait.cpp system filesystem                          : : sparring_partner ]
      [ compile-fail spawn_fail.cpp ]
     ;

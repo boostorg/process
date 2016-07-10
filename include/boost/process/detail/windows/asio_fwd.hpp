@@ -21,6 +21,9 @@ class basic_streambuf;
 typedef basic_streambuf<std::allocator<char>> streambuf;
 class io_service;
 
+template <typename Handler>
+class basic_yield_context;
+
 namespace windows {
 
 class stream_handle_service;

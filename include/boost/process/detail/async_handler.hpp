@@ -76,6 +76,41 @@ struct has_async_handler<T>
     typedef typename is_async_handler<T>::type type;
 };
 
+
+template<typename T>
+struct is_yield_context
+{
+	typedef std::false_type type;
+};
+
+template<typename T>
+struct is_yield_context<::boost::asio::basic_yield_context<T>>
+{
+	typedef std::true_type type;
+};
+
+template<typename ...Args>
+struct has_yield_context;
+
+template<typename T, typename ...Args>
+struct has_yield_context<T, Args...>
+{
+    typedef typename has_yield_context<Args...>::type next;
+    typedef typename is_yield_context<
+    		typename std::remove_reference<T>::type>::type is_ios;
+    typedef typename std::conditional<is_ios::value,
+            std::true_type,
+            next>::type type;
+};
+
+template<typename T>
+struct has_yield_context<T>
+{
+    typedef typename is_yield_context<
+    		typename std::remove_reference<T>::type>::type type;
+};
+
+
 template<typename ...Args>
 boost::asio::io_service &get_io_service_var(boost::asio::io_service & f, Args&...args)
 {

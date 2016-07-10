@@ -29,7 +29,8 @@ template <typename SignalSetService>
 class basic_signal_set;
 typedef basic_signal_set<signal_set_service> signal_set;
 
-
+template <typename Handler>
+class basic_yield_context;
 
 namespace posix {
 

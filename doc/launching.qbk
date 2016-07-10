@@ -22,6 +22,11 @@ When using this function with an asynchronous properties and NOT passing an io_s
 the system function will create one and run it. When the io_service is passed to the function, the system function will check if it is active,
 and call the io_service::run function if not.
 
+
+[tip This function also allows to get a `boost::asio::yield_context` passed to use coroutines, 
+which will cause the stackful coroutine to yield and return when the process is finished.
+See [link boost_process.handbook.coro.stackful this section] for an example. ]
+
 [endsect]
 
 [section Spawn]
