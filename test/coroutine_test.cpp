@@ -7,28 +7,11 @@
 #define BOOST_TEST_IGNORE_SIGCHLD
 #include <boost/test/included/unit_test.hpp>
 
-//check I did not use them incorrectly.
-#ifndef reenter
-# define reenter(c) BOOST_ASIO_CORO_REENTER(c)
-#endif
-
-#ifndef yield
-# define yield BOOST_ASIO_CORO_YIELD
-#endif
-
-#ifndef fork
-# define fork BOOST_ASIO_CORO_FORK
-#endif
-
 #include <boost/process/error.hpp>
 #include <boost/process/io.hpp>
 #include <boost/process/async.hpp>
 #include <boost/process/child.hpp>
 #include <boost/process/system.hpp>
-
-#undef reenter
-#undef yield
-#undef fork
 
 #include <string>
 #include <boost/asio/io_service.hpp>

@@ -27,7 +27,7 @@ struct sig_init_ : handler_base_ext
     }
 
     template <class Executor>
-    void on_error(Executor&, const std::error_code &) const
+    void on_error(Executor&, const std::error_code &)
     {
     	if (!_reset)
     	{
@@ -37,7 +37,7 @@ struct sig_init_ : handler_base_ext
     }
 
     template <class Executor>
-    void on_success(Executor&) const
+    void on_success(Executor&)
     {
     	if (!_reset)
     	{
