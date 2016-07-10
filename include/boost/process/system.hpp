@@ -219,9 +219,10 @@ inline int system_impl(
 {
 
     auto &yield_ = get_yield(args...);
+
     auto coro = yield_.coro_.lock();
     auto & ios = yield_.handler_.dispatcher_.get_io_service();
-    BOOST_ASSERT(coro);
+    BOOST_ASSERT(coro.use_count());
 
     int ret = -1;
     auto l = [coro, &ret, &ios](int ret_, const std::error_code& ec_)
