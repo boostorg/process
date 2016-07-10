@@ -46,39 +46,22 @@ inline int system_impl(
 {
     IoService & ios = ::boost::process::detail::get_io_service_var(args...);
 
-    if (ios.stopped())
-    {
-        child c(std::forward<Args>(args)...);
-        if (!c.valid())
-            return -1;
-        ios.run();
-        return c.exit_code();
-    }
-    else
-    {
-        std::condition_variable cv;
-        std::atomic<bool> exited{false};
-        child c(std::forward<Args>(args)...,
-                ::boost::process::on_exit(
+
+    std::atomic_bool exited{false};
+
+    child c(std::forward<Args>(args)...,
+            ::boost::process::on_exit(
                 [&](int exit_code, const std::error_code&)
                 {
-                    exited.store(true);
-                    cv.notify_all();
+                    ios.post([&]{exited.store(true);});
                 }));
+    if (!c.valid())
+        return -1;
 
-        if (!c.valid())
-            return -1;
+    while (!exited.load())
+        ios.poll();
 
-        std::mutex mtx;
-        std::unique_lock<std::mutex> lock(mtx);
-        //since this takes a while, I'll check again
-        if (ios.stopped())
-            ios.run();
-        else
-            cv.wait(lock, [&]{return exited.load();});
-
-        return c.exit_code();
-    }
+    return c.exit_code();
 }
 
 template<typename IoService, typename ...Args>
@@ -229,12 +212,12 @@ inline int system_impl(
     {
         ret = ret_;
         ios.post(
-        		[coro]
-			    {
+                [coro]
+                {
                     auto & c = *coro;
-        			if (c)
-        				c();
-				 });
+                    if (c)
+                        c();
+                 });
     };
 
     child c(remove_yield(std::forward<Args>(args))...,

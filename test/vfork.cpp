@@ -31,15 +31,15 @@ BOOST_AUTO_TEST_CASE(bind_fd, *boost::unit_test::timeout(2))
 
     bp::pipe p;
 
-	std::error_code ec;
-	bp::child c(
-		master_test_suite().argv[1],
-		"test", "--posix-echo-one", "3", "hello",
-		bp::posix::fd.bind(3, p.native_sink()),
-		bp::posix::use_vfork,
-		ec
-	);
-	BOOST_CHECK(!ec);
+    std::error_code ec;
+    bp::child c(
+        master_test_suite().argv[1],
+        "test", "--posix-echo-one", "3", "hello",
+        bp::posix::fd.bind(3, p.native_sink()),
+        bp::posix::use_vfork,
+        ec
+    );
+    BOOST_CHECK(!ec);
 
 
     bp::ipstream is(std::move(p));
@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(execve_set_on_error, *boost::unit_test::timeout(2))
     std::error_code ec;
     bp::spawn(
         "doesnt-exist",
-		bp::posix::use_vfork,
+        bp::posix::use_vfork,
         ec
     );
     BOOST_CHECK(ec);

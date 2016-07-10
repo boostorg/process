@@ -120,7 +120,7 @@ template<typename Executor> on_exec_error_t  <Executor> call_on_exec_error  (Exe
 template<typename Sequence>
 class executor
 {
-	template<typename HasHandler, typename UseVFork>
+    template<typename HasHandler, typename UseVFork>
     void internal_error_handle(const std::error_code &ec, const char* msg, HasHandler, boost::mpl::true_, UseVFork) {}
 
     int _pipe_sink = -1;
@@ -157,24 +157,24 @@ class executor
 
     void internal_error_handle(const std::error_code &ec, const char* msg, boost::mpl::true_ , boost::mpl::false_, boost::mpl::true_)
     {
-		this->_ec  = ec;
-		this->_msg = msg;
+        this->_ec  = ec;
+        this->_msg = msg;
     }
     void internal_error_handle(const std::error_code &ec, const char* msg, boost::mpl::false_, boost::mpl::false_, boost::mpl::true_)
     {
         if (this->pid == 0)
         {
-    		this->_ec  = ec;
-    		this->_msg = msg;
+            this->_ec  = ec;
+            this->_msg = msg;
         }
         else
-        	throw std::system_error(ec, msg);
+            throw std::system_error(ec, msg);
     }
 
     void check_error(boost::mpl::true_) {};
     void check_error(boost::mpl::false_)
     {
-    	throw std::system_error(_ec, _msg);
+        throw std::system_error(_ec, _msg);
     }
 
     typedef typename ::boost::process::detail::has_error_handler<Sequence>::type has_error_handler;
@@ -266,7 +266,7 @@ public:
 
     void set_error(const std::error_code &ec, const char* msg)
     {
-    	internal_error_handle(ec, msg, has_error_handler(), has_ignore_error(), shall_use_vfork());
+        internal_error_handle(ec, msg, has_error_handler(), has_ignore_error(), shall_use_vfork());
     }
     void set_error(const std::error_code &ec, const std::string &msg) {set_error(ec, msg.c_str());};
 
@@ -277,7 +277,7 @@ child executor<Sequence>::invoke(boost::mpl::true_, boost::mpl::false_) //ignore
 {
     boost::fusion::for_each(seq, call_on_setup(*this));
     if (_ec)
-    	return child();
+        return child();
 
     this->pid = ::fork();
     if (pid == -1)
@@ -305,17 +305,17 @@ child executor<Sequence>::invoke(boost::mpl::true_, boost::mpl::false_) //ignore
 template<typename Sequence>
 child executor<Sequence>::invoke(boost::mpl::false_, boost::mpl::false_)
 {
-	int p[2];
-	if (::pipe(p)  == -1)
-	{
-		set_error(::boost::process::detail::get_last_error(), "pipe(2) failed");
-		return child();
-	}
+    int p[2];
+    if (::pipe(p)  == -1)
+    {
+        set_error(::boost::process::detail::get_last_error(), "pipe(2) failed");
+        return child();
+    }
     if (::fcntl(p[1], F_SETFD, FD_CLOEXEC) == -1)
-	{
-		set_error(::boost::process::detail::get_last_error(), "fcntl(2) failed");
-		return child();
-	}
+    {
+        set_error(::boost::process::detail::get_last_error(), "fcntl(2) failed");
+        return child();
+    }
     _ec.clear();
     boost::fusion::for_each(seq, call_on_setup(*this));
 
@@ -382,7 +382,7 @@ child executor<Sequence>::invoke(boost::mpl::true_, boost::mpl::true_) //ignore 
 {
     boost::fusion::for_each(seq, call_on_setup(*this));
     if (_ec)
-    	return child();
+        return child();
 
     this->pid = ::vfork();
     if (pid == -1)

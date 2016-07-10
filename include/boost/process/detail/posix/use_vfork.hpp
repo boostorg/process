@@ -17,7 +17,7 @@ namespace boost { namespace process { namespace detail { namespace posix {
 
 struct use_vfork_ : handler_base_ext
 {
-	constexpr use_vfork_(){};
+    constexpr use_vfork_(){};
 };
 
 constexpr static use_vfork_ use_vfork;

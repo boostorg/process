@@ -44,9 +44,9 @@ BOOST_AUTO_TEST_CASE(cr_test, *boost::unit_test::timeout(5))
 
     struct stackless_t : boost::asio::coroutine
     {
-    	std::vector<int> &vec;
-    	boost::asio::io_service & ios;
-    	stackless_t(std::vector<int> & vec_,boost::asio::io_service & ios_) : vec(vec_), ios(ios_) {}
+        std::vector<int> &vec;
+        boost::asio::io_service & ios;
+        stackless_t(std::vector<int> & vec_,boost::asio::io_service & ios_) : vec(vec_), ios(ios_) {}
         void operator()(
                 boost::system::error_code ec = boost::system::error_code(),
                 std::size_t n = 0)
@@ -70,8 +70,8 @@ BOOST_AUTO_TEST_CASE(cr_test, *boost::unit_test::timeout(5))
     std::array<int, 6> cmp = {0,1,2,3,4,5};
 
     BOOST_CHECK_EQUAL_COLLECTIONS(
-    		vec.begin(), vec.end(),
-			cmp.begin(), cmp.end());
+            vec.begin(), vec.end(),
+            cmp.begin(), cmp.end());
 }
 
 BOOST_AUTO_TEST_CASE(stackful, *boost::unit_test::timeout(5))
@@ -84,17 +84,17 @@ BOOST_AUTO_TEST_CASE(stackful, *boost::unit_test::timeout(5))
     auto stackful =
             [&](boost::asio::yield_context yield_)
             {
-    			std::error_code ec;
-    			auto ret =
-					bp::system(
-						master_test_suite().argv[1],
-						"test", "--exit-code", "123",
-						ec,
-						yield_);
+                std::error_code ec;
+                auto ret =
+                    bp::system(
+                        master_test_suite().argv[1],
+                        "test", "--exit-code", "123",
+                        ec,
+                        yield_);
 
-    			BOOST_CHECK(!ec);
-    			BOOST_CHECK_EQUAL(ret, 123);
-    			BOOST_CHECK(did_something_else);
+                BOOST_CHECK(!ec);
+                BOOST_CHECK_EQUAL(ret, 123);
+                BOOST_CHECK(did_something_else);
             };
 
     boost::asio::spawn(ios, stackful);
@@ -114,15 +114,15 @@ BOOST_AUTO_TEST_CASE(stackful_error, *boost::unit_test::timeout(5))
     auto stackful =
             [&](boost::asio::yield_context yield_)
             {
-    			std::error_code ec;
-    			auto ret =
-					bp::system("none-existing-exe",
-						ec,
-						yield_);
+                std::error_code ec;
+                auto ret =
+                    bp::system("none-existing-exe",
+                        ec,
+                        yield_);
 
-    			BOOST_CHECK(ec);
-    			BOOST_CHECK_EQUAL(ret, -1);
-    			BOOST_CHECK(!did_something_else);
+                BOOST_CHECK(ec);
+                BOOST_CHECK_EQUAL(ret, -1);
+                BOOST_CHECK(!did_something_else);
             };
 
     boost::asio::spawn(ios, stackful);
@@ -144,13 +144,13 @@ BOOST_AUTO_TEST_CASE(stackless, *boost::unit_test::timeout(5))
 
     struct stackless_t : boost::asio::coroutine
     {
-    	boost::asio::io_service & ios;
-    	bool & did_something_else;
+        boost::asio::io_service & ios;
+        bool & did_something_else;
 
-    	bp::child c;
-    	stackless_t(boost::asio::io_service & ios_,
-    			    bool & did_something_else)
-    					: ios(ios_), did_something_else(did_something_else) {}
+        bp::child c;
+        stackless_t(boost::asio::io_service & ios_,
+                    bool & did_something_else)
+                        : ios(ios_), did_something_else(did_something_else) {}
         void operator()(
                 boost::system::error_code ec = boost::system::error_code(),
                 std::size_t n = 0)
@@ -158,13 +158,13 @@ BOOST_AUTO_TEST_CASE(stackless, *boost::unit_test::timeout(5))
             if (!ec) reenter (this)
             {
                  c = bp::child(master_test_suite().argv[1],
-						"test", "--exit-code", "321",
-						ios,
-						bp::on_exit=
-						[this](int, const std::error_code&)
-						{
-                			(*this)();
-                		});
+                        "test", "--exit-code", "321",
+                        ios,
+                        bp::on_exit=
+                        [this](int, const std::error_code&)
+                        {
+                            (*this)();
+                        });
                 yield;
 
                 BOOST_CHECK(!c.running());

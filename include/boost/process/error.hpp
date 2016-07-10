@@ -101,8 +101,8 @@ struct has_error_handler
 {
     
     typedef typename boost::fusion::result_of::as_set<Sequence>::type set_type;
-    typedef typename boost::fusion::result_of::has_key<set_type, set_on_error>::type   		 t1;
-    typedef typename boost::fusion::result_of::has_key<set_type, set_on_error&>::type    	 t2;
+    typedef typename boost::fusion::result_of::has_key<set_type, set_on_error>::type            t1;
+    typedef typename boost::fusion::result_of::has_key<set_type, set_on_error&>::type         t2;
     typedef typename boost::fusion::result_of::has_key<set_type, const set_on_error&>::type  t3;
 
     typedef typename boost::fusion::result_of::has_key<set_type, const throw_on_error_&>::type t4;

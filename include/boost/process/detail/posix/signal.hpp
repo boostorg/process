@@ -29,21 +29,21 @@ struct sig_init_ : handler_base_ext
     template <class Executor>
     void on_error(Executor&, const std::error_code &)
     {
-    	if (!_reset)
-    	{
-    		::signal(SIGCHLD, _old);
-    		_reset = true;
-    	}
+        if (!_reset)
+        {
+            ::signal(SIGCHLD, _old);
+            _reset = true;
+        }
     }
 
     template <class Executor>
     void on_success(Executor&)
     {
-    	if (!_reset)
-    	{
-    		::signal(SIGCHLD, _old);
-    		_reset = true;
-    	}
+        if (!_reset)
+        {
+            ::signal(SIGCHLD, _old);
+            _reset = true;
+        }
     }
 private:
     bool _reset = false;
