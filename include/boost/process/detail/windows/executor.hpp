@@ -43,7 +43,7 @@ template<> struct startup_info<wchar_t>
     typedef ::boost::detail::winapi::STARTUPINFOW_ type;
 };
 
-#if BOOST_USE_WINAPI_VERSION >= BOOST_WINAPI_VERSION_WIN6
+#if defined(DISABLED_FOR_NOW) && ( BOOST_USE_WINAPI_VERSION >= BOOST_WINAPI_VERSION_WIN6 )
 
 template<typename CharType> struct startup_info_ex;
 
@@ -62,8 +62,7 @@ template<> struct startup_info_ex<wchar_t>
 
 #endif
 
-#if BOOST_USE_WINAPI_VERSION >= BOOST_WINAPI_VERSION_WIN6
-
+#if defined(DISABLED_FOR_NOW) && ( BOOST_USE_WINAPI_VERSION >= BOOST_WINAPI_VERSION_WIN6 )
 
 template<typename CharT>
 struct startup_info_impl
@@ -185,8 +184,6 @@ public:
             boost::fusion::for_each(seq, on_error);
             return child();
         }
-
-
 
         //NOTE: The non-cast cmd-line string can only be modified by the wchar_t variant which is currently disabled.
         int err_code = ::boost::detail::winapi::create_process(

@@ -9,6 +9,7 @@
 
 #include <boost/process/detail/config.hpp>
 #include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
 #include <boost/iterator/transform_iterator.hpp>
 
 #if defined(BOOST_POSIX_API)
@@ -153,6 +154,9 @@ template<typename Char, typename Environment>
 struct make_entry
 {
 
+	make_entry(const make_entry&) = default;
+	make_entry& operator=(const make_entry&) = default;
+
     Environment &env;
     make_entry(Environment & env) : env(env) {};
     entry<Char, Environment> operator()(const Char* data) const
@@ -170,6 +174,9 @@ struct make_entry
 template<typename Char, typename Environment>
 struct make_const_entry
 {
+
+	make_const_entry(const make_const_entry&) = default;
+	make_const_entry& operator=(const make_const_entry&) = default;
 
     Environment &env;
     make_const_entry(Environment & env) : env(env) {};
@@ -205,23 +212,23 @@ public:
     using implementation_type = Implementation<Char>;
     using base_type = basic_environment<Char, Implementation>;
     using       entry_maker = detail::make_entry<Char, base_type>;
-    using entry_type        = detail::entry<Char, base_type>;
-    using const_entry_type  = detail::const_entry<Char, base_type>;
-    using const_entry_maker = detail::make_const_entry<Char, base_type>;
+    using entry_type        = detail::entry     <Char, base_type>;
+    using const_entry_type  = detail::const_entry     <Char, const base_type>;
+    using const_entry_maker = detail::make_const_entry<Char, const base_type>;
 
     friend       entry_type;
     friend const_entry_type;
 
-    using iterator        = boost::transform_iterator<      entry_maker, Char**>;
-    using const_iterator  = boost::transform_iterator<const_entry_maker, Char**>;
+    using iterator        = boost::transform_iterator<      entry_maker, Char**,       entry_type,       entry_type>;
+    using const_iterator  = boost::transform_iterator<const_entry_maker, Char**, const_entry_type, const_entry_type>;
     using size_type       = std::size_t;
 
-    iterator       begin()        {return       iterator(this->_env_impl,       entry_maker(*this));}
-    const_iterator begin()  const {return const_iterator(this->_env_impl, const_entry_maker(*this));}
+    iterator        begin()       {return       iterator(this->_env_impl,       entry_maker(*this));}
+    const_iterator  begin() const {return const_iterator(this->_env_impl, const_entry_maker(*this));}
     const_iterator cbegin() const {return const_iterator(this->_env_impl, const_entry_maker(*this));}
 
-    iterator       end()        {return       iterator(_get_end(),       entry_maker(*this));}
-    const_iterator end()  const {return const_iterator(_get_end(), const_entry_maker(*this));}
+    iterator        end()       {return       iterator(_get_end(),       entry_maker(*this));}
+    const_iterator  end() const {return const_iterator(_get_end(), const_entry_maker(*this));}
     const_iterator cend() const {return const_iterator(_get_end(), const_entry_maker(*this));}
 
     iterator        find( const string_type& key )
@@ -478,11 +485,15 @@ inline native_handle_t native_handle()  { return ::boost::process::detail::api::
 ///Get the enviroment of the current process.
 inline native_environment environment() { return ::boost::process::native_environment(); }
 ///Get the path environment variable of the current process runs.
-inline std::vector<std::string> path()  { return ::boost::process::native_environment()["PATH"].to_vector();}
-///Get the print working directory of the current process.
-inline std::string pwd()                { return ::boost::process::native_environment()["PWD"].to_string();}
-///Get the current working directory of the current process.
-inline std::string cwd()                { return ::boost::process::native_environment()["CWD"].to_string();}
+inline std::vector<std::string> path()
+{
+	const ::boost::process::native_environment ne;
+
+	for (const auto & e : ne)
+		if ("PATH" == ::boost::to_upper_copy(e.get_name()))
+			return e.to_vector();
+	return {};
+}
 
 }
 }
