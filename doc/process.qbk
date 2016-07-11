@@ -13,7 +13,7 @@
 
 [include introduction.qbk]
 [include design.qbk]
-[include example.qbk]
+[include tutorial.qbk]
 [include handbook.qbk]
 [include platform.qbk]
 [xinclude autodoc.xml]

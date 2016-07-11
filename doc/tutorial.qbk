@@ -1,0 +1,164 @@
+[section:tutorial Tutorial]
+
+In this section we will go step by step through the differenc features of
+boost.process. This is not a complete description, for which you should look
+into the handbook or the reference.
+
+[section Starting a process]
+
+Ok, we want to start a process, so let's start with a simple process. We will
+invoke the gcc compiler to compile a simple program.
+
+```
+namespace bp = boost::process; //we will assume this for all further examples
+
+bp::child c("g++", "main.cpp");
+//bp::child c("g++ main.cpp"); works as well.
+
+assert(c.running()); //check if it runs
+//do something else
+
+c.wait();
+
+assert(c.exit_code() == 0); //check no error occured
+```
+
+This way it allows you to start the process and to handle the result later on.
+This is most useful when the process may take some more time, as it is with a compiler.
+At any point in time you may check if the process is still running. 
+
+[note You can also wait for a time span or a until a time point with wait_for and wait_until]
+
+[warning If you don't call wait on a child object, it will be terminated on destructor call.
+This can be avoided by calling child::detach beforehand] 
+
+
+Now let's say we have process, which does not run long and you have no work to do,
+it is much easier to use the system function.
+
+```
+auto exit_code = bp::system("mv file1 file2");
+```
+
+This is a replacement for std::system, allowing to use most of the features of this library.
+
+The third option you have is to spawn a process, i.e. start a process without having a handle
+and no option to wait for the exit. Let's say you want to start a browser.
+
+```
+bp::spawn("chrome", "www.boost.org");
+```
+
+[note You have to pass the name of the binary in the given examples, i.e. you'd need to write "gcc.exe" on windows]
+
+[endsect]
+
+[section:io I/O]
+
+In the examples given above, we have only started a program, but not considered the output. The default depends on the
+system, but usually this will just write it to the output of the launching process.
+Now for the first example, we might want to just ignore the output, which can be done by redirecting it to null.
+This can be achieved this way:
+
+```
+bp::system("g++", "main.cpp", bp::std_out > null);
+```
+
+Alterantively we can also easily redirect the output to a file:
+
+```
+bp::system("g++", "main.cpp", bp::std_out > "gcc_out.log");
+```
+
+Now, let's take an example where we want to read data. 
+`nm` is a part of gcc, which reads the outline of a binary. 
+Every entry point will be put into a single line, and we will use a pipe to read it.
+Boost.process provides the pipestream (`pstream`, `ipstream` and `opstream`) to
+wrap around the pipe and provide the std::istream and std::ostream interface.
+
+```
+std::vector<std::string> read_outline(std::string & file)
+{
+    bp::ipstream is; //reading pipe-stream
+    bp::child c("nm", file, bp::std_out > is);
+    
+    std::vector<std::string> data;
+    std::string line;
+    
+    while (c.running() && std::getline(is, line))
+        data.push_back(line);
+        
+    return data; 
+}
+```
+
+So what this does is redirect the `stdout` of the process into a pipe and we read this
+synchronously. 
+
+[note You can do the same thing with `std_err` and with `std_in` by using opstream. ]
+
+Now you might want to forward output from one process to another processes input.
+`nm` has a demangle option, but for the sake of the example, we'll use `c++file` for this.
+
+```
+std::vector<std::string> read_demangled_outline(std::string & file)
+{
+    bp::pipe p;
+    bp::ipstream is;
+    
+    std::vector<std::string> outline;
+    
+    //we just use the same pipe, so the 
+    bp::child nm("nm", bp::std_out > p); 
+    bp::child filt("c++filt", bp::std_in < p);
+    
+    while (nm.running()) //nm finishes automatically, so then we can terminate c++filt.
+    {
+        std::string line;
+        std::getline(is, line);
+        outline.push_back(line);
+    }
+    //no need to wait for nm, running does that.
+    filt.terminate(); 
+}
+
+```  
+
+Now this forwards the data from `nm` to `c++filt` without your process needing to do anything.
+
+[endsect]
+[section:async_io Asynchronous I/O]
+
+Boost.Process allows the usage of boost.asio to implement asynchronous I/O. 
+If you are familiar with boost.asio (which we higly recommend), 
+you can use `async_pipe` which is implement as an I/O-Object and can be used like `pipe` as shown above.
+
+To make it easier, boost.process provides simpler interface for that. 
+If you use any boost.asio buffer or a std::future with the in or output property.
+You will still need to pass an instance of `boost::asio::io_service` to the launching function, unless you use `system`.
+
+Now we will revisit our first example and read the compiler output asynchronously:
+
+```
+boost::asio::io_service ios;
+
+std::future<std::string> data;
+
+child c("g++", "main.cpp", //set the input
+        "-o",  "main.exe" //set the output file 
+        std_in.close(), 
+        std_out > null, //so it can be written without anything
+        std_err > data, 
+        ios);
+
+
+ios.run(); //this will actually block until the compiler is finished
+
+cout << fut.get() << endl;
+```
+
+[endsect]
+
+
+
+[endsect]
