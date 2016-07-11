@@ -102,9 +102,9 @@ inline int system_impl(
         std::false_type, /* has_yield */
         Args && ...args)
 {
-    child c(std::forward<Args>(args)...,
+    child c(std::forward<Args>(args)...
 #if defined(BOOST_POSIX_API)
-            ::boost::process::posix::sig.dfl()
+            ,::boost::process::posix::sig.dfl()
 #endif
 			);
     if (!c.valid())
