@@ -147,7 +147,7 @@ BOOST_AUTO_TEST_CASE(stackless, *boost::unit_test::timeout(5))
         boost::asio::io_service & ios;
         bool & did_something_else;
 
-        bp::child c;
+        int exit_code = -1;
         stackless_t(boost::asio::io_service & ios_,
                     bool & did_something_else)
                         : ios(ios_), did_something_else(did_something_else) {}
@@ -157,18 +157,17 @@ BOOST_AUTO_TEST_CASE(stackless, *boost::unit_test::timeout(5))
         {
             if (!ec) reenter (this)
             {
-                 c = bp::child(master_test_suite().argv[1],
-                        "test", "--exit-code", "321",
+            	yield bp::child(master_test_suite().argv[1],
+                        "test", "--exit-code", "42",
                         ios,
                         bp::on_exit=
-                        [this](int, const std::error_code&)
+                        [this](int ret, const std::error_code&)
                         {
+            				exit_code = ret;
                             (*this)();
-                        });
-                yield;
+                        }).detach();
 
-                BOOST_CHECK(!c.running());
-                BOOST_CHECK_EQUAL(c.exit_code(), 321);
+                BOOST_CHECK_EQUAL(exit_code, 42);
                 BOOST_CHECK(did_something_else);
             }
         }

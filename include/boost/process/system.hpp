@@ -102,7 +102,11 @@ inline int system_impl(
         std::false_type, /* has_yield */
         Args && ...args)
 {
-    child c(std::forward<Args>(args)...);
+    child c(std::forward<Args>(args)...,
+#if defined(BOOST_POSIX_API)
+            ::boost::process::posix::sig.dfl()
+#endif
+			);
     if (!c.valid())
         return -1;
     c.wait();
@@ -246,9 +250,6 @@ inline int system(Args && ...args)
 
     return ::boost::process::detail::system_impl<boost::asio::io_service>(
             has_async(), has_ios(), has_yield(),
-#if defined(BOOST_POSIX_API)
-            ::boost::process::posix::sig.dfl(),
-#endif
             std::forward<Args>(args)...);
 }
 

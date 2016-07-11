@@ -41,11 +41,10 @@ BOOST_AUTO_TEST_CASE(sync_wait)
     BOOST_REQUIRE(!ec);
     c.wait();
     int exit_code = c.exit_code();
-#if defined(BOOST_WINDOWS_API)
+
+
     BOOST_CHECK_EQUAL(123, exit_code);
-#elif defined(BOOST_POSIX_API)
-    BOOST_CHECK_EQUAL(123, exit_code);
-#endif
+
     c.wait();
 }
 
