@@ -16,5 +16,6 @@
 [include tutorial.qbk]
 [include handbook.qbk]
 [include platform.qbk]
+[include faq.qbk]
 [xinclude autodoc.xml]
 [include acknowledgements.qbk]

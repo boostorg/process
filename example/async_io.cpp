@@ -25,7 +25,7 @@ int main()
 
     child c(
         "test.exe",
-        std_out > ios
+        std_out > p, ios
     );
 
     boost::asio::streambuf buffer;

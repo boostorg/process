@@ -57,11 +57,11 @@ bp::spawn("chrome", "www.boost.org");
 
 In the examples given above, we have only started a program, but not considered the output. The default depends on the
 system, but usually this will just write it to the output of the launching process.
-Now for the first example, we might want to just ignore the output, which can be done by redirecting it to null.
+Now for the first example, we might want to just ignore the output, which can be done by redirecting it to the null-device.
 This can be achieved this way:
 
 ```
-bp::system("g++", "main.cpp", bp::std_out > null);
+bp::system("g++", "main.cpp", bp::std_out > bp::null);
 ```
 
 Alterantively we can also easily redirect the output to a file:

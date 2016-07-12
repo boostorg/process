@@ -8,7 +8,7 @@
 
 #include <boost/test/included/unit_test.hpp>
 #include <iostream>
-
+#include <thread>
 
 #include <boost/process/pipe.hpp>
 
@@ -117,6 +117,30 @@ BOOST_AUTO_TEST_CASE(stream_line, *boost::unit_test::timeout(2))
                s.begin(),   s.  begin() + size,
                out.begin(), out.begin() + size
                );
+}
+
+
+BOOST_AUTO_TEST_CASE(large_data, *boost::unit_test::timeout(2))
+{
+    bp::pipe pipe;
+
+    bp::ipstream is(pipe);
+    bp::opstream os(pipe);
+
+    std::string in(1000000, '0');
+    std::string out;
+
+    int cnt = 0;
+    for (auto & c: in)
+    	c = (cnt++ % 26) + 'A';
+
+    std::thread th([&]{os << in << std::endl;});
+
+    is >> out;
+
+    th.join();
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(out.begin(), out.end(), in.begin(), in.end());
 }
 
 

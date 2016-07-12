@@ -88,7 +88,8 @@ out >> value;
 c.terminate();
 ```
 
-[caution This comes with the danger of dead-locks, so it should be used with care.]
+[caution This comes with the danger of dead-locks, so it should be used with care. 
+See the [link boost_process.faq the faq] for details.]
 
 [endsect]
 
