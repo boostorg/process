@@ -1,0 +1,129 @@
+[section:design Design Rationale]
+[section Scope]
+This library is meant to give an wrapper around the different OS-specific methods
+to launch processes. Its aim is to provide all functionality that is available on 
+those systems and allow the user to do all related things, which require using the OS APIs.
+
+[*This library does not try to provide a full library for everything process related] 
+In many discussions the proposal was made to build boost.process into a DSEL of some sort. 
+This is not the goal, it rather provides the facilities to build such a DSEL-Library on top of it. 
+Therefore the library also does [*not] force any particular use (such as only asynchronous communication) on its user. 
+It rather could be integrated with such a library.  
+
+[endsect] 
+[section Interface Style]
+
+Boost.Process does use a very particular style when constructing a process.
+This is because a process holds many properties, which are not members of the actual child class. 
+Those properties are in many cases not accessible by the father process, for example when using environments. 
+Here the child process can modify its own environment, but there is no way for the father process to know.
+That means, that a child process has properties that cannot be accessed in C++.
+
+This now leads to the two styles supported and mixed by this library. Overloading and properties. 
+Consider that you may want to launch a process passing a number of arguments. This is supported in both styles, and would look like this:
+
+```
+system("gcc", "--version"); //overloading
+system("gcc", args={"--version"}); //property style.
+```
+
+Both styles can also be mixed in some cases.
+
+```
+system("gcc", "-c", args+={"main.cpp"});
+```
+
+In the following documention the avaible styles will be described. Note that the
+overload style is implemented via type traits, so the types will be listed. 
+
+[caution There is guarantee in which order the arguments will be applied! 
+There is however a guarantee for arguments belonging together, i.e. the string 
+argument and the args property will be evaluated in the order given.]
+
+[endsect]
+ 
+
+
+[section Arguments/Command Style]
+
+When passing arguments to the process, two styles are provided, the cmd-style and the exe-/args-style. 
+
+The cmd style will interpret the string as a sequence of the exe and arguments and parse them as such, while the exe-/args-style will
+interpret each string as an argument.
+
+[table:id Cmd vs Exe/Args
+    [[String]              [Cmd]       [Exe/Args]]
+    [["gcc --version"]     [{"gcc", "--version"}]     [{"\\"gcc --version\\""}]]
+] 
+
+When using the overloading variant, a single string will result in a cmd interpretation, several strings will yield a exe-args interpretation. Both version can be set explicitly:
+
+```
+system("grep -c false /etc/passwd"); //cmd style
+system("grep", "-c", "false", "/etc/passwd"); //exe-/args-
+
+system(cmd="grep -c false /etc/passwd"); //cmd style
+system(exe="grep", args={"-c", "false", "/etc/passwd"}); //exe-/args-
+```
+
+[note If a '"' sign is used in the argument style, it will be passed as part of the argument.
+If the same effect it wanted with the cmd syntax, it ought to be escaped, i.e. '\\\"'. ]
+[endsect]
+
+
+[section Synchronous I/O]
+
+The simplest way to communicate with a child-process is via pipes.
+
+```
+opstream in;
+ipstream out;
+
+child c("c++filt", std_out > out, std_in < in);
+
+in << "_ZN5boost7process8tutorialE" << endl;
+std::string value;
+out >> value;
+
+c.terminate();
+```
+
+[caution This comes with the danger of dead-locks, so it should be used with care. 
+See the [link boost_process.faq the faq] for details.]
+
+[endsect]
+
+[section Asynchronous I/O]
+
+Boost.Process provides capacities to communicate in an asynchronous way using Boost.Asio.
+To do that, the [classref boost::process::async_pipe async_pipe] class is provided, which can be used
+as an I/O object directly:
+
+```
+asio::io_service ios;
+async_pipe pipe;
+spawn("ls", std_out > pipe, ios);
+
+std::string buf;
+
+boost::asio::async_read(p, buffer(buf), 
+            [](const boost::system::error_code &ec, std::size_t size){});
+
+ios.run();
+```
+
+The library also provides a shortcut for this:
+
+```
+asio::io_service ios;
+
+std::string buf;
+
+spawn("ls", std_out > buffer(buf), ios);
+
+ios.run();
+```
+
+[endsect]
+
+[endsect] 

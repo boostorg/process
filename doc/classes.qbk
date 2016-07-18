@@ -1,0 +1,124 @@
+[section:class Classes]
+[section:child Child]
+
+The child class holds a handle to the child process. It can be direclty used to 
+launch a process via the constructor. It is not copyable, but movable.
+
+[section:wait Waiting]
+
+This class does provides three functions to wait for the process to exit.
+
+    wait()
+    wait_for(duration)
+    wait_until(time_point);
+    
+If the process exits, the exit_code will be stored inside the class.
+
+[endsect]
+
+[section:terminate Termination]
+
+Another way to stop the process is to terminate it. This will also produce an 
+exit code which is platform-specific.
+
+It is implemented via `TerminateProcess` and `kill -9` on posix.
+
+[endsect]
+
+[section:exit_code Exit Code]
+
+After a process has exited the exit code is stored either inside the class or the operating 
+system holds it. The return value of the exit code is undefined if the process did not exit.
+The latter can be checked by calling [funcref boost::process::child::is_running is_running].
+
+[endsect]
+
+[section:raii RAII]
+
+The child will automatically terminate the child process on destruction, if it wasn't waited for or detached. 
+
+[endsect]
+
+[endsect]
+
+[section Pipes]
+
+The synchronous pipe is implemented as a the template 
+[classref boost::process::basic_pipe basic_pipe], which can be used with any char type.
+The typedefs [classref boost::process::pipe pipe] and [classref boost::process::wpipe wpipe]
+provide typedefs for use with char and wchar_t.
+ 
+Pipes can be copied, since handles can be duplicated.
+
+Based on the [classref boost::process::basic_pipe basic_pipe] template, a stream
+implementation, similar to the streams in the standard C++ library.
+
+    basic_pstreambuf
+    basic_pistream
+    basic_postream
+    basic_pstream
+
+[endsect]
+
+[section Async Pipes]
+
+The asynchronous pipe class is implemented similar to the I/O objects provided 
+by boost.asio.
+
+A async_pipe can be converted into and constructed from a basic_pipe.
+
+[caution Async pipes use named pipes on windows. Therefore an exception is thrown 
+if a pipe was not constructed as a named pipe and is converted to an async_pipe]
+
+[endsect]
+
+[section Groups]
+
+The group object is implemented similar to [classref boost::process::child child]. It
+does however not provide an exit code.
+
+[caution A groups behaviour is undefined when it was not used during the launch of a process.]
+
+[endsect]
+
+
+[section Environment]
+
+The environment can be stored in two different classes.
+
+ - [classref boost::process::native_environment native_environment]
+ - [classref boost::process::environment environment] 
+
+This behave simliar to an std::map, in that you can access the variables by the
+operator[] with a string key. The returned value is acutally a proxy, which can
+be interpreted as a single string or a list of ';' seperated strings. The latter
+is used by variables like "PATH".
+
+
+[section Native Environment]
+
+The [classref boost::process::native_environment native_environment] represents 
+the current environment. It essentially works like a shared_ptr, though several
+copies may not represent the changes done by one.
+
+```
+native_entironment n1;
+native_entironment n2;
+
+n1["MY_VAR"] = "Thingy";
+n2["MY_VAR"]; //will be empty.
+```
+
+[endsect]
+
+[section Environment]
+
+The plain [classref boost::process::environment environment] class is meant to 
+be used when starting a new process. It can be constructed from a 
+[classref boost::process::native_environment native_environment]. 
+
+[endsect]
+
+[endsect]
+
+[endsect]

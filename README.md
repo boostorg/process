@@ -1,6 +1,21 @@
-Boost.Process
-=============
+#[Boost Process (Boost.Process)](https://github.com/klemens-morgenstern/boost-process)
 
-[![Join the chat at https://gitter.im/klemens-morgenstern/boost-process](https://badges.gitter.im/klemens-morgenstern/boost-process.svg)](https://gitter.im/klemens-morgenstern/boost-process?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+Boost.process is not yet part of the [Boost C++ Libraries](http://github.com/boostorg). It is a library for comfortable management of processes.
 
-[![Build Status](https://travis-ci.org/BorisSchaeling/boost-process.svg?branch=master)](https://travis-ci.org/BorisSchaeling/boost-process)
+### Test results
+
+Branches        | Build         | Tests coverage | 
+----------------|-------------- | -------------- |
+Develop:        | [![Build Status](https://travis-ci.org/klemens-morgenstern/boost-process.svg?branch=develop)](https://travis-ci.org/klemens-morgenstern/boost-process)  [![Build status](https://ci.appveyor.com/api/projects/status/peup7e6m0e1bb5ba?svg=true)](https://ci.appveyor.com/project/klemens-morgenstern/boost-process) | [![Coverage Status](https://coveralls.io/repos/github/klemens-morgenstern/boost-process/badge.svg?branch=develop)](https://coveralls.io/github/klemens-morgenstern/boost-process?branch=develop) |
+Master:         | [![Build Status](https://travis-ci.org/klemens-morgenstern/boost-process.svg?branch=master)] (https://travis-ci.org/klemens-morgenstern/boost-process) [![Build status](https://ci.appveyor.com/api/projects/status/peup7e6m0e1bb5ba/branch/master?svg=true)](https://ci.appveyor.com/project/klemens-morgenstern/boost-process/branch/master)
+  | [![Coverage Status](https://coveralls.io/repos/github/klemens-morgenstern/boost-process/badge.svg?branch=master)](https://coveralls.io/github/klemens-morgenstern/boost-process?branch=master)   |
+
+[Open Issues](https://github.com/klemens-morgenstern/boost-process/issues)
+
+[Latest developer documentation](http://klemens-morgenstern.github.io/process/)
+
+### About
+This library is the current result of a long attempt to get a boost.process library, which is going on since 2006.
+
+### License
+Distributed under the [Boost Software License, Version 1.0](http://www.boost.org/LICENSE_1_0.txt).
