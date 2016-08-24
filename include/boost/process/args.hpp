@@ -46,6 +46,42 @@ struct args_
     {
         return arg_setter_<value_type<Range>, false>(std::forward<Range>(range));
     }
+    arg_setter_<std::string, true>     operator()(std::string && str) const
+    {
+        return arg_setter_<std::string, true> (str);
+    }
+    arg_setter_<std::string, true>     operator+=(std::string && str) const
+    {
+        return arg_setter_<std::string, true> (str);
+    }
+    arg_setter_<std::string, false>    operator= (std::string && str) const
+    {
+        return arg_setter_<std::string, false>(str);
+    }
+    arg_setter_<std::string, true>     operator()(const std::string & str) const
+    {
+        return arg_setter_<std::string, true> (str);
+    }
+    arg_setter_<std::string, true>     operator+=(const std::string & str) const
+    {
+        return arg_setter_<std::string, true> (str);
+    }
+    arg_setter_<std::string, false>    operator= (const std::string & str) const
+    {
+        return arg_setter_<std::string, false>(str);
+    }
+    arg_setter_<std::string, true>     operator()(std::string & str) const
+    {
+        return arg_setter_<std::string, true> (str);
+    }
+    arg_setter_<std::string, true>     operator+=(std::string & str) const
+    {
+        return arg_setter_<std::string, true> (str);
+    }
+    arg_setter_<std::string, false>    operator= (std::string & str) const
+    {
+        return arg_setter_<std::string, false>(str);
+    }
     arg_setter_<std::string, true>     operator()(const char* str) const
     {
         return arg_setter_<std::string, true> (str);
