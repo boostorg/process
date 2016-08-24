@@ -15,7 +15,7 @@ Master:         | [![Build Status](https://travis-ci.org/klemens-morgenstern/boo
 [Latest developer documentation](http://klemens-morgenstern.github.io/process/)
 
 ### About
-This library is the current result of a long attempt to get a boost.process library, which is going on since 2006.
+This C++11 library is the current result of a long attempt to get a boost.process library, which is going on since 2006.
 
 ### License
 Distributed under the [Boost Software License, Version 1.0](http://www.boost.org/LICENSE_1_0.txt).
