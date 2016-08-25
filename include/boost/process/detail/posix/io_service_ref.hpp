@@ -22,7 +22,7 @@
 #include <type_traits>
 #include <memory>
 #include <vector>
-#include <wait.h>
+#include <sys/wait.h>
 
 
 namespace boost { namespace process { namespace detail { namespace posix {
