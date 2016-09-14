@@ -20,7 +20,6 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <sysexits.h>
 #include <unistd.h>
 
 

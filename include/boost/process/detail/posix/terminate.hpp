@@ -14,7 +14,7 @@
 #include <boost/process/detail/posix/child_handle.hpp>
 #include <system_error>
 #include <signal.h>
-#include <wait.h>
+#include <sys/wait.h>
 
 
 namespace boost { namespace process { namespace detail { namespace posix {
