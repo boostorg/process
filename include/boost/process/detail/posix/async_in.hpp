@@ -19,10 +19,6 @@
 
 #include <future>
 
-
-
-using namespace std;
-
 namespace boost { namespace process { namespace detail { namespace posix {
 
 

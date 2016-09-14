@@ -26,20 +26,61 @@ namespace boost { namespace process { namespace detail {
 
 struct args_
 {
+    template<typename T>
+    using remove_reference_t = typename std::remove_reference<T>::type;
+    template<typename T>
+    using value_type = typename remove_reference_t<T>::value_type;
+
     template <class Range>
-    arg_setter_<Range, true>     operator()(Range &&range) const
+    arg_setter_<value_type<Range>, true>     operator()(Range &&range) const
     {
-        return arg_setter_<Range, true>(std::forward<Range>(range));
+        return arg_setter_<value_type<Range>, true>(std::forward<Range>(range));
     }
     template <class Range>
-    arg_setter_<Range, true>     operator+=(Range &&range) const
+    arg_setter_<value_type<Range>, true>     operator+=(Range &&range) const
     {
-        return arg_setter_<Range, true>(std::forward<Range>(range));
+        return arg_setter_<value_type<Range>, true>(std::forward<Range>(range));
     }
     template <class Range>
-    arg_setter_<Range, false>    operator= (Range &&range) const
+    arg_setter_<value_type<Range>, false>    operator= (Range &&range) const
     {
-        return arg_setter_<Range, false>(std::forward<Range>(range));
+        return arg_setter_<value_type<Range>, false>(std::forward<Range>(range));
+    }
+    arg_setter_<std::string, true>     operator()(std::string && str) const
+    {
+        return arg_setter_<std::string, true> (str);
+    }
+    arg_setter_<std::string, true>     operator+=(std::string && str) const
+    {
+        return arg_setter_<std::string, true> (str);
+    }
+    arg_setter_<std::string, false>    operator= (std::string && str) const
+    {
+        return arg_setter_<std::string, false>(str);
+    }
+    arg_setter_<std::string, true>     operator()(const std::string & str) const
+    {
+        return arg_setter_<std::string, true> (str);
+    }
+    arg_setter_<std::string, true>     operator+=(const std::string & str) const
+    {
+        return arg_setter_<std::string, true> (str);
+    }
+    arg_setter_<std::string, false>    operator= (const std::string & str) const
+    {
+        return arg_setter_<std::string, false>(str);
+    }
+    arg_setter_<std::string, true>     operator()(std::string & str) const
+    {
+        return arg_setter_<std::string, true> (str);
+    }
+    arg_setter_<std::string, true>     operator+=(std::string & str) const
+    {
+        return arg_setter_<std::string, true> (str);
+    }
+    arg_setter_<std::string, false>    operator= (std::string & str) const
+    {
+        return arg_setter_<std::string, false>(str);
     }
     arg_setter_<std::string, true>     operator()(const char* str) const
     {

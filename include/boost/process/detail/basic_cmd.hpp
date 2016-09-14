@@ -45,7 +45,6 @@ struct arg_setter_
     typedef typename std::vector<String>::iterator       iterator;
     typedef typename std::vector<String>::const_iterator const_iterator;
 
-
     template<typename Iterator>
     arg_setter_(Iterator && begin, Iterator && end) : _args(begin, end) {}
 
@@ -58,7 +57,8 @@ struct arg_setter_
     iterator end()   {return _args.end();}
     const_iterator begin() const {return _args.begin();}
     const_iterator end()   const {return _args.end();}
-    arg_setter_(std::string && s) : _args({std::move(s)}) {}
+    arg_setter_(std::string & str)     : _args{{str}} {}
+    arg_setter_(std::string && s)      : _args({std::move(s)}) {}
     arg_setter_(const std::string & s) : _args({s}) {}
     arg_setter_(const char* s) : _args({std::move(s)}) {}
 

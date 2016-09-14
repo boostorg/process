@@ -28,7 +28,7 @@ namespace boost { namespace process { namespace detail { namespace windows {
 
 
 template <typename Executor>
-void apply_out_handles(Executor &e, void* handle, std::integral_constant<int, 1>, std::integral_constant<int, -1>)
+inline void apply_out_handles(Executor &e, void* handle, std::integral_constant<int, 1>, std::integral_constant<int, -1>)
 {
     boost::detail::winapi::SetHandleInformation(handle,
             boost::detail::winapi::HANDLE_FLAG_INHERIT_,
@@ -40,7 +40,7 @@ void apply_out_handles(Executor &e, void* handle, std::integral_constant<int, 1>
 }
 
 template <typename Executor>
-void apply_out_handles(Executor &e, void* handle, std::integral_constant<int, 2>, std::integral_constant<int, -1>)
+inline void apply_out_handles(Executor &e, void* handle, std::integral_constant<int, 2>, std::integral_constant<int, -1>)
 {
     boost::detail::winapi::SetHandleInformation(handle,
             boost::detail::winapi::HANDLE_FLAG_INHERIT_,
@@ -53,7 +53,7 @@ void apply_out_handles(Executor &e, void* handle, std::integral_constant<int, 2>
 }
 
 template <typename Executor>
-void apply_out_handles(Executor &e, void* handle, std::integral_constant<int, 1>, std::integral_constant<int, 2>)
+inline void apply_out_handles(Executor &e, void* handle, std::integral_constant<int, 1>, std::integral_constant<int, 2>)
 {
     boost::detail::winapi::SetHandleInformation(handle,
             boost::detail::winapi::HANDLE_FLAG_INHERIT_,

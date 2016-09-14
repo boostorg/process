@@ -8,7 +8,7 @@ while there will be more effort put on the core library not introducing breaking
 
 [section:handler Handlers]
 The simplest form to extend functionality is to provide another handler, which 
-will be called on the resprective events on process launching. The names are:
+will be called on the respective events on process launching. The names are:
 
 - `boost::process::on_setup`
 - `boost::process::on_error`

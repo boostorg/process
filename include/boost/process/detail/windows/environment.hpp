@@ -24,7 +24,7 @@ class native_environment_impl
 {
     static void _deleter(Char* p) {boost::detail::winapi::free_environment_strings(p);};
     std::unique_ptr<Char[], void(*)(Char*)> _buf{boost::detail::winapi::get_environment_strings<Char>(), &native_environment_impl::_deleter};
-    static std::vector<Char*> _load_var(Char* p);
+    static inline std::vector<Char*> _load_var(Char* p);
     std::vector<Char*> _env_arr{_load_var(_buf.get())};
 public:
     using char_type = Char;

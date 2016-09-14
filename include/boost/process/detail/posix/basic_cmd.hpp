@@ -146,7 +146,7 @@ struct exe_cmd_init : boost::process::detail::api::handler_base_ext
                 {std::move(args)});
     }
 private:
-    std::vector<char*> make_cmd();
+    inline std::vector<char*> make_cmd();
     std::string exe;
     std::vector<std::string> args;
     std::vector<char*> cmd_impl;

@@ -1,6 +1,6 @@
 [section:tutorial Tutorial]
 
-In this section we will go step by step through the differenc features of
+In this section we will go step by step through the different features of
 boost.process. This is not a complete description, for which you should look
 into the handbook or the reference.
 
@@ -64,7 +64,7 @@ This can be achieved this way:
 bp::system("g++", "main.cpp", bp::std_out > bp::null);
 ```
 
-Alterantively we can also easily redirect the output to a file:
+Alternatively we can also easily redirect the output to a file:
 
 ```
 bp::system("g++", "main.cpp", bp::std_out > "gcc_out.log");
@@ -72,7 +72,8 @@ bp::system("g++", "main.cpp", bp::std_out > "gcc_out.log");
 
 Now, let's take an example where we want to read data. 
 `nm` is a part of gcc, which reads the outline of a binary. 
-Every entry point will be put into a single line, and we will use a pipe to read it.
+Every entry point will be put into a single line, and we will use a pipe to read it. 
+At the end and empty line is appended which we use as the indication to stop reading.
 Boost.process provides the pipestream (`pstream`, `ipstream` and `opstream`) to
 wrap around the pipe and provide the std::istream and std::ostream interface.
 
@@ -85,7 +86,7 @@ std::vector<std::string> read_outline(std::string & file)
     std::vector<std::string> data;
     std::string line;
     
-    while (c.running() && std::getline(is, line))
+    while (c.running() && std::getline(is, line) && !line.empty())
         data.push_back(line);
         
     return data; 
@@ -95,6 +96,7 @@ std::vector<std::string> read_outline(std::string & file)
 So what this does is redirect the `stdout` of the process into a pipe and we read this
 synchronously. 
 
+[warning The pipe will cause a deadlock if you try to read after nm exited]
 [note You can do the same thing with `std_err` and with `std_in` by using opstream. ]
 
 Now you might want to forward output from one process to another processes input.
@@ -130,7 +132,7 @@ Now this forwards the data from `nm` to `c++filt` without your process needing t
 [section:async_io Asynchronous I/O]
 
 Boost.Process allows the usage of boost.asio to implement asynchronous I/O. 
-If you are familiar with boost.asio (which we higly recommend), 
+If you are familiar with boost.asio (which we highly recommend), 
 you can use `async_pipe` which is implement as an I/O-Object and can be used like `pipe` as shown above.
 
 To make it easier, boost.process provides simpler interface for that. 
