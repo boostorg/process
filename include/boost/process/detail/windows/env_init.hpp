@@ -20,8 +20,6 @@ struct env_init : public ::boost::process::detail::handler_base
 {
     boost::process::environment env;
 
-
-
     env_init(boost::process::environment && env) : env(std::move(env)) {};
     env_init(const boost::process::environment & env) : env(env) {};
 

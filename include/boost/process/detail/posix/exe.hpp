@@ -18,7 +18,7 @@ namespace posix
 {
 
 template<class StringType, class Executor>
-void apply_exe(const StringType & exe, Executor & e)
+inline void apply_exe(const StringType & exe, Executor & e)
 {
     e.exe = exe.c_str();
 }

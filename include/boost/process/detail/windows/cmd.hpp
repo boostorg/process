@@ -19,7 +19,6 @@ namespace windows
 {
 
 
-
 struct cmd_setter_ : ::boost::process::detail::handler_base
 {
     cmd_setter_(std::string && cmd_line)      : _cmd_line(std::move(cmd_line)) {}

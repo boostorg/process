@@ -464,7 +464,7 @@ child executor<Sequence>::invoke(boost::mpl::false_, boost::mpl::true_)
 #endif
 
 template<typename Tup>
-executor<Tup> make_executor(Tup & tup)
+inline executor<Tup> make_executor(Tup & tup)
 {
     return executor<Tup>(tup);
 }

@@ -46,7 +46,7 @@ public:
     inline async_pipe& operator=(const basic_pipe<CharT, Traits>& p);
     inline async_pipe& operator=(const async_pipe& rhs);
 
-    async_pipe& operator=(async_pipe&& lhs);
+    inline async_pipe& operator=(async_pipe&& lhs);
 
     ~async_pipe()
     {

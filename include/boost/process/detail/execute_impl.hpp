@@ -152,7 +152,7 @@ struct invoke_get_initializer<helper_vector<Args...>>
 
 
 template<typename ...Args>
-boost::fusion::tuple<typename get_initializers_result<Args>::type...>
+inline boost::fusion::tuple<typename get_initializers_result<Args>::type...>
         get_initializers(boost::fusion::set<Args...> & builders)
 {
     //typedef boost::fusion::tuple<typename get_initializers_result<Args>::type...> return_type;

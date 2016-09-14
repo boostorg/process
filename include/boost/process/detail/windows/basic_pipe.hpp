@@ -44,7 +44,7 @@ public:
         lhs._sink = ::boost::detail::winapi::INVALID_HANDLE_VALUE_;
     }
     inline basic_pipe& operator=(const basic_pipe& p);
-    basic_pipe& operator=(basic_pipe&& lhs);
+    inline basic_pipe& operator=(basic_pipe&& lhs);
     ~basic_pipe()
     {
         if (_sink   != ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
@@ -52,8 +52,8 @@ public:
         if (_source != ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
             ::boost::detail::winapi::CloseHandle(_source);
     }
-   native_handle native_source() const {return _source;}
-   native_handle native_sink  () const {return _sink;}
+    native_handle native_source() const {return _source;}
+    native_handle native_sink  () const {return _sink;}
 
     basic_pipe()
     {

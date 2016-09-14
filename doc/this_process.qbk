@@ -22,10 +22,6 @@ Get the path environment variable of the current process runs.
 
     std::vector< std::string > path();
 
-Get the print working directory of the current process. 
-
-    std::string pwd();
-
 Get the current working directory of the current process. 
     std::string cwd();
 

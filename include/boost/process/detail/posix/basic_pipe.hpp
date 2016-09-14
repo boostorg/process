@@ -46,14 +46,14 @@ public:
         _source = fds[0];
         _sink   = fds[1];
     }
-    basic_pipe(const basic_pipe& rhs);
-    explicit basic_pipe(const std::string& name);
+    inline basic_pipe(const basic_pipe& rhs);
+    explicit inline basic_pipe(const std::string& name);
     basic_pipe(basic_pipe&& lhs)  : _source(lhs._source), _sink(lhs._sink)
     {
         lhs._source = -1;
         lhs._sink   = -1;
     }
-    basic_pipe& operator=(const basic_pipe& );
+    inline basic_pipe& operator=(const basic_pipe& );
     basic_pipe& operator=(basic_pipe&& lhs)
     {
         _source = lhs._source;

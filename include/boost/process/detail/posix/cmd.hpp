@@ -59,7 +59,7 @@ struct cmd_setter_ : handler_base_ext
         exec.cmd_line = &_cmd_impl.front();
     }
 private:
-    static std::vector<char*> make_cmd(std::vector<std::string> & args);
+    static inline std::vector<char*> make_cmd(std::vector<std::string> & args);
     std::vector<std::string> _cmd_line;
     std::vector<char*> _cmd_impl  = make_cmd(_cmd_line);
 };
