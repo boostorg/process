@@ -101,11 +101,13 @@ struct basic_pipebuf : std::basic_streambuf<CharT, Traits>
     typedef  typename Traits::pos_type pos_type   ;
     typedef  typename Traits::off_type off_type   ;
 
+    constexpr static int default_buffer_size = BOOST_PROCESS_PIPE_SIZE;
+
     ///Default constructor, will also construct the pipe.
-    basic_pipebuf() : _write(1024), _read(1024)
+    basic_pipebuf() : _write(default_buffer_size), _read(default_buffer_size)
     {
-        this->setg(_read.data(),  _read.data()+ 10,  _read.data() + 10);
-        this->setp(_write.data(), _write.data());
+        this->setg(_read.data(),  _read.data()+ 128,  _read.data() + 128);
+        this->setp(_write.data(), _write.data() + _write.size());
     }
     ///Copy Constructor.
     basic_pipebuf(const basic_pipebuf & ) = default;
@@ -113,18 +115,21 @@ struct basic_pipebuf : std::basic_streambuf<CharT, Traits>
     basic_pipebuf(basic_pipebuf && ) = default;
 
     ///Move construct from a pipe.
-    basic_pipebuf(pipe_type && p) : _pipe(std::move(p)), _write(1024), _read(1024)
+    basic_pipebuf(pipe_type && p) : _pipe(std::move(p)),
+    								_write(default_buffer_size),
+									_read(default_buffer_size)
     {
-        this->setg(_read.data(),  _read.data()+ 10,  _read.data() + 10);
-        this->setp(_write.data(), _write.data());
+        this->setg(_read.data(),  _read.data()+ 128,  _read.data() + 128);
+        this->setp(_write.data(), _write.data() + _write.size());
     }
     ///Construct from a pipe.
-    basic_pipebuf(const pipe_type & p) : _pipe(p), _write(1024), _read(1024)
+    basic_pipebuf(const pipe_type & p) : _pipe(p),
+    									_write(default_buffer_size),
+										_read(default_buffer_size)
     {
-        this->setg(_read.data(),  _read.data()+ 10,  _read.data() + 10);
-        this->setp(_write.data(), _write.data());
+        this->setg(_read.data(),  _read.data()+ 128,  _read.data() + 128);
+        this->setp(_write.data(), _write.data() + _write.size());
     }
-
     ///Copy assign.
     basic_pipebuf& operator=(const basic_pipebuf & ) = delete;
     ///Move assign.
@@ -146,18 +151,27 @@ struct basic_pipebuf : std::basic_streambuf<CharT, Traits>
     {
         if ((ch != traits_type::eof()) && _pipe.is_open())
         {
-            *this->pptr() = ch;
-            this->pbump(1);
-            if (this->_write_impl())
-                return ch;
+        	if (this->pptr() == this->epptr())
+        	{
+        		bool wr = this->_write_impl();
+        		*this->pptr() = ch;
+        		this->pbump(1);
+        		if (wr)
+        			return ch;
+        	}
+        	else
+        	{
+        		*this->pptr() = ch;
+        		this->pbump(1);
+        		if (this->_write_impl())
+        			return ch;
+        	}
         }
         return traits_type::eof();
     }
     ///synchronizes the buffers with the associated character sequence
-    int sync() override
-    {
-        return this->_write_impl() ? 0 : -1;
-    }
+    int sync() override { return this->_write_impl() ? 0 : -1; }
+
     ///reads characters from the associated input sequence to the get area
     int_type underflow() override
     {
@@ -170,7 +184,6 @@ struct basic_pipebuf : std::basic_streambuf<CharT, Traits>
 
         auto len = &_read.back() - this->egptr() ;
         auto res = _pipe.read(this->egptr(), len);
-
 
         this->setg(this->eback(), this->gptr(), this->egptr() + res);
         auto val = *this->gptr();
@@ -198,7 +211,6 @@ private:
             return false;
 
         auto base = this->pbase();
-
         auto wrt = _pipe.write(base, this->pptr() - base);
         std::ptrdiff_t diff = this->pptr() - base;
 

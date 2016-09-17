@@ -27,5 +27,5 @@ boostbook standalone
 :
   <dependency>autodoc
   <xsl:param>boost.root=../../../..
-  <xml:param>html.stylesheet=../../../../doc/src/boostbook.css
+  <xsl:param>html.stylesheet=../../../../doc/src/boostbook.css
 ;

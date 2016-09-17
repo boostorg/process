@@ -34,6 +34,9 @@
 namespace boost { namespace process { namespace detail
 {
 
+#if !defined(BOOST_PROCESS_PIPE_SIZE)
+#define BOOST_PROCESS_PIPE_SIZE 1024
+#endif
 
 #if defined(BOOST_POSIX_API)
 namespace posix {namespace extensions {}}
