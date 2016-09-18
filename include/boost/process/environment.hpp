@@ -11,6 +11,7 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/iterator/transform_iterator.hpp>
+#include <boost/filesystem/path.hpp>
 
 #if defined(BOOST_POSIX_API)
 #include <boost/process/detail/posix/environment.hpp>
@@ -196,8 +197,8 @@ struct make_const_entry
 
 #if !defined (BOOST_PROCESS_DOXYGEN)
 
-template<typename Char, template <class> class Implementation = detail::api::native_environment_impl>
-class basic_environment : public Implementation<Char>
+template<typename Char, template <class> class Implementation = detail::api::basic_environment_impl>
+class basic_environment_impl : public Implementation<Char>
 {
     Char** _get_end() const
     {
@@ -210,7 +211,7 @@ class basic_environment : public Implementation<Char>
 public:
     using string_type = std::basic_string<Char>;
     using implementation_type = Implementation<Char>;
-    using base_type = basic_environment<Char, Implementation>;
+    using base_type = basic_environment_impl<Char, Implementation>;
     using       entry_maker = detail::make_entry<Char, base_type>;
     using entry_type        = detail::entry     <Char, base_type>;
     using const_entry_type  = detail::const_entry     <Char, const base_type>;
@@ -335,7 +336,7 @@ public:
 /**Template representation of environments. It takes a template
  * as template parameter to implement the environment
  */
-template<typename Char, template <class> class Implementation = detail::api::native_environment_impl>
+template<typename Char>
 class basic_environment
 {
 
@@ -363,12 +364,12 @@ public:
 
     ///Default constructor
     basic_environment();
-    ///Copy constructor. @note Deleted for native_environment.
+    ///Copy constructor.
     basic_environment(const basic_environment & );
     ///Move constructor.
     basic_environment(basic_environment && );
 
-    ///Copy assignment. @note Deleted for native_environment.
+    ///Copy assignment.
     basic_environment& operator=(const basic_environment & );
     ///Move assignment.
     basic_environment& operator=(basic_environment && );
@@ -379,8 +380,127 @@ public:
     bool empty();
     ///Get the number of variables.
     std::size_t size() const;
-    ///Clear the environment. @attention Use with care, environment cannot be empty.
+    ///Clear the environment. @attention Use with care, passed environment cannot be empty.
     void clear();
+    ///Get the entry with the key. Throws if it does not exist.
+    entry_type  at( const string_type& key );
+    ///Get the entry with the key. Throws if it does not exist.
+    const_entry_type at( const string_type& key ) const;
+    ///Get the entry with the given key. It creates the entry if it doesn't exist.
+    entry_type operator[](const string_type & key);
+
+    /**Proxy class used for read access to members by [] or .at()
+     * @attention Holds a reference to the environment it was created from.
+     */
+    template<typename Char, typename Environment>
+    struct const_entry_type
+    {
+        typedef Char value_type;
+        typedef const value_type * pointer;
+        typedef std::basic_string<value_type> string_type;
+        typedef boost::iterator_range<pointer> range;
+        typedef Environment environment_t;
+
+        ///Split the entry by ";" and return it as a vector. Used by PATH.
+        std::vector<string_type> to_vector() const
+        ///Get the value as string.
+        string_type to_string()              const
+        ///Get the name of this entry.
+        string_type get_name() const {return string_type(_name.begin(), _name.end());}
+        ///Copy Constructor
+        const_entry(const const_entry&) = default;
+        ///Move Constructor
+        const_entry& operator=(const const_entry&) = default;
+        ///Check if the entry is empty.
+        bool empty() const;
+    };
+
+    /**Proxy class used for read and write access to members by [] or .at()
+     * @attention Holds a reference to the environment it was created from.
+     */
+    template<typename Char, typename Environment>
+    struct entry_type
+    {
+
+        typedef Char value_type;
+        typedef const value_type * pointer;
+        typedef std::basic_string<value_type> string_type;
+        typedef boost::iterator_range<pointer> range;
+        typedef Environment environment_t;
+
+        ///Split the entry by ";" and return it as a vector. Used by PATH.
+        std::vector<string_type> to_vector() const
+        ///Get the value as string.
+        string_type to_string()              const
+        ///Get the name of this entry.
+        string_type get_name() const {return string_type(_name.begin(), _name.end());}
+        ///Copy Constructor
+        entry(const entry&) = default;
+        ///Move Constructor
+        entry& operator=(const entry&) = default;
+        ///Check if the entry is empty.
+        bool empty() const;
+
+        ///Assign a string to the value
+        void assign(const string_type &value);
+        ///Assign a set of strings to the entry; they will be seperated by ';'.
+        void assign(const std::vector<string_type> &value);
+        ///Append a string to the end of the entry, it will seperated by ';'.
+        void append(const string_type &value);
+        ///Reset the value
+        void clear();
+        ///Assign a string to the entry.
+        entry &operator=(const string_type & value);
+        ///Assign a set of strings to the entry; they will be seperated by ';'.
+        entry &operator=(const std::vector<string_type> & value);
+        ///Append a string to the end of the entry, it will seperated by ';'.
+        entry &operator+=(const string_type & value);
+    };
+
+};
+
+/**Template representation of environments. It takes a template
+ * as template parameter to implement the environment
+ */
+template<typename Char>
+class basic_native_environment
+{
+
+public:
+    typedef std::basic_string<Char> string_type;
+    typedef boost::transform_iterator<      entry_maker, Char**> iterator       ;
+    typedef boost::transform_iterator<const_entry_maker, Char**> const_iterator ;
+    typedef std::size_t                                             size_type      ;
+
+    iterator       begin()        ; ///<Returns an iterator to the beginning
+    const_iterator begin()  const ; ///<Returns an iterator to the beginning
+    const_iterator cbegin() const ; ///<Returns an iterator to the beginning
+
+    iterator       end()       ; ///<Returns an iterator to the end
+    const_iterator end()  const; ///<Returns an iterator to the end
+    const_iterator cend() const; ///<Returns an iterator to the end
+
+    iterator        find( const string_type& key );            ///<Find a variable by its name
+    const_iterator  find( const string_type& key ) const;   ///<Find a variable by its name
+
+    std::size_t count(const string_type & st) const; ///<Number of variables
+    void erase(const string_type & id); ///<Erase variable by id.
+    ///Emplace an environment variable.
+    std::pair<iterator,bool> emplace(const string_type & id, const string_type & value);
+
+    ///Default constructor
+    basic_native_environment();
+    ///Move constructor.
+    basic_native_environment(basic_native_environment && );
+    ///Move assignment.
+    basic_native_environment& operator=(basic_native_environment && );
+
+    typedef typename detail::implementation_type::native_handle_type native_handle;
+
+    ///Check if environment has entries.
+    bool empty();
+    ///Get the number of variables.
+    std::size_t size() const;
     ///Get the entry with the key. Throws if it does not exist.
     entry_type  at( const string_type& key );
     ///Get the entry with the key. Throws if it does not exist.
@@ -460,11 +580,23 @@ public:
 
 #endif
 
-///Definition of the environment for the current process.
-typedef basic_environment<char,    detail::api::native_environment_impl>   native_environment;
-///Type definition to hold a seperate environment.
-typedef basic_environment<char,    detail::api::basic_environment_impl>   environment;
 
+template<typename Char>
+using basic_native_environment = basic_environment_impl<Char, detail::api::native_environment_impl>;
+
+template<typename Char>
+using basic_environment = basic_environment_impl<Char, detail::api::basic_environment_impl>;
+
+
+///Definition of the environment for the current process.
+typedef basic_native_environment<char>     native_environment;
+///Definition of the environment for the current process.
+typedef basic_native_environment<wchar_t> wnative_environment;
+
+///Type definition to hold a seperate environment.
+typedef basic_environment<char>     environment;
+///Type definition to hold a seperate environment.
+typedef basic_environment<wchar_t> wenvironment;
 
 }
 
@@ -477,21 +609,42 @@ typedef ::boost::process::detail::api::native_handle_t native_handle_t;
 
 ///Definition of the environment for this process.
 using ::boost::process::native_environment;
+///Definition of the environment for this process.
+using ::boost::process::wnative_environment;
 
 ///Get the process id of the current process.
 inline int get_id()                     { return ::boost::process::detail::api::get_id();}
 ///Get the native handle of the current process.
 inline native_handle_t native_handle()  { return ::boost::process::detail::api::native_handle();}
 ///Get the enviroment of the current process.
-inline native_environment environment() { return ::boost::process::native_environment(); }
+inline native_environment   environment() { return ::boost::process:: native_environment(); }
+///Get the enviroment of the current process.
+inline wnative_environment wenvironment() { return ::boost::process::wnative_environment(); }
 ///Get the path environment variable of the current process runs.
-inline std::vector<std::string> path()
+inline std::vector<boost::filesystem::path> path()
 {
+#if defined(BOOST_WINDOWS_API)
+	const ::boost::process::wnative_environment ne;
+	const auto id = L"PATH";
+#else
 	const ::boost::process::native_environment ne;
+	const auto id = "path";
+#endif
 
-	for (const auto & e : ne)
-		if ("PATH" == ::boost::to_upper_copy(e.get_name()))
-			return e.to_vector();
+	auto itr = std::find_if(ne.cbegin(), ne.cend(),
+			[&](const auto & e)
+			 {return id == ::boost::to_upper_copy(e.get_name());});
+
+	if (itr == ne.cend())
+		return {};
+
+	auto vec = itr->to_vector();
+
+	std::vector<boost::filesystem::path> val;
+	val.resize(vec.size());
+
+	std::copy(val.begin(), val.end(), vec.begin());
+
 	return {};
 }
 

@@ -1,9 +1,8 @@
-/*
- * string_traits.hpp
- *
- *  Created on: 05.03.2016
- *      Author: Klemens
- */
+// Copyright (c) 2016 Klemens D. Morgenstern
+//
+// Distributed under the Boost Software License, Version 1.0. (See accompanying
+// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+
 
 #ifndef BOOST_PROCESS_DETAIL_TRAITS_CMD_OR_EXE_HPP_
 #define BOOST_PROCESS_DETAIL_TRAITS_CMD_OR_EXE_HPP_
@@ -61,25 +60,6 @@ template<> struct initializer_tag<exe_setter_> { typedef cmd_or_exe_tag type;};
 
 template<>
 struct initializer_builder<cmd_or_exe_tag>;
-
-//template
-
-template<typename T> struct is_wchar_t {typedef std::false_type type;};
-
-template<> struct is_wchar_t<boost::filesystem::path> {typedef std::true_type type;};
-
-template<> struct is_wchar_t<const wchar_t* > { typedef std::true_type type;};
-
-template<> struct is_wchar_t<wchar_t* > { typedef std::true_type type;};
-
-template<std::size_t Size> struct is_wchar_t<const wchar_t [Size]>    { typedef std::true_type type;};
-template<std::size_t Size> struct is_wchar_t<const wchar_t (&)[Size]> { typedef std::true_type type;};
-
-template<> struct is_wchar_t<std::basic_string<wchar_t >>              { typedef std::true_type type;};
-template<> struct is_wchar_t<std::vector<std::basic_string<wchar_t >>> { typedef std::true_type type;};
-template<> struct is_wchar_t<std::initializer_list<std::basic_string<wchar_t >>> { typedef std::true_type type;};
-template<> struct is_wchar_t<std::vector<wchar_t *>>           { typedef std::true_type type;};
-template<> struct is_wchar_t<std::initializer_list<wchar_t *>> { typedef std::true_type type;};
 
 
 }}}
