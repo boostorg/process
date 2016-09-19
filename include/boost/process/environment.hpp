@@ -155,8 +155,8 @@ template<typename Char, typename Environment>
 struct make_entry
 {
 
-	make_entry(const make_entry&) = default;
-	make_entry& operator=(const make_entry&) = default;
+    make_entry(const make_entry&) = default;
+    make_entry& operator=(const make_entry&) = default;
 
     Environment &env;
     make_entry(Environment & env) : env(env) {};
@@ -176,8 +176,8 @@ template<typename Char, typename Environment>
 struct make_const_entry
 {
 
-	make_const_entry(const make_const_entry&) = default;
-	make_const_entry& operator=(const make_const_entry&) = default;
+    make_const_entry(const make_const_entry&) = default;
+    make_const_entry& operator=(const make_const_entry&) = default;
 
     Environment &env;
     make_const_entry(Environment & env) : env(env) {};
@@ -624,28 +624,28 @@ inline wnative_environment wenvironment() { return ::boost::process::wnative_env
 inline std::vector<boost::filesystem::path> path()
 {
 #if defined(BOOST_WINDOWS_API)
-	const ::boost::process::wnative_environment ne;
-	const auto id = L"PATH";
+    const ::boost::process::wnative_environment ne;
+    const auto id = L"PATH";
 #else
-	const ::boost::process::native_environment ne;
-	const auto id = "path";
+    const ::boost::process::native_environment ne;
+    const auto id = "path";
 #endif
 
-	auto itr = std::find_if(ne.cbegin(), ne.cend(),
-			[&](const auto & e)
-			 {return id == ::boost::to_upper_copy(e.get_name());});
+    auto itr = std::find_if(ne.cbegin(), ne.cend(),
+            [&](const auto & e)
+             {return id == ::boost::to_upper_copy(e.get_name());});
 
-	if (itr == ne.cend())
-		return {};
+    if (itr == ne.cend())
+        return {};
 
-	auto vec = itr->to_vector();
+    auto vec = itr->to_vector();
 
-	std::vector<boost::filesystem::path> val;
-	val.resize(vec.size());
+    std::vector<boost::filesystem::path> val;
+    val.resize(vec.size());
 
-	std::copy(val.begin(), val.end(), vec.begin());
+    std::copy(val.begin(), val.end(), vec.begin());
 
-	return {};
+    return {};
 }
 
 }

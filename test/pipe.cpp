@@ -132,7 +132,7 @@ BOOST_AUTO_TEST_CASE(large_data, *boost::unit_test::timeout(2))
 
     int cnt = 0;
     for (auto & c: in)
-    	c = (cnt++ % 26) + 'A';
+        c = (cnt++ % 26) + 'A';
 
     std::thread th([&]{os << in << std::endl;});
 

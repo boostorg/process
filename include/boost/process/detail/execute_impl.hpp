@@ -45,8 +45,39 @@ namespace boost { namespace process {
 
 class child;
 
-
 namespace detail {
+
+
+template<typename ...Args>
+struct has_wchar;
+
+template<typename First, typename ...Args>
+struct has_wchar<First, Args...>
+{
+    typedef has_wchar<Args...> next;
+	typedef typename std::remove_reference<First>::type res_type;
+    typedef typename is_wchar_t<res_type>::type is_t;
+
+    constexpr static bool my_value = is_t::value;
+    constexpr static bool value = my_value || next::value;
+
+    typedef std::integral_constant<bool, value> type;
+};
+
+template<typename First>
+struct has_wchar<First>
+{
+	typedef typename std::remove_reference<First>::type res_type;
+    typedef typename is_wchar_t<res_type>::type is_t;
+
+    constexpr static bool value = is_t::value;
+
+    typedef std::integral_constant<bool, value> type;
+};
+
+//#define
+
+
 
 template<typename Iterator, typename End, typename ...Args>
 struct make_builders_from_view
@@ -161,12 +192,11 @@ inline boost::fusion::tuple<typename get_initializers_result<Args>::type...>
 }
 
 
-
-
-
 template<typename ...Args>
 inline child execute_impl(Args&& ... args)
 {
+	typedef typename has_wchar<Args...>::type has_wchar_t;
+
     //create a tuple from the argument list
     boost::fusion::tuple<typename std::remove_reference<Args>::type&...> tup(args...);
 

@@ -21,3 +21,13 @@
 *.app
 /bin
 /*/bin
+/doc/autodoc.xml
+/doc/html
+/sparring_log.txt
+/.cproject
+/.project
+/Doxyfile
+
+/notes.cpp
+/notes_p.txt
+.settings

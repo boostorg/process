@@ -27,23 +27,29 @@
 
 namespace boost { namespace process { namespace detail {
 
+template<typename Char>
 struct exe_setter_
 {
-    std::string exe_;
-    exe_setter_(std::string && str)      : exe_(std::move(str)) {}
-    exe_setter_(const std::string & str) : exe_(str) {}
+    typedef Char value_type;
+    typedef std::basic_string<Char> string_type;
+
+    string_type exe_;
+    exe_setter_(string_type && str)      : exe_(std::move(str)) {}
+    exe_setter_(const string_type & str) : exe_(str) {}
 
 
 };
 
 
-template <class String, bool Append >
+template <typename Char, bool Append >
 struct arg_setter_
 {
-    std::vector<String> _args;
+    using value_type = Char;
+    using string_type = std::basic_string<value_type>;
+    std::vector<string_type> _args;
 
-    typedef typename std::vector<String>::iterator       iterator;
-    typedef typename std::vector<String>::const_iterator const_iterator;
+    typedef typename std::vector<string_type>::iterator       iterator;
+    typedef typename std::vector<string_type>::const_iterator const_iterator;
 
     template<typename Iterator>
     arg_setter_(Iterator && begin, Iterator && end) : _args(begin, end) {}
@@ -57,13 +63,13 @@ struct arg_setter_
     iterator end()   {return _args.end();}
     const_iterator begin() const {return _args.begin();}
     const_iterator end()   const {return _args.end();}
-    arg_setter_(std::string & str)     : _args{{str}} {}
-    arg_setter_(std::string && s)      : _args({std::move(s)}) {}
-    arg_setter_(const std::string & s) : _args({s}) {}
-    arg_setter_(const char* s) : _args({std::move(s)}) {}
+    arg_setter_(string_type & str)     : _args{{str}} {}
+    arg_setter_(string_type && s)      : _args({std::move(s)}) {}
+    arg_setter_(const string_type & s) : _args({s}) {}
+    arg_setter_(const value_type* s)   : _args({std::move(s)}) {}
 
     template<std::size_t Size>
-    arg_setter_(const char (&s) [Size]) : _args({s}) {}
+    arg_setter_(const value_type (&s) [Size]) : _args({s}) {}
 };
 
 using api::exe_cmd_init;
@@ -72,7 +78,7 @@ struct exe_builder
 {
     //set by path, because that will not be interpreted as a cmd
     bool not_cmd = false;
-    bool shell      = false;
+    bool shell   = false;
     std::string exe;
     std::vector<std::string> args;
 

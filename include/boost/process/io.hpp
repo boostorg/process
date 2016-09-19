@@ -82,12 +82,16 @@ struct std_in_
     api::null_in operator<(const null_t &) const {return api::null_in();}
 
     api::file_in operator=(const boost::filesystem::path &p) const {return p;}
-    api::file_in operator=(const std::string &p)             const {return p;}
-    api::file_in operator=(const char*p)                     const {return p;}
+    api::file_in operator=(const std::string & p)            const {return p;}
+    api::file_in operator=(const std::wstring &p)            const {return p;}
+    api::file_in operator=(const char * p)                   const {return p;}
+    api::file_in operator=(const wchar_t * p)                const {return p;}
 
     api::file_in operator<(const boost::filesystem::path &p) const {return p;}
     api::file_in operator<(const std::string &p)             const {return p;}
+    api::file_in operator<(const std::wstring &p)            const {return p;}
     api::file_in operator<(const char*p)                     const {return p;}
+    api::file_in operator<(const wchar_t * p)                const {return p;}
 
     api::file_in operator=(FILE * f)                         const {return f;}
     api::file_in operator<(FILE * f)                         const {return f;}
@@ -137,11 +141,15 @@ struct std_out_
 
     api::file_out<p1,p2> operator=(const boost::filesystem::path &p) const {return api::file_out<p1,p2>(p);}
     api::file_out<p1,p2> operator=(const std::string &p)             const {return api::file_out<p1,p2>(p);}
-    api::file_out<p1,p2> operator=(const char*p)                     const {return api::file_out<p1,p2>(p);}
+    api::file_out<p1,p2> operator=(const std::wstring &p)            const {return api::file_out<p1,p2>(p);}
+    api::file_out<p1,p2> operator=(const char * p)                   const {return api::file_out<p1,p2>(p);}
+    api::file_out<p1,p2> operator=(const wchar_t * p)                const {return api::file_out<p1,p2>(p);}
 
     api::file_out<p1,p2> operator>(const boost::filesystem::path &p) const {return api::file_out<p1,p2>(p);}
     api::file_out<p1,p2> operator>(const std::string &p)             const {return api::file_out<p1,p2>(p);}
-    api::file_out<p1,p2> operator>(const char*p)                     const {return api::file_out<p1,p2>(p);}
+    api::file_out<p1,p2> operator>(const std::wstring &p)            const {return api::file_out<p1,p2>(p);}
+    api::file_out<p1,p2> operator>(const char * p)                   const {return api::file_out<p1,p2>(p);}
+    api::file_out<p1,p2> operator>(const wchar_t * p)                const {return api::file_out<p1,p2>(p);}
 
     api::file_out<p1,p2> operator=(FILE * f)  const {return f;}
     api::file_out<p1,p2> operator>(FILE * f)  const {return f;}

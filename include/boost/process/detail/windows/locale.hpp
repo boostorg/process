@@ -40,12 +40,12 @@ class windows_file_codecvt
      wchar_t* to, wchar_t* to_end, wchar_t*& to_next) const override
    {
      ::boost::detail::winapi::UINT_ codepage = AreFileApisANSI() ?
-    		 ::boost::detail::winapi::CP_ACP_ :
-    		 ::boost::detail::winapi::CP_OEMCP_;
+             ::boost::detail::winapi::CP_ACP_ :
+             ::boost::detail::winapi::CP_OEMCP_;
 
      int count;
      if ((count = ::boost::detail::winapi::MultiByteToWideChar(codepage,
-    		 ::boost::detail::winapi::MB_PRECOMPOSED_, from,
+             ::boost::detail::winapi::MB_PRECOMPOSED_, from,
        from_end - from, to, to_end - to)) == 0)
      {
        return error;  // conversion failed
@@ -62,13 +62,13 @@ class windows_file_codecvt
      char* to, char* to_end, char*& to_next) const override
    {
      UINT codepage = ::boost::detail::winapi::AreFileApisANSI() ?
-    		 	 	 ::boost::detail::winapi::CP_ACP_ :
-					 ::boost::detail::winapi::CP_OEMCP_;
+                       ::boost::detail::winapi::CP_ACP_ :
+                     ::boost::detail::winapi::CP_OEMCP_;
 
      int count;
      if ((count = ::boost::detail::winapi::WideCharToMultiByte(codepage,
-    		 	  ::boost::detail::winapi::WC_NO_BEST_FIT_CHARS_, from,
-				  from_end - from, to, to_end - to, 0, 0)) == 0)
+                   ::boost::detail::winapi::WC_NO_BEST_FIT_CHARS_, from,
+                  from_end - from, to, to_end - to, 0, 0)) == 0)
      {
        return error;  // conversion failed
      }

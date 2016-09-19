@@ -180,19 +180,19 @@ public:
 
     template<typename CharR>
     explicit inline  basic_environment_impl(
-    			const basic_environment_impl<CharR>& rhs,
-    			const ::boost::process::codecvt_type & cv = ::boost::process::codecvt())
-    	: _data(::boost::process::detail::convert(rhs._data, cv))
+                const basic_environment_impl<CharR>& rhs,
+                const ::boost::process::codecvt_type & cv = ::boost::process::codecvt())
+        : _data(::boost::process::detail::convert(rhs._data, cv))
     {
     }
 
     template<typename CharR>
     basic_environment_impl & operator=(const basic_environment_impl<CharR>& rhs)
     {
-    	_data = ::boost::process::detail::convert(rhs._data);
-    	_env_arr = _load_var(&*_data.begin());
-    	_env_impl = &*_env_arr.begin();
-    	return *this;
+        _data = ::boost::process::detail::convert(rhs._data);
+        _env_arr = _load_var(&*_data.begin());
+        _env_impl = &*_env_arr.begin();
+        return *this;
     }
 
     Char ** _env_impl = &*_env_arr.begin();

@@ -28,8 +28,6 @@
  *
  */
 
-
-
 namespace boost { namespace process { namespace detail {
 
 
@@ -37,22 +35,26 @@ struct cmd_
 {
     constexpr cmd_() {}
 
-    inline api::cmd_setter_ operator()(const char *s) const
+    template<typename Char>
+    inline api::cmd_setter_<Char> operator()(const Char *s) const
     {
-        return api::cmd_setter_(s);
+        return api::cmd_setter_<Char>(s);
     }
-    inline api::cmd_setter_ operator= (const char *s) const
+    template<typename Char>
+    inline api::cmd_setter_<Char> operator= (const Char *s) const
     {
-        return api::cmd_setter_(s);
+        return api::cmd_setter_<Char>(s);
     }
 
-    inline api::cmd_setter_ operator()(const std::string &s) const
+    template<typename Char>
+    inline api::cmd_setter_<Char> operator()(const std::basic_string<Char> &s) const
     {
-        return api::cmd_setter_(s);
+        return api::cmd_setter_<Char>(s);
     }
-    inline api::cmd_setter_ operator= (const std::string &s) const
+    template<typename Char>
+    inline api::cmd_setter_<Char> operator= (const std::basic_string<Char> &s) const
     {
-        return api::cmd_setter_(s);
+        return api::cmd_setter_<Char>(s);
     }
 };
 

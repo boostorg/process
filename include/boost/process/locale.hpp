@@ -110,7 +110,7 @@ inline std::size_t convert(const char* from,
                     const char* from_end,
                     wchar_t* to, wchar_t* to_end,
                     const ::boost::process::codecvt_type & cvt =
-                       	      ::boost::process::codecvt())
+                                 ::boost::process::codecvt())
 {
     std::mbstate_t state  = std::mbstate_t();  // perhaps unneeded, but cuts bug reports
     const char* from_next;
@@ -130,7 +130,7 @@ inline std::size_t convert(const wchar_t* from,
                     const wchar_t* from_end,
                     char* to, char* to_end,
                     const ::boost::process::codecvt_type & cvt =
-                       	      ::boost::process::codecvt())
+                                 ::boost::process::codecvt())
 {
     std::mbstate_t state  = std::mbstate_t();  // perhaps unneeded, but cuts bug reports
     const wchar_t* from_next;
@@ -140,58 +140,58 @@ inline std::size_t convert(const wchar_t* from,
 
     if ((res=cvt.out(state, from, from_end, from_next,
            to, to_end, to_next)) != std::codecvt_base::ok)
-			   throw std::system_error(res, ::boost::process::codecvt_category(),
-				   "boost::process codecvt to char");
+               throw std::system_error(res, ::boost::process::codecvt_category(),
+                   "boost::process codecvt to char");
 
     return to_next - to;
 }
 
 inline std::wstring convert(const std::string & st,
-							::boost::process::codecvt_type & cvt =
-							    ::boost::process::codecvt())
+                            ::boost::process::codecvt_type & cvt =
+                                ::boost::process::codecvt())
 {
-	std::wstring out(st.size() + 10); //just to be sure
-	auto sz = convert(st.c_str(), st.c_str() + st.size(),
-					  &out.front(), &out.back(), cvt);
+    std::wstring out(st.size() + 10); //just to be sure
+    auto sz = convert(st.c_str(), st.c_str() + st.size(),
+                      &out.front(), &out.back(), cvt);
 
-	out.resize(sz);
-	return out;
+    out.resize(sz);
+    return out;
 }
 
 inline std::string convert(const std::wstring & st,
-							::boost::process::codecvt_type & cvt =
-							    ::boost::process::codecvt())
+                            ::boost::process::codecvt_type & cvt =
+                                ::boost::process::codecvt())
 {
-	std::string out(st.size() * 2); //just to be sure
-	auto sz = convert(st.c_str(), st.c_str() + st.size(),
-					  &out.front(), &out.back(), cvt);
+    std::string out(st.size() * 2); //just to be sure
+    auto sz = convert(st.c_str(), st.c_str() + st.size(),
+                      &out.front(), &out.back(), cvt);
 
-	out.resize(sz);
-	return out;
+    out.resize(sz);
+    return out;
 }
 
 inline std::vector<wchar_t> convert(const std::vector<char> & st,
-							::boost::process::codecvt_type & cvt =
-							    ::boost::process::codecvt())
+                            ::boost::process::codecvt_type & cvt =
+                                ::boost::process::codecvt())
 {
-	std::vector<wchar_t> out(st.size() + 10); //just to be sure
-	auto sz = convert(st.data(), st.data() + st.size(),
-					  &out.front(), &out.back(), cvt);
+    std::vector<wchar_t> out(st.size() + 10); //just to be sure
+    auto sz = convert(st.data(), st.data() + st.size(),
+                      &out.front(), &out.back(), cvt);
 
-	out.resize(sz);
-	return out;
+    out.resize(sz);
+    return out;
 }
 
 inline std::vector<char> convert(const std::vector<wchar_t> & st,
-							::boost::process::codecvt_type & cvt =
-							    ::boost::process::codecvt())
+                            ::boost::process::codecvt_type & cvt =
+                                ::boost::process::codecvt())
 {
-	std::vector<char> out(st.size() * 2); //just to be sure
-	auto sz = convert(st.data(), st.data() + st.size(),
-					  &out.front(), &out.back(), cvt);
+    std::vector<char> out(st.size() * 2); //just to be sure
+    auto sz = convert(st.data(), st.data() + st.size(),
+                      &out.front(), &out.back(), cvt);
 
-	out.resize(sz);
-	return out;
+    out.resize(sz);
+    return out;
 }
 
 }

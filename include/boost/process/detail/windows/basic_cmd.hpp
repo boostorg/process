@@ -26,9 +26,6 @@ namespace detail
 namespace windows
 {
 
-typedef std::string native_args;
-
-
 inline std::string build_args(const std::string & exe, std::vector<std::string> && data)
 {
     std::string st = exe;
@@ -53,15 +50,42 @@ inline std::string build_args(const std::string & exe, std::vector<std::string> 
     return st;
 }
 
+inline std::wstring build_args(const std::wstring & exe, std::vector<std::wstring> && data)
+{
+    std::wstring st = exe;
+    for (auto & arg : data)
+    {
+        boost::replace_all(arg, L"\"", L"\\\"");
 
+        auto it = std::find(arg.begin(), arg.end(), ' ');//contains space?
+        if (it != arg.end())//ok, contains spaces.
+        {
+            //the first one is put directly onto the output,
+            //because then I don't have to copy the whole string
+            arg.insert(arg.begin(), L'"');
+            arg += L'"'; //thats the post one.
+        }
+
+        if (!st.empty())//first one does not need a preceeding space
+            st += L' ';
+
+        st += arg;
+    }
+    return st;
+}
+
+template<typename Char>
 struct exe_cmd_init : handler_base_ext
 {
-    exe_cmd_init(const std::string & exe, bool cmd_only = false)
+	using value_type  = Char;
+	using string_type = std::basic_string<value_type>;
+
+    exe_cmd_init(const string_type & exe, bool cmd_only = false)
                 : exe(exe), args({}), cmd_only(cmd_only) {};
-    exe_cmd_init(std::string && exe, bool cmd_only = false)
+    exe_cmd_init(string_type && exe, bool cmd_only = false)
                 : exe(std::move(exe)), args({}), cmd_only(cmd_only) {};
 
-    exe_cmd_init(std::string && exe, std::vector<std::string> && args)
+    exe_cmd_init(string_type && exe, std::vector<string_type> && args)
             : exe(std::move(exe)), args(build_args(this->exe, std::move(args))), cmd_only(false) {};
     template <class Executor>
     void on_setup(Executor& exec) const
@@ -100,8 +124,8 @@ struct exe_cmd_init : handler_base_ext
                 std::move(args));
     }
 private:
-    std::string exe;
-    std::string args;
+    string_type exe;
+    string_type args;
     bool cmd_only;
 };
 
