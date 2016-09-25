@@ -22,22 +22,26 @@ namespace boost { namespace process { namespace detail {
 
 struct exe_
 {
-    inline exe_setter_ operator()(const char *s) const
+    template<typename Char>
+    inline exe_setter_<Char> operator()(const Char *s) const
     {
-        return exe_setter_(s);
+        return exe_setter_<Char>(s);
     }
-    inline exe_setter_ operator= (const char *s) const
+    template<typename Char>
+    inline exe_setter_<Char> operator= (const Char *s) const
     {
-        return exe_setter_(s);
+        return exe_setter_<Char>(s);
     }
 
-    inline exe_setter_ operator()(const std::string &s) const
+    template<typename Char>
+    inline exe_setter_<Char> operator()(const std::basic_string<Char> &s) const
     {
-        return exe_setter_(s);
+        return exe_setter_<Char>(s);
     }
-    inline exe_setter_ operator= (const std::string &s) const
+    template<typename Char>
+    inline exe_setter_<Char> operator= (const std::basic_string<Char> &s) const
     {
-        return exe_setter_(s);
+        return exe_setter_<Char>(s);
     }
 };
 

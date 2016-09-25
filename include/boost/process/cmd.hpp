@@ -15,6 +15,7 @@
 #include <boost/process/detail/config.hpp>
 #include <boost/process/detail/handler_base.hpp>
 #include <boost/process/detail/traits/cmd_or_exe.hpp>
+#include <boost/process/detail/traits/wchar_t.hpp>
 
 #if defined(BOOST_POSIX_API)
 #include <boost/process/detail/posix/cmd.hpp>
@@ -58,7 +59,12 @@ struct cmd_
     }
 };
 
+template<> struct is_wchar_t<api::cmd_setter_<wchar_t>> : std::true_type {};
+
+
 constexpr static cmd_ cmd;
+
+
 
 }
 

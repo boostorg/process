@@ -18,6 +18,7 @@
 #define BOOST_PROCESS_SHELL_PATH_HPP
 
 #include <boost/process/detail/config.hpp>
+#include <boost/process/detail/traits/wchar_t.hpp>
 
 #if defined(BOOST_POSIX_API)
 #include <boost/process/detail/posix/shell_path.hpp>
@@ -47,6 +48,11 @@ struct shell_
     {
         return boost::process::detail::api::shell_path(ec);
     }
+};
+
+template<>
+struct is_wchar_t<shell_> : is_wchar_t<boost::filesystem::path>
+{
 };
 
 }

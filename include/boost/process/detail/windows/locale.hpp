@@ -61,7 +61,7 @@ class windows_file_codecvt
      const wchar_t* from, const wchar_t* from_end, const wchar_t*& from_next,
      char* to, char* to_end, char*& to_next) const override
    {
-     UINT codepage = ::boost::detail::winapi::AreFileApisANSI() ?
+     auto codepage = ::boost::detail::winapi::AreFileApisANSI() ?
                        ::boost::detail::winapi::CP_ACP_ :
                      ::boost::detail::winapi::CP_OEMCP_;
 

@@ -29,7 +29,7 @@ struct cmd_setter_ : ::boost::process::detail::handler_base
     template <class Executor>
     void on_setup(Executor& exec)
     {
-        exec.set_cmd_line(std::move(_cmd_line));
+        exec.cmd_line = _cmd_line.c_str();
     }
 public:
     string_type _cmd_line;

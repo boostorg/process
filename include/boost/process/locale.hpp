@@ -116,12 +116,14 @@ inline std::size_t convert(const char* from,
     const char* from_next;
     wchar_t* to_next;
 
-    std::codecvt_base::result res;
+    auto res = cvt.in(state, from, from_end, from_next,
+                 to, to_end, to_next);
 
-    if ((res=cvt.in(state, from, from_end, from_next,
-        to, to_end, to_next)) != std::codecvt_base::ok)
-            throw std::system_error(res, ::boost::process::codecvt_category(),
-                "boost::process codecvt to wchar_t");
+    if (res != std::codecvt_base::ok)
+         throw std::system_error(res, ::boost::process::codecvt_category(),
+             "boost::process codecvt to wchar_t");
+
+
     return to_next - to;
 
 }
@@ -147,10 +149,10 @@ inline std::size_t convert(const wchar_t* from,
 }
 
 inline std::wstring convert(const std::string & st,
-                            ::boost::process::codecvt_type & cvt =
+                            const ::boost::process::codecvt_type & cvt =
                                 ::boost::process::codecvt())
 {
-    std::wstring out(st.size() + 10); //just to be sure
+    std::wstring out(st.size() + 10, ' '); //just to be sure
     auto sz = convert(st.c_str(), st.c_str() + st.size(),
                       &out.front(), &out.back(), cvt);
 
@@ -159,10 +161,10 @@ inline std::wstring convert(const std::string & st,
 }
 
 inline std::string convert(const std::wstring & st,
-                            ::boost::process::codecvt_type & cvt =
+                           const ::boost::process::codecvt_type & cvt =
                                 ::boost::process::codecvt())
 {
-    std::string out(st.size() * 2); //just to be sure
+    std::string out(st.size() * 2, ' '); //just to be sure
     auto sz = convert(st.c_str(), st.c_str() + st.size(),
                       &out.front(), &out.back(), cvt);
 
@@ -171,8 +173,8 @@ inline std::string convert(const std::wstring & st,
 }
 
 inline std::vector<wchar_t> convert(const std::vector<char> & st,
-                            ::boost::process::codecvt_type & cvt =
-                                ::boost::process::codecvt())
+                                    const ::boost::process::codecvt_type & cvt =
+                                        ::boost::process::codecvt())
 {
     std::vector<wchar_t> out(st.size() + 10); //just to be sure
     auto sz = convert(st.data(), st.data() + st.size(),
@@ -183,8 +185,8 @@ inline std::vector<wchar_t> convert(const std::vector<char> & st,
 }
 
 inline std::vector<char> convert(const std::vector<wchar_t> & st,
-                            ::boost::process::codecvt_type & cvt =
-                                ::boost::process::codecvt())
+                                 const ::boost::process::codecvt_type & cvt =
+                                     ::boost::process::codecvt())
 {
     std::vector<char> out(st.size() * 2); //just to be sure
     auto sz = convert(st.data(), st.data() + st.size(),
@@ -193,6 +195,37 @@ inline std::vector<char> convert(const std::vector<wchar_t> & st,
     out.resize(sz);
     return out;
 }
+
+
+inline std::wstring convert(const char *begin, const char* end,
+                            const ::boost::process::codecvt_type & cvt =
+                                ::boost::process::codecvt())
+{
+    auto size = end-begin;
+    std::wstring out(size + 10, ' '); //just to be sure
+    using namespace std;
+    auto sz = convert(begin, end,
+                      &out.front(), &out.back(), cvt);
+    out.resize(sz);
+    return out;
+}
+
+inline std::string convert(const wchar_t  * begin, const wchar_t *end,
+                           const ::boost::process::codecvt_type & cvt =
+                                ::boost::process::codecvt())
+{
+    auto size = end-begin;
+
+    std::string out(size * 2, ' '); //just to be sure
+    auto sz = convert(begin, end ,
+                      &out.front(), &out.back(), cvt);
+
+    out.resize(sz);
+    return out;
+}
+
+
+
 
 }
 

@@ -107,21 +107,21 @@ struct args_
     {
         return arg_setter_<Char, false>(str);
     }
-    template<typename Char, std::size_t Size>
-    arg_setter_<Char, true>     operator()(const Char (&str) [Size]) const
-    {
-        return arg_setter_<Char, true> (str);
-    }
-    template<typename Char, std::size_t Size>
-    arg_setter_<Char, true>     operator+=(const Char (&str) [Size]) const
-    {
-        return arg_setter_<Char, true> (str);
-    }
-    template<typename Char, std::size_t Size>
-    arg_setter_<Char, false>    operator= (const Char (&str) [Size]) const
-    {
-        return arg_setter_<Char, false>(str);
-    }
+//    template<typename Char, std::size_t Size>
+//    arg_setter_<Char, true>     operator()(const Char (&str) [Size]) const
+//    {
+//        return arg_setter_<Char, true> (str);
+//    }
+//    template<typename Char, std::size_t Size>
+//    arg_setter_<Char, true>     operator+=(const Char (&str) [Size]) const
+//    {
+//        return arg_setter_<Char, true> (str);
+//    }
+//    template<typename Char, std::size_t Size>
+//    arg_setter_<Char, false>    operator= (const Char (&str) [Size]) const
+//    {
+//        return arg_setter_<Char, false>(str);
+//    }
 
     template<typename Char>
     arg_setter_<Char, true> operator()(std::initializer_list<const Char*> &&range) const
@@ -154,6 +154,7 @@ struct args_
         return arg_setter_<Char, true>(range.begin(), range.end());
     }
 };
+
 
 }
 

@@ -77,8 +77,11 @@ inline std::wstring build_args(const std::wstring & exe, std::vector<std::wstrin
 template<typename Char>
 struct exe_cmd_init : handler_base_ext
 {
-	using value_type  = Char;
-	using string_type = std::basic_string<value_type>;
+    using value_type  = Char;
+    using string_type = std::basic_string<value_type>;
+
+    static const char*    c_arg(char)    { return "/c";}
+    static const wchar_t* c_arg(wchar_t) { return L"/c";}
 
     exe_cmd_init(const string_type & exe, bool cmd_only = false)
                 : exe(exe), args({}), cmd_only(cmd_only) {};
@@ -99,27 +102,32 @@ struct exe_cmd_init : handler_base_ext
             exec.cmd_line = args.c_str();
         }
     }
-    static exe_cmd_init exe_args(std::string&& exe, std::vector<std::string> && args)
+    static exe_cmd_init<Char> exe_args(string_type && exe, std::vector<string_type> && args)
     {
-        return exe_cmd_init(std::move(exe), std::move(args));
+        return exe_cmd_init<Char>(std::move(exe), std::move(args));
     }
-    static exe_cmd_init cmd(std::string&& cmd)
+    static exe_cmd_init<Char> cmd(string_type&& cmd)
     {
-        return exe_cmd_init(std::move(cmd), true);
+        return exe_cmd_init<Char>(std::move(cmd), true);
     }
-    static exe_cmd_init exe_args_shell(std::string&& exe, std::vector<std::string> && args)
+    static exe_cmd_init<Char> exe_args_shell(string_type && exe, std::vector<string_type> && args)
     {
-        std::vector<std::string> args_ = {"/c", std::move(exe)};
+        std::vector<string_type> args_ = {c_arg(Char()), std::move(exe)};
         args_.insert(args_.end(), std::make_move_iterator(args.begin()), std::make_move_iterator(args.end()));
-        std::string sh = shell().string();
-        return exe_cmd_init(std::move(sh), std::move(args_));
-    }
-    static exe_cmd_init cmd_shell(std::string&& cmd)
-    {
-        std::vector<std::string> args = {"/c", std::move(cmd)};
-        std::string sh = shell().string();
+        string_type sh = get_shell(Char());
 
-        return exe_cmd_init(
+        return exe_cmd_init<Char>(std::move(sh), std::move(args_));
+    }
+
+    static std:: string get_shell(char)    {return shell(). string(codecvt()); }
+    static std::wstring get_shell(wchar_t) {return shell().wstring(codecvt());}
+
+    static exe_cmd_init<Char> cmd_shell(string_type&& cmd)
+    {
+        std::vector<string_type> args = {c_arg(Char()), std::move(cmd)};
+        string_type sh = get_shell(Char());
+
+        return exe_cmd_init<Char>(
                 std::move(sh),
                 std::move(args));
     }

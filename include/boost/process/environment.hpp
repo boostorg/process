@@ -37,7 +37,7 @@ struct const_entry
         if (_data == nullptr)
             return std::vector<string_type>();
         std::vector<string_type> data;
-        auto str = std::string(_data);
+        auto str = string_type(_data);
         struct splitter
         {
             bool operator()(wchar_t w) const {return w == L';';}
@@ -580,12 +580,26 @@ public:
 
 #endif
 
-
+///Definition of the environment for the current process.
 template<typename Char>
-using basic_native_environment = basic_environment_impl<Char, detail::api::native_environment_impl>;
+class basic_native_environment : public basic_environment_impl<Char, detail::api::native_environment_impl>
+{
+public:
+    using base_type = basic_environment_impl<Char, detail::api::native_environment_impl>;
+    using base_type::base_type;
+    using base_type::operator=;
+    };
 
+///Type definition to hold a seperate environment.
 template<typename Char>
-using basic_environment = basic_environment_impl<Char, detail::api::basic_environment_impl>;
+class basic_environment : public basic_environment_impl<Char, detail::api::basic_environment_impl>
+{
+public:
+    using base_type = basic_environment_impl<Char, detail::api::basic_environment_impl>;
+    using base_type::base_type;
+    using base_type::operator=;
+    };
+
 
 
 ///Definition of the environment for the current process.
@@ -643,7 +657,7 @@ inline std::vector<boost::filesystem::path> path()
     std::vector<boost::filesystem::path> val;
     val.resize(vec.size());
 
-    std::copy(val.begin(), val.end(), vec.begin());
+    std::copy(vec.begin(), vec.end(), val.begin());
 
     return {};
 }
