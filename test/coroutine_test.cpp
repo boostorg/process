@@ -24,7 +24,7 @@
 
 namespace bp = boost::process;
 
-BOOST_AUTO_TEST_CASE(cr_test, *boost::unit_test::timeout(5))
+BOOST_AUTO_TEST_CASE(cr_test, *boost::unit_test::timeout(15))
 {
     //ok, here I check if I got the coroutine stuff right
     using boost::unit_test::framework::master_test_suite;
@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(cr_test, *boost::unit_test::timeout(5))
             cmp.begin(), cmp.end());
 }
 
-BOOST_AUTO_TEST_CASE(stackful, *boost::unit_test::timeout(5))
+BOOST_AUTO_TEST_CASE(stackful, *boost::unit_test::timeout(15))
 {
     using boost::unit_test::framework::master_test_suite;
 
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE(stackful, *boost::unit_test::timeout(5))
     BOOST_CHECK(did_something_else);
 }
 
-BOOST_AUTO_TEST_CASE(stackful_error, *boost::unit_test::timeout(5))
+BOOST_AUTO_TEST_CASE(stackful_error, *boost::unit_test::timeout(15))
 {
     using boost::unit_test::framework::master_test_suite;
 
@@ -134,7 +134,7 @@ BOOST_AUTO_TEST_CASE(stackful_error, *boost::unit_test::timeout(5))
 }
 
 
-BOOST_AUTO_TEST_CASE(stackless, *boost::unit_test::timeout(5))
+BOOST_AUTO_TEST_CASE(stackless, *boost::unit_test::timeout(15))
 {
     using boost::unit_test::framework::master_test_suite;
 
