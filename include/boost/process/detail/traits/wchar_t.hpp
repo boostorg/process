@@ -128,6 +128,14 @@ struct char_converter<wchar_t, std::string>
     }
 };
 
+template<>
+struct char_converter<char, std::wstring>
+{
+    static std::string conv(const std::wstring & in)
+    {
+        return ::boost::process::detail::convert(in);
+    }
+};
 
 template<>
 struct char_converter<wchar_t, std::vector<std::string>>
