@@ -7,6 +7,7 @@
 #ifndef BOOST_PROCESS_DETAIL_POSIX_CMD_HPP_
 #define BOOST_PROCESS_DETAIL_POSIX_CMD_HPP_
 
+#include <boost/process/detail/config.hpp>
 #include <boost/process/detail/posix/handler.hpp>
 #include <string>
 #include <vector>
@@ -22,19 +23,19 @@ namespace posix
 
 
 
-inline std::vector<std::string> build_cmd(const std::string & value) 
+template<typename Char>
+inline std::vector<std::basic_string<Char>> build_cmd(const std::basic_string<Char> & value)
 {
-       std::vector<std::string>  ret;
-    
+    std::vector<std::basic_string<Char>>  ret;
 
-       bool in_quotes = false;
-       auto beg = value.begin();
+    bool in_quotes = false;
+    auto beg = value.begin();
     for (auto itr = value.begin(); itr != value.end(); itr++)
     {
-        if (*itr == '"')
+        if (*itr == quote_sign<Char>())
             in_quotes = !in_quotes;
 
-        if (!in_quotes && (*itr == ' '))
+        if (!in_quotes && (*itr == space_sign<Char>()))
         {
             if (itr != beg)
             {
@@ -49,25 +50,31 @@ inline std::vector<std::string> build_cmd(const std::string & value)
     return ret;
 }
 
+template<typename Char>
 struct cmd_setter_ : handler_base_ext
 {
-    cmd_setter_(std::string && cmd_line)      : _cmd_line(api::build_cmd(std::move(cmd_line))) {}
-    cmd_setter_(const std::string & cmd_line) : _cmd_line(api::build_cmd(cmd_line)) {}
+    typedef Char value_type;
+    typedef std::basic_string<value_type> string_type;
+
+    cmd_setter_(string_type && cmd_line)      : _cmd_line(api::build_cmd(std::move(cmd_line))) {}
+    cmd_setter_(const string_type & cmd_line) : _cmd_line(api::build_cmd(cmd_line)) {}
     template <class Executor>
     void on_setup(Executor& exec) 
     {
         exec.cmd_line = &_cmd_impl.front();
     }
+    const string_type & str() const {return _cmd_line;}
+
 private:
-    static inline std::vector<char*> make_cmd(std::vector<std::string> & args);
-    std::vector<std::string> _cmd_line;
-    std::vector<char*> _cmd_impl  = make_cmd(_cmd_line);
+    static inline std::vector<Char*> make_cmd(std::vector<string_type> & args);
+    std::vector<string_type> _cmd_line;
+    std::vector<Char*> _cmd_impl  = make_cmd(_cmd_line);
 };
 
-
-std::vector<char*> cmd_setter_::make_cmd(std::vector<std::string> & args)
+template<typename Char>
+std::vector<Char*> cmd_setter_<Char>::make_cmd(std::vector<std::basic_string<Char>> & args)
 {
-    std::vector<char*> vec;
+    std::vector<Char*> vec;
 
     for (auto & v : args)
         vec.push_back(&v.front());

@@ -31,7 +31,9 @@ struct cmd_setter_ : ::boost::process::detail::handler_base
     {
         exec.cmd_line = _cmd_line.c_str();
     }
-public:
+    const string_type & str() const {return _cmd_line;}
+
+private:
     string_type _cmd_line;
 };
 

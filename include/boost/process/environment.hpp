@@ -235,7 +235,7 @@ public:
     iterator        find( const string_type& key )
     {
         auto p = this->_env_impl;
-        auto st1 = key + equal_sign<Char>();
+        auto st1 = key + ::boost::process::detail::equal_sign<Char>();
         while (*p != nullptr)
         {
             if (std::equal(st1.begin(), st1.end(), *p))
@@ -247,7 +247,7 @@ public:
     const_iterator  find( const string_type& key ) const
     {
         auto p = this->_env_impl;
-        auto st1 = key + equal_sign<Char>();
+        auto st1 = key + ::boost::process::detail::equal_sign<Char>();
         while (*p != nullptr)
         {
             if (std::equal(st1.begin(), st1.end(), *p))
@@ -260,7 +260,7 @@ public:
     std::size_t count(const string_type & st) const
     {
         auto p = this->_env_impl;
-        auto st1 = st + equal_sign<Char>();
+        auto st1 = st + ::boost::process::detail::equal_sign<Char>();
         while (*p != nullptr)
         {
             if (std::equal(st1.begin(), st1.end(), *p))
@@ -276,7 +276,7 @@ public:
     std::pair<iterator,bool> emplace(const string_type & id, const string_type & value)
     {
         auto p = this->_env_impl;
-        auto st1 = id + equal_sign<Char>();
+        auto st1 = id + ::boost::process::detail::equal_sign<Char>();
         auto f = find(id);
         if (f != end())
         {

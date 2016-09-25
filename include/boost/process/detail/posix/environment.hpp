@@ -47,10 +47,10 @@ class native_environment_impl
     std::vector<std::basic_string<Char>> _buffer = _load();
     std::vector<Char*> _impl = _load_var(_buffer);
 public:
-    using char_type = char;
+    using char_type = Char;
     using pointer_type = const char_type*;
     using string_type = std::basic_string<char_type>;
-    using native_handle_type = char **;
+    using native_handle_type = char_type **;
 
     void reload()
     {
@@ -68,7 +68,7 @@ public:
     string_type get(const string_type & id)
     {
         std::string id_c = ::boost::process::detail::convert(id);
-        string_type g = ::getenv(id_c.c_str());
+        std::string g = ::getenv(id_c.c_str());
         return ::boost::process::detail::convert(g.c_str());
     }
     void        set(const string_type & id, const string_type & value)
@@ -104,7 +104,7 @@ public:
     using char_type = char;
     using pointer_type = const char_type*;
     using string_type = std::basic_string<char_type>;
-    using native_handle_type = char **;
+    using native_handle_type = char_type **;
 
     void reload() {}
 
