@@ -639,15 +639,17 @@ inline std::vector<boost::filesystem::path> path()
 {
 #if defined(BOOST_WINDOWS_API)
     const ::boost::process::wnative_environment ne;
+    typedef typename ::boost::process::wnative_environment::const_entry_type value_type;
     const auto id = L"PATH";
 #else
     const ::boost::process::native_environment ne;
+    typedef typename ::boost::process::native_environment::const_entry_type value_type;
     const auto id = "path";
 #endif
 
     auto itr = std::find_if(ne.cbegin(), ne.cend(),
-            [&](const auto & e)
-             {return id == ::boost::to_upper_copy(e.get_name());});
+            [&](const value_type & e)
+             {return id == ::boost::to_upper_copy(e.get_name(), ::boost::process::detail::process_locale());});
 
     if (itr == ne.cend())
         return {};

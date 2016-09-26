@@ -21,7 +21,7 @@ struct start_dir_init : handler_base_ext
 {
 	typedef Char value_type;
 	typedef std::basic_string<value_type> string_type;
-    explicit start_dir_init(const string_type &s) : s_(s) {}
+    start_dir_init(const string_type &s) : s_(s) {}
 
     template <class PosixExecutor>
     void on_exec_setup(PosixExecutor&) const

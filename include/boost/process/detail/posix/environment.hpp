@@ -37,7 +37,7 @@ class native_environment_impl
         std::vector<Char*> val;
         val.resize(vec.size() + 1);
         std::transform(vec.begin(), vec.end(), val.begin(),
-                [](auto & str)
+                [](std::basic_string<Char> & str)
                 {
                     return &str.front();
                 });
@@ -185,8 +185,16 @@ public:
     explicit inline  basic_environment_impl(
                 const basic_environment_impl<CharR>& rhs,
                 const ::boost::process::codecvt_type & cv = ::boost::process::codecvt())
-        : _data(::boost::process::detail::convert(rhs._data, cv))
+        : _data(rhs._data.size())
     {
+    	std::transform(rhs._data.begin(), rhs._data.end(), _data.begin(),
+    			[&](const std::basic_string<CharR> & st)
+				{
+    				return ::boost::process::detail::convert(st, cv);
+				}
+
+    		);
+
     }
 
     template<typename CharR>
