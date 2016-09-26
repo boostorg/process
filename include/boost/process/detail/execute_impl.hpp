@@ -77,6 +77,14 @@ struct has_wchar<First>
 
 
 #if defined(BOOST_WINDOWS_API)
+//everything needs to be wchar_t
+#if defined(BOOST_NO_ANSI_APIS)
+template<bool has_wchar>
+struct required_char_type
+{
+    typedef wchar_t type;
+};
+#else
 template<bool has_wchar> struct required_char_type;
 template<> struct required_char_type<true>
 {
@@ -86,6 +94,8 @@ template<> struct required_char_type<false>
 {
     typedef char type;
 };
+#endif
+
 #elif defined(BOOST_POSIX_API)
 template<bool has_wchar>
 struct required_char_type
