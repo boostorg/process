@@ -67,9 +67,9 @@ public:
     /** Get the native handle of the sink. */
     native_handle native_sink  () const;
 
-    ///Write date to the pipe.
+    ///Write data to the pipe.
     int_type write(const char_type * data, int_type count);
-    ///Read date from the pipe.
+    ///Read data from the pipe.
     int_type read(char_type * data, int_type count);
     ///Check if the pipe is open.
     bool is_open();
@@ -184,6 +184,8 @@ struct basic_pipebuf : std::basic_streambuf<CharT, Traits>
 
         auto len = &_read.back() - this->egptr() ;
         auto res = _pipe.read(this->egptr(), len);
+        if (res == 0)
+        	return traits_type::eof();
 
         this->setg(this->eback(), this->gptr(), this->egptr() + res);
         auto val = *this->gptr();
