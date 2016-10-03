@@ -48,11 +48,15 @@ struct char_converter
     {
         return std::move(in);
     }
+    static const T&  conv(const T & in)
+    {
+        return in;
+    }
 };
 
 template<typename Char, typename T>
 using char_converter_t = char_converter<Char,
-        typename std::remove_reference<typename std::remove_cv<T>::type>::type>;
+        typename std::remove_cv<typename std::remove_reference<T>::type>::type>;
 
 
 template<>
