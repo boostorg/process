@@ -41,9 +41,12 @@ exe sparring_partner : sparring_partner.cpp program_options system filesystem io
     
 exe sub_launch : sub_launcher.cpp program_options iostreams system filesystem : <warnings>off ;    
 
-
-test-suite ts :
-    [ run pipe.cpp        system filesystem ]
+test-suite bare :
+    [ run environment.cpp system filesystem  ]
+    [ run pipe.cpp        system filesystem  ]
+    ;
+    
+test-suite execution :
     [ run async.cpp       system thread filesystem            : : sparring_partner ]
     [ run async_fut.cpp   system thread filesystem            : : sparring_partner ]
     [ run args_cmd.cpp    system filesystem                   : : sparring_partner ]
@@ -79,4 +82,4 @@ test-suite ts :
 #    [ run vfork.cpp     system filesystem                     : : sparring_partner : <build>no <target-os>linux:<build>yes   ]
     [ run wait.cpp system filesystem                          : : sparring_partner ]
     [ compile-fail spawn_fail.cpp ]
-   ;
+   : <dependency>bare ;
