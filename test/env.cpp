@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE(append, *boost::unit_test::timeout(5))
 
     std::getline(st, s);
 
-    BOOST_CHECK_EQUAL(s, "some_fictional_path_42;other;next");
+    BOOST_CHECK(boost::starts_with(s, "some_fictional_path_42;other;next"));
 
     c.wait();
 }
