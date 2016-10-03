@@ -176,7 +176,6 @@ public:
     child operator()()
     {
         on_setup_t on_setup(*this);
-
         boost::fusion::for_each(seq, on_setup);
 
         if (_ec)
@@ -185,6 +184,7 @@ public:
             boost::fusion::for_each(seq, on_error);
             return child();
         }
+
         //NOTE: The non-cast cmd-line string can only be modified by the wchar_t variant which is currently disabled.
         int err_code = ::boost::detail::winapi::create_process(
             exe,                                        //       LPCSTR_ lpApplicationName,

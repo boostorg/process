@@ -185,7 +185,7 @@ struct basic_pipebuf : std::basic_streambuf<CharT, Traits>
         auto len = &_read.back() - this->egptr() ;
         auto res = _pipe.read(this->egptr(), len);
         if (res == 0)
-        	return traits_type::eof();
+            return traits_type::eof();
 
         this->setg(this->eback(), this->gptr(), this->egptr() + res);
         auto val = *this->gptr();

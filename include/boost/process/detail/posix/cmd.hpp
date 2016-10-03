@@ -65,19 +65,19 @@ struct cmd_setter_ : handler_base_ext
     }
     string_type str() const
     {
-    	string_type ret;
-    	std::size_t size = 0;
-    	for (auto & cmd : _cmd_line)
-    		size += cmd.size() + 1;
-    	ret.reserve(size -1);
+        string_type ret;
+        std::size_t size = 0;
+        for (auto & cmd : _cmd_line)
+            size += cmd.size() + 1;
+        ret.reserve(size -1);
 
-    	for (auto & cmd : _cmd_line)
-    	{
-    		if (!ret.empty())
-    			ret += equal_sign<Char>();
-    		ret += cmd;
-    	}
-    	return ret;
+        for (auto & cmd : _cmd_line)
+        {
+            if (!ret.empty())
+                ret += equal_sign<Char>();
+            ret += cmd;
+        }
+        return ret;
     }
 private:
     static inline std::vector<Char*> make_cmd(std::vector<string_type> & args);

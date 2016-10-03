@@ -187,13 +187,13 @@ public:
                 const ::boost::process::codecvt_type & cv = ::boost::process::codecvt())
         : _data(rhs._data.size())
     {
-    	std::transform(rhs._data.begin(), rhs._data.end(), _data.begin(),
-    			[&](const std::basic_string<CharR> & st)
-				{
-    				return ::boost::process::detail::convert(st, cv);
-				}
+        std::transform(rhs._data.begin(), rhs._data.end(), _data.begin(),
+                [&](const std::basic_string<CharR> & st)
+                {
+                    return ::boost::process::detail::convert(st, cv);
+                }
 
-    		);
+            );
 
     }
 

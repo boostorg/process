@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE(cmd, *boost::unit_test::timeout(2))
     std::error_code ec;
 
     std::wstring cmd =
-    		bp::detail::convert(master_test_suite().argv[1]);
+            bp::detail::convert(master_test_suite().argv[1]);
     cmd+= L" test --echo-argv \"hello thingy\" \\\"stuff\\\" \"  spa ce  \"";
 
     bp::child c(cmd,

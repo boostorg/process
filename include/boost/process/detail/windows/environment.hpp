@@ -169,12 +169,25 @@ public:
         : _data(rhs._data)
     {
     }
-    basic_environment_impl(basic_environment_impl && ) = default;
+    basic_environment_impl(basic_environment_impl && rhs)
+        :    _data(std::move(rhs._data)),
+            _env_arr(std::move(rhs._env_arr)),
+            _env_impl(_env_arr.data())
+    {
+    }
+    basic_environment_impl &operator=(basic_environment_impl && rhs)
+    {
+        _data = std::move(rhs._data);
+        //reload();
+        _env_arr  = std::move(rhs._env_arr);
+        _env_impl = _env_arr.data();
+
+        return *this;
+    }
     basic_environment_impl & operator=(const basic_environment_impl& rhs)
     {
         _data = rhs._data;
-        _env_arr = _load_var(&*_data.begin());
-        _env_impl = &*_env_arr.begin();
+        reload();
         return *this;
     }
 
@@ -206,13 +219,13 @@ basic_environment_impl<Char>::basic_environment_impl(const native_environment_im
 {
     auto beg = nei.native_handle();
     auto p   = beg;
-    while ((*p != null_char<Char>()) || (*(p+1) != null_char<Char>()))
+    while ((*p != null_char<Char>()) || (*(p+1) !=  null_char<Char>()))
         p++;
-
     p++; //pointing to the second nullchar
     p++; //to get the pointer behing the second nullchar, so it's end.
 
     this->_data.assign(beg, p);
+    this->reload();
 }
 
 
@@ -257,13 +270,14 @@ inline void basic_environment_impl<Char>::set(const string_type &id, const strin
 template<typename Char>
 inline void  basic_environment_impl<Char>::reset(const string_type &id)
 {
+    //check if it's the first one, spares us the search.
     if (std::equal(id.begin(), id.end(), _data.begin()) && (_data[id.size()] == '='))
     {
-        auto beg = _data.begin() + _data.size() + 1;
+        auto beg = _data.begin();
         auto end = beg;
 
         while (*end != '\0')
-            end++;
+           end++;
 
         end++; //to point behind the last null-char
 

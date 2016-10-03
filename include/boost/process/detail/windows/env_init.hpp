@@ -29,7 +29,6 @@ struct env_init : public ::boost::process::detail::handler_base
     void on_setup(WindowsExecutor &exec) const
     {
         auto e = env.native_handle();
-
         if (*e == null_char<char>())
         {
             exec.set_error(std::error_code(::boost::detail::winapi::ERROR_BAD_ENVIRONMENT_, std::system_category()),

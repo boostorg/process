@@ -25,25 +25,40 @@
 namespace boost { namespace process { namespace detail {
 
 
+template<typename Char>
+std::size_t make_env_string_size(const std::basic_string<Char> & ch)
+{
+    return ch.size() + 1;
+}
+
+template<typename Char>
+std::size_t make_env_string_size(const Char * ch)
+{
+    std::size_t sz = 0;
+    while (ch[sz] != null_char<Char>())
+        sz++;
+
+    sz++;
+    return sz;
+}
+
 template<typename Char, typename Container>
 inline std::basic_string<Char> make_env_string(const Container & value)
 {
     std::size_t sz;
     for (auto & v : value)
-        sz += v.size() + 1;
+        sz += make_env_string_size(v);
 
     std::basic_string<Char> s;
-    s.reserve(sz -1); //+1 for ;, end doesn't have one.
+    s.reserve(sz); //+1 for ;, end doesn't have one.
 
     for (auto & val : value)
-    {
-        s += val;
-        if (&val != &value.back())
-            s += ';';
-    }
+        (s += val) += ';';
 
+    s.resize(s.size() -1); //remove last ';'
     return s;
 }
+
 
 template<typename Char>
 struct env_set
@@ -176,7 +191,7 @@ struct env_proxy
     {
         return {std::move(key), make_env_string<Char>(value)};
     }
-    env_set<Char> operator=(const std::initializer_list<char*> & value)
+    env_set<Char> operator=(const std::initializer_list<const char*> & value)
     {
         return {std::move(key), make_env_string<Char>(value)};
     }
@@ -189,7 +204,7 @@ struct env_proxy
     {
         return {std::move(key), make_env_string<Char>(value)};
     }
-    env_append<Char> operator+=(const std::initializer_list<Char*> & value)
+    env_append<Char> operator+=(const std::initializer_list<const Char*> & value)
     {
         return {std::move(key), make_env_string<Char>(value)};
     }
@@ -232,6 +247,11 @@ struct env_
         return {key};
     }
     template<typename Char>
+    env_proxy<Char> operator[](const Char* key) const
+    {
+        return {key};
+    }
+    template<typename Char>
     env_init<Char> operator()(const basic_environment<Char> & env) const
     {
         return {env};
@@ -254,9 +274,8 @@ struct env_builder
 
     void operator()(env_init<Char> & ei)
     {
-        ei.env = std::move(ei.env);
+        env = std::move(ei.env);
     }
-    template<typename T>
     void operator()(env_set<Char> & es)
     {
         env[es.key] = es.value;

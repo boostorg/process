@@ -114,16 +114,34 @@ struct entry : const_entry<Char, Environment>
             data += v;
         }
         this->_env->set(this->_name, data);
-        this->_env->reload();
+        this->reload();
+
+    }
+    void assign(const std::initializer_list<string_type> &value)
+    {
+        string_type data;
+        for (auto &v : value)
+        {
+            if (&v != &*value.begin())
+                data += ';';
+            data += v;
+        }
+        this->_env->set(this->_name, data);
+        this->reload();
+
     }
     void append(const string_type &value)
     {
-        string_type st = this->_data;
-        if (st.empty())
+        if (this->_data == nullptr)
             this->_env->set(this->_name, value);
         else
+        {
+            string_type st = this->_data;
             this->_env->set(this->_name, st + ';' + value);
+
+        }
         this->reload();
+
     }
     void clear()
     {
@@ -137,6 +155,11 @@ struct entry : const_entry<Char, Environment>
         return *this;
     }
     entry &operator=(const std::vector<string_type> & value)
+    {
+        assign(value);
+        return *this;
+    }
+    entry &operator=(const std::initializer_list<string_type> & value)
     {
         assign(value);
         return *this;
@@ -158,8 +181,8 @@ struct make_entry
     make_entry(const make_entry&) = default;
     make_entry& operator=(const make_entry&) = default;
 
-    Environment &env;
-    make_entry(Environment & env) : env(env) {};
+    Environment *env;
+    make_entry(Environment & env) : env(&env) {};
     entry<Char, Environment> operator()(const Char* data) const
     {
         auto p = data;
@@ -168,7 +191,7 @@ struct make_entry
         auto name = std::basic_string<Char>(data, p);
         p++; //go behind equal sign
 
-        return entry<Char, Environment>(std::move(name), p, env);
+        return entry<Char, Environment>(std::move(name), p, *env);
     }
 };
 
@@ -179,8 +202,8 @@ struct make_const_entry
     make_const_entry(const make_const_entry&) = default;
     make_const_entry& operator=(const make_const_entry&) = default;
 
-    Environment &env;
-    make_const_entry(Environment & env) : env(env) {};
+    Environment *env;
+    make_const_entry(Environment & env) : env(&env) {};
     const_entry<Char, Environment> operator()(const Char* data) const
     {
         auto p = data;
@@ -189,7 +212,7 @@ struct make_const_entry
         auto name = std::basic_string<Char>(data, p);
         p++; //go behind equal sign
 
-        return const_entry<Char, Environment>(std::move(name), p, env);
+        return const_entry<Char, Environment>(std::move(name), p, *env);
     }
 };
 
@@ -294,7 +317,7 @@ public:
     //copy ctor if impl is copy-constructible
     bool empty()
     {
-        return this->_env_impl == nullptr;
+        return *this->_env_impl == nullptr;
     }
     std::size_t size() const
     {
@@ -598,7 +621,7 @@ public:
     using base_type = basic_environment_impl<Char, detail::api::basic_environment_impl>;
     using base_type::base_type;
     using base_type::operator=;
-    };
+};
 
 
 

@@ -68,7 +68,7 @@ struct char_converter<char, api::cmd_setter_<wchar_t>>
 {
     static api::cmd_setter_<char> conv(const api::cmd_setter_<wchar_t> & in)
     {
-    	return { ::boost::process::detail::convert(in.str()) };
+        return { ::boost::process::detail::convert(in.str()) };
     }
 };
 
@@ -77,7 +77,7 @@ struct char_converter<wchar_t, api::cmd_setter_<char>>
 {
     static api::cmd_setter_<wchar_t> conv(const api::cmd_setter_<char> & in)
     {
-    	return { ::boost::process::detail::convert(in.str()) };
+        return { ::boost::process::detail::convert(in.str()) };
     }
 };
 

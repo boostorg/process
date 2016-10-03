@@ -14,24 +14,24 @@ namespace boost { namespace process { namespace detail { namespace windows {
 
 inline bool compare_handles(boost::detail::winapi::HANDLE_ lhs, boost::detail::winapi::HANDLE_ rhs)
 {
-	if ( (lhs == ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
-	  || (rhs == ::boost::detail::winapi::INVALID_HANDLE_VALUE_))
-		return false;
+    if ( (lhs == ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
+      || (rhs == ::boost::detail::winapi::INVALID_HANDLE_VALUE_))
+        return false;
 
-	if (lhs == rhs)
-		return true;
+    if (lhs == rhs)
+        return true;
 
-	::boost::detail::winapi::BY_HANDLE_FILE_INFORMATION_ lhs_info{0,0,0,0,0,0,0,0,0,0};
-	::boost::detail::winapi::BY_HANDLE_FILE_INFORMATION_ rhs_info{0,0,0,0,0,0,0,0,0,0};
+    ::boost::detail::winapi::BY_HANDLE_FILE_INFORMATION_ lhs_info{0,0,0,0,0,0,0,0,0,0};
+    ::boost::detail::winapi::BY_HANDLE_FILE_INFORMATION_ rhs_info{0,0,0,0,0,0,0,0,0,0};
 
-	if (!::boost::detail::winapi::GetFileInformationByHandle(lhs, &lhs_info))
-		::boost::process::detail::throw_last_error("GetFileInformationByHandle");
+    if (!::boost::detail::winapi::GetFileInformationByHandle(lhs, &lhs_info))
+        ::boost::process::detail::throw_last_error("GetFileInformationByHandle");
 
-	if (!::boost::detail::winapi::GetFileInformationByHandle(rhs, &rhs_info))
-		::boost::process::detail::throw_last_error("GetFileInformationByHandle");
+    if (!::boost::detail::winapi::GetFileInformationByHandle(rhs, &rhs_info))
+        ::boost::process::detail::throw_last_error("GetFileInformationByHandle");
 
-	return     (lhs_info.nFileIndexHigh == rhs_info.nFileIndexHigh)
-			&& (lhs_info.nFileIndexLow  == rhs_info.nFileIndexLow);
+    return     (lhs_info.nFileIndexHigh == rhs_info.nFileIndexHigh)
+            && (lhs_info.nFileIndexLow  == rhs_info.nFileIndexLow);
 }
 
 }}}}
