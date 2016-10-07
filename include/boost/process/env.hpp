@@ -131,7 +131,7 @@ struct env_builder
 
     void operator()(env_init & ei)
     {
-        ei.env = std::move(ei.env);
+        env = std::move(ei.env);
     }
     template<typename T>
     void operator()(env_set<T> & es)
