@@ -257,7 +257,7 @@ public:
     Sequence & seq;
     const char * exe      = nullptr;
     char *const* cmd_line = nullptr;
-    char **env      = nullptr;
+    char **env      = ::environ;
     pid_t pid = -1;
     std::shared_ptr<std::atomic<int>> exit_status = std::make_shared<std::atomic<int>>(still_active);
 

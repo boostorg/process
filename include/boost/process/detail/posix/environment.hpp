@@ -194,7 +194,7 @@ public:
                 }
 
             );
-
+        reload();
     }
 
     template<typename CharR>
@@ -259,11 +259,11 @@ inline void basic_environment_impl<Char>::set(const string_type &id, const strin
 
     if (itr != _data.end())
     {
-        *itr = id + '=' + value;
+        *itr = id + equal_sign<Char>() + value;
     }
     else 
     {
-        _data.push_back(id + '=' + value);
+        _data.push_back(id + equal_sign<Char>() + value);
     }
 
     reload();

@@ -15,6 +15,16 @@
 
 namespace bp = boost::process;
 
+
+namespace std
+{
+std::ostream & operator<<(std::ostream & str, const std::wstring & ws)
+{
+	str << bp::detail::convert(ws);
+	return str;
+}
+}
+
 BOOST_AUTO_TEST_CASE(empty)
 {
     bp::environment ev ;
@@ -69,7 +79,7 @@ BOOST_AUTO_TEST_CASE(compare)
     bp::environment env = nat;
 
     {
-        BOOST_REQUIRE_EQUAL(nat.size(), env.size());
+    	BOOST_CHECK_EQUAL(nat.size(), env.size());
         auto ni = nat.begin();
         auto ei = env.begin();
 
@@ -84,19 +94,21 @@ BOOST_AUTO_TEST_CASE(compare)
     //ok check if I can convert it.
     bp::wenvironment wenv{env};
     auto wnat = boost::this_process::wenvironment();
-    BOOST_REQUIRE_EQUAL(wenv.size(), env.size());
-    BOOST_REQUIRE_EQUAL(wnat.size(), nat.size());
+    BOOST_CHECK_EQUAL(wenv.size(), env.size());
+    BOOST_CHECK_EQUAL(wnat.size(), nat.size());
     {
-        BOOST_REQUIRE_EQUAL(wnat.size(), wenv.size());
+        BOOST_CHECK_EQUAL(wnat.size(), wenv.size());
         auto ni = wnat.begin();
         auto ei = wenv.begin();
 
-        while ((ni != wnat.end()) &&(ei != wenv.end()))
+        while ((ni != wnat.end()) && (ei != wenv.end()))
         {
-            BOOST_CHECK(ni->get_name()  == ei->get_name());
-            BOOST_CHECK(ni->to_string() == ei->to_string());
+            BOOST_CHECK_EQUAL(ni->get_name() , ei->get_name());
+            BOOST_CHECK_EQUAL(ni->to_string(), ei->to_string());
             ni++; ei++;
         }
+
+        BOOST_CHECK(ni == wnat.end());
     }
 }
 

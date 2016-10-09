@@ -75,6 +75,16 @@ BOOST_AUTO_TEST_CASE(inherit_mod_env, *boost::unit_test::timeout(2))
     std::string value = "TestString";
     ie["BOOST_PROCESS_TEST_1"] = value;
 
+    {
+    	auto ie2 = boost::this_process::environment();
+    	auto val = ie2["BOOST_PROCESS_TEST_1"];
+    	auto st  = val.to_string();
+
+		BOOST_CHECK_EQUAL_COLLECTIONS(
+            st.begin(),     st.end(),
+            value.begin(), value.end()
+            );
+    }
     bp::ipstream st;
 
     std::error_code ec;

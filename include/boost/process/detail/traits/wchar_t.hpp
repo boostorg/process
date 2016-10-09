@@ -82,7 +82,7 @@ struct char_converter<char, wchar_t*>
 };
 
 template<std::size_t Size>
-struct char_converter<char, const wchar_t[Size]>
+struct char_converter<char, wchar_t[Size]>
 {
     static std::string conv(const wchar_t(&in)[Size])
     {
@@ -114,7 +114,7 @@ struct char_converter<wchar_t, char*>
 
 
 template<std::size_t Size>
-struct char_converter<wchar_t, const char[Size]>
+struct char_converter<wchar_t, char[Size]>
 {
     static std::wstring conv(const char(&in)[Size])
     {
