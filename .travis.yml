@@ -65,16 +65,17 @@ before_install:
     - BOOST=$HOME/boost-local
     - git init $BOOST
     - cd $BOOST
-    - git remote add --no-tags -t $BRANCH_TO_TEST origin https://github.com/boostorg/boost.git
-    - git fetch --depth=1
     - if [ $(BRANCH_TO_TEST) = "master" ]; 
-      then git checkout master; 
-      else git checkout develop; fi
+      set BOOST_BRANCH=master; 
+      else set BOOST_BRANCH=develop; fi
+    - git remote add --no-tags -t $BOOST_BRANCH origin https://github.com/boostorg/boost.git
+    - git fetch --depth=1
+    - git checkout $BOOST_BRANCH; 
     - git submodule update --init --merge
-    - git remote set-branches --add origin $BRANCH_TO_TEST
+    - git remote set-branches --add origin $BOOST_BRANCH
     - git pull --recurse-submodules
     - git submodule update --init
-    - git checkout $BRANCH_TO_TEST
+    - git checkout $BOOST_BRANCH
     - git submodule foreach "git reset --quiet --hard; git clean -fxd"
     - git reset --hard; git clean -fxd
     - git status
