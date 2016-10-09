@@ -18,11 +18,11 @@ namespace boost { namespace process { namespace detail { namespace posix {
 inline bool compare_handles(int lhs, int rhs)
 {
 
-	if ((lhs == -1) || (rhs == -1))
-		return false;
+    if ((lhs == -1) || (rhs == -1))
+        return false;
 
-	if (lhs == rhs)
-		return true;
+    if (lhs == rhs)
+        return true;
 
     struct stat stat1, stat2;
     if(fstat(lhs, &stat1) < 0) ::boost::process::detail::throw_last_error("fstat() failed");

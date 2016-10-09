@@ -20,8 +20,8 @@ namespace std
 {
 std::ostream & operator<<(std::ostream & str, const std::wstring & ws)
 {
-	str << bp::detail::convert(ws);
-	return str;
+    str << bp::detail::convert(ws);
+    return str;
 }
 }
 
@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE(compare)
     bp::environment env = nat;
 
     {
-    	BOOST_CHECK_EQUAL(nat.size(), env.size());
+        BOOST_CHECK_EQUAL(nat.size(), env.size());
         auto ni = nat.begin();
         auto ei = env.begin();
 
