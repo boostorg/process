@@ -36,11 +36,7 @@ before_build:
     - set PROJECT_TO_TEST=%APPVEYOR_PROJECT_NAME%
     - echo "Testing %PROJECT_TO_TEST%"
     # Cloning Boost libraries (fast nondeep cloning)
-    - if %BRANCH_TO_TEST%==master ( 
-        set BOOST_BRANCH=master
-    ) else (
-        set BOOST_BRANCH=develop
-    )
+    - if %BRANCH_TO_TEST%==master ( set BOOST_BRANCH=master ) else ( set BOOST_BRANCH=develop )
     - set BOOST=C:/boost-local
     - git init %BOOST%
     - cd %BOOST%

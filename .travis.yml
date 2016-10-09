@@ -65,7 +65,7 @@ before_install:
     - BOOST=$HOME/boost-local
     - git init $BOOST
     - cd $BOOST
-    - if [ $(BRANCH_TO_TEST) = "master" ]; 
+    - if [ $(BRANCH_TO_TEST) = "master" ]; then
       set BOOST_BRANCH=master; 
       else set BOOST_BRANCH=develop; fi
     - git remote add --no-tags -t $BOOST_BRANCH origin https://github.com/boostorg/boost.git
