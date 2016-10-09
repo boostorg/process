@@ -42,7 +42,7 @@ before_build:
     - cd %BOOST%
     - git remote add --no-tags -t %BOOST_BRANCH% origin https://github.com/boostorg/boost.git
     - git fetch --depth=1
-    - get checkout %BOOST_BRANCH%
+    - git checkout %BOOST_BRANCH%
     - git submodule update --init --merge
     - git remote set-branches --add origin %BOOST_BRANCH%
     - git pull --recurse-submodules
