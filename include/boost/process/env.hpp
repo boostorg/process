@@ -45,7 +45,7 @@ std::size_t make_env_string_size(const Char * ch)
 template<typename Char, typename Container>
 inline std::basic_string<Char> make_env_string(const Container & value)
 {
-    std::size_t sz;
+    std::size_t sz = 0;
     for (auto & v : value)
         sz += make_env_string_size(v);
 
