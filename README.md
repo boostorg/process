@@ -7,8 +7,7 @@ Boost.process is not yet part of the [Boost C++ Libraries](http://github.com/boo
 Branches        | Build         | Tests coverage | 
 ----------------|-------------- | -------------- |
 Develop:        | [![Build Status](https://travis-ci.org/klemens-morgenstern/boost-process.svg?branch=develop)](https://travis-ci.org/klemens-morgenstern/boost-process)  [![Build status](https://ci.appveyor.com/api/projects/status/peup7e6m0e1bb5ba?svg=true)](https://ci.appveyor.com/project/klemens-morgenstern/boost-process) | [![Coverage Status](https://coveralls.io/repos/github/klemens-morgenstern/boost-process/badge.svg?branch=develop)](https://coveralls.io/github/klemens-morgenstern/boost-process?branch=develop) |
-Master:         | [![Build Status](https://travis-ci.org/klemens-morgenstern/boost-process.svg?branch=master)] (https://travis-ci.org/klemens-morgenstern/boost-process) [![Build status](https://ci.appveyor.com/api/projects/status/peup7e6m0e1bb5ba/branch/master?svg=true)](https://ci.appveyor.com/project/klemens-morgenstern/boost-process/branch/master)
-  | [![Coverage Status](https://coveralls.io/repos/github/klemens-morgenstern/boost-process/badge.svg?branch=master)](https://coveralls.io/github/klemens-morgenstern/boost-process?branch=master)   |
+Master:         | [![Build Status](https://travis-ci.org/klemens-morgenstern/boost-process.svg?branch=master)] (https://travis-ci.org/klemens-morgenstern/boost-process) [![Build status](https://ci.appveyor.com/api/projects/status/peup7e6m0e1bb5ba/branch/master?svg=true)](https://ci.appveyor.com/project/klemens-morgenstern/boost-process/branch/master) | [![Coverage Status](https://coveralls.io/repos/github/klemens-morgenstern/boost-process/badge.svg?branch=master)](https://coveralls.io/github/klemens-morgenstern/boost-process?branch=master)   |
 
 [Open Issues](https://github.com/klemens-morgenstern/boost-process/issues)
 
