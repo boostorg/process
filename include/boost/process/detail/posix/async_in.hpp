@@ -28,7 +28,7 @@ struct async_in_buffer : ::boost::process::detail::posix::async_handler
     Buffer & buf;
 
     std::shared_ptr<std::promise<void>> promise;
-    async_in_buffer operator<(std::future<void> & fut)
+    async_in_buffer operator>(std::future<void> & fut)
     {
         promise = std::make_shared<std::promise<void>>();
         fut = promise->get_future(); return std::move(*this);

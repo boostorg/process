@@ -257,7 +257,7 @@ public:
     Sequence & seq;
     const char * exe      = nullptr;
     char *const* cmd_line = nullptr;
-    char **env      = nullptr;
+    char **env      = ::environ;
     pid_t pid = -1;
     std::shared_ptr<std::atomic<int>> exit_status = std::make_shared<std::atomic<int>>(still_active);
 
@@ -462,7 +462,7 @@ child executor<Sequence>::invoke(boost::mpl::false_, boost::mpl::true_)
 
 #endif
 
-template<typename Tup>
+template<typename Char, typename Tup>
 inline executor<Tup> make_executor(Tup & tup)
 {
     return executor<Tup>(tup);

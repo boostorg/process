@@ -97,9 +97,11 @@ inline std::vector<std::string>  build_args(const std::string & data)
     return st;
 }
 
+template<typename Char>
+struct exe_cmd_init;
 
-
-struct exe_cmd_init : boost::process::detail::api::handler_base_ext
+template<>
+struct exe_cmd_init<char> : boost::process::detail::api::handler_base_ext
 {
     exe_cmd_init(const exe_cmd_init & ) = delete;
     exe_cmd_init(exe_cmd_init && ) = default;
@@ -152,7 +154,7 @@ private:
     std::vector<char*> cmd_impl;
 };
 
-std::vector<char*> exe_cmd_init::make_cmd()
+std::vector<char*> exe_cmd_init<char>::make_cmd()
 {
     std::vector<char*> vec;
     if (!exe.empty())

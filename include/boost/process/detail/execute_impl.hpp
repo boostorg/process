@@ -37,7 +37,6 @@
 #include <boost/fusion/adapted/std_tuple.hpp>
 #include <boost/fusion/container/vector/convert.hpp>
 
-
 #include <type_traits>
 #include <utility>
 
@@ -45,8 +44,69 @@ namespace boost { namespace process {
 
 class child;
 
-
 namespace detail {
+
+
+template<typename ...Args>
+struct has_wchar;
+
+template<typename First, typename ...Args>
+struct has_wchar<First, Args...>
+{
+    typedef has_wchar<Args...> next;
+    typedef typename std::remove_cv<
+                typename std::remove_reference<First>::type>::type res_type;
+
+    constexpr static bool my_value = is_wchar_t<res_type>::value;
+    constexpr static bool value = my_value || next::value;
+
+    typedef std::integral_constant<bool, value> type;
+};
+
+template<typename First>
+struct has_wchar<First>
+{
+    typedef typename std::remove_cv<
+                typename std::remove_reference<First>::type>::type res_type;
+
+    constexpr static bool value = is_wchar_t<res_type>::value;
+
+    typedef std::integral_constant<bool, value> type;
+};
+
+
+#if defined(BOOST_WINDOWS_API)
+//everything needs to be wchar_t
+#if defined(BOOST_NO_ANSI_APIS)
+template<bool has_wchar>
+struct required_char_type
+{
+    typedef wchar_t type;
+};
+#else
+template<bool has_wchar> struct required_char_type;
+template<> struct required_char_type<true>
+{
+    typedef wchar_t type;
+};
+template<> struct required_char_type<false>
+{
+    typedef char type;
+};
+#endif
+
+#elif defined(BOOST_POSIX_API)
+template<bool has_wchar>
+struct required_char_type
+{
+    typedef char type;
+};
+#endif
+
+template<typename ... Args>
+using required_char_type_t = typename required_char_type<
+                    has_wchar<Args...>::value>::type;
+
 
 template<typename Iterator, typename End, typename ...Args>
 struct make_builders_from_view
@@ -161,11 +221,8 @@ inline boost::fusion::tuple<typename get_initializers_result<Args>::type...>
 }
 
 
-
-
-
-template<typename ...Args>
-inline child execute_impl(Args&& ... args)
+template<typename Char, typename ... Args>
+inline child basic_execute_impl(Args && ... args)
 {
     //create a tuple from the argument list
     boost::fusion::tuple<typename std::remove_reference<Args>::type&...> tup(args...);
@@ -201,14 +258,24 @@ inline child execute_impl(Args&& ... args)
     detail::builder_ref<builder_t> builder_ref(builders);
 
     boost::fusion::for_each(others, builder_ref);
-
     auto other_inits = ::boost::process::detail::get_initializers(builders);
 
 
     boost::fusion::joint_view<decltype(other_inits), decltype(inits)> complete_inits(other_inits, inits);
 
-    auto exec = boost::process::detail::api::make_executor(complete_inits);
+    auto exec = boost::process::detail::api::make_executor<Char>(complete_inits);
     return exec();
+}
+
+template<typename ...Args>
+inline child execute_impl(Args&& ... args)
+{
+    typedef required_char_type_t<Args...> req_char_type;
+
+    return basic_execute_impl<req_char_type>(
+        boost::process::detail::char_converter_t<req_char_type, Args>::conv(
+                std::forward<Args>(args))...
+            );
 }
 
 }}}

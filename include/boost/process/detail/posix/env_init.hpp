@@ -14,7 +14,11 @@
 
 namespace boost { namespace process { namespace detail { namespace posix {
 
-struct env_init : handler_base_ext
+template<typename Char>
+struct env_init;
+
+template<>
+struct env_init<char> : handler_base_ext
 {
     boost::process::environment env;
 

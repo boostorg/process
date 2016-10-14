@@ -157,13 +157,13 @@ BOOST_AUTO_TEST_CASE(stackless, *boost::unit_test::timeout(15))
         {
             if (!ec) reenter (this)
             {
-            	yield bp::child(master_test_suite().argv[1],
+                yield bp::child(master_test_suite().argv[1],
                         "test", "--exit-code", "42",
                         ios,
                         bp::on_exit=
                         [this](int ret, const std::error_code&)
                         {
-            				exit_code = ret;
+                            exit_code = ret;
                             (*this)();
                         }).detach();
 

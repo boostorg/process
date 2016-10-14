@@ -12,6 +12,7 @@
 
 #include <boost/process/detail/config.hpp>
 #include <boost/process/detail/handler.hpp>
+#include <boost/process/locale.hpp>
 
 #if defined (BOOST_POSIX_API)
 #include <boost/process/detail/posix/start_dir.hpp>
@@ -34,16 +35,44 @@ struct start_dir_
 {
     constexpr start_dir_() {};
 
-    api::start_dir_init operator()(const std::string & st)             const {return api::start_dir_init(st); }
-    api::start_dir_init operator()(std::string && s)                   const {return api::start_dir_init(std::move(s)); }
-    api::start_dir_init operator()(const char* s)                      const {return api::start_dir_init(s); }
-    api::start_dir_init operator()(const boost::filesystem::path & st) const {return api::start_dir_init(st.string()); }
+    template<typename Char>
+    api::start_dir_init<Char> operator()(const std::basic_string<Char> & st) const {return {st}; }
+    template<typename Char>
+    api::start_dir_init<Char> operator()(std::basic_string<Char> && s) const {return {std::move(s)}; }
+    template<typename Char>
+    api::start_dir_init<Char> operator()(const Char* s)                const {return {s}; }
+    api::start_dir_init<typename boost::filesystem::path::value_type>
+                              operator()(const boost::filesystem::path & st) const {return {st.native()}; }
 
-    api::start_dir_init operator=(const std::string & st)             const {return api::start_dir_init(st); }
-    api::start_dir_init operator=(std::string && s)                   const {return api::start_dir_init(std::move(s)); }
-    api::start_dir_init operator=(const char* s)                      const {return api::start_dir_init(s); }
-    api::start_dir_init operator=(const boost::filesystem::path & st) const {return api::start_dir_init(st.string()); }
+    template<typename Char>
+    api::start_dir_init<Char> operator= (const std::basic_string<Char> & st) const {return {st}; }
+    template<typename Char>
+    api::start_dir_init<Char> operator= (std::basic_string<Char> && s) const {return {std::move(s)}; }
+    template<typename Char>
+    api::start_dir_init<Char> operator= (const Char* s)                const {return {s}; }
+    api::start_dir_init<typename boost::filesystem::path::value_type>
+                              operator= (const boost::filesystem::path & st) const {return {st.native()}; }
 
+};
+
+template<> struct is_wchar_t<api::start_dir_init<wchar_t>> { typedef std::true_type type;};
+
+template<>
+struct char_converter<api::start_dir_init<char>, api::start_dir_init<wchar_t>>
+{
+    static api::start_dir_init<char> conv(const api::start_dir_init<wchar_t> & in)
+    {
+        return api::start_dir_init<char>{::boost::process::detail::convert(in.str())};
+    }
+};
+
+template<>
+struct char_converter<api::start_dir_init<wchar_t>, api::start_dir_init<char>>
+{
+    static api::start_dir_init<wchar_t> conv(const api::start_dir_init<char> & in)
+    {
+        return api::start_dir_init<wchar_t>{::boost::process::detail::convert(in.str())};
+    }
 };
 
 constexpr static start_dir_ start_dir;

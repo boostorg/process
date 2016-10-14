@@ -16,19 +16,19 @@
 
 namespace boost { namespace process { namespace detail { namespace windows {
 
+template<typename Char>
 struct env_init : public ::boost::process::detail::handler_base
 {
-    boost::process::environment env;
+    boost::process::basic_environment<Char> env;
 
-    env_init(boost::process::environment && env) : env(std::move(env)) {};
-    env_init(const boost::process::environment & env) : env(env) {};
+    env_init(boost::process::basic_environment<Char> && env) : env(std::move(env)) {};
+    env_init(const boost::process::basic_environment<Char> & env) : env(env) {};
 
 
     template <class WindowsExecutor>
     void on_setup(WindowsExecutor &exec) const
     {
         auto e = env.native_handle();
-
         if (*e == null_char<char>())
         {
             exec.set_error(std::error_code(::boost::detail::winapi::ERROR_BAD_ENVIRONMENT_, std::system_category()),

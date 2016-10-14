@@ -124,15 +124,18 @@ BOOST_AUTO_TEST_CASE(large_data, *boost::unit_test::timeout(20))
 {
     bp::pipe pipe;
 
-    bp::ipstream is(pipe);
-    bp::opstream os(pipe);
+    bp::pipebuf is_buf(pipe);
+    bp::pipebuf os_buf(std::move(pipe));
+
+    std::istream is(&is_buf);
+    std::ostream os(&os_buf);
 
     std::string in(1000000, '0');
     std::string out;
 
     int cnt = 0;
     for (auto & c: in)
-    	c = (cnt++ % 26) + 'A';
+        c = (cnt++ % 26) + 'A';
 
     std::thread th([&]{os << in << std::endl;});
 
@@ -141,4 +144,89 @@ BOOST_AUTO_TEST_CASE(large_data, *boost::unit_test::timeout(20))
     th.join();
 }
 
+BOOST_AUTO_TEST_CASE(closed, *boost::unit_test::timeout(2))
+{
+    bp::opstream os;
+    bp::ipstream is;
+
+    os.pipe().close();
+    is.pipe().close();
+
+    int i;
+
+    BOOST_CHECK(!(os << 42 << endl));
+    BOOST_CHECK(!(is >> i));
+}
+
+
+BOOST_AUTO_TEST_CASE(coverage, *boost::unit_test::timeout(5))
+{
+    //more of a syntax check, since template.
+    {
+        bp::pipe p1;
+        bp::ipstream is1(p1);
+        bp::ipstream is2(std::move(p1));
+
+        is2.pipe(is1.pipe());
+
+        bp::pipe p2_;
+        bp::pipe p2 = p2_;
+        BOOST_REQUIRE_NO_THROW(p2_ == p2);
+        BOOST_CHECK(p2_ == p2);
+
+        bp::opstream os1(p2);
+        bp::opstream os2(std::move(p2));
+
+        os2.pipe(os1.pipe());
+
+        bp::pipe p3;
+        is1 = p3;
+        is2 = std::move(p3);
+
+        bp::pipe p4_;
+        bp::pipe p4 = std::move(p4_);
+
+        bp::pipe p5;
+        BOOST_REQUIRE_NO_THROW(p4_ != p4);
+        BOOST_CHECK(p4_ != p4);
+
+        BOOST_REQUIRE_NO_THROW(p5 != p4);
+        BOOST_CHECK(p4 != p5);
+
+        is1 = p4;
+        is2 = std::move(p4);
+    }
+    {
+        bp::wpipe p;
+        bp::wpstream ws1(p);
+        bp::wpstream ws2(std::move(p));
+
+        ws2.pipe(std::move(ws1.pipe()));
+
+        bp::wpipe p2;
+
+        ws1 = p2;
+        ws2 = std::move(p2);
+
+        const bp::wpstream & ws2c = ws2;
+        ws1.pipe(ws2c.pipe());
+    }
+
+    {
+        bp::wpipe p;
+        bp::wpipebuf ws1(p);
+        bp::wpipebuf ws2(std::move(p));
+
+        ws2.pipe(std::move(ws1.pipe()));
+
+        bp::wpipe p2;
+
+        ws1 = p2;
+        ws2 = std::move(p2);
+
+        const bp::wpipebuf & ws2c = ws2;
+        ws1.pipe(ws2c.pipe());
+
+    }
+}
 

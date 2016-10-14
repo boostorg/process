@@ -208,15 +208,15 @@ basic_pipe<Char, Traits>& basic_pipe<Char, Traits>::operator=(basic_pipe && lhs)
 template<class Char, class Traits>
 inline bool operator==(const basic_pipe<Char, Traits> & lhs, const basic_pipe<Char, Traits> & rhs)
 {
-    return compare_handles(lhs.source(), rhs.source()) &&
-           compare_handles(lhs.sink(),   rhs.sink());
+    return compare_handles(lhs.native_source(), rhs.native_source()) &&
+           compare_handles(lhs.native_sink(),   rhs.native_sink());
 }
 
 template<class Char, class Traits>
 inline bool operator!=(const basic_pipe<Char, Traits> & lhs, const basic_pipe<Char, Traits> & rhs)
 {
-    return !compare_handles(lhs.source(), rhs.source()) ||
-           !compare_handles(lhs.sink(),   rhs.sink());
+    return !compare_handles(lhs.native_source(), rhs.native_source()) ||
+           !compare_handles(lhs.native_sink(),   rhs.native_sink());
 }
 
 }}}}

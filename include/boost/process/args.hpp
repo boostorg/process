@@ -22,8 +22,6 @@
 
 namespace boost { namespace process { namespace detail {
 
-
-
 struct args_
 {
     template<typename T>
@@ -31,110 +29,151 @@ struct args_
     template<typename T>
     using value_type = typename remove_reference_t<T>::value_type;
 
+    template<typename T>
+    using vvalue_type = value_type<value_type<T>>;
+
     template <class Range>
-    arg_setter_<value_type<Range>, true>     operator()(Range &&range) const
+    arg_setter_<vvalue_type<Range>, true>     operator()(Range &&range) const
     {
-        return arg_setter_<value_type<Range>, true>(std::forward<Range>(range));
-    }
-    template <class Range>
-    arg_setter_<value_type<Range>, true>     operator+=(Range &&range) const
-    {
-        return arg_setter_<value_type<Range>, true>(std::forward<Range>(range));
+        return arg_setter_<vvalue_type<Range>, true>(std::forward<Range>(range));
     }
     template <class Range>
-    arg_setter_<value_type<Range>, false>    operator= (Range &&range) const
+    arg_setter_<vvalue_type<Range>, true>     operator+=(Range &&range) const
     {
-        return arg_setter_<value_type<Range>, false>(std::forward<Range>(range));
+        return arg_setter_<vvalue_type<Range>, true>(std::forward<Range>(range));
     }
-    arg_setter_<std::string, true>     operator()(std::string && str) const
+    template <class Range>
+    arg_setter_<vvalue_type<Range>, false>    operator= (Range &&range) const
     {
-        return arg_setter_<std::string, true> (str);
+        return arg_setter_<vvalue_type<Range>, false>(std::forward<Range>(range));
     }
-    arg_setter_<std::string, true>     operator+=(std::string && str) const
+    template<typename Char>
+    arg_setter_<Char, true>     operator()(std::basic_string<Char> && str) const
     {
-        return arg_setter_<std::string, true> (str);
+        return arg_setter_<Char, true> (str);
     }
-    arg_setter_<std::string, false>    operator= (std::string && str) const
+    template<typename Char>
+    arg_setter_<Char, true>     operator+=(std::basic_string<Char> && str) const
     {
-        return arg_setter_<std::string, false>(str);
+        return arg_setter_<Char, true> (str);
     }
-    arg_setter_<std::string, true>     operator()(const std::string & str) const
+    template<typename Char>
+    arg_setter_<Char, false>    operator= (std::basic_string<Char> && str) const
     {
-        return arg_setter_<std::string, true> (str);
+        return arg_setter_<Char, false>(str);
     }
-    arg_setter_<std::string, true>     operator+=(const std::string & str) const
+    template<typename Char>
+    arg_setter_<Char, true>     operator()(const std::basic_string<Char> & str) const
     {
-        return arg_setter_<std::string, true> (str);
+        return arg_setter_<Char, true> (str);
     }
-    arg_setter_<std::string, false>    operator= (const std::string & str) const
+    template<typename Char>
+    arg_setter_<Char, true>     operator+=(const std::basic_string<Char> & str) const
     {
-        return arg_setter_<std::string, false>(str);
+        return arg_setter_<Char, true> (str);
     }
-    arg_setter_<std::string, true>     operator()(std::string & str) const
+    template<typename Char>
+    arg_setter_<Char, false>    operator= (const std::basic_string<Char> & str) const
     {
-        return arg_setter_<std::string, true> (str);
+        return arg_setter_<Char, false>(str);
     }
-    arg_setter_<std::string, true>     operator+=(std::string & str) const
+    template<typename Char>
+    arg_setter_<Char, true>     operator()(std::basic_string<Char> & str) const
     {
-        return arg_setter_<std::string, true> (str);
+        return arg_setter_<Char, true> (str);
     }
-    arg_setter_<std::string, false>    operator= (std::string & str) const
+    template<typename Char>
+    arg_setter_<Char, true>     operator+=(std::basic_string<Char> & str) const
     {
-        return arg_setter_<std::string, false>(str);
+        return arg_setter_<Char, true> (str);
     }
-    arg_setter_<std::string, true>     operator()(const char* str) const
+    template<typename Char>
+    arg_setter_<Char, false>    operator= (std::basic_string<Char> & str) const
     {
-        return arg_setter_<std::string, true> (str);
+        return arg_setter_<Char, false>(str);
     }
-    arg_setter_<std::string, true>     operator+=(const char* str) const
+    template<typename Char>
+    arg_setter_<Char, true>     operator()(const Char* str) const
     {
-        return arg_setter_<std::string, true> (str);
+        return arg_setter_<Char, true> (str);
     }
-    arg_setter_<std::string, false>    operator= (const char* str) const
+    template<typename Char>
+    arg_setter_<Char, true>     operator+=(const Char* str) const
     {
-        return arg_setter_<std::string, false>(str);
+        return arg_setter_<Char, true> (str);
     }
-    template<std::size_t Size>
-    arg_setter_<std::string, true>     operator()(const char (&str) [Size]) const
+    template<typename Char>
+    arg_setter_<Char, false>    operator= (const Char* str) const
     {
-        return arg_setter_<std::string, true> (str);
+        return arg_setter_<Char, false>(str);
     }
-    template<std::size_t Size>
-    arg_setter_<std::string, true>     operator+=(const char (&str) [Size]) const
+//    template<typename Char, std::size_t Size>
+//    arg_setter_<Char, true>     operator()(const Char (&str) [Size]) const
+//    {
+//        return arg_setter_<Char, true> (str);
+//    }
+//    template<typename Char, std::size_t Size>
+//    arg_setter_<Char, true>     operator+=(const Char (&str) [Size]) const
+//    {
+//        return arg_setter_<Char, true> (str);
+//    }
+//    template<typename Char, std::size_t Size>
+//    arg_setter_<Char, false>    operator= (const Char (&str) [Size]) const
+//    {
+//        return arg_setter_<Char, false>(str);
+//    }
+
+    arg_setter_<char, true> operator()(std::initializer_list<const char*> &&range) const
     {
-        return arg_setter_<std::string, true> (str);
+        return arg_setter_<char>(range.begin(), range.end());
     }
-    template<std::size_t Size>
-    arg_setter_<std::string, false>    operator= (const char (&str) [Size]) const
+    arg_setter_<char, true> operator+=(std::initializer_list<const char*> &&range) const
     {
-        return arg_setter_<std::string, false>(str);
+        return arg_setter_<char, true>(range.begin(), range.end());
+    }
+    arg_setter_<char, false> operator= (std::initializer_list<const char*> &&range) const
+    {
+        return arg_setter_<char, true>(range.begin(), range.end());
+    }
+    arg_setter_<char, true> operator()(std::initializer_list<std::string> &&range) const
+    {
+        return arg_setter_<char>(range.begin(), range.end());
+    }
+    arg_setter_<char, true> operator+=(std::initializer_list<std::string> &&range) const
+    {
+        return arg_setter_<char, true>(range.begin(), range.end());
+    }
+    arg_setter_<char, false> operator= (std::initializer_list<std::string> &&range) const
+    {
+        return arg_setter_<char, true>(range.begin(), range.end());
     }
 
-    arg_setter_<std::string, true> operator()(std::initializer_list<const char*> &&range) const
+    arg_setter_<wchar_t, true> operator()(std::initializer_list<const wchar_t*> &&range) const
     {
-        return arg_setter_<std::string>(range.begin(), range.end());
+        return arg_setter_<wchar_t>(range.begin(), range.end());
     }
-    arg_setter_<std::string, true> operator+=(std::initializer_list<const char*> &&range) const
+    arg_setter_<wchar_t, true> operator+=(std::initializer_list<const wchar_t*> &&range) const
     {
-        return arg_setter_<std::string, true>(range.begin(), range.end());
+        return arg_setter_<wchar_t, true>(range.begin(), range.end());
     }
-    arg_setter_<std::string, false> operator= (std::initializer_list<const char*> &&range) const
+    arg_setter_<wchar_t, false> operator= (std::initializer_list<const wchar_t*> &&range) const
     {
-        return arg_setter_<std::string, true>(range.begin(), range.end());
+        return arg_setter_<wchar_t, true>(range.begin(), range.end());
     }
-    arg_setter_<std::string, true> operator()(std::initializer_list<std::string> &&range) const
+    arg_setter_<wchar_t, true> operator()(std::initializer_list<std::wstring> &&range) const
     {
-        return arg_setter_<std::string>(range.begin(), range.end());
+        return arg_setter_<wchar_t>(range.begin(), range.end());
     }
-    arg_setter_<std::string, true> operator+=(std::initializer_list<std::string> &&range) const
+    arg_setter_<wchar_t, true> operator+=(std::initializer_list<std::wstring> &&range) const
     {
-        return arg_setter_<std::string, true>(range.begin(), range.end());
+        return arg_setter_<wchar_t, true>(range.begin(), range.end());
     }
-    arg_setter_<std::string, false> operator= (std::initializer_list<std::string> &&range) const
+    arg_setter_<wchar_t, false> operator= (std::initializer_list<std::wstring> &&range) const
     {
-        return arg_setter_<std::string, true>(range.begin(), range.end());
+        return arg_setter_<wchar_t, true>(range.begin(), range.end());
     }
 };
+
 
 }
 

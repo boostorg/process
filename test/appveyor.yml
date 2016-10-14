@@ -36,17 +36,18 @@ before_build:
     - set PROJECT_TO_TEST=%APPVEYOR_PROJECT_NAME%
     - echo "Testing %PROJECT_TO_TEST%"
     # Cloning Boost libraries (fast nondeep cloning)
+    - if %BRANCH_TO_TEST%==master ( set BOOST_BRANCH=master ) else ( set BOOST_BRANCH=develop )
     - set BOOST=C:/boost-local
     - git init %BOOST%
     - cd %BOOST%
-    - git remote add --no-tags -t %BRANCH_TO_TEST% origin https://github.com/boostorg/boost.git
+    - git remote add --no-tags -t %BOOST_BRANCH% origin https://github.com/boostorg/boost.git
     - git fetch --depth=1
-    - git checkout %BRANCH_TO_TEST%
+    - git checkout %BOOST_BRANCH%
     - git submodule update --init --merge
-    - git remote set-branches --add origin %BRANCH_TO_TEST%
+    - git remote set-branches --add origin %BOOST_BRANCH%
     - git pull --recurse-submodules
     - git submodule update --init
-    - git checkout %BRANCH_TO_TEST%
+    - git checkout %BOOST_BRANCH%
     #- git submodule foreach "git reset --quiet --hard"
     #- git submodule foreach "git clean -fxd"
     - git reset --hard
