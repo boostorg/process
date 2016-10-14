@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE(stream_line, *boost::unit_test::timeout(2))
 }
 
 
-BOOST_AUTO_TEST_CASE(large_data, *boost::unit_test::timeout(2))
+BOOST_AUTO_TEST_CASE(large_data, *boost::unit_test::timeout(20))
 {
     bp::pipe pipe;
 
