@@ -270,9 +270,9 @@ inline void basic_environment_impl<Char>::set(const string_type &id, const strin
 template<typename Char>
 inline void  basic_environment_impl<Char>::reset(const string_type &id)
 {
-	//ok, we need to check the size of data first
-	if (id.size() >= _data.size()) //ok, so it's impossible id is in there.
-		return;
+    //ok, we need to check the size of data first
+    if (id.size() >= _data.size()) //ok, so it's impossible id is in there.
+        return;
 
     //check if it's the first one, spares us the search.
     if (std::equal(id.begin(), id.end(), _data.begin()) && (_data[id.size()] == '='))

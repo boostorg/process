@@ -57,7 +57,7 @@ public:
      * @note Windows creates a named pipe here, where the name is automatically generated.
      */
     inline async_pipe(boost::asio::io_service & ios_source,
-    		          boost::asio::io_service & ios_sink);
+                      boost::asio::io_service & ios_sink);
 
     /** Construct a new async_pipe, does automatically open.
      * Initializes source and sink with the same io_service.
@@ -72,7 +72,7 @@ public:
      * @note Windows restricts possible names.
      */
     inline async_pipe(boost::asio::io_service & ios_source,
-	                  boost::asio::io_service & ios_sink, const std::string & name);
+                      boost::asio::io_service & ios_sink, const std::string & name);
 
     /** Copy-Constructor of the async pipe.
      * @note Windows requires a named pipe for this, if a the wrong type is used an exception is thrown.
@@ -97,8 +97,8 @@ public:
      */
     template<class CharT, class Traits = std::char_traits<CharT>>
     explicit async_pipe(boost::asio::io_service & ios_source,
-    		            boost::asio::io_service & ios_sink,
-						const basic_pipe<CharT, Traits> & p);
+                        boost::asio::io_service & ios_sink,
+                        const basic_pipe<CharT, Traits> & p);
 
 
     /** Assign a basic_pipe.
@@ -167,7 +167,7 @@ public:
              typename ReadHandler>
     BOOST_ASIO_INITFN_RESULT_TYPE(
           ReadHandler, void(boost::system::error_code, std::size_t))
-	  async_read_some(
+      async_read_some(
         const MutableBufferSequence & buffers,
               ReadHandler &&handler);
 
@@ -196,15 +196,15 @@ public:
     ///Steal, i.e. move, the source out of this class and change the io_service.
     handle_type steal_source(::boost::asio::io_service& ios);
     ///Steal, i.e. move, the sink out of this class and change the io_service.
-   	handle_type steal_sink  (::boost::asio::io_service& ios);
-   	///Clone the source.
+       handle_type steal_sink  (::boost::asio::io_service& ios);
+       ///Clone the source.
     handle_type clone_source() const;
     ///Clone the sink.
     handle_type clone_sink()   const;
     ///Clone the source and replace the io_service.
     handle_type clone_source(::boost::asio::io_service& ios) const;
     ///Clone the sink and replace the io_service.
-   	handle_type clone_sink  (::boost::asio::io_service& ios) const
+       handle_type clone_sink  (::boost::asio::io_service& ios) const
 };
 
 #else

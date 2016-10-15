@@ -25,7 +25,7 @@ public:
     inline async_pipe(boost::asio::io_service & ios) : async_pipe(ios, ios) {}
 
     inline async_pipe(boost::asio::io_service & ios_source,
-					  boost::asio::io_service & ios_sink) : _source(ios), _sink(ios)
+                      boost::asio::io_service & ios_sink) : _source(ios_source), _sink(ios_sink)
     {
         int fds[2];
         if (::pipe(fds) == -1)
@@ -35,10 +35,10 @@ public:
         _sink  .assign(fds[1]);
     };
     inline async_pipe(boost::asio::io_service & ios, const std::string & name)
-    	: async_pipe(ios, ios, name) {}
+        : async_pipe(ios, ios, name) {}
 
     inline async_pipe(boost::asio::io_service & ios_source,
-    		          boost::asio::io_service & io_sink, const std::string & name);
+                      boost::asio::io_service & io_sink, const std::string & name);
     inline async_pipe(const async_pipe& lhs);
     async_pipe(async_pipe&& lhs)  : _source(std::move(lhs._source)), _sink(std::move(lhs._sink))
     {
@@ -48,8 +48,8 @@ public:
 
     template<class CharT, class Traits = std::char_traits<CharT>>
     explicit async_pipe(::boost::asio::io_service & ios_source,
-    		            ::boost::asio::io_service & ios_sink,
-						 const basic_pipe<CharT, Traits> & p)
+                        ::boost::asio::io_service & ios_sink,
+                         const basic_pipe<CharT, Traits> & p)
             : _source(ios_source, p.native_source()), _sink(ios_sink, p.native_sink())
     {
     }
@@ -132,7 +132,7 @@ public:
              typename ReadHandler>
     BOOST_ASIO_INITFN_RESULT_TYPE(
           ReadHandler, void(boost::system::error_code, std::size_t))
-	  async_read_some(
+      async_read_some(
         const MutableBufferSequence & buffers,
               ReadHandler &&handler)
     {
@@ -159,42 +159,42 @@ public:
 
     handle_type steal_source(::boost::asio::io_service& ios)
     {
-    	::boost::asio::posix::stream_descriptor stolen(ios, _source.native_handle());
-    	_source.assign(-1);
-    	return stolen;
+        ::boost::asio::posix::stream_descriptor stolen(ios, _source.native_handle());
+        _source.assign(-1);
+        return stolen;
     }
-	handle_type steal_sink  (::boost::asio::io_service& ios)
-	{
-    	::boost::asio::posix::stream_descriptor stolen(ios, _sink.native_handle());
-    	_sink.assign(-1);
-    	return stolen;
-	}
+    handle_type steal_sink  (::boost::asio::io_service& ios)
+    {
+        ::boost::asio::posix::stream_descriptor stolen(ios, _sink.native_handle());
+        _sink.assign(-1);
+        return stolen;
+    }
 
     handle_type clone_source() const
     {
-    	return clone_source(const_cast<handle_type&>(_source).get_io_service());
+        return clone_source(const_cast<handle_type&>(_source).get_io_service());
     }
     handle_type clone_sink()   const
     {
-    	return clone_sink(const_cast<handle_type&>(_sink).get_io_service());
+        return clone_sink(const_cast<handle_type&>(_sink).get_io_service());
     }
 
     handle_type clone_source(::boost::asio::io_service& ios) const
     {
-	    auto source_in = const_cast<::boost::asio::c::stream_descriptor &>(_source).native();
-    	return ::boost::asio::posix::stream_descriptor(ios, ::dup(source_in));
+        auto source_in = const_cast<::boost::asio::posix::stream_descriptor &>(_source).native();
+        return ::boost::asio::posix::stream_descriptor(ios, ::dup(source_in));
     }
-	handle_type clone_sink  (::boost::asio::io_service& ios) const
-	{
-	    auto sink_in = const_cast<::boost::asio::posix::stream_descriptor &>(_sink).native();
-    	return ::boost::asio::posix::stream_descriptor(ios, ::dup(sink_in));
-	}
+    handle_type clone_sink  (::boost::asio::io_service& ios) const
+    {
+        auto sink_in = const_cast<::boost::asio::posix::stream_descriptor &>(_sink).native();
+        return ::boost::asio::posix::stream_descriptor(ios, ::dup(sink_in));
+    }
 };
 
 
 async_pipe::async_pipe(boost::asio::io_service & ios_source,
-		               boost::asio::io_service & ios_sink,
-					   const std::string & name) : _source(ios_source), _sink(ios_sink)
+                       boost::asio::io_service & ios_sink,
+                       const std::string & name) : _source(ios_source), _sink(ios_sink)
 {
     auto fifo = mkfifo(name.c_str(), 0666 );
 

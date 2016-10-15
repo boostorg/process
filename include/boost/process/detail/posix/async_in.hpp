@@ -71,7 +71,7 @@ struct async_in_buffer : ::boost::process::detail::posix::async_handler
     template<typename Executor>
     std::function<void(int, const std::error_code&)> on_exit_handler(Executor & exec)
     {
-    	auto &ios = get_io_service(exec.seq);
+        auto &ios = get_io_service(exec.seq);
         if (!pipe)
             pipe = std::make_shared<boost::process::async_pipe>(ios);
 
