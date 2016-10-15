@@ -19,7 +19,7 @@ namespace boost { namespace process { namespace detail { namespace posix {
 
 struct null_in : handler_base_ext
 {
-    file_descriptor source{"/dev/null"};
+    file_descriptor source{"/dev/null", file_descriptor::read};
 
 public:
     template <class Executor>
