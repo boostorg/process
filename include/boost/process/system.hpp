@@ -248,9 +248,8 @@ int ret = system("ls");
 \attention When used with Pipes it will almost always result in a dead-lock.
 
 When using this function with an asynchronous properties and NOT passing an io_service object,
-the system function will create one and run it. When the io_service is passed to the function, the system function will check if it is active,
-and call the io_service::run function if not.
-
+the system function will create one and run it. When the io_service is passed to the function,
+the system function will check if it is active, and call the io_service::run function if not.
 
 \par Coroutines
 

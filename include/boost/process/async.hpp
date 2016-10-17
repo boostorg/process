@@ -5,12 +5,13 @@
 
 /** \file boost/process/async.hpp
 
-  The header which provides the basic asynchrounous features.
-  It provides the on_exit property, which allows callbacks when the process exits.
-  It also implements the necessary traits for passing an boost::asio::io_service,
-  which is needed for asynchronous communication.
+The header which provides the basic asynchrounous features.
+It provides the on_exit property, which allows callbacks when the process exits.
+It also implements the necessary traits for passing an boost::asio::io_service,
+which is needed for asynchronous communication.
 
-  It also pulls the boost::asio::buffer into the boost::process namespace for convenience.
+It also pulls the [boost::asio::buffer](http://www.boost.org/doc/libs/release/doc/html/boost_asio/reference/buffer.html)
+into the boost::process namespace for convenience.
 
 \xmlonly
 <programlisting>
@@ -86,6 +87,30 @@ struct initializer_builder<async_tag>
 }
 
 using ::boost::asio::buffer;
+
+/** When an io_service is passed, the on_exit property can be used, to be notified
+    when the child process exits.
+
+
+The following syntax is valid
+
+\code{.cpp}
+on_exit=function;
+on_exit(function);
+\endcode
+
+with `function` being callable with `(int, const std::error_code&)`.
+
+\par Example
+
+\code{.cpp}
+io_service ios;
+spawn("ls", on_exit=[](int exit, const std::error_code& ec_in){});
+\endcode
+
+ */
+constexpr static ::boost::process::detail::on_exit_ on_exit{};
+
 
 }}
 

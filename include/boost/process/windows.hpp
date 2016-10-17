@@ -16,13 +16,13 @@
 namespace boost {
   namespace process {
     namespace windows {
-      <emphasis>unspecified</emphasis> hide;
-      <emphasis>unspecified</emphasis> maximized;
-      <emphasis>unspecified</emphasis> minimized;
-      <emphasis>unspecified</emphasis> minimized_not_active;
-      <emphasis>unspecified</emphasis> not_active;
-      <emphasis>unspecified</emphasis> show;
-      <emphasis>unspecified</emphasis> show_normal;
+      <emphasis>unspecified</emphasis> <globalname alt="boost::process::windows::hide">hide</globalname>;
+      <emphasis>unspecified</emphasis> <globalname alt="boost::process::windows::maximized">maximized</globalname>;
+      <emphasis>unspecified</emphasis> <globalname alt="boost::process::windows::minimized">minimized</globalname>;
+      <emphasis>unspecified</emphasis> <globalname alt="boost::process::windows::minimized_not_active">minimized_not_active</globalname>;
+      <emphasis>unspecified</emphasis> <globalname alt="boost::process::windows::not_active">not_active</globalname>;
+      <emphasis>unspecified</emphasis> <globalname alt="boost::process::windows::show">show</globalname>;
+      <emphasis>unspecified</emphasis> <globalname alt="boost::process::windows::show_normal">show_normal</globalname>;
     }
   }
 }
@@ -37,14 +37,20 @@ namespace boost { namespace process {
 ///Namespace containing the windows exensions.
 namespace windows {
 
-
-using boost::process::detail::windows::hide;
-using boost::process::detail::windows::maximized;
-using boost::process::detail::windows::minimized;
-using boost::process::detail::windows::minimized_not_active;
-using boost::process::detail::windows::not_active;
-using boost::process::detail::windows::show;
-using boost::process::detail::windows::show_normal;
+///Hides the window and activates another window.
+constexpr static ::boost::process::detail::windows::show_window<::boost::detail::winapi::SW_HIDE_           > hide;
+///Activates the window and displays it as a maximized window.
+constexpr static ::boost::process::detail::windows::show_window<::boost::detail::winapi::SW_SHOWMAXIMIZED_  > maximized;
+///Activates the window and displays it as a minimized window.
+constexpr static ::boost::process::detail::windows::show_window<::boost::detail::winapi::SW_SHOWMINIMIZED_  > minimized;
+///Displays the window as a minimized window. This value is similar to `minimized`, except the window is not activated.
+constexpr static ::boost::process::detail::windows::show_window<::boost::detail::winapi::SW_SHOWMINNOACTIVE_> minimized_not_active;
+///Displays a window in its most recent size and position. This value is similar to show_normal`, except that the window is not activated.
+constexpr static ::boost::process::detail::windows::show_window<::boost::detail::winapi::SW_SHOWNOACTIVATE_ > not_active;
+///Activates and displays a window. If the window is minimized or maximized, the system restores it to its original size and position. An application should specify this flag when displaying the window for the first time.
+constexpr static ::boost::process::detail::windows::show_window<::boost::detail::winapi::SW_SHOWNORMAL_     > show;
+///Activates and displays a window. If the window is minimized or maximized, the system restores it to its original size and position. An application should specify this flag when displaying the window for the first time.
+constexpr static ::boost::process::detail::windows::show_window<::boost::detail::winapi::SW_SHOWNORMAL_     > show_normal;
 
 
 }}}

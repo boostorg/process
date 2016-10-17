@@ -12,10 +12,8 @@
 ]
 
 [include introduction.qbk]
-[include design.qbk]
 [include tutorial.qbk]
-[include handbook.qbk]
-[include platform.qbk]
+[include design.qbk]
 [include faq.qbk]
 [xinclude autodoc.xml]
 [include acknowledgements.qbk]

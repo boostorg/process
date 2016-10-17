@@ -482,8 +482,9 @@ public:
 
 };
 
-/**Template representation of environments. It takes a template
- * as template parameter to implement the environment
+/**Template representation of the environment of this process. It takes a template
+ * as template parameter to implement the environment. All instances of this class
+ * refer to the same environment, but might not get updated if another one makes changes.
  */
 template<typename Char>
 class basic_native_environment

@@ -25,28 +25,6 @@ struct on_exit_
 
 }
 
-/** When an io_service is passed, the on_exit property can be used, to be notified
-    when the child process exits.
-
-
-The following syntax is valid
-
-\code{.cpp}
-on_exit=function;
-on_exit(function);
-\endcode
-
-with `function` being callable with `(int, const std::error_code&)`.
-
-\par Example
-
-\code{.cpp}
-io_service ios;
-spawn("ls", on_exit=[](int exit, const std::error_code& ec_in){});
-\endcode
-
- */
-constexpr static ::boost::process::detail::on_exit_ on_exit{};
 
 
 }}

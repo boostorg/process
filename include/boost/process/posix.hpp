@@ -39,10 +39,12 @@ namespace boost { namespace process {
 ///Namespace containing the posix exensions.
 namespace posix {
 
-/** This property lets you modify file-descriptors other than the standardones (0,1,2).
+/** This property lets you modify file-descriptors other than the standard ones (0,1,2).
  *
  * It provides the functions `bind`, which implements [dup2](http://pubs.opengroup.org/onlinepubs/9699919799/functions/dup.html)
  * and [close](http://pubs.opengroup.org/onlinepubs/9699919799/functions/close.html).
+ *
+ * Close can also be called with a range of file-descriptors to be closed.
  *
  */
 constexpr static ::boost::process::detail::posix::fd_ fd;
@@ -65,7 +67,10 @@ sig(handler);
 \warning @ref spawn will automatically use `sig.ign()`, which will override if you pass a custom handler.
  */
 constexpr static ::boost::process::detail::posix::sig_       sig;
-///This property will replace the usage of [fork](http://pubs.opengroup.org/onlinepubs/9699919799/functions/fork.html) by [vfork](http://pubs.opengroup.org/onlinepubs/009695399/functions/vfork.html).
+/** This property will replace the usage of [fork](http://pubs.opengroup.org/onlinepubs/9699919799/functions/fork.html) by [vfork](http://pubs.opengroup.org/onlinepubs/009695399/functions/vfork.html).
+ \note `vfork` is no longer an official part of the posix standard.
+
+ */
 constexpr static ::boost::process::detail::posix::use_vfork_ use_vfork;
 
 }}}
