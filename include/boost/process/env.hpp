@@ -17,12 +17,30 @@
 
 /** \file boost/process/env.hpp
  *
- *    Header which provides the env property. It allows the modification of the
+ *    This header which provides the `env` property. It allows the modification of the
  *    environment the child process will run in, in a functional style.
+ *
+ *  \xmlonly
+<programlisting>
+namespace boost {
+  namespace process {
+    <emphasis>unspecified</emphasis> <globalname alt="boost::process::env">env</globalname>;
+  }
+}
+</programlisting>
+ *  \endxmlonly
+ *
+ *  For additional information see the platform documentations:
+ *
+ *   - [windows](https://msdn.microsoft.com/en-US/library/windows/desktop/ms682653.aspx)
+ *   - [posix](http://pubs.opengroup.org/onlinepubs/009695399/basedefs/xbd_chap08.html)
+ *
  */
 
 
-namespace boost { namespace process { namespace detail {
+namespace boost {
+
+namespace process { namespace detail {
 
 
 template<typename Char>
@@ -309,11 +327,156 @@ struct initializer_builder<env_tag<wchar_t>>
     typedef env_builder<wchar_t> type;
 };
 
-
-constexpr static env_ env;
 }
 
-using boost::process::detail::env;
+/**
+
+The `env` property provides a functional way to modify the environment used by
+the child process. If none is passed the environment is inherited from the father
+process. Appending means that the environment will be interpreted as a ';'
+seperated list as used in `PATH`.
+
+On both `posix` and `windows` the environment variables can be lists of strings,
+seperated by ';'. This is typically used for the `PATH` variable.
+
+By default the environment will be inherited from the launching process,
+which is also true if environment are modified with this initializer.
+
+\section env_details Details
+
+\subsection env_operations Operations
+
+\subsubsection env_set_var Setting variables
+
+To set a variable `id` the value `value` the following syntax can be used.
+
+\code{.cpp}
+env[id] = value;
+env(id, value);
+\endcode
+
+`std::initializer_list` is among the allowed types, so the following syntax is also possible.
+
+\code{.cpp}
+env[id] = {value1, value2};
+env(id, {value1, value2});
+\endcode
+
+\note Creates the variable if it does not exist.
+
+The following lists contain possible value types, with `char_type` being either `char` or `wchar_t`
+for both `id` and `value`.
+
+\paragraph id id
+
+ - `std::basic_string<char_type>`
+ - `const char_type *`
+
+\paragraph env_set_var_value value
+
+ - `std::basic_string<char_type>`
+ - `const char_type * `
+ - `std::initializer_list<const char_type *>`
+ - `std::vector<std::basic_string<char_type>>`
+
+
+\note Using `std::vector` or `std::initializer_list`
+
+\subsubsection env_append_var Append variables
+
+Appending means, that a variable will be interpreted as a
+To append  a variable `id` the value `value` the following syntax can be used:
+
+\code{.cpp}
+env[id] += value;
+\endcode
+
+`std::initializer_list` is among the allowed types, so the following syntax is also possible.
+
+\code{.cpp}
+env[id] += {value1, value2};
+\endcode
+
+\note Creates the variable if it does not exist.
+
+The following lists contain possible value types, with `char_type` being either `char` or `wchar_t`
+for both `id` and `value`.
+
+\paragraph env_append_var_id id
+
+ - `std::basic_string<char_type>`
+ - `const char_type *`
+
+\paragraph env_append_var_value value
+
+ - `std::basic_string<char_type>`
+ - `const char_type *`
+ - `std::initializer_list<const char_type *>`
+ - `std::vector<std::basic_string<char_type>>`
+
+
+\subsubsection env_reset Reset variables
+
+Reseting signle variables can be done in the following way:
+
+\code{.cpp}
+env[id] = boost::none;
+env(id, boost::none);
+\endcode
+
+\note This does not set the value empty, but removes it from the list.
+
+The following lists contain possible value types, with `char_type` being either `char` or `wchar_t`:
+
+\paragraph env_reset_var_id id
+
+ - `std::basic_string<char_type>`
+ - `const char_type *`
+
+\subsubsection env_init Initialize the environment
+
+The whole environment can be initialized from an object of type
+\xmlonly <classname>boost::process::environment</classname> \endxmlonly
+
+\code{.cpp}
+env=env;
+env(env);
+\endcode
+
+\note The passed `environment` can also be default-constructed to get an empty environment.
+
+\paragraph env_init_var_id id
+
+ - `std::basic_string<char_type>`
+ - `const char_type *`
+
+\paragraph env_init_var_value value
+
+ - `boost::process::basic_environment<char_type>`
+
+\subsection env_example Example
+
+\code{.cpp}
+spawn("b2", env["PATH"]+="F:/boost", env["SOME_VAR"]=boost::none, env["NEW_VAR"]="VALUE");
+\endcode
+
+If the overload style should be done by passing an instance of
+\xmlonly <classname>boost::process::environment</classname> \endxmlonly
+the above example would look like this.
+
+\code{.cpp}
+environment e = this_process::environment();
+e["PATH"]   += "F:/boost";
+e.erase("SOME_VAR");
+e["NEW_VAR"] = "VALUE";
+spawn("b2", e);
+\endcode
+
+\warning Passing an empty environment will cause undefined behaviour.
+
+ */
+constexpr static boost::process::detail::env_ env{};
+
 
 }}
 

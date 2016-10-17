@@ -642,7 +642,7 @@ namespace this_process
 {
 
 ///Definition of the native handle type.
-typedef ::boost::process::detail::api::native_handle_t native_handle_t;
+typedef ::boost::process::detail::api::native_handle_t native_handle_type;
 
 ///Definition of the environment for this process.
 using ::boost::process::native_environment;
@@ -652,7 +652,7 @@ using ::boost::process::wnative_environment;
 ///Get the process id of the current process.
 inline int get_id()                     { return ::boost::process::detail::api::get_id();}
 ///Get the native handle of the current process.
-inline native_handle_t native_handle()  { return ::boost::process::detail::api::native_handle();}
+inline native_handle_type native_handle()  { return ::boost::process::detail::api::native_handle();}
 ///Get the enviroment of the current process.
 inline native_environment   environment() { return ::boost::process:: native_environment(); }
 ///Get the enviroment of the current process.

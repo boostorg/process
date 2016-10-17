@@ -63,7 +63,6 @@ struct sig_
 };
 
 
-constexpr static sig_ sig;
 
 
 

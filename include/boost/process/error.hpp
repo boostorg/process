@@ -34,10 +34,19 @@
  *
  *    Header which provides the error properties. It allows to explicitly set the error handling, the properties are:
  *
- *     - ignore_error
- *     - error
- *     - throw_on_error
- *
+\xmlonly
+<programlisting>
+namespace boost {
+  namespace process {
+    <emphasis>unspecified</emphasis> <globalname alt="boost::process::ignore_error">ignore_error</globalname>;
+    <emphasis>unspecified</emphasis> <globalname alt="boost::process::throw_on_error">throw_on_error</globalname>;
+    <emphasis>unspecified</emphasis> <globalname alt="boost::process::error">error</globalname>;
+    <emphasis>unspecified</emphasis> <globalname alt="boost::process::error_ref">error_ref</globalname>;
+    <emphasis>unspecified</emphasis> <globalname alt="boost::process::error_code">error_code</globalname>;
+  }
+}
+</programlisting>
+\endxmlonly
  *     For error there are two aliases: error_ref and error_code
  */
 
@@ -145,12 +154,38 @@ struct initializer_builder<error_tag>
 };
 
 }
-
+/**The ignore_error property will disable any error handling. This can be useful
+on linux, where error handling will require a pipe.*/
 constexpr static boost::process::detail::ignore_error_ ignore_error;
-constexpr static boost::process::detail::error_ error;
-constexpr static boost::process::detail::error_ error_ref;
-constexpr static boost::process::detail::error_ error_code;
+/**The throw_on_error property will enable the exception when launching a process.
+It is unnecessary by default, but may be used, when an additional error_code is provided.*/
 constexpr static boost::process::detail::throw_on_error_ throw_on_error;
+/**
+The error property will set the executor to handle any errors by setting an
+[std::error_code](http://en.cppreference.com/w/cpp/error/error_code).
+
+\code{.cpp}
+std::error_code ec;
+system("gcc", error(ec));
+\endcode
+
+The following syntax is valid:
+
+\code{.cpp}
+error(ec);
+error=ec;
+\endcode
+
+The overload version is achieved by just passing an object of
+ [std::error_code](http://en.cppreference.com/w/cpp/error/error_code) to the function.
+
+
+ */
+constexpr static boost::process::detail::error_ error;
+///Alias for \xmlonly <globalname alt="boost::process::error">error</globalname> \endxmlonly .
+constexpr static boost::process::detail::error_ error_ref;
+///Alias for \xmlonly <globalname alt="boost::process::error">error</globalname> \endxmlonly .
+constexpr static boost::process::detail::error_ error_code;
 
 
 }}

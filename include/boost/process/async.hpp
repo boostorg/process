@@ -3,15 +3,26 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-/** \file boost/process/args.hpp
- *
-  Header which provides the basic asynchrounous features.
+/** \file boost/process/async.hpp
+
+  The header which provides the basic asynchrounous features.
   It provides the on_exit property, which allows callbacks when the process exits.
   It also implements the necessary traits for passing an boost::asio::io_service,
   which is needed for asynchronous communication.
 
   It also pulls the boost::asio::buffer into the boost::process namespace for convenience.
 
+\xmlonly
+<programlisting>
+namespace boost {
+  namespace process {
+    <emphasis>unspecified</emphasis> buffer;
+    <emphasis>unspecified</emphasis> <globalname alt="boost::process::on_exit">on_exit</globalname>;
+  }
+}
+</programlisting>
+
+\endxmlonly
   */
 
 #ifndef BOOST_PROCESS_DETAIL_ASYNC_HPP_
@@ -30,10 +41,13 @@
 #include <boost/process/detail/posix/io_service_ref.hpp>
 #include <boost/process/detail/posix/async_in.hpp>
 #include <boost/process/detail/posix/async_out.hpp>
+#include <boost/process/detail/posix/on_exit.hpp>
+
 #elif defined(BOOST_WINDOWS_API)
 #include <boost/process/detail/windows/io_service_ref.hpp>
 #include <boost/process/detail/windows/async_in.hpp>
 #include <boost/process/detail/windows/async_out.hpp>
+#include <boost/process/detail/windows/on_exit.hpp>
 #endif
 
 namespace boost { namespace process { namespace detail {
@@ -72,6 +86,30 @@ struct initializer_builder<async_tag>
 }
 
 using ::boost::asio::buffer;
+
+
+/** When an io_service is passed, the on_exit property can be used, to be notified
+    when the child process exits.
+
+
+The following syntax is valid
+
+\code{.cpp}
+on_exit=function;
+on_exit(function);
+\endcode
+
+with `function` being callable with `(int, const std::error_code&)`.
+
+\par Example
+
+\code{.cpp}
+io_service ios;
+spawn("ls", on_exit=[](int exit, const std::error_code& ec_in){});
+\endcode
+
+ */
+constexpr static ::boost::process::detail::on_exit_ on_exit{};
 
 }}
 

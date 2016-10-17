@@ -8,12 +8,6 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-/**
- * \file boost/process/shell_path.hpp
- *
- * Defines a function to return the absolute path to a shell executable.
- */
-
 #ifndef BOOST_PROCESS_SHELL_PATH_HPP
 #define BOOST_PROCESS_SHELL_PATH_HPP
 
@@ -31,6 +25,16 @@
  *    Header which provides the shell property. This provides the
  *    property to launch a process through the system shell.
  *    It also allows the user to obtain the shell-path via shell().
+\xmlonly
+<programlisting>
+namespace boost {
+  namespace process {
+    <emphasis>unspecified</emphasis> <globalname alt="boost::process::shell">shell</globalname>;
+  }
+}
+</programlisting>
+\endxmlonly
+
  */
 
 namespace boost { namespace process { namespace detail {
@@ -56,7 +60,26 @@ struct is_wchar_t<shell_> : is_wchar_t<boost::filesystem::path>
 };
 
 }
+/**
+The shell property enables to launch a program through the shell of the system.
 
+\code{.cpp}
+system("gcc", shell);
+\endcode
+
+The shell argument goes without any expression. The operator() is overloaded, to
+obtain the path of the system shell.
+
+\code{.cpp}
+auto shell_cmd = shell();
+//avoid exceptions
+std::error_code ec;
+shell_cmd = shell(ec);
+\endcode
+
+\attention Launching through the shell will NOT provide proper error handling, i.e.
+you will get an error via the return code.
+*/
 constexpr static ::boost::process::detail::shell_ shell;
 
 }}

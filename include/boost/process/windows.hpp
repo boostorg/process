@@ -10,15 +10,26 @@
 /** \file boost/process/windows.hpp
  *
  *    Header which provides the windows extensions.
- *    Those are all show_windows parameters:
- *
- *      - hide
- *      - maximized
- *      - minimized
- *      - minimized_not_active
- *      - not_active
- *      - show
- *      - show_normal
+
+\xmlonly
+<programlisting>
+namespace boost {
+  namespace process {
+    namespace windows {
+      <emphasis>unspecified</emphasis> hide;
+      <emphasis>unspecified</emphasis> maximized;
+      <emphasis>unspecified</emphasis> minimized;
+      <emphasis>unspecified</emphasis> minimized_not_active;
+      <emphasis>unspecified</emphasis> not_active;
+      <emphasis>unspecified</emphasis> show;
+      <emphasis>unspecified</emphasis> show_normal;
+    }
+  }
+}
+</programlisting>
+ *  \endxmlonly
+ *   \warning Only available on windows.
+ *   See the parameter documentation of [ShowWindow](https://msdn.microsoft.com/en-us/library/windows/desktop/ms633548.aspx) for more details.
  */
 
 namespace boost { namespace process {

@@ -31,7 +31,7 @@ See [link boost_process.handbook.coro.stackful this section] for an example. ]
 
 [section Spawn]
 
-Another function which is more then convenience is the  [funcref boost::process::spawn] function. 
+Another function which is more than convenience is the  [funcref boost::process::spawn] function. 
 This function starts a process and immediately detaches it. It thereby prevents the system from creating a zombie process,
 but will also cause the system to be unable to wait for the child to exit.
 

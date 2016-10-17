@@ -13,21 +13,60 @@
 
 /** \file boost/process/posix.hpp
  *
- *    Header which provides the posix extensions. Those include fd, on_fork_error,
- *    on_exec_setup and on_exec_error.
+ *    Header which provides the posix extensions.
+\xmlonly
+<programlisting>
+namespace boost {
+  namespace process {
+    namespace windows {
+    <emphasis>unspecified</emphasis> <globalname alt="boost::process::posix::fd">fd</globalname>;
+    <emphasis>unspecified</emphasis> <globalname alt="boost::process::posix::on_fork_error">on_fork_error</globalname>;
+    <emphasis>unspecified</emphasis> <globalname alt="boost::process::posix::on_exec_setup">on_exec_setup</globalname>;
+    <emphasis>unspecified</emphasis> <globalname alt="boost::process::posix::on_exec_error">on_exec_error</globalname>;
+    <emphasis>unspecified</emphasis> <globalname alt="boost::process::posix::sig">sig</globalname>;
+    <emphasis>unspecified</emphasis> <globalname alt="boost::process::posix::use_vfork">use_vfork</globalname>;
+    }
+  }
+}
+</programlisting>
+ *  \endxmlonly
+ *   \warning Only available on posix.
+ *   See the parameter documentation of [ShowWindow](https://msdn.microsoft.com/en-us/library/windows/desktop/ms633548.aspx) for more details.
  */
+
 namespace boost { namespace process {
 
 ///Namespace containing the posix exensions.
 namespace posix {
 
+/** This property lets you modify file-descriptors other than the standardones (0,1,2).
+ *
+ * It provides the functions `bind`, which implements [dup2](http://pubs.opengroup.org/onlinepubs/9699919799/functions/dup.html)
+ * and [close](http://pubs.opengroup.org/onlinepubs/9699919799/functions/close.html).
+ *
+ */
+constexpr static ::boost::process::detail::posix::fd_ fd;
+///This handler is invoked if the fork fails.
+constexpr static ::boost::process::detail::make_handler_t<::boost::process::detail::posix::on_fork_error_  >   on_fork_error;
+///This handler is invoked if the fork succeeded.
+constexpr static ::boost::process::detail::make_handler_t<::boost::process::detail::posix::on_exec_setup_  >   on_exec_setup;
+///This handler is invoked if the exec call errored.
+constexpr static ::boost::process::detail::make_handler_t<::boost::process::detail::posix::on_exec_error_     >   on_exec_error;
+/** This property lets you modify the handling of `SIGCHLD` for this call. It will be reset afterwards.
 
-using ::boost::process::detail::posix::fd;
-using ::boost::process::detail::posix::on_fork_error;
-using ::boost::process::detail::posix::on_exec_setup;
-using ::boost::process::detail::posix::on_exec_error;
-using ::boost::process::detail::posix::sig;
-using ::boost::process::detail::posix::use_vfork;
+It can be set to default, by the expression `sig.dfl()`, set to ignore with `sig.ign()` or
+assigned a custom handler. A custom handler must have the type `sighandler_t`and can be assigned with the following syntax:
+
+\code{.cpp}
+sig = handler;
+sig(handler);
+\endcode
+
+\warning @ref spawn will automatically use `sig.ign()`, which will override if you pass a custom handler.
+ */
+constexpr static ::boost::process::detail::posix::sig_       sig;
+///This property will replace the usage of [fork](http://pubs.opengroup.org/onlinepubs/9699919799/functions/fork.html) by [vfork](http://pubs.opengroup.org/onlinepubs/009695399/functions/vfork.html).
+constexpr static ::boost::process::detail::posix::use_vfork_ use_vfork;
 
 }}}
 

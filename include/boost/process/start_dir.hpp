@@ -26,7 +26,18 @@
 
 /** \file boost/process/start_dir.hpp
  *
- *    Header which provides the start_dir property.
+Header which provides the start_dir property, which allows to set the directory
+the process shall be started in.
+\xmlonly
+<programlisting>
+namespace boost {
+  namespace process {
+    <emphasis>unspecified</emphasis> <globalname alt="boost::process::start_dir">start_dir</globalname>;
+  }
+}
+</programlisting>
+\endxmlonly
+
  */
 
 namespace boost { namespace process { namespace detail {
@@ -75,10 +86,25 @@ struct char_converter<api::start_dir_init<wchar_t>, api::start_dir_init<char>>
     }
 };
 
-constexpr static start_dir_ start_dir;
-
 }
-using ::boost::process::detail::start_dir;
+
+/**
+
+To set the start dir, the `start_dir` property is provided.
+
+The valid operations are the following:
+
+\code{.cpp}
+start_dir=path
+start_dir(path)
+\endcode
+
+It can be used with `std::string`, `std::wstring` and `boost::filesystem::path`.
+
+
+ */
+constexpr static ::boost::process::detail::start_dir_ start_dir;
+
 }}
 
 #endif

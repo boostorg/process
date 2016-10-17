@@ -25,9 +25,18 @@
 
 /** \file boost/process/cmd.hpp
  *
- *    Header which provides the cmd property.
+ *    This header provides the \xmlonly <globalname alt="boost::process::cmd">cmd</globalname>\endxmlonly property.
  *
- */
+\xmlonly
+<programlisting>
+namespace boost {
+  namespace process {
+    <emphasis>unspecified</emphasis> <globalname alt="boost::process::cmd">cmd</globalname>;
+  }
+}
+</programlisting>
+\endxmlonly
+*/
 
 namespace boost { namespace process { namespace detail {
 
@@ -83,13 +92,30 @@ struct char_converter<wchar_t, api::cmd_setter_<char>>
 
 
 
-constexpr static cmd_ cmd;
 
 
 
 }
 
-using boost::process::detail::cmd;
+
+/** The cmd property allows to explicitly set commands for the execution.
+
+The overload form applies when only one string is passed to a launching function.
+The string will be internally parsed and split at spaces.
+
+The following expressions are valid, with `value` being either a C-String or
+a `std::basic_string` with `char` or `wchar_t`.
+
+\code{.cpp}
+cmd="value";
+cmd(value);
+\endcode
+
+The property can only be used for assignments.
+
+
+ */
+constexpr static ::boost::process::detail::cmd_ cmd;
 
 }}
 

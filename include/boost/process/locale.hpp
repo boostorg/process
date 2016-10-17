@@ -53,6 +53,7 @@ public:
 
 }
 
+///Internally used error cateory for code conversion.
 inline const std::error_category& codecvt_category()
 {
     static const ::boost::process::detail::codecvt_category_t cat;
@@ -86,15 +87,17 @@ inline std::locale& process_locale()
 
 }
 
-
+///The internally used type for code conversion.
 typedef std::codecvt<wchar_t, char, std::mbstate_t> codecvt_type;
 
+///Get a reference to the currently used code converter.
 inline const codecvt_type& codecvt()
 {
   return std::use_facet<std::codecvt<wchar_t, char, std::mbstate_t>>(
                 detail::process_locale());
 }
 
+///Set the locale of the library.
 inline std::locale imbue(const std::locale& loc)
 {
   std::locale temp(detail::process_locale());

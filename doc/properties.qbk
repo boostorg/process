@@ -16,7 +16,6 @@ expressions are valid:
 //assign
 cmd="value";
 cmd(value);
-
 ```
 
 The overload form applies when only one string is passed to a launching function.
@@ -423,7 +422,7 @@ There is no explicit property for this feature.
 The `env` property provides a functional way to modify the environment used by
 the child process. If none is passed the environment is inherited from the father
 process. Appending means that the environment will be interpreted as a ';' 
-seperated list as used in PATH.
+seperated list as used in `PATH`.
 
 The following expressions are valid.
 

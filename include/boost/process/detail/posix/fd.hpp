@@ -86,7 +86,6 @@ struct fd_
 
 };
 
-constexpr static fd_ fd;
 
 }}}}
 
