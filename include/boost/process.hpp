@@ -8,14 +8,15 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
+#ifndef BOOST_PROCESS_HPP
+#define BOOST_PROCESS_HPP
+
 /**
  * \file boost/process.hpp
  *
- * Convenience header which includes all public Boost.Process header files.
+ * Convenience header which includes all public and platform-independent
+ * boost.process header files.
  */
-
-#ifndef BOOST_PROCESS_HPP
-#define BOOST_PROCESS_HPP
 
 #include <boost/process/args.hpp>
 #include <boost/process/async.hpp>

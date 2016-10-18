@@ -28,7 +28,7 @@ struct async_in_buffer : ::boost::process::detail::posix::async_handler
     Buffer & buf;
 
     std::shared_ptr<std::promise<void>> promise;
-    async_in_buffer operator<(std::future<void> & fut)
+    async_in_buffer operator>(std::future<void> & fut)
     {
         promise = std::make_shared<std::promise<void>>();
         fut = promise->get_future(); return std::move(*this);
@@ -71,13 +71,13 @@ struct async_in_buffer : ::boost::process::detail::posix::async_handler
     template<typename Executor>
     std::function<void(int, const std::error_code&)> on_exit_handler(Executor & exec)
     {
+        auto &ios = get_io_service(exec.seq);
         if (!pipe)
-            pipe = std::make_shared<boost::process::async_pipe>(get_io_service(exec.seq));
+            pipe = std::make_shared<boost::process::async_pipe>(ios);
 
         auto pipe = this->pipe;
-        return [pipe](int, const std::error_code& ec)
+        return [pipe, &ios](int, const std::error_code& ec)
                {
-                  boost::asio::io_service & ios = pipe->get_io_service();
                   ios.post([pipe]
                       {
                             boost::system::error_code ec;

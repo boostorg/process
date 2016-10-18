@@ -39,6 +39,7 @@ BOOST_AUTO_TEST_CASE(async_out_future, *boost::unit_test::timeout(2))
     std::error_code ec;
 
     std::future<std::string> fut;
+    std::future<void> fut_in;
     boost::asio::streambuf in_buf;
 
 
@@ -48,7 +49,7 @@ BOOST_AUTO_TEST_CASE(async_out_future, *boost::unit_test::timeout(2))
     bp::child c(
         master_test_suite().argv[1],
         "test", "--prefix-once", "test",
-        bp::std_in  < in_buf,
+        bp::std_in  < in_buf > fut_in,
         bp::std_out > fut,
         io_service,
         ec
@@ -59,6 +60,9 @@ BOOST_AUTO_TEST_CASE(async_out_future, *boost::unit_test::timeout(2))
     io_service.run();
 
     BOOST_REQUIRE(fut.valid());
+    BOOST_REQUIRE(fut_in.valid());
+    BOOST_CHECK_NO_THROW(fut_in.get());
+
     std::string line;
 
     BOOST_CHECK_NO_THROW(line = fut.get());

@@ -1,3 +1,32 @@
+[def bp::system [funcref boost::process::system bp::system]]
+[def bp::spawn  [funcref boost::process::system bp::spawn]]
+[def bp::child  [classref boost::process::child bp::child]]
+[def bp::group  [classref boost::process::group bp::group]]
+[def bp::ipstream  [classref boost::process::ipstream bp::ipstream]]
+[def bp::opstream  [classref boost::process::opstream bp::opstream]]
+[def bp::pstream  [classref boost::process::pstream bp::pstream]]
+[def bp::pipe  [classref boost::process::pipe bp::pipe]]
+[def boost_org  [@www.boost.org "www.boost.org"]]
+[def std::system [@http://en.cppreference.com/w/cpp/utility/program/system std::system]]
+[def child_running [memberref boost::process::child::running running]]
+[def child_wait [memberref boost::process::child::wait wait]]
+[def child_exit_code [memberref boost::process::child::exit_code exit_code]]
+[def bp::on_exit [memberref boost::process::child::on_exit bp::on_exit]]
+[def child_terminate [memberref boost::process::child::terminate terminate]]
+[def group_terminate [memberref boost::process::group::terminate terminate]]
+[def bp::std_in [globalref boost::process::std_in bp::std_in]]
+[def bp::std_out [globalref boost::process::std_out bp::std_out]]
+[def bp::std_err [globalref boost::process::std_err bp::std_err]]
+[def io_service  [@http://www.boost.org/doc/libs/release/doc/html/boost_asio/reference/io_service.html boost::asio::io_service]]
+[def asio_buffer [@http://www.boost.org/doc/libs/release/doc/html/boost_asio/reference/buffer.html boost::asio::buffer]]
+[def asio_async_read [@http://www.boost.org/doc/libs/release/doc/html/boost_asio/reference/async_read.html boost::asio::async_read]]
+[def bp::environment  [classref boost::process::basic_environment bp::environment]]
+[def bp::native_environment  [classref boost::process::basic_native_environment bp::native_environment]]
+[def boost::this_process::environment [funcref boost::this_process::environment boost::this_process::environment]] 
+
+[def boost::asio::yield_context [@http://www.boost.org/doc/libs/release/doc/html/boost_asio/reference/yield_context.html boost::asio::yield_context]]
+[def boost::asio::coroutine [@http://www.boost.org/doc/libs/release/doc/html/boost_asio/reference/coroutine.html boost::asio::coroutine]]
+
 [section:tutorial Tutorial]
 
 In this section we will go step by step through the different features of
@@ -9,54 +38,106 @@ into the handbook or the reference.
 Ok, we want to start a process, so let's start with a simple process. We will
 invoke the gcc compiler to compile a simple program.
 
+With the standard library this looks like this.
+
+```
+int result = std::system("g++ main.cpp"); 
+```
+
+Which we can write exactly like this in boost.process.
+
 ```
 namespace bp = boost::process; //we will assume this for all further examples
-
-bp::child c("g++", "main.cpp");
-//bp::child c("g++ main.cpp"); works as well.
-
-assert(c.running()); //check if it runs
-//do something else
-
-c.wait();
-
-assert(c.exit_code() == 0); //check no error occured
+bp::system("g++ main.cpp");
 ```
 
-This way it allows you to start the process and to handle the result later on.
-This is most useful when the process may take some more time, as it is with a compiler.
-At any point in time you may check if the process is still running. 
+The first thing we can do, is to seperate the command and the executable into
+two parts, so it is more readable and can be built by a function.
+
+```
+auto result = bp::system("g++", "main.cpp");
+```
+
+With that sytax we still have "g++" hard-coded, so let's assume we get the string
+from an external source as `boost::filesystem::path`, we can do this too.
+
+```
+boost::filesystem::path p = "g++"; //or get it from somewhere else.
+auto result = bp::system(p, "main.cpp");
+```
+
+Now, there is a subtle difference between the two syntaxes, i.e. passing a
+single string or passing one. When passing several string, the first string will be
+interpreted as the name of a file and the rest as arguments; 
+when passing one string it will be interpreted as a command. 
+This might lead to different results, which are platform dependent. 
+
+For more details please see the [link boost_process.design.arg_cmd_style design description].
+
+[endsect]
+
+[section:launch_mode Launch functions]
+
+Given that in our example used the [funcref boost::process::system system] function, 
+our program will wait until the child process is completed. This is unwanted, 
+especially since compiling can take a while. 
+
+In order to avoid that, boost.process provides several ways to launch a process.
+Besides the already mentioned [funcref boost::process::system system] function,
+we can also use the [funcref boost::process::spawn spawn] function or the
+[classref boost::process::child child] class.
+
+The [funcref boost::process::spawn spawn] function launches a process and 
+immediately detaches so, so no handle will be returned and the process will be ignored.
+This is not what we need for compiling, but maybe we want to entertain the user,
+while compiling:
+
+```
+bp::spawn("chrome", boost_org);
+```
+
+Now for the more sensible approach for compiling, we want a detached execution. 
+To implement that, we directly call the constructor of [classref boost::process::child child].
+
+```
+bp::child c("g++", "main.cpp");
+
+while (c.child_running())
+    do_some_stuff();
+
+c.child_wait(); //wait for the process to exit   
+int result = c.child_exit_code();
+```
+
+So we launch the process, by calling the child constructor. Then we check and do other
+things while the process is running and afterwards get the exit code. The call 
+to child_wait is necessary, to obtain it and tell the operating system, that no
+one is waiting for the process anymore.
 
 [note You can also wait for a time span or a until a time point with wait_for and wait_until]
 
 [warning If you don't call wait on a child object, it will be terminated on destructor call.
-This can be avoided by calling child::detach beforehand] 
-
-
-Now let's say we have process, which does not run long and you have no work to do,
-it is much easier to use the system function.
-
-```
-auto exit_code = bp::system("mv file1 file2");
-```
-
-This is a replacement for std::system, allowing to use most of the features of this library.
-
-The third option you have is to spawn a process, i.e. start a process without having a handle
-and no option to wait for the exit. Let's say you want to start a browser.
-
-```
-bp::spawn("chrome", "www.boost.org");
-```
-
-[note You have to pass the name of the binary in the given examples, i.e. you'd need to write "gcc.exe" on windows]
+This can be avoided by calling child::detach beforehand]  
 
 [endsect]
+[section:error_handling Error]
 
-[section:io I/O]
+Until now, we have assumed that everything works out, but it is not impossible, 
+that "g++" is not present. That will cause the launch of the process to fail.
+The default behaviour of all functions is to throw an 
+[@http://en.cppreference.com/w/cpp/error/system_error std::system_error] on failure.
+As with all other functions, passing an [@http://en.cppreference.com/w/cpp/error/error_code std::error_code]
+will change the behaviour, so that instead of throwing an exception, the error will be a assigned to the error code.
 
-In the examples given above, we have only started a program, but not considered the output. The default depends on the
-system, but usually this will just write it to the output of the launching process.
+```
+std::error_code ec;
+bp::system c("g++", "main.cpp", ec);
+```
+[endsect]
+[section:io Synchronous I/O]
+
+In the examples given above, we have only started a program, but did not consider the output. 
+The default depends on the system, but usually this will just write it to the output of the launching process.
 Now for the first example, we might want to just ignore the output, which can be done by redirecting it to the null-device.
 This can be achieved this way:
 
@@ -70,12 +151,14 @@ Alternatively we can also easily redirect the output to a file:
 bp::system("g++", "main.cpp", bp::std_out > "gcc_out.log");
 ```
 
-Now, let's take an example where we want to read data. 
+Now, let's take a more visual example for reading data. 
 `nm` is a part of gcc, which reads the outline of a binary. 
 Every entry point will be put into a single line, and we will use a pipe to read it. 
 At the end and empty line is appended which we use as the indication to stop reading.
-Boost.process provides the pipestream (`pstream`, `ipstream` and `opstream`) to
-wrap around the pipe and provide the std::istream and std::ostream interface.
+Boost.process provides the pipestream ([classref boost::process::ipstream ipstream], 
+[classref boost::process::opstream opstream], [classref boost::process::pstream pstream]) to
+wrap around the pipe and provide the [@http://en.cppreference.com/w/cpp/io/basic_istream std::istream]
+and [@http://en.cppreference.com/w/cpp/io/basic_ostream std::ostream] interface.
 
 ```
 std::vector<std::string> read_outline(std::string & file)
@@ -86,7 +169,7 @@ std::vector<std::string> read_outline(std::string & file)
     std::vector<std::string> data;
     std::string line;
     
-    while (c.running() && std::getline(is, line) && !line.empty())
+    while (c.child_running() && std::getline(is, line) && !line.empty())
         data.push_back(line);
         
     return data; 
@@ -97,7 +180,23 @@ So what this does is redirect the `stdout` of the process into a pipe and we rea
 synchronously. 
 
 [warning The pipe will cause a deadlock if you try to read after nm exited]
-[note You can do the same thing with `std_err` and with `std_in` by using opstream. ]
+[note You can do the same thing with [globalname boost::process::std_err std_err] 
+and with [globalname boost::process::std_out std_out] by using [classname boost::process::opstream opstream]]
+
+Now we get the name from `nm` and we might want to demangle it, so we use input and output.
+
+```
+bp::opstream in;
+bp::ipstream out;
+
+bp::child c("c++filt", std_out > out, std_in < in);
+
+in << "_ZN5boost7process8tutorialE" << endl;
+std::string value;
+out >> value;
+
+c.child_terminate();
+```
 
 Now you might want to forward output from one process to another processes input.
 `nm` has a demangle option, but for the sake of the example, we'll use `c++file` for this.
@@ -131,13 +230,52 @@ Now this forwards the data from `nm` to `c++filt` without your process needing t
 [endsect]
 [section:async_io Asynchronous I/O]
 
-Boost.Process allows the usage of boost.asio to implement asynchronous I/O. 
-If you are familiar with boost.asio (which we highly recommend), 
-you can use `async_pipe` which is implement as an I/O-Object and can be used like `pipe` as shown above.
+Boost.process allows the usage of boost.asio to implement asynchronous I/O. 
+If you are familiar with [http://www.boost.org/doc/libs/release/libs/asio/ boost.asio] (which we highly recommend), 
+you can use [classref boost::process::async_pipe async_pipe] which is implement 
+as an I/O-Object and can be used like [classref boost::process::pipe pipe] as shown above.
 
-To make it easier, boost.process provides simpler interface for that. 
-If you use any boost.asio buffer or a std::future with the in or output property.
-You will still need to pass an instance of `boost::asio::io_service` to the launching function, unless you use `system`.
+Now we get back to our compiling example. `nm` we might analyze it line by line,
+but the compiler output will just be put into one large buffer.
+
+With [http://www.boost.org/doc/libs/release/libs/asio/ boost.asio] this is what it looks like.
+
+```
+io_service ios;
+std::vector<char> buf;
+
+bp::async_pipe ap(ios);
+
+child c("g++", "main.cpp", bp::std_out > ap);
+
+asio_async_read("g++", "main.cpp", asio_buffer(buf));
+
+ios.run();
+c.wait();
+int result = c.exit_code();
+```
+
+To make it easier, boost.process provides simpler interface for that, so that the buffer can be passed directly, 
+provided we also pass the io_service. 
+
+```
+io_service ios;
+std::vector<char> buf;
+
+bp::async_pipe ap(ios);
+
+child c("g++", "main.cpp", bp::std_out > asio_buffer(buf), ios);
+
+ios.run();
+c.wait();
+int result = c.exit_code();
+```
+
+[note Passing an instance of io_service to the launching function automatically cause it to wait asynchronously for the exit, so no call of 
+[memberref boost::process::child::wait wait] is needed]
+ 
+To make it even easier, you can use [@http://en.cppreference.com/w/cpp/thread/future std::future] for asynchronous operations
+(you will still need to pass a reference to a io_service) to the launching function, unless you use `system`.
 
 Now we will revisit our first example and read the compiler output asynchronously:
 
@@ -147,20 +285,118 @@ boost::asio::io_service ios;
 std::future<std::string> data;
 
 child c("g++", "main.cpp", //set the input
-        "-o",  "main.exe" //set the output file 
-        std_in.close(), 
-        std_out > null, //so it can be written without anything
-        std_err > data, 
+        bp::std_in.close(), 
+        bp::std_out > bp::null, //so it can be written without anything
+        bp::std_err > bp::data, 
         ios);
 
 
 ios.run(); //this will actually block until the compiler is finished
 
-cout << fut.get() << endl;
+auto err =  fut.get();
 ```
+
+[endsect]
+[section:group Groups]
+
+When launching several processes, processes can be grouped together. 
+This will also apply for a child process, that launches other processes. E.g. 
+if you call `make` which launches other processes and call child_terminate on it, 
+it will not terminate all the child processes of the child.
+
+```
+bp::group g;
+bp::child c1("foo", g);
+bp::child c2("bar", g);
+g.group_terminate();
+```
+
+[endsect]
+[section:env Environment]
+
+This library provides access to the environment of the current process and allows
+setting it for the child process.
+
+```
+//get a handle to the current environment
+auto env = boost::this_process::environment();
+//add a variable to the current environment
+env["VALUE_1"] = "foo";
+
+//copy it into a environment seperate to the one of this process
+bp::environment env_ = env;  
+//add a value only to the new env
+env_["VALUE_2"] = "bar";
+
+//launch a process with `env_`
+bp::system("stuff", env_); 
+```
+
+A more convenient way to modify the environment for the child is the 
+[globalname boost::process::env env] property.
 
 [endsect]
 
 
+[section:coro Coroutines]
+[section:stackless Stackless Coroutines]
+
+Stackless coroutines can be implemented rather easily, so there is no need to
+implement extra functionality concerning boost.process. 
+
+```
+struct stackless_t : boost::asio::coroutine
+{
+    bp::child c;
+
+    boost::asio::io_service & ios;
+    
+    stackless_t(boost::asio::io_service & ios) : ios(ios) {}
+    
+    void operator()(
+            boost::system::error_code ec = boost::system::error_code(),
+            std::size_t n = 0)
+    {
+        if (!ec) reenter (this)
+        {
+             c = bp::child("my_program", ios, 
+                    bp::on_exit=
+                    [this](int, const std::error_code&)
+                    {
+                        (*this)(); //this is the reentry for the coroutine
+                    });
+            yield; //yield the thing.
+        }
+    }
+};
+///post the coroutine to a io-service and run it
+int main()
+{
+    boost::asio::io_service ios;
+    ios.post(stackless_t(ios));
+    ios.run();
+    return 0;
+}
+```
+
+[endsect]
+
+[section:stackful Stackful Coroutines]
+
+For stackful coroutines this is not as simple, because the members of 
+`boost::asio::yield_context` are not documented. Therefore, boost.process 
+provides a simple way to use stackful coroutines, which looks as follows:
+
+```
+void cr(boost::asio::yield_context yield_)
+{
+    bp::system("my-program", yield_);
+}
+```
+
+This will automatically suspend the coroutine until the child process is finished.
+
+[endsect]
+[endsect]
 
 [endsect]

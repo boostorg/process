@@ -41,17 +41,38 @@ public:
      * \note This is the handle on the system, not the boost.asio class.
      *
      */
-    typedef platform_specific native_handle;
+    typedef platform_specific native_handle_type;
+    /** Typedef for the handle representation of boost.asio.
+     *
+     */
+    typedef platform_specific handle_type;
 
     /** Construct a new async_pipe, does automatically open the pipe.
+     * Initializes source and sink with the same io_service.
      * @note Windows creates a named pipe here, where the name is automatically generated.
      */
     inline async_pipe(boost::asio::io_service & ios);
 
+    /** Construct a new async_pipe, does automatically open the pipe.
+     * @note Windows creates a named pipe here, where the name is automatically generated.
+     */
+    inline async_pipe(boost::asio::io_service & ios_source,
+                      boost::asio::io_service & ios_sink);
+
     /** Construct a new async_pipe, does automatically open.
+     * Initializes source and sink with the same io_service.
+     *
      * @note Windows restricts possible names.
      */
     inline async_pipe(boost::asio::io_service & ios, const std::string & name);
+
+
+    /** Construct a new async_pipe, does automatically open.
+     *
+     * @note Windows restricts possible names.
+     */
+    inline async_pipe(boost::asio::io_service & ios_source,
+                      boost::asio::io_service & ios_sink, const std::string & name);
 
     /** Copy-Constructor of the async pipe.
      * @note Windows requires a named pipe for this, if a the wrong type is used an exception is thrown.
@@ -69,6 +90,16 @@ public:
      */
     template<class CharT, class Traits = std::char_traits<CharT>>
     explicit async_pipe(boost::asio::io_service & ios, const basic_pipe<CharT, Traits> & p);
+
+    /** Construct the async-pipe from a pipe, with two different io_service objects.
+     * @note Windows requires a named pipe for this, if a the wrong type is used an exception is thrown.
+     *
+     */
+    template<class CharT, class Traits = std::char_traits<CharT>>
+    explicit async_pipe(boost::asio::io_service & ios_source,
+                        boost::asio::io_service & ios_sink,
+                        const basic_pipe<CharT, Traits> & p);
+
 
     /** Assign a basic_pipe.
      * @note Windows requires a named pipe for this, if a the wrong type is used an exception is thrown.
@@ -109,14 +140,14 @@ public:
      */
     void async_close();
 
-    /* Read some data from the handle.
+    /** Read some data from the handle.
 
      * See the boost.asio documentation for more details.
      */
     template<typename MutableBufferSequence>
     std::size_t read_some(const MutableBufferSequence & buffers);
 
-    /* Write some data to the handle.
+    /** Write some data to the handle.
 
      * See the boost.asio documentation for more details.
      */
@@ -128,28 +159,52 @@ public:
     /** Get the native handle of the source. */
     native_handle native_sink  () const {return const_cast<boost::asio::windows::stream_handle&>(_sink  ).native();}
 
-    /* Start an asynchronous read.
+    /** Start an asynchronous read.
 
      * See the boost.asio documentation for more details.
      */
     template<typename MutableBufferSequence,
              typename ReadHandler>
-    void async_read_some(
+    BOOST_ASIO_INITFN_RESULT_TYPE(
+          ReadHandler, void(boost::system::error_code, std::size_t))
+      async_read_some(
         const MutableBufferSequence & buffers,
-              ReadHandler handler);
+              ReadHandler &&handler);
 
-    /* Start an asynchronous write.
+    /** Start an asynchronous write.
 
      * See the boost.asio documentation for more details.
      */
     template<typename ConstBufferSequence,
              typename WriteHandler>
-    void async_write_some(
+    BOOST_ASIO_INITFN_RESULT_TYPE(
+              WriteHandler, void(boost::system::error_code, std::size_t))
+      async_write_some(
         const ConstBufferSequence & buffers,
-        WriteHandler handler);
+        WriteHandler && handler);
 
-    /** Get a reference to the io_service. */
-    boost::asio::io_service &get_io_service() {return _sink.get_io_service();}
+    ///Get the asio handle of the pipe sink.
+    const handle_type & sink  () const;
+    ///Get the asio handle of the pipe source.
+    const handle_type & source() const;
+
+    ///Steal, i.e. move, the source out of this class.
+    handle_type steal_source();
+    ///Steal, i.e. move the sink out of this class.
+    handle_type steal_sink();
+
+    ///Steal, i.e. move, the source out of this class and change the io_service.
+    handle_type steal_source(::boost::asio::io_service& ios);
+    ///Steal, i.e. move, the sink out of this class and change the io_service.
+       handle_type steal_sink  (::boost::asio::io_service& ios);
+       ///Clone the source.
+    handle_type clone_source() const;
+    ///Clone the sink.
+    handle_type clone_sink()   const;
+    ///Clone the source and replace the io_service.
+    handle_type clone_source(::boost::asio::io_service& ios) const;
+    ///Clone the sink and replace the io_service.
+       handle_type clone_sink  (::boost::asio::io_service& ios) const
 };
 
 #else

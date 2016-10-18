@@ -27,6 +27,7 @@
 
 namespace boost {
 
+///The main namespace of boost.process.
 namespace process {
 
 template<typename ...Args>
@@ -53,10 +54,12 @@ class child
      */
     explicit child(pid_t & pid) : _child_handle(pid) {};
 
-    /** Move-Constructor. */
+    /** Move-Constructor.*/
     child(child && lhs);
 
-    /** Construct a child from a property list and launch it */
+    /** Construct a child from a property list and launch it
+     * The standard version is to create a subprocess, which will spawn the process.
+     */
     template<typename ...Args>
     explicit child(Args&&...args);
 
@@ -76,7 +79,7 @@ class child
     /** Destructor.
      * @attention Will call terminate (without warnign) when the child was neither joined nor detached.
      */
-    ~child():
+    ~child();
 
     /** Get the native handle for the child process. */
     native_handle_t native_handle() const;

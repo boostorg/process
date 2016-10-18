@@ -23,12 +23,10 @@ struct on_exit_
     api::on_exit_ operator()(const std::function<void(int, const std::error_code&)> & f) const {return f;}
 };
 
-
-constexpr static on_exit_ on_exit;
-
 }
 
-using ::boost::process::detail::on_exit;
+constexpr static ::boost::process::detail::on_exit_ on_exit{};
+
 
 }}
 #endif /* INCLUDE_BOOST_PROCESS_WINDOWS_ON_EXIT_HPP_ */

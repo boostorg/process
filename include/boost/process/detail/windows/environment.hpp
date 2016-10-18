@@ -15,7 +15,7 @@
 #include <boost/detail/winapi/get_current_process.hpp>
 #include <boost/detail/winapi/get_current_process_id.hpp>
 #include <algorithm>
-
+#include <boost/process/locale.hpp>
 
 namespace boost { namespace process { namespace detail { namespace windows {
 
@@ -63,10 +63,37 @@ inline auto native_environment_impl<Char>::get(const pointer_type id) -> string_
     auto size = boost::detail::winapi::get_environment_variable(id, buf, sizeof(buf));
     if (size == 0) //failed
     {
-        auto err =  boost::detail::winapi::GetLastError();
-        if (err == boost::detail::winapi::ERROR_ENVVAR_NOT_FOUND_)//well, then we consider that an empty value
+        auto err =  ::boost::detail::winapi::GetLastError();
+        if (err == ::boost::detail::winapi::ERROR_ENVVAR_NOT_FOUND_)//well, then we consider that an empty value
             return "";
+        else
+            throw std::system_error("GetEnvironmentVariable() failed",
+                    std::error_code(err, std::system_category()));
+    }
+
+    if (size == sizeof(buf)) //the return size gives the size without the null, so I know this went wrong
+    {
+        /*limit defined here https://msdn.microsoft.com/en-us/library/windows/desktop/ms683188(v=vs.85).aspx
+         * but I used 32768 so it is a multiple of 4096.
+         */
+        constexpr static std::size_t max_size = 32768;
         //Handle variables longer then buf.
+        std::size_t buf_size = sizeof(buf);
+        while (buf_size <= max_size)
+        {
+            std::vector<Char> buf(buf_size);
+            auto size = boost::detail::winapi::get_environment_variable(id, buf.data(), buf.size());
+
+            if (size == buf_size) //buffer to small
+                buf_size *= 2;
+            else if (size == 0)
+                ::boost::process::detail::throw_last_error("GetEnvironmentVariable() failed");
+            else
+                return std::basic_string<Char>(
+                        buf.data(), buf.data()+ size + 1);
+
+        }
+
     }
     return std::basic_string<Char>(buf, buf+size+1);
 }
@@ -119,6 +146,9 @@ public:
     using pointer_type = const char_type*;
     using string_type = std::basic_string<char_type>;
     using native_handle_type = pointer_type;
+
+    std::size_t size() const { return _data.size();}
+
     void reload()
     {
         _env_arr = _load_var(_data.data());
@@ -133,22 +163,50 @@ public:
     void        set(const string_type & id, const string_type & value);
     void      reset(const string_type & id);
 
-    basic_environment_impl(const native_environment_impl<Char> & nei);
+    inline basic_environment_impl(const native_environment_impl<Char> & nei);
     basic_environment_impl() = default;
     basic_environment_impl(const basic_environment_impl& rhs)
         : _data(rhs._data)
     {
-
     }
-    basic_environment_impl(basic_environment_impl && ) = default;
+    basic_environment_impl(basic_environment_impl && rhs)
+        :    _data(std::move(rhs._data)),
+            _env_arr(std::move(rhs._env_arr)),
+            _env_impl(_env_arr.data())
+    {
+    }
+    basic_environment_impl &operator=(basic_environment_impl && rhs)
+    {
+        _data = std::move(rhs._data);
+        //reload();
+        _env_arr  = std::move(rhs._env_arr);
+        _env_impl = _env_arr.data();
+
+        return *this;
+    }
     basic_environment_impl & operator=(const basic_environment_impl& rhs)
     {
         _data = rhs._data;
+        reload();
+        return *this;
+    }
+
+    template<typename CharR>
+    explicit inline  basic_environment_impl(
+                const basic_environment_impl<CharR>& rhs,
+                const ::boost::process::codecvt_type & cv = ::boost::process::codecvt())
+        : _data(::boost::process::detail::convert(rhs._data, cv))
+    {
+    }
+
+    template<typename CharR>
+    basic_environment_impl & operator=(const basic_environment_impl<CharR>& rhs)
+    {
+        _data = ::boost::process::detail::convert(rhs._data);
         _env_arr = _load_var(&*_data.begin());
         _env_impl = &*_env_arr.begin();
         return *this;
     }
-    basic_environment_impl & operator=(basic_environment_impl && ) = default;
 
     Char ** _env_impl = &*_env_arr.begin();
 
@@ -161,13 +219,13 @@ basic_environment_impl<Char>::basic_environment_impl(const native_environment_im
 {
     auto beg = nei.native_handle();
     auto p   = beg;
-    while ((*p != null_char<Char>()) || (*(p+1) != null_char<Char>()))
+    while ((*p != null_char<Char>()) || (*(p+1) !=  null_char<Char>()))
         p++;
-
     p++; //pointing to the second nullchar
     p++; //to get the pointer behing the second nullchar, so it's end.
 
     this->_data.assign(beg, p);
+    this->reload();
 }
 
 
@@ -212,13 +270,18 @@ inline void basic_environment_impl<Char>::set(const string_type &id, const strin
 template<typename Char>
 inline void  basic_environment_impl<Char>::reset(const string_type &id)
 {
+    //ok, we need to check the size of data first
+    if (id.size() >= _data.size()) //ok, so it's impossible id is in there.
+        return;
+
+    //check if it's the first one, spares us the search.
     if (std::equal(id.begin(), id.end(), _data.begin()) && (_data[id.size()] == '='))
     {
-        auto beg = _data.begin() + _data.size() + 1;
+        auto beg = _data.begin();
         auto end = beg;
 
         while (*end != '\0')
-            end++;
+           end++;
 
         end++; //to point behind the last null-char
 

@@ -70,9 +70,7 @@ private:
 
 
 
-constexpr boost::process::detail::make_handler_t<on_fork_error_  >   on_fork_error;
-constexpr boost::process::detail::make_handler_t<on_exec_setup_  >   on_exec_setup;
-constexpr boost::process::detail::make_handler_t<on_exec_error_     >   on_exec_error;
+
 
 }}}}
 

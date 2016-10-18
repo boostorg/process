@@ -39,25 +39,42 @@ class async_pipe
     ::boost::asio::windows::stream_handle _source;
     ::boost::asio::windows::stream_handle _sink  ;
 public:
-    typedef ::boost::detail::winapi::HANDLE_ native_handle;
+    typedef ::boost::detail::winapi::HANDLE_ native_handle_type;
+    typedef ::boost::asio::windows::stream_handle   handle_type;
 
-    inline async_pipe(boost::asio::io_service & ios, const std::string & name = make_pipe_name());
+    inline async_pipe(boost::asio::io_service & ios,
+                      const std::string & name = make_pipe_name())
+                    : async_pipe(ios, ios, name) {}
 
-    async_pipe(async_pipe&& lhs)  : _source(std::move(lhs._source)), _sink(std::move(lhs._sink))
+    inline async_pipe(boost::asio::io_service & ios_source,
+                      boost::asio::io_service & ios_sink,
+                      const std::string & name = make_pipe_name());
+
+    inline async_pipe(const async_pipe& rhs);
+    async_pipe(async_pipe&& rhs)  : _source(std::move(rhs._source)), _sink(std::move(rhs._sink))
     {
-        lhs._source.assign (::boost::detail::winapi::INVALID_HANDLE_VALUE_);
-        lhs._sink  .assign (::boost::detail::winapi::INVALID_HANDLE_VALUE_);
+        rhs._source.assign (::boost::detail::winapi::INVALID_HANDLE_VALUE_);
+        rhs._sink  .assign (::boost::detail::winapi::INVALID_HANDLE_VALUE_);
     }
+    template<class CharT, class Traits = std::char_traits<CharT>>
+    explicit async_pipe(::boost::asio::io_service & ios_source,
+                        ::boost::asio::io_service & ios_sink,
+                         const basic_pipe<CharT, Traits> & p)
+            : _source(ios_source, p.native_source()), _sink(ios_sink, p.native_sink())
+    {
+    }
+
     template<class CharT, class Traits = std::char_traits<CharT>>
     explicit async_pipe(boost::asio::io_service & ios, const basic_pipe<CharT, Traits> & p)
-            : _source(ios, p.native_source()), _sink(ios, p.native_sink())
+            : async_pipe(ios, ios, p)
     {
     }
+
     template<class CharT, class Traits = std::char_traits<CharT>>
     inline async_pipe& operator=(const basic_pipe<CharT, Traits>& p);
-    inline async_pipe& operator=(const async_pipe& lhs);
+    inline async_pipe& operator=(const async_pipe& rhs);
 
-    inline async_pipe& operator=(async_pipe&& lhs);
+    inline async_pipe& operator=(async_pipe&& rhs);
 
     ~async_pipe()
     {
@@ -88,7 +105,7 @@ public:
         if (_source.is_open())
         {
             _source.close();
-            _sink.assign(::boost::detail::winapi::INVALID_HANDLE_VALUE_);
+            _source.assign(::boost::detail::winapi::INVALID_HANDLE_VALUE_);
         }
     }
     void close(boost::system::error_code & ec)
@@ -98,7 +115,6 @@ public:
         if (_source.is_open())
             _source.close(ec);
     }
-
 
     bool is_open() const
     {
@@ -123,63 +139,98 @@ public:
         return _sink.write_some(buffers);
     }
 
-    native_handle native_source() const {return const_cast<boost::asio::windows::stream_handle&>(_source).native();}
-    native_handle native_sink  () const {return const_cast<boost::asio::windows::stream_handle&>(_sink  ).native();}
-
+    native_handle_type native_source() const {return const_cast<boost::asio::windows::stream_handle&>(_source).native();}
+    native_handle_type native_sink  () const {return const_cast<boost::asio::windows::stream_handle&>(_sink  ).native();}
 
     template<typename MutableBufferSequence,
              typename ReadHandler>
-    void async_read_some(
+    BOOST_ASIO_INITFN_RESULT_TYPE(
+          ReadHandler, void(boost::system::error_code, std::size_t))
+      async_read_some(
         const MutableBufferSequence & buffers,
-              ReadHandler handler)
+              ReadHandler &&handler)
     {
-        _source.async_read_some(buffers, handler);
+        _source.async_read_some(buffers, std::forward<ReadHandler>(handler));
     }
 
     template<typename ConstBufferSequence,
              typename WriteHandler>
-    void async_write_some(
+    BOOST_ASIO_INITFN_RESULT_TYPE(
+              WriteHandler, void(boost::system::error_code, std::size_t))
+      async_write_some(
         const ConstBufferSequence & buffers,
-        WriteHandler handler)
+        WriteHandler && handler)
     {
-        _sink.async_write_some(buffers, handler);
+        _sink.async_write_some(buffers,  std::forward<WriteHandler>(handler));
     }
-    boost::asio::io_service &get_io_service() {return _sink.get_io_service();}
+
+    const handle_type & sink  () const {return _sink;}
+    const handle_type & source() const {return _source;}
+
+    handle_type steal_source() { return steal_source(_source.get_io_service()); }
+    handle_type steal_sink()   { return steal_sink(_sink.get_io_service()); }
+
+    handle_type steal_source(::boost::asio::io_service& ios)
+    {
+        ::boost::asio::windows::stream_handle stolen(ios, _source.native_handle());
+        _source.assign(::boost::detail::winapi::INVALID_HANDLE_VALUE_);
+        return stolen;
+    }
+    handle_type steal_sink  (::boost::asio::io_service& ios)
+    {
+        ::boost::asio::windows::stream_handle stolen(ios, _sink.native_handle());
+        _sink.assign(::boost::detail::winapi::INVALID_HANDLE_VALUE_);
+        return stolen;
+    }
+
+    handle_type clone_source() const
+    {
+        return clone_source(const_cast<handle_type&>(_source).get_io_service());
+    }
+    handle_type clone_sink()   const
+    {
+        return clone_sink(const_cast<handle_type&>(_sink).get_io_service());
+    }
+
+    handle_type clone_source(::boost::asio::io_service& ios) const
+    {
+        auto proc = ::boost::detail::winapi::GetCurrentProcess();
+
+        ::boost::detail::winapi::HANDLE_ source;
+        auto source_in = const_cast<handle_type&>(_source).native();
+        if (source_in == ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
+            source = ::boost::detail::winapi::INVALID_HANDLE_VALUE_;
+        else if (!::boost::detail::winapi::DuplicateHandle(
+                proc, source_in, proc, &source, 0,
+                static_cast<::boost::detail::winapi::BOOL_>(true),
+                 ::boost::detail::winapi::DUPLICATE_SAME_ACCESS_))
+            throw_last_error("Duplicate Pipe Failed");
+
+        return ::boost::asio::windows::stream_handle(ios, source);
+    }
+    handle_type clone_sink  (::boost::asio::io_service& ios) const
+    {
+        auto proc = ::boost::detail::winapi::GetCurrentProcess();
+
+        ::boost::detail::winapi::HANDLE_ sink;
+        auto sink_in = const_cast<handle_type&>(_sink).native();
+        if (sink_in == ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
+            sink = ::boost::detail::winapi::INVALID_HANDLE_VALUE_;
+        else if (!::boost::detail::winapi::DuplicateHandle(
+                proc, sink_in, proc, &sink, 0,
+                static_cast<::boost::detail::winapi::BOOL_>(true),
+                 ::boost::detail::winapi::DUPLICATE_SAME_ACCESS_))
+            throw_last_error("Duplicate Pipe Failed");
+
+        return ::boost::asio::windows::stream_handle(ios, sink);
+    }
 };
 
 
-async_pipe::async_pipe(boost::asio::io_service & ios, const std::string & name) : _source(ios), _sink(ios)
-{
-    static constexpr int OPEN_EXISTING_         = 3; //temporary.
-    static constexpr int FILE_FLAG_OVERLAPPED_  = 0x40000000; //temporary
-    //static constexpr int FILE_ATTRIBUTE_NORMAL_ = 0x00000080; //temporary
 
-    ::boost::detail::winapi::HANDLE_ source = ::boost::detail::winapi::create_named_pipe(
-            name.c_str(),
-            ::boost::detail::winapi::PIPE_ACCESS_INBOUND_
-            | FILE_FLAG_OVERLAPPED_, //write flag
-            0, 1, 8192, 8192, 0, nullptr);
-
-
-    if (source == boost::detail::winapi::INVALID_HANDLE_VALUE_)
-        ::boost::process::detail::throw_last_error("create_named_pipe(" + name + ") failed");
-
-    _source.assign(source);
-
-    ::boost::detail::winapi::HANDLE_ sink = boost::detail::winapi::create_file(
-            name.c_str(),
-            ::boost::detail::winapi::GENERIC_WRITE_, 0, nullptr,
-            OPEN_EXISTING_,
-            FILE_FLAG_OVERLAPPED_, //to allow read
-            nullptr);
-
-    if (sink == ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
-        ::boost::process::detail::throw_last_error("create_file() failed");
-
-    _sink.assign(sink);
-}
-
-async_pipe& async_pipe::operator=(const async_pipe & p)
+async_pipe::async_pipe(const async_pipe& p)  :
+    _source(const_cast<handle_type&>(p._source).get_io_service()),
+    _sink  (const_cast<handle_type&>(p._sink).get_io_service())
 {
     auto proc = ::boost::detail::winapi::GetCurrentProcess();
 
@@ -187,8 +238,8 @@ async_pipe& async_pipe::operator=(const async_pipe & p)
     ::boost::detail::winapi::HANDLE_ sink;
 
     //cannot get the handle from a const object.
-    auto source_in = const_cast<::boost::asio::windows::stream_handle &>(p._source).native();
-    auto sink_in   = const_cast<::boost::asio::windows::stream_handle &>(p._sink).native();
+    auto source_in = const_cast<handle_type&>(p._source).native();
+    auto sink_in   = const_cast<handle_type&>(p._sink).native();
 
     if (source_in == ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
         source = ::boost::detail::winapi::INVALID_HANDLE_VALUE_;
@@ -208,11 +259,75 @@ async_pipe& async_pipe::operator=(const async_pipe & p)
 
     _source.assign(source);
     _sink.  assign(sink);
+}
+
+
+async_pipe::async_pipe(boost::asio::io_service & ios_source,
+                       boost::asio::io_service & ios_sink,
+                       const std::string & name) : _source(ios_source), _sink(ios_sink)
+{
+    static constexpr int FILE_FLAG_OVERLAPPED_  = 0x40000000; //temporary
+
+    ::boost::detail::winapi::HANDLE_ source = ::boost::detail::winapi::create_named_pipe(
+            name.c_str(),
+            ::boost::detail::winapi::PIPE_ACCESS_INBOUND_
+            | FILE_FLAG_OVERLAPPED_, //write flag
+            0, 1, 8192, 8192, 0, nullptr);
+
+
+    if (source == boost::detail::winapi::INVALID_HANDLE_VALUE_)
+        ::boost::process::detail::throw_last_error("create_named_pipe(" + name + ") failed");
+
+    _source.assign(source);
+
+    ::boost::detail::winapi::HANDLE_ sink = boost::detail::winapi::create_file(
+            name.c_str(),
+            ::boost::detail::winapi::GENERIC_WRITE_, 0, nullptr,
+            ::boost::detail::winapi::OPEN_EXISTING_,
+            FILE_FLAG_OVERLAPPED_, //to allow read
+            nullptr);
+
+    if (sink == ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
+        ::boost::process::detail::throw_last_error("create_file() failed");
+
+    _sink.assign(sink);
+}
+
+async_pipe& async_pipe::operator=(const async_pipe & p)
+{
+    auto proc = ::boost::detail::winapi::GetCurrentProcess();
+
+    ::boost::detail::winapi::HANDLE_ source;
+    ::boost::detail::winapi::HANDLE_ sink;
+
+    //cannot get the handle from a const object.
+    auto &source_in = const_cast<::boost::asio::windows::stream_handle &>(p._source);
+    auto &sink_in   = const_cast<::boost::asio::windows::stream_handle &>(p._sink);
+
+    if (source_in.native() == ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
+        source = ::boost::detail::winapi::INVALID_HANDLE_VALUE_;
+    else if (!::boost::detail::winapi::DuplicateHandle(
+            proc, source_in.native(), proc, &source, 0,
+            static_cast<::boost::detail::winapi::BOOL_>(true),
+             ::boost::detail::winapi::DUPLICATE_SAME_ACCESS_))
+        throw_last_error("Duplicate Pipe Failed");
+
+    if (sink_in.native()   == ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
+        sink = ::boost::detail::winapi::INVALID_HANDLE_VALUE_;
+    else if (!::boost::detail::winapi::DuplicateHandle(
+            proc, sink_in.native(), proc, &sink, 0,
+            static_cast<::boost::detail::winapi::BOOL_>(true),
+             ::boost::detail::winapi::DUPLICATE_SAME_ACCESS_))
+        throw_last_error("Duplicate Pipe Failed");
+
+    //so we also assign the io_service
+    _source = ::boost::asio::windows::stream_handle(source_in.get_io_service(), source);
+    _sink = ::boost::asio::windows::stream_handle(source_in.get_io_service(), sink);
 
     return *this;
 }
 
-async_pipe& async_pipe::operator=(async_pipe && lhs)
+async_pipe& async_pipe::operator=(async_pipe && rhs)
 {
     if (_source.native_handle() == ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
         ::boost::detail::winapi::CloseHandle(_source.native());
@@ -220,10 +335,10 @@ async_pipe& async_pipe::operator=(async_pipe && lhs)
     if (_sink.native_handle()   == ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
         ::boost::detail::winapi::CloseHandle(_sink.native());
 
-    _source.assign(lhs._source.native_handle());
-    _sink  .assign(lhs._sink  .native_handle());
-    lhs._source.assign(::boost::detail::winapi::INVALID_HANDLE_VALUE_);
-    lhs._sink  .assign(::boost::detail::winapi::INVALID_HANDLE_VALUE_);
+    _source.assign(rhs._source.native_handle());
+    _sink  .assign(rhs._sink  .native_handle());
+    rhs._source.assign(::boost::detail::winapi::INVALID_HANDLE_VALUE_);
+    rhs._sink  .assign(::boost::detail::winapi::INVALID_HANDLE_VALUE_);
     return *this;
 }
 
