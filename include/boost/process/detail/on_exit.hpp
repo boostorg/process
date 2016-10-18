@@ -25,6 +25,7 @@ struct on_exit_
 
 }
 
+constexpr static ::boost::process::detail::on_exit_ on_exit{};
 
 
 }}

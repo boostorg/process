@@ -26,8 +26,8 @@ namespace boost {
 \endxmlonly
   */
 
-#ifndef BOOST_PROCESS_DETAIL_ASYNC_HPP_
-#define BOOST_PROCESS_DETAIL_ASYNC_HPP_
+#ifndef BOOST_PROCESS_ASYNC_HPP_
+#define BOOST_PROCESS_ASYNC_HPP_
 
 #include <boost/process/detail/traits.hpp>
 #include <boost/process/detail/on_exit.hpp>
@@ -88,6 +88,8 @@ struct initializer_builder<async_tag>
 
 using ::boost::asio::buffer;
 
+
+#if defined(BOOST_PROCESS_DOXYGEN)
 /** When an io_service is passed, the on_exit property can be used, to be notified
     when the child process exits.
 
@@ -110,7 +112,7 @@ spawn("ls", on_exit=[](int exit, const std::error_code& ec_in){});
 
  */
 constexpr static ::boost::process::detail::on_exit_ on_exit{};
-
+#endif
 
 }}
 
