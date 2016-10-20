@@ -154,8 +154,8 @@ public:
     const handle_type & sink  () const & {return _sink;}
     const handle_type & source() const & {return _source;}
 
-    handle_type && source()&&  { return steal_source(_source.get_io_service()); }
-    handle_type && sink()  &&  { return steal_sink(_sink.get_io_service()); }
+    handle_type && source()&&  { return std::move(_sink); }
+    handle_type && sink()  &&  { return std::move(_source); }
 
     handle_type source(::boost::asio::io_service& ios) &&
     {
