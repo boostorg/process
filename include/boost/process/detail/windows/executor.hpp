@@ -175,13 +175,13 @@ public:
 
     child operator()()
     {
-        on_setup_t on_setup(*this);
-        boost::fusion::for_each(seq, on_setup);
+        on_setup_t on_setup_fn(*this);
+        boost::fusion::for_each(seq, on_setup_fn);
 
         if (_ec)
         {
-            on_error_t on_error(*this, _ec);
-            boost::fusion::for_each(seq, on_error);
+            on_error_t on_error_fn(*this, _ec);
+            boost::fusion::for_each(seq, on_error_fn);
             return child();
         }
 
@@ -203,8 +203,8 @@ public:
         if (err_code != 0)
         {
             _ec.clear();
-            on_success_t on_success(*this);
-            boost::fusion::for_each(seq, on_success);
+            on_success_t on_success_fn(*this);
+            boost::fusion::for_each(seq, on_success_fn);
         }
         else
             set_error(::boost::process::detail::get_last_error(),
@@ -212,8 +212,8 @@ public:
 
         if ( _ec)
         {
-            on_error_t on_error(*this, _ec);
-            boost::fusion::for_each(seq, on_error);
+            on_error_t on_err(*this, _ec);
+            boost::fusion::for_each(seq, on_err);
             return child();
         }
         else
