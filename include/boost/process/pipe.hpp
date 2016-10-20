@@ -183,7 +183,9 @@ struct basic_pipebuf : std::basic_streambuf<CharT, Traits>
 
 
         auto len = &_read.back() - this->egptr() ;
-        auto res = _pipe.read(this->egptr(), len);
+        auto res = _pipe.read(
+                        this->egptr(),
+                        static_cast<typename pipe_type::int_type>(len));
         if (res == 0)
             return traits_type::eof();
 
@@ -215,7 +217,8 @@ private:
             return false;
 
         auto base = this->pbase();
-        auto wrt = _pipe.write(base, this->pptr() - base);
+        auto wrt = _pipe.write(base,
+                static_cast<typename pipe_type::int_type>(this->pptr() - base));
         std::ptrdiff_t diff = this->pptr() - base;
 
         if (wrt < diff)

@@ -255,7 +255,7 @@ inline void basic_environment_impl<Char>::set(const string_type &id, const strin
 {
     reset(id);
 
-    std::vector<char> insertion;
+    std::vector<Char> insertion;
 
     insertion.insert(insertion.end(), id.begin(),    id.end());
     insertion.push_back('=');
