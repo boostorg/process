@@ -51,7 +51,7 @@ namespace bp = boost::process; //we will assume this for all further examples
 bp::system("g++ main.cpp");
 ```
 
-The first thing we can do, is to seperate the command and the executable into
+The first thing we can do, is to separate the command and the executable into
 two parts, so it is more readable and can be built by a function.
 
 ```

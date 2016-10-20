@@ -198,10 +198,12 @@ struct basic_pipebuf : std::basic_streambuf<CharT, Traits>
     void pipe(pipe_type&& p)      {_pipe = std::move(p); }
     ///Set the pipe of the streambuf.
     void pipe(const pipe_type& p) {_pipe = p; }
-    ///Get a const reference of the pipe.
-    const pipe_type &pipe() const {return _pipe;}
-    ///Get a reference of the pipe. \note Is a reference so it can be moved.
-    pipe_type       &pipe()       {return _pipe;}
+    ///Get a reference to the pipe.
+    pipe_type &      pipe() &       {return _pipe;}
+    ///Get a const reference to the pipe.
+    const pipe_type &pipe() const & {return _pipe;}
+    ///Get a rvalue reference to the pipe. Qualified as rvalue.
+    pipe_type &&     pipe()  &&     {return std::move(_pipe);}
 private:
     pipe_type _pipe;
     std::vector<char_type> _write;
@@ -293,10 +295,12 @@ public:
     void pipe(pipe_type&& p)      {_buf.pipe(std::move(p)); }
     ///Set the pipe of the streambuf.
     void pipe(const pipe_type& p) {_buf.pipe(p); }
-    ///Get a const reference of the pipe.
-    const pipe_type &pipe() const {return _buf.pipe();}
-    ///Get a reference of the pipe. \note Is a reference so it can be moved.
-    pipe_type       &pipe()       {return _buf.pipe();}
+    ///Get a reference to the pipe.
+    pipe_type &      pipe() &       {return _buf.pipe();}
+    ///Get a const reference to the pipe.
+    const pipe_type &pipe() const & {return _buf.pipe();}
+    ///Get a rvalue reference to the pipe. Qualified as rvalue.
+    pipe_type &&     pipe()  &&     {return std::move(_buf).pipe();}
 };
 
 typedef basic_ipstream<char>     ipstream;
@@ -365,10 +369,12 @@ public:
     void pipe(pipe_type&& p)      {_buf.pipe(std::move(p)); }
     ///Set the pipe of the streambuf.
     void pipe(const pipe_type& p) {_buf.pipe(p); }
-    ///Get a const reference of the pipe.
-    const pipe_type &pipe() const {return _buf.pipe();}
-    ///Get a reference of the pipe. \note Is a reference so it can be moved.
-    pipe_type       &pipe()       {return _buf.pipe();}
+    ///Get a reference to the pipe.
+    pipe_type &      pipe() &       {return _buf.pipe();}
+    ///Get a const reference to the pipe.
+    const pipe_type &pipe() const & {return _buf.pipe();}
+    ///Get a rvalue reference to the pipe. Qualified as rvalue.
+    pipe_type &&     pipe()  &&     {return std::move(_buf).pipe();}
 };
 
 typedef basic_opstream<char>     opstream;
@@ -438,10 +444,12 @@ public:
     void pipe(pipe_type&& p)      {_buf.pipe(std::move(p)); }
     ///Set the pipe of the streambuf.
     void pipe(const pipe_type& p) {_buf.pipe(p); }
-    ///Get a const reference of the pipe.
-    const pipe_type &pipe() const {return _buf.pipe();}
-    ///Get a reference of the pipe. \note Is a reference so it can be moved.
-    pipe_type       &pipe()       {return _buf.pipe();}
+    ///Get a reference to the pipe.
+    pipe_type &      pipe() &       {return _buf.pipe();}
+    ///Get a const reference to the pipe.
+    const pipe_type &pipe() const & {return _buf.pipe();}
+    ///Get a rvalue reference to the pipe. Qualified as rvalue.
+    pipe_type &&     pipe()  &&     {return std::move(_buf).pipe();}
 };
 
 typedef basic_pstream<char>     pstream;
