@@ -19,8 +19,6 @@ project : requirements
   <toolset>msvc:<define>_SCL_SECURE_NO_WARNINGS
   <toolset>msvc:<define>_CRT_SECURE_NO_DEPRECATE
   <target-os>windows:<define>WIN32_LEAN_AND_MEAN
-  <target-os>windows:<define>NOMINMAX
-  <target-os>windows:<define>_WIN32_WINNT=0x0501
   <target-os>linux:<linkflags>-lpthread
   <os>NT,<toolset>cw:<library>ws2_32
   <os>NT,<toolset>gcc:<library>ws2_32

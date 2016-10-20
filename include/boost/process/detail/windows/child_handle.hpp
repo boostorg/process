@@ -82,14 +82,14 @@ struct child_handle
         ::boost::detail::winapi::BOOL_ value;
         if (!::boost::detail::winapi::IsProcessInJob(proc_info.hProcess, nullptr, &value))
             throw_last_error("IsProcessinJob Failed");
-        return value==1; // TODO: correct Windows API usage is: value==TRUE but TRUE isn't defined at winapi
+        return value!=0;
     }
     bool in_group(std::error_code &ec) const noexcept
     {
         ::boost::detail::winapi::BOOL_ value;
         if (!::boost::detail::winapi::IsProcessInJob(proc_info.hProcess, nullptr, &value))
             ec = get_last_error();
-        return value==1;
+        return value!=0;
     }
 };
 
