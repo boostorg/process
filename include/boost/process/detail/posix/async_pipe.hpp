@@ -154,53 +154,31 @@ public:
     const handle_type & sink  () const & {return _sink;}
     const handle_type & source() const & {return _source;}
 
-    handle_type && source() && { return std::move(_source); }
-    handle_type && sink()   && { return std::move(_sink); }
+    handle_type && source()&&  { return steal_source(_source.get_io_service()); }
+    handle_type && sink()  &&  { return steal_sink(_sink.get_io_service()); }
 
     handle_type source(::boost::asio::io_service& ios) &&
     {
-        ::boost::asio::windows::stream_handle stolen(ios, _source.native_handle());
-        _source.assign(::boost::detail::winapi::INVALID_HANDLE_VALUE_);
+        ::boost::asio::posix::stream_descriptor stolen(ios, _source.native_handle());
+        _source.assign(-1);
         return stolen;
     }
     handle_type sink  (::boost::asio::io_service& ios) &&
     {
-        ::boost::asio::windows::stream_handle stolen(ios, _sink.native_handle());
-        _sink.assign(::boost::detail::winapi::INVALID_HANDLE_VALUE_);
+        ::boost::asio::posix::stream_descriptor stolen(ios, _sink.native_handle());
+        _sink.assign(-1);
         return stolen;
     }
 
     handle_type source(::boost::asio::io_service& ios) const &
     {
-        auto proc = ::boost::detail::winapi::GetCurrentProcess();
-
-        ::boost::detail::winapi::HANDLE_ source;
-        auto source_in = const_cast<handle_type&>(_source).native();
-        if (source_in == ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
-            source = ::boost::detail::winapi::INVALID_HANDLE_VALUE_;
-        else if (!::boost::detail::winapi::DuplicateHandle(
-                proc, source_in, proc, &source, 0,
-                static_cast<::boost::detail::winapi::BOOL_>(true),
-                 ::boost::detail::winapi::DUPLICATE_SAME_ACCESS_))
-            throw_last_error("Duplicate Pipe Failed");
-
-        return ::boost::asio::windows::stream_handle(ios, source);
+        auto source_in = const_cast<::boost::asio::posix::stream_descriptor &>(_source).native();
+        return ::boost::asio::posix::stream_descriptor(ios, ::dup(source_in));
     }
     handle_type sink  (::boost::asio::io_service& ios) const &
     {
-        auto proc = ::boost::detail::winapi::GetCurrentProcess();
-
-        ::boost::detail::winapi::HANDLE_ sink;
-        auto sink_in = const_cast<handle_type&>(_sink).native();
-        if (sink_in == ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
-            sink = ::boost::detail::winapi::INVALID_HANDLE_VALUE_;
-        else if (!::boost::detail::winapi::DuplicateHandle(
-                proc, sink_in, proc, &sink, 0,
-                static_cast<::boost::detail::winapi::BOOL_>(true),
-                 ::boost::detail::winapi::DUPLICATE_SAME_ACCESS_))
-            throw_last_error("Duplicate Pipe Failed");
-
-        return ::boost::asio::windows::stream_handle(ios, sink);
+        auto sink_in = const_cast<::boost::asio::posix::stream_descriptor &>(_sink).native();
+        return ::boost::asio::posix::stream_descriptor(ios, ::dup(sink_in));
     }
 };
 
