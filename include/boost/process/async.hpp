@@ -71,7 +71,7 @@ struct async_builder
 {
     boost::asio::io_service * ios;
 
-    void operator()(boost::asio::io_service & ios) {this->ios = &ios;};
+    void operator()(boost::asio::io_service & ios_) {this->ios = &ios_;};
 
     typedef api::io_service_ref result_type;
     api::io_service_ref get_initializer() {return api::io_service_ref (*ios);};

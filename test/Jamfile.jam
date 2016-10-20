@@ -16,8 +16,11 @@ if [ os.name ] = NT
 }
 
 project : requirements
-  <toolset>msvc:<define>_SCL_5SECURE_NO_WARNINGS
+  <toolset>msvc:<define>_SCL_SECURE_NO_WARNINGS
+  <toolset>msvc:<define>_CRT_SECURE_NO_DEPRECATE
   <target-os>windows:<define>WIN32_LEAN_AND_MEAN
+  <target-os>windows:<define>NOMINMAX
+  <target-os>windows:<define>_WIN32_WINNT=0x0501
   <target-os>linux:<linkflags>-lpthread
   <os>NT,<toolset>cw:<library>ws2_32
   <os>NT,<toolset>gcc:<library>ws2_32
@@ -38,14 +41,14 @@ alias coroutine        : /boost//coroutine       : <link>static ;
 exe sparring_partner : sparring_partner.cpp program_options system filesystem iostreams :
     <warnings>off
     ;
-    
-exe sub_launch : sub_launcher.cpp program_options iostreams system filesystem : <warnings>off ;    
+
+exe sub_launch : sub_launcher.cpp program_options iostreams system filesystem : <warnings>off ;
 
 test-suite bare :
     [ run environment.cpp system filesystem  ]
     [ run pipe.cpp        system filesystem  ]
     ;
-    
+
 test-suite execution :
     [ run async.cpp       system thread filesystem            : : sparring_partner ]
     [ run async_fut.cpp   system thread filesystem            : : sparring_partner ]
