@@ -66,7 +66,7 @@ struct async_handler_collector
     void operator()(T & t) const
     {
         handlers.push_back(t.on_exit_handler(exec));
-    };
+    }
 };
 
 //Also set's up waiting for the exit, so it can close async stuff.

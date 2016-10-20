@@ -54,8 +54,8 @@ struct const_entry
             return string_type();
     }
     string_type get_name() const {return string_type(_name.begin(), _name.end());}
-    explicit const_entry(string_type&& name, pointer data, environment_t & env) :
-        _name(std::move(name)), _data(data), _env(&env) {}
+    explicit const_entry(string_type&& name, pointer data, environment_t & env_) :
+        _name(std::move(name)), _data(data), _env(&env_) {}
 
     explicit const_entry(string_type &&name, environment_t & env) :
         _name(std::move(name)), _data(nullptr), _env(&env) {}

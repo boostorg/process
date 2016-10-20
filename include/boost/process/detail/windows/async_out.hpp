@@ -106,7 +106,7 @@ struct async_out_buffer : ::boost::process::detail::windows::async_handler
 
 
 
-    };
+    }
     template <typename WindowsExecutor>
     void on_setup(WindowsExecutor &exec)
     {
@@ -181,7 +181,7 @@ struct async_out_future : ::boost::process::detail::windows::async_handler
 
                               });
                 };
-    };
+    }
 
     template <typename WindowsExecutor>
     void on_setup(WindowsExecutor &exec)

@@ -164,35 +164,26 @@ public:
         _sink.async_write_some(buffers,  std::forward<WriteHandler>(handler));
     }
 
-    const handle_type & sink  () const {return _sink;}
-    const handle_type & source() const {return _source;}
+    const handle_type & sink  () const & {return _sink;}
+    const handle_type & source() const & {return _source;}
 
-    handle_type steal_source() { return steal_source(_source.get_io_service()); }
-    handle_type steal_sink()   { return steal_sink(_sink.get_io_service()); }
+    handle_type && source() && { return std::move(_source); }
+    handle_type && sink()   && { return std::move(_sink); }
 
-    handle_type steal_source(::boost::asio::io_service& ios)
+    handle_type source(::boost::asio::io_service& ios) &&
     {
         ::boost::asio::windows::stream_handle stolen(ios, _source.native_handle());
         _source.assign(::boost::detail::winapi::INVALID_HANDLE_VALUE_);
         return stolen;
     }
-    handle_type steal_sink  (::boost::asio::io_service& ios)
+    handle_type sink  (::boost::asio::io_service& ios) &&
     {
         ::boost::asio::windows::stream_handle stolen(ios, _sink.native_handle());
         _sink.assign(::boost::detail::winapi::INVALID_HANDLE_VALUE_);
         return stolen;
     }
 
-    handle_type clone_source() const
-    {
-        return clone_source(const_cast<handle_type&>(_source).get_io_service());
-    }
-    handle_type clone_sink()   const
-    {
-        return clone_sink(const_cast<handle_type&>(_sink).get_io_service());
-    }
-
-    handle_type clone_source(::boost::asio::io_service& ios) const
+    handle_type source(::boost::asio::io_service& ios) const &
     {
         auto proc = ::boost::detail::winapi::GetCurrentProcess();
 
@@ -208,7 +199,7 @@ public:
 
         return ::boost::asio::windows::stream_handle(ios, source);
     }
-    handle_type clone_sink  (::boost::asio::io_service& ios) const
+    handle_type sink  (::boost::asio::io_service& ios) const &
     {
         auto proc = ::boost::detail::winapi::GetCurrentProcess();
 

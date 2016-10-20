@@ -79,7 +79,7 @@ public:
             else
                 throw std::system_error(ec, "WriteFile failed");
         }
-        return write_len;
+        return static_cast<int_type>(write_len);
     }
     int_type read(char_type * data, int_type count)
     {
@@ -94,7 +94,7 @@ public:
             else
                 throw std::system_error(ec, "ReadFile failed");
         }
-        return read_len;
+        return static_cast<int_type>(read_len);
     }
 
     bool is_open()

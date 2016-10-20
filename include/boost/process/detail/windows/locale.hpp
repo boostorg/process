@@ -8,6 +8,7 @@
 #define BOOST_PROCESS_DETAIL_WINDOWS_LOCALE_HPP_
 
 #include <locale>
+#include <boost/core/ignore_unused.hpp>
 #include <boost/detail/winapi/file_management.hpp>
 #include <boost/detail/winapi/character_code_conversion.hpp>
 
@@ -39,6 +40,7 @@ class windows_file_codecvt
      const char* from, const char* from_end, const char*& from_next,
      wchar_t* to, wchar_t* to_end, wchar_t*& to_next) const override
    {
+     boost::ignore_unused(state);
      ::boost::detail::winapi::UINT_ codepage = AreFileApisANSI() ?
              ::boost::detail::winapi::CP_ACP_ :
              ::boost::detail::winapi::CP_OEMCP_;
@@ -46,7 +48,7 @@ class windows_file_codecvt
      int count;
      if ((count = ::boost::detail::winapi::MultiByteToWideChar(codepage,
              ::boost::detail::winapi::MB_PRECOMPOSED_, from,
-       from_end - from, to, to_end - to)) == 0)
+       static_cast<int>(from_end - from), to, static_cast<int>(to_end - to))) == 0)
      {
        return error;  // conversion failed
      }
@@ -61,6 +63,7 @@ class windows_file_codecvt
      const wchar_t* from, const wchar_t* from_end, const wchar_t*& from_next,
      char* to, char* to_end, char*& to_next) const override
    {
+     boost::ignore_unused(state);
      auto codepage = ::boost::detail::winapi::AreFileApisANSI() ?
                        ::boost::detail::winapi::CP_ACP_ :
                      ::boost::detail::winapi::CP_OEMCP_;
@@ -68,7 +71,7 @@ class windows_file_codecvt
      int count;
      if ((count = ::boost::detail::winapi::WideCharToMultiByte(codepage,
                    ::boost::detail::winapi::WC_NO_BEST_FIT_CHARS_, from,
-                  from_end - from, to, to_end - to, 0, 0)) == 0)
+                  static_cast<int>(from_end - from), to, static_cast<int>(to_end - to), 0, 0)) == 0)
      {
        return error;  // conversion failed
      }

@@ -184,27 +184,27 @@ public:
         WriteHandler && handler);
 
     ///Get the asio handle of the pipe sink.
-    const handle_type & sink  () const;
+    const handle_type & sink  () const &;
     ///Get the asio handle of the pipe source.
-    const handle_type & source() const;
+    const handle_type & source() const &;
 
-    ///Steal, i.e. move, the source out of this class.
-    handle_type steal_source();
-    ///Steal, i.e. move the sink out of this class.
-    handle_type steal_sink();
+    ///Get the asio handle of the pipe sink.
+    handle_type && sink  () &&;
+    ///Get the asio handle of the pipe source.
+    handle_type && source() &&;
 
-    ///Steal, i.e. move, the source out of this class and change the io_service.
-    handle_type steal_source(::boost::asio::io_service& ios);
-    ///Steal, i.e. move, the sink out of this class and change the io_service.
-       handle_type steal_sink  (::boost::asio::io_service& ios);
-       ///Clone the source.
-    handle_type clone_source() const;
-    ///Clone the sink.
-    handle_type clone_sink()   const;
-    ///Clone the source and replace the io_service.
-    handle_type clone_source(::boost::asio::io_service& ios) const;
-    ///Clone the sink and replace the io_service.
-       handle_type clone_sink  (::boost::asio::io_service& ios) const
+    /// Move the source out of this class and change the io_service. Qualified as rvalue. \attention Will always move.
+    handle_type source(::boost::asio::io_service& ios) &&;
+    /// Move the sink out of this class and change the io_service. Qualified as rvalue. \attention Will always move
+    handle_type sink  (::boost::asio::io_service& ios) &&;
+
+    /// Copy the source out of this class and change the io_service. \attention Will always copy.
+    handle_type source(::boost::asio::io_service& ios) const &;
+    /// Copy the sink out of this class and change the io_service. \attention Will always copy
+    handle_type sink  (::boost::asio::io_service& ios) const &;
+
+
+
 };
 
 #else

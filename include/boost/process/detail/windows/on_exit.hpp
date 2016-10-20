@@ -35,7 +35,7 @@ struct on_exit_ : boost::process::detail::windows::async_handler
                     handler(static_cast<int>(exit_code), ec);
                };
 
-    };
+    }
 };
 
 

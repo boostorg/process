@@ -88,7 +88,7 @@ struct async_in_buffer : ::boost::process::detail::windows::async_handler
                       });
                };
 
-    };
+    }
     template <typename WindowsExecutor>
     void on_setup(WindowsExecutor &exec)
     {

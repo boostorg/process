@@ -21,4 +21,4 @@ Distributed under the [Boost Software License, Version 1.0](http://www.boost.org
 
 ### Dependency
 
-This library requires boost 1.62. Since this is not released yet you can clone the winapi module from [here](https://github.com/boostorg/winapi) to get it to work. You will need to overwrite the current code in boost/libs/winapi.
+This library requires boost 1.63. Since this is not released yet you can clone the winapi module from [here](https://github.com/boostorg/winapi) to get it to work. You will need to overwrite the current code in boost/libs/winapi.
