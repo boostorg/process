@@ -143,14 +143,14 @@ struct group_handle
         if (!::boost::detail::winapi::IsProcessInJob(proc, _job_object,  &is))
             throw_last_error();
 
-        return is;
+        return is!=0;
     }
     bool has(handle_t proc, std::error_code & ec) noexcept
     {
         ::boost::detail::winapi::BOOL_ is;
         if (!::boost::detail::winapi::IsProcessInJob(proc, _job_object,  &is))
             ec = get_last_error();
-        return is;
+        return is!=0;
     }
 
     bool valid() const
@@ -180,7 +180,7 @@ inline bool in_group()
     if (!::boost::detail::winapi::IsProcessInJob(boost::detail::winapi::GetCurrentProcess(), nullptr, &res))
         throw_last_error("IsProcessInJob failed");
 
-    return res;
+    return res!=0;
 }
 
 

@@ -7,8 +7,7 @@ Boost.process is not yet part of the [Boost C++ Libraries](http://github.com/boo
 Branches        | Build         | Tests coverage | 
 ----------------|-------------- | -------------- |
 Develop:        | [![Build Status](https://travis-ci.org/klemens-morgenstern/boost-process.svg?branch=develop)](https://travis-ci.org/klemens-morgenstern/boost-process)  [![Build status](https://ci.appveyor.com/api/projects/status/peup7e6m0e1bb5ba?svg=true)](https://ci.appveyor.com/project/klemens-morgenstern/boost-process) | [![Coverage Status](https://coveralls.io/repos/github/klemens-morgenstern/boost-process/badge.svg?branch=develop)](https://coveralls.io/github/klemens-morgenstern/boost-process?branch=develop) |
-Master:         | [![Build Status](https://travis-ci.org/klemens-morgenstern/boost-process.svg?branch=master)] (https://travis-ci.org/klemens-morgenstern/boost-process) [![Build status](https://ci.appveyor.com/api/projects/status/peup7e6m0e1bb5ba/branch/master?svg=true)](https://ci.appveyor.com/project/klemens-morgenstern/boost-process/branch/master)
-  | [![Coverage Status](https://coveralls.io/repos/github/klemens-morgenstern/boost-process/badge.svg?branch=master)](https://coveralls.io/github/klemens-morgenstern/boost-process?branch=master)   |
+Master:         | [![Build Status](https://travis-ci.org/klemens-morgenstern/boost-process.svg?branch=master)] (https://travis-ci.org/klemens-morgenstern/boost-process) [![Build status](https://ci.appveyor.com/api/projects/status/peup7e6m0e1bb5ba/branch/master?svg=true)](https://ci.appveyor.com/project/klemens-morgenstern/boost-process/branch/master) | [![Coverage Status](https://coveralls.io/repos/github/klemens-morgenstern/boost-process/badge.svg?branch=master)](https://coveralls.io/github/klemens-morgenstern/boost-process?branch=master)   |
 
 [Open Issues](https://github.com/klemens-morgenstern/boost-process/issues)
 
@@ -22,4 +21,4 @@ Distributed under the [Boost Software License, Version 1.0](http://www.boost.org
 
 ### Dependency
 
-This library requires boost 1.62. Since this is not released yet you can clone the winapi module from [here](https://github.com/boostorg/winapi) to get it to work. You will need to overwrite the current code in boost/libs/winapi.
+This library requires boost 1.63. Since this is not released yet you can clone the winapi module from [here](https://github.com/boostorg/winapi) to get it to work. You will need to overwrite the current code in boost/libs/winapi.

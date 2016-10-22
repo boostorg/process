@@ -11,11 +11,12 @@
 #define BOOST_TEST_IGNORE_SIGCHLD
 #include <boost/test/included/unit_test.hpp>
 
+#include <boost/process/args.hpp>
+#include <boost/process/child.hpp>
+#include <boost/process/env.hpp>
 #include <boost/process/environment.hpp>
 #include <boost/process/error.hpp>
 #include <boost/process/io.hpp>
-#include <boost/process/child.hpp>
-#include <boost/process/env.hpp>
 
 #include <boost/algorithm/string/predicate.hpp>
 
@@ -24,6 +25,7 @@
 #include <boost/program_options/environment_iterator.hpp>
 #include <string>
 #include <stdlib.h>
+#include <list>
 
 namespace bp = boost::process;
 
@@ -49,8 +51,8 @@ BOOST_AUTO_TEST_CASE(inherit_env, *boost::unit_test::timeout(2))
 
     auto path = boost::this_process::environment()["PATH"].to_string();
 
-    std::cout << "Path: '" << path << "'" << std::endl;
-    std::cout << "Valu: '" << s << "'" << std::endl;
+    std::cout << "Path : '" << path << "'" << std::endl;
+    std::cout << "Value: '" << s    << "'" << std::endl;
 
     if(!path.empty())
     {
@@ -61,6 +63,8 @@ BOOST_AUTO_TEST_CASE(inherit_env, *boost::unit_test::timeout(2))
             path.begin(), path.begin() + size
             );
     }
+    else
+    	BOOST_CHECK(boost::starts_with(s, "************** empty environment **************"));
     c.wait();
 }
 
@@ -73,6 +77,16 @@ BOOST_AUTO_TEST_CASE(inherit_mod_env, *boost::unit_test::timeout(2))
     std::string value = "TestString";
     ie["BOOST_PROCESS_TEST_1"] = value;
 
+    {
+        auto ie2 = boost::this_process::environment();
+        auto val = ie2["BOOST_PROCESS_TEST_1"];
+        auto st  = val.to_string();
+
+        BOOST_CHECK_EQUAL_COLLECTIONS(
+            st.begin(),     st.end(),
+            value.begin(), value.end()
+            );
+    }
     bp::ipstream st;
 
     std::error_code ec;
@@ -127,3 +141,38 @@ BOOST_AUTO_TEST_CASE(modifided_env, *boost::unit_test::timeout(2))
     c.wait();
 }
 
+
+BOOST_AUTO_TEST_CASE(append, *boost::unit_test::timeout(5))
+{
+    using boost::unit_test::framework::master_test_suite;
+
+    bp::ipstream st;
+    BOOST_TEST_PASSPOINT();
+    bp::environment e = boost::this_process::environment();
+
+    std::error_code ec;
+    BOOST_REQUIRE_GE(e.size(), 1u);
+
+    std::list<std::string> arg = {"test", "--query", "BOOST_PROCESS_TEST_3"};
+    bp::child c(
+        master_test_suite().argv[1],
+        bp::env["BOOST_PROCESS_TEST_3"]="some_string",
+        bp::env=e,
+        bp::env["BOOST_PROCESS_TEST_3"]=boost::none,
+        bp::env["BOOST_PROCESS_TEST_3"]+="some_fictional_path_42",
+        bp::env["BOOST_PROCESS_TEST_3"]+={"other", "next"},
+        bp::args=arg,
+        bp::std_out>st,
+        ec
+    );
+
+    BOOST_REQUIRE(!ec);
+    BOOST_WARN(c.running());
+    std::string s;
+
+    std::getline(st, s);
+
+    BOOST_CHECK(boost::starts_with(s, "some_fictional_path_42;other;next"));
+
+    c.wait();
+}

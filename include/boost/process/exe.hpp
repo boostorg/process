@@ -16,33 +16,62 @@
 /** \file boost/process/exe.hpp
  *
  *    Header which provides the exe property.
- *
+\xmlonly
+<programlisting>
+namespace boost {
+  namespace process {
+    <emphasis>unspecified</emphasis> <globalname alt="boost::process::exe">exe</globalname>;
+  }
+}
+</programlisting>
+\endxmlonly
  */
 namespace boost { namespace process { namespace detail {
 
 struct exe_
 {
-    inline exe_setter_ operator()(const char *s) const
+    template<typename Char>
+    inline exe_setter_<Char> operator()(const Char *s) const
     {
-        return exe_setter_(s);
+        return exe_setter_<Char>(s);
     }
-    inline exe_setter_ operator= (const char *s) const
+    template<typename Char>
+    inline exe_setter_<Char> operator= (const Char *s) const
     {
-        return exe_setter_(s);
+        return exe_setter_<Char>(s);
     }
 
-    inline exe_setter_ operator()(const std::string &s) const
+    template<typename Char>
+    inline exe_setter_<Char> operator()(const std::basic_string<Char> &s) const
     {
-        return exe_setter_(s);
+        return exe_setter_<Char>(s);
     }
-    inline exe_setter_ operator= (const std::string &s) const
+    template<typename Char>
+    inline exe_setter_<Char> operator= (const std::basic_string<Char> &s) const
     {
-        return exe_setter_(s);
+        return exe_setter_<Char>(s);
     }
 };
 
 }
 
+/** The exe property allows to explicitly set the executable.
+
+The overload form applies when to the first, when several strings are passed to a launching
+function.
+
+The following expressions are valid, with `value` being either a C-String or
+a `std::basic_string` with `char` or `wchar_t` or a `boost::filesystem::path`.
+
+\code{.cpp}
+exe="value";
+exe(value);
+\endcode
+
+The property can only be used for assignments.
+
+
+ */
 constexpr boost::process::detail::exe_ exe{};
 
 }}

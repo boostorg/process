@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(attached, *boost::unit_test::timeout(5))
         ec
     );
     BOOST_REQUIRE(!ec);
-    BOOST_REQUIRE(c.in_group());
+    BOOST_REQUIRE(c.in_group(ec));
     BOOST_CHECK(c);
 
 

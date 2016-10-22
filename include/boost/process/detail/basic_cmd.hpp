@@ -11,6 +11,7 @@
 
 #include <boost/process/detail/handler_base.hpp>
 #include <boost/process/detail/traits/cmd_or_exe.hpp>
+#include <boost/process/detail/traits/wchar_t.hpp>
 
 #if defined( BOOST_WINDOWS_API )
 #include <boost/process/detail/windows/basic_cmd.hpp>
@@ -27,23 +28,49 @@
 
 namespace boost { namespace process { namespace detail {
 
+template<typename Char>
 struct exe_setter_
 {
-    std::string exe_;
-    exe_setter_(std::string && str)      : exe_(std::move(str)) {}
-    exe_setter_(const std::string & str) : exe_(str) {}
+    typedef Char value_type;
+    typedef std::basic_string<Char> string_type;
+
+    string_type exe_;
+    exe_setter_(string_type && str)      : exe_(std::move(str)) {}
+    exe_setter_(const string_type & str) : exe_(str) {}
+};
+
+template<> struct is_wchar_t<exe_setter_<wchar_t>> : std::true_type {};
 
 
+template<>
+struct char_converter<exe_setter_<char>, exe_setter_<wchar_t>>
+{
+    static exe_setter_<char> conv(const exe_setter_<wchar_t> & in)
+    {
+        return {::boost::process::detail::convert(in.exe_)};
+    }
+};
+
+template<>
+struct char_converter<exe_setter_<wchar_t>, exe_setter_<char>>
+{
+    static exe_setter_<wchar_t> conv(const exe_setter_<char> & in)
+    {
+        return {::boost::process::detail::convert(in.exe_)};
+    }
 };
 
 
-template <class String, bool Append >
+
+template <typename Char, bool Append >
 struct arg_setter_
 {
-    std::vector<String> _args;
+    using value_type = Char;
+    using string_type = std::basic_string<value_type>;
+    std::vector<string_type> _args;
 
-    typedef typename std::vector<String>::iterator       iterator;
-    typedef typename std::vector<String>::const_iterator const_iterator;
+    typedef typename std::vector<string_type>::iterator       iterator;
+    typedef typename std::vector<string_type>::const_iterator const_iterator;
 
     template<typename Iterator>
     arg_setter_(Iterator && begin, Iterator && end) : _args(begin, end) {}
@@ -57,45 +84,107 @@ struct arg_setter_
     iterator end()   {return _args.end();}
     const_iterator begin() const {return _args.begin();}
     const_iterator end()   const {return _args.end();}
-    arg_setter_(std::string & str)     : _args{{str}} {}
-    arg_setter_(std::string && s)      : _args({std::move(s)}) {}
-    arg_setter_(const std::string & s) : _args({s}) {}
-    arg_setter_(const char* s) : _args({std::move(s)}) {}
+    arg_setter_(string_type & str)     : _args{{str}} {}
+    arg_setter_(string_type && s)      : _args({std::move(s)}) {}
+    arg_setter_(const string_type & s) : _args({s}) {}
+    arg_setter_(const value_type* s)   : _args({std::move(s)}) {}
 
     template<std::size_t Size>
-    arg_setter_(const char (&s) [Size]) : _args({s}) {}
+    arg_setter_(const value_type (&s) [Size]) : _args({s}) {}
+};
+
+template<> struct is_wchar_t<arg_setter_<wchar_t, true >> : std::true_type {};
+template<> struct is_wchar_t<arg_setter_<wchar_t, false>> : std::true_type {};
+
+template<>
+struct char_converter<char, arg_setter_<wchar_t, true>>
+{
+    static arg_setter_<char, true> conv(const arg_setter_<wchar_t, true> & in)
+    {
+        std::vector<std::string> vec(in._args.size());
+        std::transform(in._args.begin(), in._args.end(), vec.begin(),
+                [](const std::wstring & ws)
+                {
+                    return ::boost::process::detail::convert(ws);
+                });
+        return {vec};
+    }
+};
+
+template<>
+struct char_converter<wchar_t, arg_setter_<char, true>>
+{
+    static arg_setter_<wchar_t, true> conv(const arg_setter_<char, true> & in)
+    {
+        std::vector<std::wstring> vec(in._args.size());
+        std::transform(in._args.begin(), in._args.end(), vec.begin(),
+                [](const std::string & ws)
+                {
+                    return ::boost::process::detail::convert(ws);
+                });
+
+        return {vec};
+    }
+};
+
+template<>
+struct char_converter<char, arg_setter_<wchar_t, false>>
+{
+    static arg_setter_<char, false> conv(const arg_setter_<wchar_t, false> & in)
+    {
+        std::vector<std::string> vec(in._args.size());
+        std::transform(in._args.begin(), in._args.end(), vec.begin(),
+                [](const std::wstring & ws)
+                {
+                    return ::boost::process::detail::convert(ws);
+                });
+        return {vec};    }
+};
+
+template<>
+struct char_converter<wchar_t, arg_setter_<char, false>>
+{
+    static arg_setter_<wchar_t, false> conv2(const arg_setter_<char, false> & in)
+    {
+        std::vector<std::wstring> vec(in._args.size());
+        std::transform(in._args.begin(), in._args.end(), vec.begin(),
+                [](const std::string & ws)
+                {
+                    return ::boost::process::detail::convert(ws);
+                });
+        return {vec};
+    }
 };
 
 using api::exe_cmd_init;
 
+template<typename Char>
 struct exe_builder
 {
     //set by path, because that will not be interpreted as a cmd
     bool not_cmd = false;
-    bool shell      = false;
-    std::string exe;
-    std::vector<std::string> args;
-
-    const char* get_exe     () const { return exe.c_str();}
-    const char* get_cmd_line() const { return nullptr;} //TODO: Implement.
+    bool shell   = false;
+    using string_type = std::basic_string<Char>;
+    string_type exe;
+    std::vector<string_type> args;
 
     void operator()(const boost::filesystem::path & data)
     {
         not_cmd = true;
         if (exe.empty())
-            exe = data.string();
+            exe = data.native();
         else
-            args.push_back(data.string());
+            args.push_back(data.native());
     }
 
-    void operator()(const std::string & data)
+    void operator()(const string_type & data)
     {
         if (exe.empty())
             exe = data;
         else
             args.push_back(data);
     }
-    void operator()(const char* data)
+    void operator()(const Char* data)
     {
         if (exe.empty())
             exe = data;
@@ -103,7 +192,7 @@ struct exe_builder
             args.push_back(data);
     }
     void operator()(shell_) {shell = true;}
-    void operator()(std::vector<std::string> && data)
+    void operator()(std::vector<string_type> && data)
     {
         if (data.empty())
             return;
@@ -119,7 +208,7 @@ struct exe_builder
         args.insert(args.end(), itr, end);
     }
 
-    void operator()(const std::vector<std::string> & data)
+    void operator()(const std::vector<string_type> & data)
     {
         if (data.empty())
             return;
@@ -134,67 +223,67 @@ struct exe_builder
         }
         args.insert(args.end(), itr, end);
     }
-    void operator()(exe_setter_ && data)
+    void operator()(exe_setter_<Char> && data)
     {
         not_cmd = true;
         exe = std::move(data.exe_);
     }
-    void operator()(const exe_setter_ & data)
+    void operator()(const exe_setter_<Char> & data)
     {
         not_cmd = true;
         exe = data.exe_;
     }
-    template<typename Range>
-    void operator()(arg_setter_<Range, false> && data)
+    void operator()(arg_setter_<Char, false> && data)
     {
         args.assign(
                 std::make_move_iterator(data._args.begin()),
                 std::make_move_iterator(data._args.end()));
     }
-    template<typename Range>
-    void operator()(arg_setter_<Range, true> && data)
+    void operator()(arg_setter_<Char, true> && data)
     {
         args.insert(args.end(),
                 std::make_move_iterator(data._args.begin()),
                 std::make_move_iterator(data._args.end()));
     }
-    template<typename Range>
-    void operator()(const arg_setter_<Range, false> & data)
+    void operator()(const arg_setter_<Char, false> & data)
     {
         args.assign(data._args.begin(), data._args.end());
     }
-    template<typename Range>
-    void operator()(const arg_setter_<Range, true> & data)
+    void operator()(const arg_setter_<Char, true> & data)
     {
         args.insert(args.end(), data._args.begin(), data._args.end());
     }
 
-    api::exe_cmd_init get_initializer()
+    api::exe_cmd_init<Char> get_initializer()
     {
         if (not_cmd || !args.empty())
         {
             if (shell)
-                return api::exe_cmd_init::exe_args_shell(std::move(exe), std::move(args));
+                return api::exe_cmd_init<Char>::exe_args_shell(std::move(exe), std::move(args));
             else
-                return api::exe_cmd_init::exe_args(std::move(exe), std::move(args));
+                return api::exe_cmd_init<Char>::exe_args(std::move(exe), std::move(args));
         }
         else
             if (shell)
-                return api::exe_cmd_init::cmd_shell(std::move(exe));
+                return api::exe_cmd_init<Char>::cmd_shell(std::move(exe));
             else
-                return api::exe_cmd_init::cmd(std::move(exe));
+                return api::exe_cmd_init<Char>::cmd(std::move(exe));
 
     }
-    typedef api::exe_cmd_init result_type;
+    typedef api::exe_cmd_init<Char> result_type;
 };
 
 template<>
-struct initializer_builder<cmd_or_exe_tag>
+struct initializer_builder<cmd_or_exe_tag<char>>
 {
-    typedef exe_builder type;
+    typedef exe_builder<char> type;
 };
 
-
+template<>
+struct initializer_builder<cmd_or_exe_tag<wchar_t>>
+{
+    typedef exe_builder<wchar_t> type;
+};
 
 }}}
 

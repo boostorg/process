@@ -30,13 +30,7 @@ struct show_window : ::boost::process::detail::handler_base
 };
 
 
-constexpr show_window<::boost::detail::winapi::SW_HIDE_           > hide;
-constexpr show_window<::boost::detail::winapi::SW_SHOWMAXIMIZED_  > maximized;
-constexpr show_window<::boost::detail::winapi::SW_SHOWMINIMIZED_  > minimized;
-constexpr show_window<::boost::detail::winapi::SW_SHOWMINNOACTIVE_> minimized_not_active;
-constexpr show_window<::boost::detail::winapi::SW_SHOWNOACTIVATE_ > not_active;
-constexpr show_window<::boost::detail::winapi::SW_SHOWNORMAL_     > show;
-constexpr show_window<::boost::detail::winapi::SW_SHOWNORMAL_     > show_normal;
+
 
 
 }}}}

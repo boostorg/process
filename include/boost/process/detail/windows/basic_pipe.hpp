@@ -32,7 +32,7 @@ public:
     typedef typename Traits::int_type  int_type   ;
     typedef typename Traits::pos_type  pos_type   ;
     typedef typename Traits::off_type  off_type   ;
-    typedef ::boost::detail::winapi::HANDLE_ native_handle;
+    typedef ::boost::detail::winapi::HANDLE_ native_handle_type;
 
     explicit basic_pipe(::boost::detail::winapi::HANDLE_ source, ::boost::detail::winapi::HANDLE_ sink)
             : _source(source), _sink(sink) {}
@@ -52,8 +52,8 @@ public:
         if (_source != ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
             ::boost::detail::winapi::CloseHandle(_source);
     }
-    native_handle native_source() const {return _source;}
-    native_handle native_sink  () const {return _sink;}
+    native_handle_type native_source() const {return _source;}
+    native_handle_type native_sink  () const {return _sink;}
 
     basic_pipe()
     {
@@ -79,7 +79,7 @@ public:
             else
                 throw std::system_error(ec, "WriteFile failed");
         }
-        return write_len;
+        return static_cast<int_type>(write_len);
     }
     int_type read(char_type * data, int_type count)
     {
@@ -94,7 +94,7 @@ public:
             else
                 throw std::system_error(ec, "ReadFile failed");
         }
-        return read_len;
+        return static_cast<int_type>(read_len);
     }
 
     bool is_open()
@@ -208,15 +208,15 @@ basic_pipe<Char, Traits>& basic_pipe<Char, Traits>::operator=(basic_pipe && lhs)
 template<class Char, class Traits>
 inline bool operator==(const basic_pipe<Char, Traits> & lhs, const basic_pipe<Char, Traits> & rhs)
 {
-    return compare_handles(lhs.source(), rhs.source()) &&
-           compare_handles(lhs.sink(),   rhs.sink());
+    return compare_handles(lhs.native_source(), rhs.native_source()) &&
+           compare_handles(lhs.native_sink(),   rhs.native_sink());
 }
 
 template<class Char, class Traits>
 inline bool operator!=(const basic_pipe<Char, Traits> & lhs, const basic_pipe<Char, Traits> & rhs)
 {
-    return !compare_handles(lhs.source(), rhs.source()) ||
-           !compare_handles(lhs.sink(),   rhs.sink());
+    return !compare_handles(lhs.native_source(), rhs.native_source()) ||
+           !compare_handles(lhs.native_sink(),   rhs.native_sink());
 }
 
 }}}}

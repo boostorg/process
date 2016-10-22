@@ -108,8 +108,8 @@ struct startup_info_impl
 
 
 
-template<typename Sequence>
-class executor : public startup_info_impl<char>
+template<typename Char, typename Sequence>
+class executor : public startup_info_impl<Char>
 {
 
     void internal_error_handle(const std::error_code &ec, const char* msg, boost::mpl::false_, boost::mpl::true_) {}
@@ -175,25 +175,25 @@ public:
 
     child operator()()
     {
-        on_setup_t on_setup(*this);
-        boost::fusion::for_each(seq, on_setup);
+        on_setup_t on_setup_fn(*this);
+        boost::fusion::for_each(seq, on_setup_fn);
 
         if (_ec)
         {
-            on_error_t on_error(*this, _ec);
-            boost::fusion::for_each(seq, on_error);
+            on_error_t on_error_fn(*this, _ec);
+            boost::fusion::for_each(seq, on_error_fn);
             return child();
         }
 
         //NOTE: The non-cast cmd-line string can only be modified by the wchar_t variant which is currently disabled.
         int err_code = ::boost::detail::winapi::create_process(
             exe,                                        //       LPCSTR_ lpApplicationName,
-            const_cast<char*>(cmd_line),                //       LPSTR_ lpCommandLine,
+            const_cast<Char*>(cmd_line),                //       LPSTR_ lpCommandLine,
             proc_attrs,                                 //       LPSECURITY_ATTRIBUTES_ lpProcessAttributes,
             thread_attrs,                               //       LPSECURITY_ATTRIBUTES_ lpThreadAttributes,
             inherit_handles,                            //       INT_ bInheritHandles,
-            creation_flags,                             //       DWORD_ dwCreationFlags,
-            reinterpret_cast<void*>(const_cast<char*>(env)),  //     LPVOID_ lpEnvironment,
+            this->creation_flags,                       //       DWORD_ dwCreationFlags,
+            reinterpret_cast<void*>(const_cast<Char*>(env)),  //     LPVOID_ lpEnvironment,
             work_dir,                                   //       LPCSTR_ lpCurrentDirectory,
             &this->startup_info,                        //       LPSTARTUPINFOA_ lpStartupInfo,
             &proc_info);                                //       LPPROCESS_INFORMATION_ lpProcessInformation)
@@ -203,8 +203,8 @@ public:
         if (err_code != 0)
         {
             _ec.clear();
-            on_success_t on_success(*this);
-            boost::fusion::for_each(seq, on_success);
+            on_success_t on_success_fn(*this);
+            boost::fusion::for_each(seq, on_success_fn);
         }
         else
             set_error(::boost::process::detail::get_last_error(),
@@ -212,8 +212,8 @@ public:
 
         if ( _ec)
         {
-            on_error_t on_error(*this, _ec);
-            boost::fusion::for_each(seq, on_error);
+            on_error_t on_err(*this, _ec);
+            boost::fusion::for_each(seq, on_err);
             return child();
         }
         else
@@ -235,10 +235,10 @@ public:
     ::boost::detail::winapi::LPSECURITY_ATTRIBUTES_ proc_attrs   = nullptr;
     ::boost::detail::winapi::LPSECURITY_ATTRIBUTES_ thread_attrs = nullptr;
     ::boost::detail::winapi::BOOL_ inherit_handles = false;
-    const char * work_dir = nullptr;
-    const char * cmd_line = nullptr;
-    const char * exe      = nullptr;
-    const char * env      = nullptr;
+    const Char * work_dir = nullptr;
+    const Char * cmd_line = nullptr;
+    const Char * exe      = nullptr;
+    const Char * env      = nullptr;
 
 
     Sequence & seq;
@@ -247,10 +247,10 @@ public:
 
 
 
-template<typename Tup>
-executor<Tup> make_executor(Tup & tup)
+template<typename Char, typename Tup>
+executor<Char, Tup> make_executor(Tup & tup)
 {
-    return executor<Tup>(tup);
+    return executor<Char, Tup>(tup);
 }
 
 

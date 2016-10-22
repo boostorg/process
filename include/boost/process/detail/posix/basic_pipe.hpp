@@ -169,6 +169,19 @@ basic_pipe<CharT, Traits>::basic_pipe(const std::string & name)
     ::unlink(name.c_str());
 }
 
+template<class Char, class Traits>
+inline bool operator==(const basic_pipe<Char, Traits> & lhs, const basic_pipe<Char, Traits> & rhs)
+{
+    return compare_handles(lhs.native_source(), rhs.native_source()) &&
+           compare_handles(lhs.native_sink(),   rhs.native_sink());
+}
+
+template<class Char, class Traits>
+inline bool operator!=(const basic_pipe<Char, Traits> & lhs, const basic_pipe<Char, Traits> & rhs)
+{
+    return !compare_handles(lhs.native_source(), rhs.native_source()) ||
+           !compare_handles(lhs.native_sink(),   rhs.native_sink());
+}
 
 }}}}
 

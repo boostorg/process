@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
         ("prefix", value<std::string>())
         ("prefix-once", value<std::string>())
         ("pwd", bool_switch())
-        ("query-env", value<std::string>())
+        ("query", value<std::string>())
         ("stdin-to-stdout", bool_switch())
 #if defined(BOOST_POSIX_API)
         ("posix-echo-one", value<std::vector<std::string> >()->multitoken())
@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
     }
     else if (vm["loop"].as<bool>())
     {
-        for (;;);
+        while (true);
     }
     else if (vm.count("prefix"))
     {
@@ -165,11 +165,15 @@ int main(int argc, char *argv[])
     {
         std::cout << boost::filesystem::current_path().string() << std::endl;
     }
-    else if (vm.count("query-env"))
+    else if (vm.count("query"))
     {
-        auto key = vm["query-env"].as<std::string>();
-
-        std::cout << boost::this_process::environment()[key].to_string() << std::endl;
+        auto key = vm["query"].as<std::string>();
+        auto env = boost::this_process::environment();
+        auto val = env[key];
+        if (val.empty())
+            std::cout << "************** empty environment **************" << std::endl;
+        else
+            std::cout << val.to_string() << std::endl;
     }
     else if (vm["stdin-to-stdout"].as<bool>())
     {

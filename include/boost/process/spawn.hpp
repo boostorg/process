@@ -35,7 +35,15 @@ namespace detail {
 }
 
 /** Launch a process and detach it. Returns no handle.
- *
+
+This function starts a process and immediately detaches it. It thereby prevents the system from creating a zombie process,
+but will also cause the system to be unable to wait for the child to exit.
+
+\note This will set `SIGCHLD` to `SIGIGN` on posix.
+
+\warning This function does not allow asynchronous operations, since it cannot wait for the end of the process.
+It will fail to compile if a reference to `boost::asio::io_service` is passed.
+
  */
 template<typename ...Args>
 inline void spawn(Args && ...args)

@@ -13,7 +13,7 @@
 
 namespace boost { namespace process { namespace detail { namespace windows {
 
-class group_handle;
+struct group_handle;
 
 inline void wait(const group_handle &p)
 {

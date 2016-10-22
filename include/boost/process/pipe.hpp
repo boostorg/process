@@ -67,9 +67,9 @@ public:
     /** Get the native handle of the sink. */
     native_handle native_sink  () const;
 
-    ///Write date to the pipe.
+    ///Write data to the pipe.
     int_type write(const char_type * data, int_type count);
-    ///Read date from the pipe.
+    ///Read data from the pipe.
     int_type read(char_type * data, int_type count);
     ///Check if the pipe is open.
     bool is_open();
@@ -116,16 +116,16 @@ struct basic_pipebuf : std::basic_streambuf<CharT, Traits>
 
     ///Move construct from a pipe.
     basic_pipebuf(pipe_type && p) : _pipe(std::move(p)),
-    								_write(default_buffer_size),
-									_read(default_buffer_size)
+                                    _write(default_buffer_size),
+                                    _read(default_buffer_size)
     {
         this->setg(_read.data(),  _read.data()+ 128,  _read.data() + 128);
         this->setp(_write.data(), _write.data() + _write.size());
     }
     ///Construct from a pipe.
     basic_pipebuf(const pipe_type & p) : _pipe(p),
-    									_write(default_buffer_size),
-										_read(default_buffer_size)
+                                        _write(default_buffer_size),
+                                        _read(default_buffer_size)
     {
         this->setg(_read.data(),  _read.data()+ 128,  _read.data() + 128);
         this->setp(_write.data(), _write.data() + _write.size());
@@ -151,21 +151,21 @@ struct basic_pipebuf : std::basic_streambuf<CharT, Traits>
     {
         if ((ch != traits_type::eof()) && _pipe.is_open())
         {
-        	if (this->pptr() == this->epptr())
-        	{
-        		bool wr = this->_write_impl();
-        		*this->pptr() = ch;
-        		this->pbump(1);
-        		if (wr)
-        			return ch;
-        	}
-        	else
-        	{
-        		*this->pptr() = ch;
-        		this->pbump(1);
-        		if (this->_write_impl())
-        			return ch;
-        	}
+            if (this->pptr() == this->epptr())
+            {
+                bool wr = this->_write_impl();
+                *this->pptr() = ch;
+                this->pbump(1);
+                if (wr)
+                    return ch;
+            }
+            else
+            {
+                *this->pptr() = ch;
+                this->pbump(1);
+                if (this->_write_impl())
+                    return ch;
+            }
         }
         return traits_type::eof();
     }
@@ -183,7 +183,11 @@ struct basic_pipebuf : std::basic_streambuf<CharT, Traits>
 
 
         auto len = &_read.back() - this->egptr() ;
-        auto res = _pipe.read(this->egptr(), len);
+        auto res = _pipe.read(
+                        this->egptr(),
+                        static_cast<typename pipe_type::int_type>(len));
+        if (res == 0)
+            return traits_type::eof();
 
         this->setg(this->eback(), this->gptr(), this->egptr() + res);
         auto val = *this->gptr();
@@ -196,10 +200,12 @@ struct basic_pipebuf : std::basic_streambuf<CharT, Traits>
     void pipe(pipe_type&& p)      {_pipe = std::move(p); }
     ///Set the pipe of the streambuf.
     void pipe(const pipe_type& p) {_pipe = p; }
-    ///Get a const reference of the pipe.
-    const pipe_type &pipe() const {return _pipe;}
-    ///Get a reference of the pipe. \note Is a reference so it can be moved.
-    pipe_type       &pipe()       {return _pipe;}
+    ///Get a reference to the pipe.
+    pipe_type &      pipe() &       {return _pipe;}
+    ///Get a const reference to the pipe.
+    const pipe_type &pipe() const & {return _pipe;}
+    ///Get a rvalue reference to the pipe. Qualified as rvalue.
+    pipe_type &&     pipe()  &&     {return std::move(_pipe);}
 private:
     pipe_type _pipe;
     std::vector<char_type> _write;
@@ -211,7 +217,8 @@ private:
             return false;
 
         auto base = this->pbase();
-        auto wrt = _pipe.write(base, this->pptr() - base);
+        auto wrt = _pipe.write(base,
+                static_cast<typename pipe_type::int_type>(this->pptr() - base));
         std::ptrdiff_t diff = this->pptr() - base;
 
         if (wrt < diff)
@@ -251,9 +258,9 @@ public:
 
     ///Default constructor.
     basic_ipstream() : std::basic_istream<CharT, Traits>(nullptr)
-	{
-    	std::basic_istream<CharT, Traits>::rdbuf(&_buf);
-	};
+    {
+        std::basic_istream<CharT, Traits>::rdbuf(&_buf);
+    };
     ///Copy constructor.
     basic_ipstream(const basic_ipstream & ) = delete;
     ///Move constructor.
@@ -261,15 +268,15 @@ public:
 
     ///Move construct from a pipe.
     basic_ipstream(pipe_type && p)      : std::basic_istream<CharT, Traits>(nullptr), _buf(std::move(p))
-	{
-    	std::basic_istream<CharT, Traits>::rdbuf(&_buf);
-	}
+    {
+        std::basic_istream<CharT, Traits>::rdbuf(&_buf);
+    }
 
     ///Copy construct from a pipe.
     basic_ipstream(const pipe_type & p) : std::basic_istream<CharT, Traits>(nullptr), _buf(p)
-	{
-    	std::basic_istream<CharT, Traits>::rdbuf(&_buf);
-	}
+    {
+        std::basic_istream<CharT, Traits>::rdbuf(&_buf);
+    }
 
     ///Copy assignment.
     basic_ipstream& operator=(const basic_ipstream & ) = delete;
@@ -291,10 +298,12 @@ public:
     void pipe(pipe_type&& p)      {_buf.pipe(std::move(p)); }
     ///Set the pipe of the streambuf.
     void pipe(const pipe_type& p) {_buf.pipe(p); }
-    ///Get a const reference of the pipe.
-    const pipe_type &pipe() const {return _buf.pipe();}
-    ///Get a reference of the pipe. \note Is a reference so it can be moved.
-    pipe_type       &pipe()       {return _buf.pipe();}
+    ///Get a reference to the pipe.
+    pipe_type &      pipe() &       {return _buf.pipe();}
+    ///Get a const reference to the pipe.
+    const pipe_type &pipe() const & {return _buf.pipe();}
+    ///Get a rvalue reference to the pipe. Qualified as rvalue.
+    pipe_type &&     pipe()  &&     {return std::move(_buf).pipe();}
 };
 
 typedef basic_ipstream<char>     ipstream;
@@ -325,9 +334,9 @@ public:
 
     ///Default constructor.
     basic_opstream() : std::basic_ostream<CharT, Traits>(nullptr)
-	{
-    	std::basic_ostream<CharT, Traits>::rdbuf(&_buf);
-	};
+    {
+        std::basic_ostream<CharT, Traits>::rdbuf(&_buf);
+    };
     ///Copy constructor.
     basic_opstream(const basic_opstream & ) = delete;
     ///Move constructor.
@@ -336,13 +345,13 @@ public:
     ///Move construct from a pipe.
     basic_opstream(pipe_type && p)      : std::basic_ostream<CharT, Traits>(nullptr), _buf(std::move(p))
     {
-		std::basic_ostream<CharT, Traits>::rdbuf(&_buf);
-	};
+        std::basic_ostream<CharT, Traits>::rdbuf(&_buf);
+    };
     ///Copy construct from a pipe.
     basic_opstream(const pipe_type & p) : std::basic_ostream<CharT, Traits>(nullptr), _buf(p)
     {
-		std::basic_ostream<CharT, Traits>::rdbuf(&_buf);
-	};
+        std::basic_ostream<CharT, Traits>::rdbuf(&_buf);
+    };
     ///Copy assignment.
     basic_opstream& operator=(const basic_opstream & ) = delete;
     ///Move assignment
@@ -363,10 +372,12 @@ public:
     void pipe(pipe_type&& p)      {_buf.pipe(std::move(p)); }
     ///Set the pipe of the streambuf.
     void pipe(const pipe_type& p) {_buf.pipe(p); }
-    ///Get a const reference of the pipe.
-    const pipe_type &pipe() const {return _buf.pipe();}
-    ///Get a reference of the pipe. \note Is a reference so it can be moved.
-    pipe_type       &pipe()       {return _buf.pipe();}
+    ///Get a reference to the pipe.
+    pipe_type &      pipe() &       {return _buf.pipe();}
+    ///Get a const reference to the pipe.
+    const pipe_type &pipe() const & {return _buf.pipe();}
+    ///Get a rvalue reference to the pipe. Qualified as rvalue.
+    pipe_type &&     pipe()  &&     {return std::move(_buf).pipe();}
 };
 
 typedef basic_opstream<char>     opstream;
@@ -398,9 +409,9 @@ public:
 
     ///Default constructor.
     basic_pstream() : std::basic_iostream<CharT, Traits>(nullptr)
-	{
-		std::basic_iostream<CharT, Traits>::rdbuf(&_buf);
-	};
+    {
+        std::basic_iostream<CharT, Traits>::rdbuf(&_buf);
+    };
     ///Copy constructor.
     basic_pstream(const basic_pstream & ) = delete;
     ///Move constructor.
@@ -408,14 +419,14 @@ public:
 
     ///Move construct from a pipe.
     basic_pstream(pipe_type && p)      : std::basic_iostream<CharT, Traits>(nullptr), _buf(std::move(p))
-	{
-		std::basic_iostream<CharT, Traits>::rdbuf(&_buf);
-	};
+    {
+        std::basic_iostream<CharT, Traits>::rdbuf(&_buf);
+    };
     ///Copy construct from a pipe.
     basic_pstream(const pipe_type & p) : std::basic_iostream<CharT, Traits>(nullptr), _buf(p)
-	{
-		std::basic_iostream<CharT, Traits>::rdbuf(&_buf);
-	};
+    {
+        std::basic_iostream<CharT, Traits>::rdbuf(&_buf);
+    };
     ///Copy assignment.
     basic_pstream& operator=(const basic_pstream & ) = delete;
     ///Move assignment
@@ -436,10 +447,12 @@ public:
     void pipe(pipe_type&& p)      {_buf.pipe(std::move(p)); }
     ///Set the pipe of the streambuf.
     void pipe(const pipe_type& p) {_buf.pipe(p); }
-    ///Get a const reference of the pipe.
-    const pipe_type &pipe() const {return _buf.pipe();}
-    ///Get a reference of the pipe. \note Is a reference so it can be moved.
-    pipe_type       &pipe()       {return _buf.pipe();}
+    ///Get a reference to the pipe.
+    pipe_type &      pipe() &       {return _buf.pipe();}
+    ///Get a const reference to the pipe.
+    const pipe_type &pipe() const & {return _buf.pipe();}
+    ///Get a rvalue reference to the pipe. Qualified as rvalue.
+    pipe_type &&     pipe()  &&     {return std::move(_buf).pipe();}
 };
 
 typedef basic_pstream<char>     pstream;
