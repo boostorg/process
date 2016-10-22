@@ -43,8 +43,6 @@ BOOST_AUTO_TEST_CASE(terminate_set_on_error)
     c.terminate(ec);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     BOOST_CHECK(!c.running(ec));
-    BOOST_CHECK(c.exit_code());
-
     BOOST_CHECK(!ec);
 }
 
@@ -70,5 +68,4 @@ BOOST_AUTO_TEST_CASE(terminate_throw_on_error)
     c.terminate();
     std::this_thread::sleep_for(std::chrono::milliseconds(5)); 
     BOOST_CHECK(!c.running());
-    BOOST_CHECK(c.exit_code());
 }
