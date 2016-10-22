@@ -188,9 +188,9 @@ public:
     ///Get the asio handle of the pipe source.
     const handle_type & source() const &;
 
-    ///Get the asio handle of the pipe sink.
+    ///Get the asio handle of the pipe sink. Qualified as rvalue
     handle_type && sink  () &&;
-    ///Get the asio handle of the pipe source.
+    ///Get the asio handle of the pipe source. Qualified as rvalue
     handle_type && source() &&;
 
     /// Move the source out of this class and change the io_service. Qualified as rvalue. \attention Will always move.

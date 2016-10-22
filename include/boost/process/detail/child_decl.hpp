@@ -115,7 +115,7 @@ public:
 
     void terminate()
     {
-        if (valid() && !running())
+        if (valid() && running())
             boost::process::detail::api::terminate(_child_handle);
 
         _terminated = true;
@@ -175,7 +175,7 @@ public:
 
     void terminate(std::error_code & ec) noexcept
     {
-        if (valid() && !running(ec))
+        if (valid() && running(ec))
             boost::process::detail::api::terminate(_child_handle, ec);
 
         _terminated = true;

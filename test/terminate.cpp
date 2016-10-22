@@ -10,6 +10,9 @@
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_IGNORE_SIGCHLD
 #include <boost/test/included/unit_test.hpp>
+
+
+
 #include <boost/process/error.hpp>
 #include <boost/process/exe.hpp>
 #include <boost/process/child.hpp>
@@ -30,11 +33,16 @@ BOOST_AUTO_TEST_CASE(terminate_set_on_error)
     );
     BOOST_REQUIRE(!ec);
 
-    BOOST_CHECK(c.running());
-    c.terminate(); //throws on error
-    std::this_thread::sleep_for(std::chrono::milliseconds(5)); 
+    BOOST_CHECK(c.valid());
+    BOOST_CHECK(c.running(ec));
 
-    BOOST_CHECK(!c.running());
+    BOOST_CHECK(!c.wait_for(std::chrono::milliseconds(100), ec));
+    BOOST_CHECK(c.running(ec));
+    BOOST_CHECK(c.valid());
+
+    c.terminate(ec);
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    BOOST_CHECK(!c.running(ec));
     BOOST_CHECK(!ec);
 }
 
@@ -50,7 +58,13 @@ BOOST_AUTO_TEST_CASE(terminate_throw_on_error)
         ec
     );
     BOOST_REQUIRE(!ec);
+    BOOST_CHECK(c.valid());
     BOOST_CHECK(c.running());
+
+    BOOST_CHECK(!c.wait_for(std::chrono::milliseconds(100), ec));
+    BOOST_CHECK(c.running(ec));
+    BOOST_CHECK(c.valid());
+
     c.terminate();
     std::this_thread::sleep_for(std::chrono::milliseconds(5)); 
     BOOST_CHECK(!c.running());

@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
     }
     else if (vm["loop"].as<bool>())
     {
-        for (;;);
+        while (true);
     }
     else if (vm.count("prefix"))
     {
