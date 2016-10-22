@@ -9,15 +9,16 @@
 
 #include <boost/process.hpp>
 
-using namespace boost::process;
+namespace bp = boost::process;
 
 int main()
 {
-//[modifiy_env
-    boost::process::environment my_env = boost::this_process::environment(); //empty env, that would fail.
-    system("test.exe", my_env);
-//]
-//[inherit_env
-    system("test.exe", env["PATH"]+="/tmp");
-//]
+    bp::environment my_env = boost::this_process::environment();
+
+    my_env["PATH"] += "/foo";
+    bp::system("test.exe", my_env);
+
+
+
+    bp::system("test.exe", bp::env["PATH"]+="/bar");
 }

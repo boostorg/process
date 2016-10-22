@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(inherit_env, *boost::unit_test::timeout(2))
             );
     }
     else
-    	BOOST_CHECK(boost::starts_with(s, "************** empty environment **************"));
+        BOOST_CHECK(boost::starts_with(s, "************** empty environment **************"));
     c.wait();
 }
 

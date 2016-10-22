@@ -84,7 +84,7 @@ class child
     /** Get the native handle for the child process. */
     native_handle_t native_handle() const;
 
-    /** Get the exit_code. The return value is without any meaning if the child wasn't waited for. */
+    /** Get the exit_code. The return value is without any meaning if the child wasn't waited for or if it was terminated. */
     int exit_code() const;
     /** Get the Process Identifier. */
     pid_t id()      const;

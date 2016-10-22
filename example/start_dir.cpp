@@ -8,29 +8,20 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include <boost/process.hpp>
-#if defined(BOOST_POSIX_API)
-#   include <signal.h>
-#endif
+#include <boost/filesystem.hpp>
 
-using namespace boost::process;
+namespace bp = boost::process;
 
 int main()
 {
-//[cleanup
-    {
-        child c("test.exe");
-        //wait for exit
-    }
-//]
+    bp::system(
+        "test.exe",
+        bp::start_dir="../foo"
+    );
 
-//[cleanup_detach_short
-
-    spawn("test.exe");
-//]
-
-//[cleanup_system
-    {
-        system("test.exe");
-    }
-//]
+    boost::filesystem::path exe = "test.exe";
+    bp::system(
+        boost::filesystem::absolute(exe),
+        bp::start_dir="../foo"
+    );
 }

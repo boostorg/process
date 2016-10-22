@@ -11,27 +11,19 @@
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
 #include <string>
-#if defined(BOOST_WINDOWS_API)
-#   include <Windows.h>
-#endif
 
-using namespace boost::process;
+namespace bp = boost::process;
 
 int main()
 {
-//[async_io
     boost::asio::io_service ios;
-    boost::process::async_pipe p(ios);
-
-    child c(
-        "test.exe",
-        std_out > p, ios
-    );
-
     boost::asio::streambuf buffer;
-    boost::asio::async_read_until(p, buffer, '\n',
-        [](const boost::system::error_code&, std::size_t){});
+
+
+    bp::child c(
+        "test.exe",
+        bp::std_out > buffer
+        );
 
     ios.run();
-//]
 }

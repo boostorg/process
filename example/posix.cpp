@@ -18,21 +18,19 @@ using namespace boost::process;
 
 int main()
 {
-//[bind_fd
 
+    //duplicate our pipe descriptor into literal position 4
     pipe p;
     system("test", posix::fd.bind(4, p.native_sink())    );
-//]
 
-//[close_fd
+
+    //close file-descriptor from explicit integral value
     system("test", posix::fd.close(STDIN_FILENO));
-//]
 
-//[close_fds
+    //close file-descriptors from explicit integral values
     system("test", posix::fd.close({STDIN_FILENO, STDOUT_FILENO}));
-//]
 
-//[fork_execve
+    //add custom handlers
     const char *env[2] = { 0 };
     env[0] = "LANG=de";
     system("test",
@@ -44,5 +42,5 @@ int main()
         posix::on_exec_error([](auto&)
             { std::ofstream ofs("log.txt"); if (ofs) ofs << errno; })
     );
-//]
+
 }

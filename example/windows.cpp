@@ -13,21 +13,18 @@
 
 #include <windows.h>
 
-using namespace boost::process;
+namespace bp = boost::process;
 
 int main()
 {
-//[show_window
-    system("test.exe",
-            windows::show);
-//]
+    bp::system("test.exe",
+        bp::windows::show);
 
-//[create_process
-    system("test.exe",
-        on_setup([](auto &e)
+
+    bp::system("test.exe",
+        bp::on_setup([](auto &e)
             { e.startup_info.dwFlags = STARTF_RUNFULLSCREEN; }),
-        on_error([](auto&, const std::error_code & ec)
+        bp::on_error([](auto&, const std::error_code & ec)
             { std::cerr << ec.message() << std::endl; })
-    );
-//]
+        );
 }

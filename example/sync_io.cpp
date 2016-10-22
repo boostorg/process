@@ -10,22 +10,19 @@
 #include <boost/process.hpp>
 #include <string>
 
-using namespace boost::process;
+namespace bp = boost::process;
 
 int main()
 {
-//[sync_io
-    boost::process::ipstream p;
+    bp::ipstream p;
 
-    child c(
+    bp::child c(
         "test.exe",
-        std_out > p
+        bp::std_out > p
     );
-
 
     std::string s;
     std::getline(p, s);
 
     c.wait();
-//]
 }
