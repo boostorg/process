@@ -36,6 +36,8 @@ alias system           : /boost//system          ;
 alias thread           : /boost//thread          ;
 alias coroutine        : /boost//coroutine       : <link>static ;
 
+lib multi_ref : multi_ref1.cpp multi_ref2.cpp system ;
+
 exe sparring_partner : sparring_partner.cpp program_options system filesystem iostreams :
     <warnings>off
     ;

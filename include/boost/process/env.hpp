@@ -209,7 +209,7 @@ struct env_proxy
     {
         return {std::move(key), make_env_string<Char>(value)};
     }
-    env_set<Char> operator=(const std::initializer_list<const char*> & value)
+    env_set<Char> operator=(const std::initializer_list<const Char*> & value)
     {
         return {std::move(key), make_env_string<Char>(value)};
     }

@@ -19,12 +19,12 @@
 namespace boost {
   namespace process {
     namespace windows {
-    <emphasis>unspecified</emphasis> <globalname alt="boost::process::posix::fd">fd</globalname>;
-    <emphasis>unspecified</emphasis> <globalname alt="boost::process::posix::on_fork_error">on_fork_error</globalname>;
-    <emphasis>unspecified</emphasis> <globalname alt="boost::process::posix::on_exec_setup">on_exec_setup</globalname>;
-    <emphasis>unspecified</emphasis> <globalname alt="boost::process::posix::on_exec_error">on_exec_error</globalname>;
-    <emphasis>unspecified</emphasis> <globalname alt="boost::process::posix::sig">sig</globalname>;
-    <emphasis>unspecified</emphasis> <globalname alt="boost::process::posix::use_vfork">use_vfork</globalname>;
+      <emphasis>unspecified</emphasis> <globalname alt="boost::process::posix::fd">fd</globalname>;
+      <emphasis>unspecified</emphasis> <globalname alt="boost::process::posix::on_fork_error">on_fork_error</globalname>;
+      <emphasis>unspecified</emphasis> <globalname alt="boost::process::posix::on_exec_setup">on_exec_setup</globalname>;
+      <emphasis>unspecified</emphasis> <globalname alt="boost::process::posix::on_exec_error">on_exec_error</globalname>;
+      <emphasis>unspecified</emphasis> <globalname alt="boost::process::posix::sig">sig</globalname>;
+      <emphasis>unspecified</emphasis> <globalname alt="boost::process::posix::use_vfork">use_vfork</globalname>;
     }
   }
 }

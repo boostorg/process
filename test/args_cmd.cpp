@@ -34,7 +34,9 @@ BOOST_AUTO_TEST_CASE(args, *boost::unit_test::timeout(2))
     std::error_code ec;
     bp::child c(
         master_test_suite().argv[1],
-        "test", "--echo-argv", "hello thingy", "\"stuff\"", "  spa ce  ",
+        "test", "--echo-argv",
+		bp::args+={"hello thingy", "\"stuff\""},
+		bp::args+="  spa ce  ",
         bp::std_out>is,
         ec
     );
