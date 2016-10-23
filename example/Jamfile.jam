@@ -17,15 +17,12 @@ import testing ;
 
 compile args.cpp ;
 compile async_io.cpp ;
-compile cleanup.cpp ;
 compile env.cpp ;
 compile error_handling.cpp ;
-compile execute.cpp ;
-compile intro.cpp ;
+compile io.cpp ;
 compile posix.cpp : <build>no <target-os>linux:<build>yes ;
-compile streams.cpp ;
+compile start_dir.cpp ;
 compile sync_io.cpp ;
 compile terminate.cpp ;
 compile wait.cpp ;
 compile windows.cpp : <build>no <target-os>windows:<build>yes ;
-compile work_dir.cpp ;

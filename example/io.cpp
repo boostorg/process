@@ -19,7 +19,7 @@ int main()
         "test.exe",
         bp::std_out > stdout, //forward
         bp::std_err.close(), //close
-        bp::std_in > bp::null //null in
+        bp::std_in < bp::null //null in
     );
 
     boost::filesystem::path p = "input.txt";

@@ -22,7 +22,8 @@ int main()
 
     bp::child c(
         "test.exe",
-        bp::std_out > buffer
+        bp::std_out > buffer,
+        ios
         );
 
     ios.run();
