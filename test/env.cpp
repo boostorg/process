@@ -171,8 +171,10 @@ BOOST_AUTO_TEST_CASE(append, *boost::unit_test::timeout(5))
     std::string s;
 
     std::getline(st, s);
-
+#if defined(BOOST_WINDOWS_API)
     BOOST_CHECK(boost::starts_with(s, "some_fictional_path_42;other;next"));
-
+#else
+    BOOST_CHECK(boost::starts_with(s, "some_fictional_path_42:other:next"));
+#endif
     c.wait();
 }

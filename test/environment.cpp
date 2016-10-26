@@ -122,7 +122,11 @@ BOOST_AUTO_TEST_CASE(insert_remove)
 
     env["BOOST_TEST_VAR"] = {"some string", "badabumm"};
 
+#if defined(BOOST_WINDOWS_API)
     BOOST_CHECK_EQUAL(env["BOOST_TEST_VAR"].to_string(), "some string;badabumm");
+#else
+    BOOST_CHECK_EQUAL(env["BOOST_TEST_VAR"].to_string(), "some string:badabumm");
+#endif
     BOOST_CHECK_EQUAL(sz +1, env.size());
 
     env["BOOST_TEST_VAR"].clear();
