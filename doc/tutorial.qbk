@@ -24,10 +24,16 @@
 [def bp::native_environment  [classref boost::process::basic_native_environment bp::native_environment]]
 [def boost::this_process::environment [funcref boost::this_process::environment boost::this_process::environment]]
 
+[def __wait_for__  [memberref boost::process::child::wait_for wait_for]]
+[def __wait_until__  [memberref boost::process::child::wait_until wait_until]]
+[def __detach__  [memberref boost::process::child::detach detach]]
+
+
 [def __reference__ [link process.reference reference]]
 
 [def boost::asio::yield_context [@http://www.boost.org/doc/libs/release/doc/html/boost_asio/reference/yield_context.html boost::asio::yield_context]]
 [def boost::asio::coroutine [@http://www.boost.org/doc/libs/release/doc/html/boost_asio/reference/coroutine.html boost::asio::coroutine]]
+[def boost::asio::yield_context [@http://www.boost.org/doc/libs/release/doc/html/boost_asio/reference/yield_context.html boost::asio::yield_context]]
 
 [section:tutorial Tutorial]
 
@@ -49,14 +55,14 @@ Which we can write exactly like this in boost.process.
 
 ```
 namespace bp = boost::process; //we will assume this for all further examples
-bp::system("g++ main.cpp");
+int result = bp::system("g++ main.cpp");
 ```
 
 The first thing we can do, is to separate the command and the executable into
 two parts, so it is more readable and can be built by a function.
 
 ```
-auto result = bp::system("g++", "main.cpp");
+int result = bp::system("g++", "main.cpp");
 ```
 
 With that sytax we still have "g++" hard-coded, so let's assume we get the string
@@ -64,14 +70,14 @@ from an external source as `boost::filesystem::path`, we can do this too.
 
 ```
 boost::filesystem::path p = "g++"; //or get it from somewhere else.
-auto result = bp::system(p, "main.cpp");
+int result = bp::system(p, "main.cpp");
 ```
 
 Now, there is a subtle difference between the two syntaxes, i.e. passing a
 single string or passing one. When passing several string, the first string will be
 interpreted as the name of a file and the rest as arguments; 
 when passing one string it will be interpreted as a command. 
-This might lead to different results, which are platform dependent. 
+This might lead to different results which are platform dependent. 
 
 For more details please see the [link boost_process.design.arg_cmd_style design description].
 
@@ -115,10 +121,10 @@ things while the process is running and afterwards get the exit code. The call
 to child_wait is necessary, to obtain it and tell the operating system, that no
 one is waiting for the process anymore.
 
-[note You can also wait for a time span or a until a time point with wait_for and wait_until]
+[note You can also wait for a time span or a until a time point with __wait_for__ and __wait_until__]
 
-[warning If you don't call wait on a child object, it will be terminated on destructor call.
-This can be avoided by calling child::detach beforehand]  
+[warning If you don't call wait on a child object, it will be terminated on destruction.
+This can be avoided by calling __detach__ beforehand]  
 
 [endsect]
 [section:error_handling Error]
@@ -158,7 +164,8 @@ Every entry point will be put into a single line, and we will use a pipe to read
 At the end and empty line is appended which we use as the indication to stop reading.
 Boost.process provides the pipestream ([classref boost::process::ipstream ipstream], 
 [classref boost::process::opstream opstream], [classref boost::process::pstream pstream]) to
-wrap around the pipe and provide the [@http://en.cppreference.com/w/cpp/io/basic_istream std::istream]
+wrap around the pipe and provide an implenentation of the 
+[@http://en.cppreference.com/w/cpp/io/basic_istream std::istream]
 and [@http://en.cppreference.com/w/cpp/io/basic_ostream std::ostream] interface.
 
 ```
@@ -200,7 +207,7 @@ c.child_terminate();
 ```
 
 Now you might want to forward output from one process to another processes input.
-`nm` has a demangle option, but for the sake of the example, we'll use `c++file` for this.
+`nm` has a demangle option, but for the sake of the example, we'll use `c++filt` for this.
 
 ```
 std::vector<std::string> read_demangled_outline(std::string & file)
@@ -257,13 +264,11 @@ int result = c.exit_code();
 ```
 
 To make it easier, boost.process provides simpler interface for that, so that the buffer can be passed directly, 
-provided we also pass the io_service. 
+provided we also pass a reference to an io_service. 
 
 ```
 io_service ios;
 std::vector<char> buf;
-
-bp::async_pipe ap(ios);
 
 child c("g++", "main.cpp", bp::std_out > asio_buffer(buf), ios);
 
@@ -276,7 +281,7 @@ int result = c.exit_code();
 [memberref boost::process::child::wait wait] is needed]
  
 To make it even easier, you can use [@http://en.cppreference.com/w/cpp/thread/future std::future] for asynchronous operations
-(you will still need to pass a reference to a io_service) to the launching function, unless you use `system`.
+(you will still need to pass a reference to a io_service) to the launching function, unless you use bp::system.
 
 Now we will revisit our first example and read the compiler output asynchronously:
 
@@ -288,7 +293,7 @@ std::future<std::string> data;
 child c("g++", "main.cpp", //set the input
         bp::std_in.close(), 
         bp::std_out > bp::null, //so it can be written without anything
-        bp::std_err > bp::data, 
+        bp::std_err > data, 
         ios);
 
 
@@ -301,9 +306,10 @@ auto err =  fut.get();
 [section:group Groups]
 
 When launching several processes, processes can be grouped together. 
-This will also apply for a child process, that launches other processes. E.g. 
-if you call `make` which launches other processes and call child_terminate on it, 
-it will not terminate all the child processes of the child.
+This will also apply for a child process, that launches other processes, 
+if they do not modifiy the group membership. E.g. if you call `make` which 
+launches other processes and call terminate on it, 
+it will not terminate all the child processes of the child unless you use a group.
 
 ```
 bp::group g;

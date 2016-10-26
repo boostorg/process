@@ -233,7 +233,7 @@ inline auto basic_environment_impl<Char>::get(const string_type &id) -> string_t
             {
                 if (st.size() <= id.size())
                     return false;
-                return std::equal(id.begin(), id.end(), st.begin()) && (st[id.size()] == equal_sign<Char());
+                return std::equal(id.begin(), id.end(), st.begin()) && (st[id.size()] == equal_sign<Char>());
             }
         );
 
@@ -253,7 +253,7 @@ inline void basic_environment_impl<Char>::set(const string_type &id, const strin
         {
             if (st.size() <= id.size())
                 return false;
-            return std::equal(id.begin(), id.end(), st.begin()) && (st[id.size()] == equal_sign<Char());
+            return std::equal(id.begin(), id.end(), st.begin()) && (st[id.size()] == equal_sign<Char>());
         }
     );
 
