@@ -17,7 +17,7 @@ into the boost::process namespace for convenience.
 <programlisting>
 namespace boost {
   namespace process {
-    <emphasis>unspecified</emphasis> buffer;
+    <emphasis>unspecified</emphasis> <ulink url="http://www.boost.org/doc/libs/1_61_0/doc/html/boost_asio/reference/buffer.html">buffer</ulink>;
     <emphasis>unspecified</emphasis> <globalname alt="boost::process::on_exit">on_exit</globalname>;
   }
 }
@@ -101,7 +101,7 @@ on_exit=function;
 on_exit(function);
 \endcode
 
-with `function` being callable with `(int, const std::error_code&)`.
+with `function` being a callable object with the signature `(int, const std::error_code&)`.
 
 \par Example
 

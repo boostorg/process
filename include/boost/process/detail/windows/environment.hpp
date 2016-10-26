@@ -233,7 +233,7 @@ template<typename Char>
 inline auto basic_environment_impl<Char>::get(const string_type &id) -> string_type
 {
 
-    if (std::equal(id.begin(), id.end(), _data.begin()) && (_data[id.size()] == '='))
+    if (std::equal(id.begin(), id.end(), _data.begin()) && (_data[id.size()] == equal_sign<Char>()))
         return string_type(_data.data()); //null-char is handled by the string.
 
     std::vector<Char> seq = {'\0'}; //using a vector, because strings might cause problems with nullchars
@@ -275,7 +275,7 @@ inline void  basic_environment_impl<Char>::reset(const string_type &id)
         return;
 
     //check if it's the first one, spares us the search.
-    if (std::equal(id.begin(), id.end(), _data.begin()) && (_data[id.size()] == '='))
+    if (std::equal(id.begin(), id.end(), _data.begin()) && (_data[id.size()] == equal_sign<Char>()))
     {
         auto beg = _data.begin();
         auto end = beg;
@@ -335,8 +335,9 @@ std::vector<Char*> basic_environment_impl<Char>::_load_var(Char* p)
 }
 
 
-
-
+template<typename T> constexpr T env_seperator();
+template<> constexpr  char   env_seperator() {return  ";"; }
+template<> constexpr wchar_t env_seperator() {return L";"; }
 
 inline int   get_id()         {return boost::detail::winapi::GetCurrentProcessId();}
 inline void* native_handle()  {return boost::detail::winapi::GetCurrentProcess(); }

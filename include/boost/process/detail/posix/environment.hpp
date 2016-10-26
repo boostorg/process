@@ -233,7 +233,7 @@ inline auto basic_environment_impl<Char>::get(const string_type &id) -> string_t
             {
                 if (st.size() <= id.size())
                     return false;
-                return std::equal(id.begin(), id.end(), st.begin()) && (st[id.size()] == '=');
+                return std::equal(id.begin(), id.end(), st.begin()) && (st[id.size()] == equal_sign<Char());
             }
         );
 
@@ -253,7 +253,7 @@ inline void basic_environment_impl<Char>::set(const string_type &id, const strin
         {
             if (st.size() <= id.size())
                 return false;
-            return std::equal(id.begin(), id.end(), st.begin()) && (st[id.size()] == '=');
+            return std::equal(id.begin(), id.end(), st.begin()) && (st[id.size()] == equal_sign<Char());
         }
     );
 
@@ -277,7 +277,7 @@ inline void  basic_environment_impl<Char>::reset(const string_type &id)
         {
             if (st.size() <= id.size())
                 return false;
-            return std::equal(id.begin(), id.end(), st.begin()) && (st[id.size()] == '=');
+            return std::equal(id.begin(), id.end(), st.begin()) && (st[id.size()] == equal_sign<Char>());
         }
     );
     if (itr != _data.end())
@@ -303,7 +303,9 @@ std::vector<Char*> basic_environment_impl<Char>::_load_var(std::vector<std::basi
     return ret;
 }
 
-
+template<typename T> constexpr T env_seperator();
+template<> constexpr  char   env_seperator() {return  ":"; }
+template<> constexpr wchar_t env_seperator() {return L":"; }
 
 
 typedef int native_handle_t;

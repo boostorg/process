@@ -26,11 +26,11 @@ namespace detail {
 template<typename Char, typename Environment>
 struct const_entry
 {
-    typedef Char value_type;
-    typedef const value_type * pointer;
-    typedef std::basic_string<value_type> string_type;
-    typedef boost::iterator_range<pointer> range;
-    typedef Environment environment_t;
+	using value_type    = Char ;
+    using pointer       = const value_type * ;
+    using string_type   = std::basic_string<value_type> ;
+    using range         = boost::iterator_range<pointer> ;
+    using environment_t = Environment ;
 
     std::vector<string_type> to_vector() const
     {
@@ -40,8 +40,8 @@ struct const_entry
         auto str = string_type(_data);
         struct splitter
         {
-            bool operator()(wchar_t w) const {return w == L';';}
-            bool operator()(char c)    const {return c == ';';}
+            bool operator()(wchar_t w) const {return api::env_seperator<wchar_t>();}
+            bool operator()(char c)    const {return api::env_seperator<char>   ();}
         } s;
         boost::split(data, _data, s);
         return std::move(data);
@@ -86,6 +86,7 @@ template<typename Char, typename Environment>
 struct entry : const_entry<Char, Environment>
 {
     using father = const_entry<Char, Environment>;
+    using value_type    = typename father::value_type;
     using string_type   = typename father::string_type;
     using pointer       = typename father::pointer;
     using environment_t = typename father::environment_t;
@@ -110,7 +111,7 @@ struct entry : const_entry<Char, Environment>
         for (auto &v : value)
         {
             if (&v != &value.front())
-                data += ';';
+                data += api::env_seperator<value_type>();
             data += v;
         }
         this->_env->set(this->_name, data);
@@ -123,7 +124,7 @@ struct entry : const_entry<Char, Environment>
         for (auto &v : value)
         {
             if (&v != &*value.begin())
-                data += ';';
+                data += api::env_seperator<value_type>();
             data += v;
         }
         this->_env->set(this->_name, data);
@@ -137,7 +138,7 @@ struct entry : const_entry<Char, Environment>
         else
         {
             string_type st = this->_data;
-            this->_env->set(this->_name, st + ';' + value);
+            this->_env->set(this->_name, st + api::env_seperator<value_type>() + value);
 
         }
         this->reload();
@@ -424,7 +425,7 @@ public:
         typedef boost::iterator_range<pointer> range;
         typedef Environment environment_t;
 
-        ///Split the entry by ";" and return it as a vector. Used by PATH.
+        ///Split the entry by ";" or ":" and return it as a vector. Used by PATH.
         std::vector<string_type> to_vector() const
         ///Get the value as string.
         string_type to_string()              const
@@ -451,7 +452,7 @@ public:
         typedef boost::iterator_range<pointer> range;
         typedef Environment environment_t;
 
-        ///Split the entry by ";" and return it as a vector. Used by PATH.
+        ///Split the entry by ";" or ":" and return it as a vector. Used by PATH.
         std::vector<string_type> to_vector() const
         ///Get the value as string.
         string_type to_string()              const
@@ -466,17 +467,17 @@ public:
 
         ///Assign a string to the value
         void assign(const string_type &value);
-        ///Assign a set of strings to the entry; they will be seperated by ';'.
+        ///Assign a set of strings to the entry; they will be seperated by ';' or ':'.
         void assign(const std::vector<string_type> &value);
-        ///Append a string to the end of the entry, it will seperated by ';'.
+        ///Append a string to the end of the entry, it will seperated by ';' or ':'.
         void append(const string_type &value);
         ///Reset the value
         void clear();
         ///Assign a string to the entry.
         entry &operator=(const string_type & value);
-        ///Assign a set of strings to the entry; they will be seperated by ';'.
+        ///Assign a set of strings to the entry; they will be seperated by ';' or ':'.
         entry &operator=(const std::vector<string_type> & value);
-        ///Append a string to the end of the entry, it will seperated by ';'.
+        ///Append a string to the end of the entry, it will seperated by ';' or ':'.
         entry &operator+=(const string_type & value);
     };
 
@@ -586,17 +587,17 @@ public:
 
         ///Assign a string to the value
         void assign(const string_type &value);
-        ///Assign a set of strings to the entry; they will be seperated by ';'.
+        ///Assign a set of strings to the entry; they will be seperated by ';' or ':'.
         void assign(const std::vector<string_type> &value);
-        ///Append a string to the end of the entry, it will seperated by ';'.
+        ///Append a string to the end of the entry, it will seperated by ';'  or ':'.
         void append(const string_type &value);
         ///Reset the value
         void clear();
         ///Assign a string to the entry.
         entry &operator=(const string_type & value);
-        ///Assign a set of strings to the entry; they will be seperated by ';'.
+        ///Assign a set of strings to the entry; they will be seperated by ';' or ':'.
         entry &operator=(const std::vector<string_type> & value);
-        ///Append a string to the end of the entry, it will seperated by ';'.
+        ///Append a string to the end of the entry, it will seperated by ';' or ':'.
         entry &operator+=(const string_type & value);
     };
 

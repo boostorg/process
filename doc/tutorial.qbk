@@ -11,7 +11,7 @@
 [def child_running [memberref boost::process::child::running running]]
 [def child_wait [memberref boost::process::child::wait wait]]
 [def child_exit_code [memberref boost::process::child::exit_code exit_code]]
-[def bp::on_exit [memberref boost::process::child::on_exit bp::on_exit]]
+[def bp::on_exit [globalref boost::process::on_exit bp::on_exit]]
 [def child_terminate [memberref boost::process::child::terminate terminate]]
 [def group_terminate [memberref boost::process::group::terminate terminate]]
 [def bp::std_in [globalref boost::process::std_in bp::std_in]]

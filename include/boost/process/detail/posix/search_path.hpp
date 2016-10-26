@@ -20,17 +20,10 @@
 
 namespace boost { namespace process { namespace detail { namespace posix {
 
-inline std::string search_path(const std::string &filename,
-    std::string path = "")
+inline boost::filesystem::path search_path(
+        const boost::filesystem::path &filename,
+        const std::string &path = ::getenv("PATH"))
 {
-    if (path.empty())
-    {
-        path = ::getenv("PATH");
-        if (path.empty())
-             throw std::runtime_error(
-                "Environment variable PATH not found");
-    }
-
     std::string result;
     typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
     boost::char_separator<char> sep(":");
