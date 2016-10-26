@@ -304,8 +304,8 @@ std::vector<Char*> basic_environment_impl<Char>::_load_var(std::vector<std::basi
 }
 
 template<typename T> constexpr T env_seperator();
-template<> constexpr  char   env_seperator() {return  ":"; }
-template<> constexpr wchar_t env_seperator() {return L":"; }
+template<> constexpr  char   env_seperator() {return  ':'; }
+template<> constexpr wchar_t env_seperator() {return L':'; }
 
 
 typedef int native_handle_t;

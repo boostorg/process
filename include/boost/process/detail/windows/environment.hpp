@@ -336,8 +336,8 @@ std::vector<Char*> basic_environment_impl<Char>::_load_var(Char* p)
 
 
 template<typename T> constexpr T env_seperator();
-template<> constexpr  char   env_seperator() {return  ";"; }
-template<> constexpr wchar_t env_seperator() {return L";"; }
+template<> constexpr  char   env_seperator() {return  ';'; }
+template<> constexpr wchar_t env_seperator() {return L';'; }
 
 inline int   get_id()         {return boost::detail::winapi::GetCurrentProcessId();}
 inline void* native_handle()  {return boost::detail::winapi::GetCurrentProcess(); }

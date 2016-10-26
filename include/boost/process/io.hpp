@@ -345,7 +345,7 @@ child c2("c++filt", std_in<p);
 \subsection stdin_async_pipe Asynchronous Pipe Input
 
 Asynchronous Pipe I/O classifies communication which has automatically handling
-of the async operations by the process library. This means, that a pipe will be
+of the asynchronous operations by the process library. This means, that a pipe will be
 constructed, the async_read/-write will be automatically started, and that the
 end of the child process will also close the pipe.
 
@@ -368,7 +368,8 @@ std_err = buffer;
 (std_out & std_err) = buffer;
 \endcode
 
-\note  It is also possible to get a future for std_in, by chaining another `std::future<void>` onto it, i.e.
+\note  It is also possible to get a future for std_in, by chaining another `std::future<void>` onto it,
+so you can wait for the input to be completed. It looks like this:
 \code{.cpp}
 std::future<void> fut;
 boost::asio::io_service ios;
@@ -376,6 +377,7 @@ std::string data;
 child c("prog", std_in < buffer(data) >  fut, ios);
 fut.get();
 \endcode
+
 
 \note `boost::asio::buffer` is also available in the `boost::process` namespace.
 
@@ -456,8 +458,8 @@ As explained in the corresponding section, the boost.process library provides a
 used to communicate with child processes.
 
 \note Technically the @ref boost::process::async_pipe "async_pipe"
-works synchronous here, since no asio implementation is used by the library here.
-The async-operation will then however not end if the process is finished, since
+works like a synchronous pipe here, since no asio implementation is used by the library here.
+The asynchronous operation will then however not end if the process is finished, since
 the pipe remains open. You can use the async_close function with on_exit to fix that.
 
 Valid expressions with pipes are these:

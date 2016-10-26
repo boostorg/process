@@ -33,10 +33,10 @@ Both styles can also be mixed in some cases.
 system("gcc", "-c", args+={"main.cpp"});
 ```
 
-In the following documention the avaible styles will be described. Note that the
+In the following this the avaible styles will be described. Note that the
 overload style is implemented via type traits, so the types will be listed. 
 
-[caution There is guarantee in which order the arguments will be applied! 
+[caution There is no guarantee in which order the arguments will be applied! 
 There is however a guarantee for arguments belonging together, i.e. the string 
 argument and the args property will be evaluated in the order given.]
 
@@ -53,7 +53,8 @@ interpret each string as an argument.
     [["gcc --version"]     [{"gcc", "--version"}]     [{"\\"gcc --version\\""}]]
 ] 
 
-When using the overloading variant, a single string will result in a cmd interpretation, several strings will yield a exe-args interpretation. Both version can be set explicitly:
+When using the overloading variant, a single string will result in a cmd interpretation, 
+several strings will yield a exe-args interpretation. Both version can be set explicitly:
 
 ```
 system("grep -c false /etc/passwd"); //cmd style

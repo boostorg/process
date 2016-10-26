@@ -22,7 +22,9 @@
 [def asio_async_read [@http://www.boost.org/doc/libs/release/doc/html/boost_asio/reference/async_read.html boost::asio::async_read]]
 [def bp::environment  [classref boost::process::basic_environment bp::environment]]
 [def bp::native_environment  [classref boost::process::basic_native_environment bp::native_environment]]
-[def boost::this_process::environment [funcref boost::this_process::environment boost::this_process::environment]] 
+[def boost::this_process::environment [funcref boost::this_process::environment boost::this_process::environment]]
+
+[def __reference__ [link process.reference reference]]
 
 [def boost::asio::yield_context [@http://www.boost.org/doc/libs/release/doc/html/boost_asio/reference/yield_context.html boost::asio::yield_context]]
 [def boost::asio::coroutine [@http://www.boost.org/doc/libs/release/doc/html/boost_asio/reference/coroutine.html boost::asio::coroutine]]
@@ -30,12 +32,11 @@
 [section:tutorial Tutorial]
 
 In this section we will go step by step through the different features of
-boost.process. This is not a complete description, for which you should look
-into the handbook or the reference.
+boost.process. For a full description see the __reference__.
 
 [section Starting a process]
 
-Ok, we want to start a process, so let's start with a simple process. We will
+Wwe want to start a process, so let's start with a simple process. We will
 invoke the gcc compiler to compile a simple program.
 
 With the standard library this looks like this.

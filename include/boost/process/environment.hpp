@@ -26,7 +26,7 @@ namespace detail {
 template<typename Char, typename Environment>
 struct const_entry
 {
-	using value_type    = Char ;
+    using value_type    = Char ;
     using pointer       = const value_type * ;
     using string_type   = std::basic_string<value_type> ;
     using range         = boost::iterator_range<pointer> ;
@@ -357,7 +357,7 @@ public:
 #endif
 
 #if defined(BOOST_PROCESS_DOXYGEN)
-/**Template representation of environments. It takes a template
+/**Template representation of environments. It takes a character type (`char` or `wchar_t`)
  * as template parameter to implement the environment
  */
 template<typename Char>
@@ -545,7 +545,7 @@ public:
         typedef boost::iterator_range<pointer> range;
         typedef Environment environment_t;
 
-        ///Split the entry by ";" and return it as a vector. Used by PATH.
+        ///Split the entry by ";" or ":" and return it as a vector. Used by PATH.
         std::vector<string_type> to_vector() const
         ///Get the value as string.
         string_type to_string()              const
@@ -572,7 +572,7 @@ public:
         typedef boost::iterator_range<pointer> range;
         typedef Environment environment_t;
 
-        ///Split the entry by ";" and return it as a vector. Used by PATH.
+        ///Split the entry by ";" or ":" and return it as a vector. Used by PATH.
         std::vector<string_type> to_vector() const
         ///Get the value as string.
         string_type to_string()              const

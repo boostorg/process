@@ -70,7 +70,7 @@ public:
     {
         lhs._attached = false;
     }
-    ///Defaul constructor
+    ///Default constructor
     group() = default;
     group& operator=(const group&) = delete;
     ///Move assign
@@ -187,7 +187,6 @@ public:
     friend struct detail::group_builder;
 };
 
-//for now it'll just be declared here.
 namespace detail
 {
 
