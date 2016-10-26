@@ -71,7 +71,7 @@ inline std::basic_string<Char> make_env_string(const Container & value)
     s.reserve(sz); //+1 for ;, end doesn't have one.
 
     for (auto & val : value)
-        (s += val) += ';';
+        (s += val) += api::env_seperator<Char>();
 
     s.resize(s.size() -1); //remove last ';'
     return s;
@@ -333,7 +333,7 @@ struct initializer_builder<env_tag<wchar_t>>
 
 The `env` property provides a functional way to modify the environment used by
 the child process. If none is passed the environment is inherited from the father
-process. Appending means that the environment will be interpreted as a ';'
+process. Appending means that the environment will be interpreted as a ';' or ':'
 seperated list as used in `PATH`.
 
 On both `posix` and `windows` the environment variables can be lists of strings,
