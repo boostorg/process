@@ -43,7 +43,7 @@ template<> struct is_wchar_t<exe_setter_<wchar_t>> : std::true_type {};
 
 
 template<>
-struct char_converter<exe_setter_<char>, exe_setter_<wchar_t>>
+struct char_converter<char, exe_setter_<wchar_t>>
 {
     static exe_setter_<char> conv(const exe_setter_<wchar_t> & in)
     {
@@ -52,7 +52,7 @@ struct char_converter<exe_setter_<char>, exe_setter_<wchar_t>>
 };
 
 template<>
-struct char_converter<exe_setter_<wchar_t>, exe_setter_<char>>
+struct char_converter<wchar_t, exe_setter_<char>>
 {
     static exe_setter_<wchar_t> conv(const exe_setter_<char> & in)
     {

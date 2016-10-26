@@ -15,14 +15,13 @@ using namespace boost::process;
 int main()
 {
     ipstream pipe_stream;
-    system("gcc.exe", "--version", std_out > pipe_stream);
+    child c("gcc.exe", "--version", std_out > pipe_stream);
 
+    std::string line;
 
-    while (pipe_stream)
-    {
-        std::string value;
-        std::getline(pipe_stream, value);
-        std::cerr << value << std::endl;
-    }
+    while (pipe_stream && std::getline(pipe_stream, line) && !line.empty())
+        std::cerr << line << std::endl;
+
+    c.wait();
 }
 //]

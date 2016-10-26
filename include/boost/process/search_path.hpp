@@ -43,17 +43,18 @@ namespace boost { namespace process {
  * will then try the various file extensions for executables on
  * Windows to find filename.
  *
- * path must be a set of directories. Directories must be
+ * The path must be a set of directories. Directories must be
  * separated by colons on POSIX and by semicolons on Windows.
  * If path is empty, the environment variable PATH is used.
  *
+ * \param filename The base of the filename to find
+ *
+ * \param path the set of paths so search, defaults to "PATH" environment variable.
+ *
  * \returns the absolute path to the executable filename or an
  *          empty string if filename isn't found
- *
- * \throws std::runtime_error if path is empty and no environment
- *                            variable PATH exists
  */
-string_type search_path(const string_type &filename, string_type path = "");
+boost::filesystem::path search_path(const boost::filesystem::path &filename, const std::string &path = "");
 
 }}
 #endif

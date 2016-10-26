@@ -11,12 +11,19 @@
 #include <vector>
 #include <string>
 
-using namespace boost::process;
+namespace bp = boost::process;
 
 int main()
 {
-//[args
-    child c("test.exe", "--foo", "/bar");
-//]
+    bp::child c("test.exe", "--foo", "/bar");
+
+    //or explicit
+
+    bp::child c2(
+        bp::exe="test.exe",
+        bp::args={"--foo", "/bar"}
+        );
+
     c.wait();
+    c2.wait();
 }

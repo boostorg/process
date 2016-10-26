@@ -10,16 +10,15 @@
 #include <boost/process.hpp>
 #include <system_error>
 
-using namespace boost::process;
+namespace bp = boost::process;
 
 int main()
 {
-//[set_on_error
-    std::error_code ec;
-    child c1("test.exe", ec);
-//]
 
-//[ignore_error
-    child c2("test.exe", ignore_error);
-//]
+    std::error_code ec;
+    bp::child c1("test.exe", ec);
+
+
+    bp::child c2("test.exe", bp::ignore_error);
+
 }

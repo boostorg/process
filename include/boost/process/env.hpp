@@ -71,7 +71,7 @@ inline std::basic_string<Char> make_env_string(const Container & value)
     s.reserve(sz); //+1 for ;, end doesn't have one.
 
     for (auto & val : value)
-        (s += val) += ';';
+        (s += val) += api::env_seperator<Char>();
 
     s.resize(s.size() -1); //remove last ';'
     return s;
@@ -111,7 +111,7 @@ template<> struct is_wchar_t<basic_environment<wchar_t>> : std::true_type {};
 
 
 template<>
-struct char_converter<env_set<char>, env_set<wchar_t>>
+struct char_converter<char, env_set<wchar_t>>
 {
     static env_set<char> conv(const env_set<wchar_t> & in)
     {
@@ -121,7 +121,7 @@ struct char_converter<env_set<char>, env_set<wchar_t>>
 };
 
 template<>
-struct char_converter<env_set<wchar_t>, env_set<char>>
+struct char_converter<wchar_t, env_set<char>>
 {
     static env_set<wchar_t> conv(const env_set<char> & in)
     {
@@ -131,7 +131,7 @@ struct char_converter<env_set<wchar_t>, env_set<char>>
 };
 
 template<>
-struct char_converter<env_append<char>, env_append<wchar_t>>
+struct char_converter<char, env_append<wchar_t>>
 {
     static env_append<char> conv(const env_append<wchar_t> & in)
     {
@@ -141,7 +141,7 @@ struct char_converter<env_append<char>, env_append<wchar_t>>
 };
 
 template<>
-struct char_converter<env_append<wchar_t>, env_append<char>>
+struct char_converter<wchar_t, env_append<char>>
 {
     static env_append<wchar_t> conv(const env_append<char> & in)
     {
@@ -151,7 +151,7 @@ struct char_converter<env_append<wchar_t>, env_append<char>>
 };
 
 template<>
-struct char_converter<env_reset<char>, env_reset<wchar_t>>
+struct char_converter<char, env_reset<wchar_t>>
 {
     static env_reset<char> conv(const env_reset<wchar_t> & in)
     {
@@ -160,7 +160,7 @@ struct char_converter<env_reset<char>, env_reset<wchar_t>>
 };
 
 template<>
-struct char_converter<env_reset<wchar_t>, env_reset<char>>
+struct char_converter<wchar_t, env_reset<char>>
 {
     static env_reset<wchar_t> conv(const env_reset<char> & in)
     {
@@ -176,7 +176,7 @@ struct env_init
 };
 
 template<>
-struct char_converter<env_init<char>, env_init<wchar_t>>
+struct char_converter<char, env_init<wchar_t>>
 {
     static env_init<char> conv(const env_init<wchar_t> & in)
     {
@@ -185,7 +185,7 @@ struct char_converter<env_init<char>, env_init<wchar_t>>
 };
 
 template<>
-struct char_converter<env_init<wchar_t>, env_init<char>>
+struct char_converter<wchar_t, env_init<char>>
 {
     static env_init<wchar_t> conv(const env_init<char> & in)
     {
@@ -333,7 +333,7 @@ struct initializer_builder<env_tag<wchar_t>>
 
 The `env` property provides a functional way to modify the environment used by
 the child process. If none is passed the environment is inherited from the father
-process. Appending means that the environment will be interpreted as a ';'
+process. Appending means that the environment will be interpreted as a ';' or ':'
 seperated list as used in `PATH`.
 
 On both `posix` and `windows` the environment variables can be lists of strings,

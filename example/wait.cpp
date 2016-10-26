@@ -9,36 +9,26 @@
 
 #include <boost/process.hpp>
 #include <boost/asio.hpp>
-#if defined(BOOST_WINDOWS_API)
-#   include <Windows.h>
-#elif defined(BOOST_POSIX_API)
-#   include <sys/wait.h>
-#   include <errno.h>
-#endif
 
-using namespace boost::process;
+namespace bp = boost::process;
 
 int main()
 {
     {
-//[sync
-    child c("test.exe");
-    c.wait();
-    auto exit_code = c.exit_code();
-//]
+        bp::child c("test.exe");
+        c.wait();
+        auto exit_code = c.exit_code();
     }
 
     {
-//[async
-    boost::asio::io_service io_service;
+        boost::asio::io_service io_service;
 
-    child c(
-        "test.exe",
-        io_service,
-        on_exit([&](int exit, const std::error_code& ec_in){})
-    );
+        bp::child c(
+            "test.exe",
+            io_service,
+            bp::on_exit([&](int exit, const std::error_code& ec_in){})
+        );
 
-    io_service.run();
-//]
+        io_service.run();
     }
 }

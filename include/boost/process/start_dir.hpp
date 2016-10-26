@@ -69,7 +69,7 @@ struct start_dir_
 template<> struct is_wchar_t<api::start_dir_init<wchar_t>> { typedef std::true_type type;};
 
 template<>
-struct char_converter<api::start_dir_init<char>, api::start_dir_init<wchar_t>>
+struct char_converter<char, api::start_dir_init<wchar_t>>
 {
     static api::start_dir_init<char> conv(const api::start_dir_init<wchar_t> & in)
     {
@@ -78,7 +78,7 @@ struct char_converter<api::start_dir_init<char>, api::start_dir_init<wchar_t>>
 };
 
 template<>
-struct char_converter<api::start_dir_init<wchar_t>, api::start_dir_init<char>>
+struct char_converter<wchar_t, api::start_dir_init<char>>
 {
     static api::start_dir_init<wchar_t> conv(const api::start_dir_init<char> & in)
     {
