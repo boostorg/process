@@ -40,8 +40,8 @@ struct const_entry
         auto str = string_type(_data);
         struct splitter
         {
-            bool operator()(wchar_t w) const {return api::env_seperator<wchar_t>();}
-            bool operator()(char c)    const {return api::env_seperator<char>   ();}
+            bool operator()(wchar_t w) const {return w == api::env_seperator<wchar_t>();}
+            bool operator()(char c)    const {return c == api::env_seperator<char>   ();}
         } s;
         boost::split(data, _data, s);
         return std::move(data);
