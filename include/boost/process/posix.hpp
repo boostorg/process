@@ -30,8 +30,10 @@ namespace boost {
 }
 </programlisting>
  *  \endxmlonly
- *   \warning Only available on posix.
- *   See the parameter documentation of [ShowWindow](https://msdn.microsoft.com/en-us/library/windows/desktop/ms633548.aspx) for more details.
+ *   \warning Only available on posix. See the documentation of [fork](http://pubs.opengroup.org/onlinepubs/009695399/functions/fork.html),
+ *   [execve](http://pubs.opengroup.org/onlinepubs/009695399/functions/execve.html) and
+ *   [vfork](http://pubs.opengroup.org/onlinepubs/009695399/functions/vfork.html).
+ *
  */
 
 namespace boost { namespace process {
