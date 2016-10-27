@@ -103,7 +103,7 @@ while compiling:
 bp::spawn("chrome", boost_org);
 ```
 
-Now for the more sensible approach for compiling, we want a detached execution. 
+Now for the more sensible approach for compiling, we want a non-blocking execution. 
 To implement that, we directly call the constructor of [classref boost::process::child child].
 
 ```
