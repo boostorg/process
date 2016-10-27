@@ -42,7 +42,7 @@ boost.process. For a full description see the __reference__.
 
 [section Starting a process]
 
-Wwe want to start a process, so let's start with a simple process. We will
+We want to start a process, so let's start with a simple process. We will
 invoke the gcc compiler to compile a simple program.
 
 With the standard library this looks like this.
