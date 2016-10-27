@@ -124,7 +124,13 @@ class child
     /** \overload bool in_group() const */
     bool in_group(std::error_code & ec) const noexcept;
 
-    /** Terminate the child process. */
+    /** Terminate the child process.
+     *
+     *  This function will cause the child process to unconditionally and immediately exit.
+     *  It is implement with [SIGKILL](http://pubs.opengroup.org/onlinepubs/009695399/functions/kill.html) on posix
+     *  and [TerminateProcess](https://technet.microsoft.com/en-us/library/ms686714.aspx) on windows.
+     *
+     */
     void terminate();
 
     /** \overload void terminate() */

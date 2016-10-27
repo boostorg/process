@@ -1,10 +1,10 @@
 [def bp::system [funcref boost::process::system bp::system]]
-[def bp::spawn  [funcref boost::process::system bp::spawn]]
-[def bp::child  [classref boost::process::child bp::child]]
-[def bp::group  [classref boost::process::group bp::group]]
-[def bp::ipstream  [classref boost::process::ipstream bp::ipstream]]
-[def bp::opstream  [classref boost::process::opstream bp::opstream]]
-[def bp::pstream  [classref boost::process::pstream bp::pstream]]
+[def bp::spawn [funcref boost::process::system bp::spawn]]
+[def bp::child [classref boost::process::child bp::child]]
+[def bp::group [classref boost::process::group bp::group]]
+[def bp::ipstream [classref boost::process::ipstream bp::ipstream]]
+[def bp::opstream [classref boost::process::opstream bp::opstream]]
+[def bp::pstream [classref boost::process::pstream bp::pstream]]
 [def bp::pipe  [classref boost::process::pipe bp::pipe]]
 [def boost_org  [@www.boost.org "www.boost.org"]]
 [def std::system [@http://en.cppreference.com/w/cpp/utility/program/system std::system]]
@@ -12,6 +12,7 @@
 [def child_wait [memberref boost::process::child::wait wait]]
 [def child_exit_code [memberref boost::process::child::exit_code exit_code]]
 [def bp::on_exit [globalref boost::process::on_exit bp::on_exit]]
+[def bp::null [globalref boost::process::null bp::null]]
 [def child_terminate [memberref boost::process::child::terminate terminate]]
 [def group_terminate [memberref boost::process::group::terminate terminate]]
 [def bp::std_in [globalref boost::process::std_in bp::std_in]]
@@ -24,6 +25,7 @@
 [def bp::native_environment  [classref boost::process::basic_native_environment bp::native_environment]]
 [def boost::this_process::environment [funcref boost::this_process::environment boost::this_process::environment]]
 
+
 [def __wait_for__  [memberref boost::process::child::wait_for wait_for]]
 [def __wait_until__  [memberref boost::process::child::wait_until wait_until]]
 [def __detach__  [memberref boost::process::child::detach detach]]
@@ -33,7 +35,6 @@
 
 [def boost::asio::yield_context [@http://www.boost.org/doc/libs/release/doc/html/boost_asio/reference/yield_context.html boost::asio::yield_context]]
 [def boost::asio::coroutine [@http://www.boost.org/doc/libs/release/doc/html/boost_asio/reference/coroutine.html boost::asio::coroutine]]
-[def boost::asio::yield_context [@http://www.boost.org/doc/libs/release/doc/html/boost_asio/reference/yield_context.html boost::asio::yield_context]]
 
 [section:tutorial Tutorial]
 
@@ -77,7 +78,6 @@ Now, there is a subtle difference between the two syntaxes, i.e. passing a
 single string or passing one. When passing several string, the first string will be
 interpreted as the name of a file and the rest as arguments; 
 when passing one string it will be interpreted as a command. 
-This might lead to different results which are platform dependent. 
 
 For more details please see the [link boost_process.design.arg_cmd_style design description].
 
@@ -159,14 +159,16 @@ bp::system("g++", "main.cpp", bp::std_out > "gcc_out.log");
 ```
 
 Now, let's take a more visual example for reading data. 
-`nm` is a part of gcc, which reads the outline of a binary. 
+[@http://pubs.opengroup.org/onlinepubs/009696699/utilities/nm.html nm] is a tool on posix, 
+which reads the outline, i.e. a list of all entry points, of a binary. 
 Every entry point will be put into a single line, and we will use a pipe to read it. 
-At the end and empty line is appended which we use as the indication to stop reading.
+At the end an empty line is appended, which we use as the indication to stop reading.
 Boost.process provides the pipestream ([classref boost::process::ipstream ipstream], 
 [classref boost::process::opstream opstream], [classref boost::process::pstream pstream]) to
-wrap around the pipe and provide an implenentation of the 
-[@http://en.cppreference.com/w/cpp/io/basic_istream std::istream]
-and [@http://en.cppreference.com/w/cpp/io/basic_ostream std::ostream] interface.
+wrap around the [classref boost::process::pipe pipe] and provide an implementation of the 
+[@http://en.cppreference.com/w/cpp/io/basic_istream std::istream],
+[@http://en.cppreference.com/w/cpp/io/basic_ostream std::ostream] and 
+[@http://en.cppreference.com/w/cpp/io/basic_iostream std::iostream] interface.
 
 ```
 std::vector<std::string> read_outline(std::string & file)
@@ -178,20 +180,23 @@ std::vector<std::string> read_outline(std::string & file)
     std::string line;
     
     while (c.child_running() && std::getline(is, line) && !line.empty())
-        data.push_back(line);
+        data.push_back(line);    
         
+    c.child_wait();
+    
     return data; 
 }
 ```
 
-So what this does is redirect the `stdout` of the process into a pipe and we read this
-synchronously. 
+What this does is redirect the `stdout` of the process into a pipe and we read this
+synchronously.
 
 [warning The pipe will cause a deadlock if you try to read after nm exited]
-[note You can do the same thing with [globalname boost::process::std_err std_err] 
-and with [globalname boost::process::std_out std_out] by using [classname boost::process::opstream opstream]]
+[note You can do the same thing with [globalref boost::process::std_err std_err]] 
 
 Now we get the name from `nm` and we might want to demangle it, so we use input and output.
+`nm` has a demangle option, but for the sake of the example, we'll use 
+[@https://sourceware.org/binutils/docs/binutils/c_002b_002bfilt.html c++filt] for this.
 
 ```
 bp::opstream in;
@@ -207,7 +212,6 @@ c.child_terminate();
 ```
 
 Now you might want to forward output from one process to another processes input.
-`nm` has a demangle option, but for the sake of the example, we'll use `c++filt` for this.
 
 ```
 std::vector<std::string> read_demangled_outline(std::string & file)
@@ -227,8 +231,8 @@ std::vector<std::string> read_demangled_outline(std::string & file)
         std::getline(is, line);
         outline.push_back(line);
     }
-    //no need to wait for nm, running does that.
-    filt.terminate(); 
+    nm.child_wait();
+    filt.child_terminate(); 
 }
 
 ```  
@@ -239,14 +243,14 @@ Now this forwards the data from `nm` to `c++filt` without your process needing t
 [section:async_io Asynchronous I/O]
 
 Boost.process allows the usage of boost.asio to implement asynchronous I/O. 
-If you are familiar with [http://www.boost.org/doc/libs/release/libs/asio/ boost.asio] (which we highly recommend), 
+If you are familiar with [@http://www.boost.org/doc/libs/release/libs/asio/ boost.asio] (which we highly recommend), 
 you can use [classref boost::process::async_pipe async_pipe] which is implement 
 as an I/O-Object and can be used like [classref boost::process::pipe pipe] as shown above.
 
 Now we get back to our compiling example. `nm` we might analyze it line by line,
 but the compiler output will just be put into one large buffer.
 
-With [http://www.boost.org/doc/libs/release/libs/asio/ boost.asio] this is what it looks like.
+With [@http://www.boost.org/doc/libs/release/libs/asio/ boost.asio] this is what it looks like.
 
 ```
 io_service ios;
@@ -318,6 +322,8 @@ bp::child c2("bar", g);
 g.group_terminate();
 ```
 
+Please see to the [headerref boost/process/group.hpp reference] for more information.
+
 [endsect]
 [section:env Environment]
 
@@ -340,13 +346,19 @@ bp::system("stuff", env_);
 ```
 
 A more convenient way to modify the environment for the child is the 
-[globalname boost::process::env env] property.
+[globalref boost::process::env env] property.
+
+Please see to the [headerref boost/process/environment.hpp reference] for more information.
+
 
 [endsect]
 
 
 [section:coro Coroutines]
 [section:stackless Stackless Coroutines]
+
+[note This section presumes knowledge of the boost.asio 
+[@http://www.boost.org/doc/libs/release/doc/html/boost_asio/overview/core/coroutine.html stackless coroutine] feature.]
 
 Stackless coroutines can be implemented rather easily, so there is no need to
 implement extra functionality concerning boost.process. 
@@ -389,6 +401,9 @@ int main()
 [endsect]
 
 [section:stackful Stackful Coroutines]
+
+[note This section presumes knowledge of the boost.asio 
+[@http://www.boost.org/doc/libs/release/doc/html/boost_asio/overview/core/spawn.html stackful coroutine] feature.]
 
 For stackful coroutines this is not as simple, because the members of 
 `boost::asio::yield_context` are not documented. Therefore, boost.process 

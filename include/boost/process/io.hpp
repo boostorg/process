@@ -415,7 +415,7 @@ constexpr static boost::process::detail::std_in_<void>   std_in;
 /**
 This property allows to set the output stream for the child process.
 
-\note The Semantic is the same as for \xmlonly <globalname alt="boost::process::std_out">std_out</globalname> \endxmlonly
+\note The Semantic is the same as for \xmlonly <globalname alt="boost::process::std_err">std_err</globalname> \endxmlonly
 
 \note `std_err` and `std_out` can be combined into one stream, with the `operator &`, i.e. `std_out & std_err`.
 

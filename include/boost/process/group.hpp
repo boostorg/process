@@ -7,6 +7,11 @@
  * \file boost/process/group.hpp
  *
  * Defines a group process class.
+ * For additional information see the platform specific implementations:
+ *
+ *   - [windows - job object](https://msdn.microsoft.com/en-us/library/windows/desktop/ms684161.aspx)
+ *   - [posix - process group](http://pubs.opengroup.org/onlinepubs/009695399/functions/setpgid.html)
+ *
  */
 
 #ifndef BOOST_PROCESS_GROUP_HPP
