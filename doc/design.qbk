@@ -85,7 +85,8 @@ child c("ls", on_setup([](){cout << "On Setup" << endl;});
 ```
 
 
-[note On posix all those callbacks will be handles by this process, not the created one.]
+[note On posix all those callbacks will be handled by this process, not the created one. 
+This is different for the posix extensions, which can be executed on the forked process.]
 [endsect]
 
 [endsect] 

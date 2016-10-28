@@ -144,7 +144,13 @@ bp::system c("g++", "main.cpp", ec);
 [section:io Synchronous I/O]
 
 In the examples given above, we have only started a program, but did not consider the output. 
-The default depends on the system, but usually this will just write it to the output of the launching process.
+The default depends on the system, but usually this will just write it to the same output as the launching process.
+If this shall be guaranteed, the streams can be explicitly forwarded like this.
+
+```
+   bp::system("g++", bp::std_out > stdout, bp::std_err > stderr, bp::stdin < stdin);
+``` 
+
 Now for the first example, we might want to just ignore the output, which can be done by redirecting it to the null-device.
 This can be achieved this way:
 
