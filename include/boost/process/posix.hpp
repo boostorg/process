@@ -18,7 +18,7 @@
 <programlisting>
 namespace boost {
   namespace process {
-    namespace windows {
+    namespace posix {
       <emphasis>unspecified</emphasis> <globalname alt="boost::process::posix::fd">fd</globalname>;
       <emphasis>unspecified</emphasis> <globalname alt="boost::process::posix::on_fork_error">on_fork_error</globalname>;
       <emphasis>unspecified</emphasis> <globalname alt="boost::process::posix::on_exec_setup">on_exec_setup</globalname>;
