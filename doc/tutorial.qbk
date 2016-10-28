@@ -133,7 +133,7 @@ Until now, we have assumed that everything works out, but it is not impossible,
 that "g++" is not present. That will cause the launch of the process to fail.
 The default behaviour of all functions is to throw an 
 [@http://en.cppreference.com/w/cpp/error/system_error std::system_error] on failure.
-As with all other functions, passing an [@http://en.cppreference.com/w/cpp/error/error_code std::error_code]
+As with many other functions in this library, passing an [@http://en.cppreference.com/w/cpp/error/error_code std::error_code]
 will change the behaviour, so that instead of throwing an exception, the error will be a assigned to the error code.
 
 ```
