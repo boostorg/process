@@ -75,7 +75,7 @@ int result = bp::system(p, "main.cpp");
 ```
 
 Now, there is a subtle difference between the two syntaxes, i.e. passing a
-single string or passing one. When passing several string, the first string will be
+single string or passing multiple. When passing multiple string, the first string will be
 interpreted as the name of a file and the rest as arguments; 
 when passing one string it will be interpreted as a command. 
 
@@ -244,7 +244,7 @@ Now this forwards the data from `nm` to `c++filt` without your process needing t
 
 Boost.process allows the usage of boost.asio to implement asynchronous I/O. 
 If you are familiar with [@http://www.boost.org/doc/libs/release/libs/asio/ boost.asio] (which we highly recommend), 
-you can use [classref boost::process::async_pipe async_pipe] which is implement 
+you can use [classref boost::process::async_pipe async_pipe] which is implemented 
 as an I/O-Object and can be used like [classref boost::process::pipe pipe] as shown above.
 
 Now we get back to our compiling example. `nm` we might analyze it line by line,
