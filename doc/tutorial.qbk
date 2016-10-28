@@ -214,7 +214,7 @@ c.child_terminate();
 Now you might want to forward output from one process to another processes input.
 
 ```
-std::vector<std::string> read_demangled_outline(std::string & file)
+std::vector<std::string> read_demangled_outline(const std::string & file)
 {
     bp::pipe p;
     bp::ipstream is;
@@ -222,8 +222,8 @@ std::vector<std::string> read_demangled_outline(std::string & file)
     std::vector<std::string> outline;
     
     //we just use the same pipe, so the 
-    bp::child nm("nm", bp::std_out > p); 
-    bp::child filt("c++filt", bp::std_in < p);
+    bp::child nm("nm", file, bp::std_out > p); 
+    bp::child filt("c++filt", bp::std_in < p, bp::std_out > is);
     
     while (nm.running()) //nm finishes automatically, so then we can terminate c++filt.
     {
@@ -260,7 +260,8 @@ bp::async_pipe ap(ios);
 
 child c("g++", "main.cpp", bp::std_out > ap);
 
-asio_async_read("g++", "main.cpp", asio_buffer(buf));
+asio_async_read(ap, asio_buffer(buf), 
+                [](const boost::system::error_code &ec, std::size_t size){});
 
 ios.run();
 c.wait();
