@@ -148,7 +148,7 @@ The default depends on the system, but usually this will just write it to the sa
 If this shall be guaranteed, the streams can be explicitly forwarded like this.
 
 ```
-   bp::system("g++", bp::std_out > stdout, bp::std_err > stderr, bp::stdin < stdin);
+   bp::system("g++", bp::std_out > stdout, bp::std_err > stderr, bp::std_in < stdin);
 ``` 
 
 Now for the first example, we might want to just ignore the output, which can be done by redirecting it to the null-device.
