@@ -192,10 +192,10 @@ basic_pipe<Char, Traits>& basic_pipe<Char, Traits>::operator=(const basic_pipe &
 template<class Char, class Traits>
 basic_pipe<Char, Traits>& basic_pipe<Char, Traits>::operator=(basic_pipe && lhs)
 {
-    if (_source == ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
+    if (_source != ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
         ::boost::detail::winapi::CloseHandle(_source);
 
-    if (_sink == ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
+    if (_sink != ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
         ::boost::detail::winapi::CloseHandle(_sink);
 
     _source = lhs._source;
