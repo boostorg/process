@@ -320,10 +320,10 @@ async_pipe& async_pipe::operator=(const async_pipe & p)
 
 async_pipe& async_pipe::operator=(async_pipe && rhs)
 {
-    if (_source.native_handle() == ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
+    if (_source.native_handle() != ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
         ::boost::detail::winapi::CloseHandle(_source.native());
 
-    if (_sink.native_handle()   == ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
+    if (_sink.native_handle()   != ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
         ::boost::detail::winapi::CloseHandle(_sink.native());
 
     _source.assign(rhs._source.native_handle());
