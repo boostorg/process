@@ -22,9 +22,6 @@ struct pipe_in : public ::boost::process::detail::handler_base
     ::boost::detail::winapi::HANDLE_ handle;
     template<typename T>
     pipe_in(const T & p) : handle(p.native_source()) {}
-    //template<typename CharT, typename Traits>
-    //pipe_in(const boost::process::basic_pipe<CharT, Traits> & p) : handle(p.native_source()) {}
-    //pipe_in(const boost::process::async_pipe & p)                : handle(p.native_source()) {}
 
     template <class WindowsExecutor>
     void on_setup(WindowsExecutor &e) const
@@ -36,7 +33,18 @@ struct pipe_in : public ::boost::process::detail::handler_base
         e.startup_info.hStdInput = handle;
         e.startup_info.dwFlags  |= boost::detail::winapi::STARTF_USESTDHANDLES_;
         e.inherit_handles = true;
-   }
+    }
+    template<typename WindowsExecutor>
+    void on_error(WindowsExecutor &, const std::error_code &) const
+    {
+        ::boost::detail::winapi::CloseHandle(handle);
+    }
+
+    template<typename WindowsExecutor>
+    void on_success(WindowsExecutor &) const
+    {
+        ::boost::detail::winapi::CloseHandle(handle);
+    }
 };
 
 }}}}

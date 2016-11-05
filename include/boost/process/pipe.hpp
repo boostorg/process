@@ -192,7 +192,7 @@ struct basic_pipebuf : std::basic_streambuf<CharT, Traits>
         this->setg(this->eback(), this->gptr(), this->egptr() + res);
         auto val = *this->gptr();
 
-        return  traits_type::to_int_type(val);
+        return traits_type::to_int_type(val);
     }
 
 
@@ -223,6 +223,8 @@ private:
 
         if (wrt < diff)
             std::move(base + wrt, base + diff, base);
+        else if (wrt == 0) //broken pipe
+            return false;
 
         this->pbump(-wrt);
 

@@ -45,6 +45,7 @@ int main()
 
     bp::spawn(
         "dummy",
+        bp::on_exit([](int, const std::error_code&){}),
         ios,
         ec
     ); 

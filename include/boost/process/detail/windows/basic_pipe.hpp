@@ -58,7 +58,7 @@ public:
     basic_pipe()
     {
         if (!::boost::detail::winapi::CreatePipe(&_source, &_sink, nullptr, 0))
-        	throw_last_error("CreatePipe() failed");
+            throw_last_error("CreatePipe() failed");
 
     }
 
@@ -70,7 +70,8 @@ public:
                 ))
         {
             auto ec = ::boost::process::detail::get_last_error();
-            if (ec.value() == ::boost::detail::winapi::ERROR_BROKEN_PIPE_)
+            if ((ec.value() == ::boost::detail::winapi::ERROR_BROKEN_PIPE_) ||
+                (ec.value() == ::boost::detail::winapi::ERROR_NO_DATA_))
                 return 0;
             else
                 throw process_error(ec, "WriteFile failed");
@@ -85,7 +86,8 @@ public:
                 ))
         {
             auto ec = ::boost::process::detail::get_last_error();
-            if (ec.value() == ::boost::detail::winapi::ERROR_BROKEN_PIPE_)
+            if ((ec.value() == ::boost::detail::winapi::ERROR_BROKEN_PIPE_) ||
+                (ec.value() == ::boost::detail::winapi::ERROR_NO_DATA_))
                 return 0;
             else
                 throw process_error(ec, "ReadFile failed");

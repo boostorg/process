@@ -78,7 +78,7 @@ test-suite execution :
     [ run shell_path.cpp  filesystem system                   ]
     [ run show_window.cpp filesystem system                   : : sparring_partner : <build>no <target-os>windows:<build>yes   ]
     [ run system_test1.cpp filesystem system                  : : sparring_partner ]
-    [ run system_test2.cpp filesystem system                  : --log_level=all : sparring_partner ]
+    [ run system_test2.cpp filesystem system                  : : sparring_partner ]
     [ run spawn.cpp filesystem system                         : : sparring_partner ]
     [ run start_dir.cpp   filesystem system                   : : sparring_partner ]
     [ run terminate.cpp system filesystem                     : : sparring_partner ]

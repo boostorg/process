@@ -156,7 +156,7 @@ public:
 
     /** Get the native handle of the source. */
     native_handle native_source() const {return const_cast<boost::asio::windows::stream_handle&>(_source).native();}
-    /** Get the native handle of the source. */
+    /** Get the native handle of the sink. */
     native_handle native_sink  () const {return const_cast<boost::asio::windows::stream_handle&>(_sink  ).native();}
 
     /** Start an asynchronous read.

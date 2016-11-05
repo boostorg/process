@@ -66,7 +66,8 @@ inline void apply_out_handles(Executor &e, void* handle, std::integral_constant<
 }
 
 template<int p1, int p2, typename Buffer>
-struct async_out_buffer : ::boost::process::detail::windows::async_handler
+struct async_out_buffer : ::boost::process::detail::windows::handler_base_ext,
+                          ::boost::process::detail::windows::require_io_service
 {
     Buffer & buf;
 
@@ -82,44 +83,32 @@ struct async_out_buffer : ::boost::process::detail::windows::async_handler
         auto pipe = this->pipe;
         boost::asio::async_read(*pipe, buf,
                 [pipe](const boost::system::error_code&, std::size_t size){});
-
+        ::boost::detail::winapi::CloseHandle(pipe->native_sink());
         this->pipe       = nullptr;
 
     }
 
     template<typename Executor>
-    std::function<void(int, const std::error_code&)> on_exit_handler(Executor & exec)
+    void on_error(Executor &, const std::error_code &) const
     {
-        auto & ios = get_io_service(exec.seq);
-        if (!pipe)
-            pipe = std::make_shared<boost::process::async_pipe>(ios);
-
-        auto pipe = this->pipe;
-        return [pipe, &ios](int, const std::error_code & ec)
-                {
-                    ios.post([pipe]
-                              {
-                                    boost::system::error_code ec;
-                                    pipe->close(ec);
-                              });
-                };
-
-
-
+        ::boost::detail::winapi::CloseHandle(pipe->native_sink());
     }
+
     template <typename WindowsExecutor>
     void on_setup(WindowsExecutor &exec)
     {
         if (!pipe)
             pipe = std::make_shared<boost::process::async_pipe>(get_io_service(exec.seq));
-        apply_out_handles(exec, pipe->native_sink(), std::integral_constant<int, p1>(), std::integral_constant<int, p2>());
+        apply_out_handles(exec, std::move(*pipe).sink().native_handle(),
+                std::integral_constant<int, p1>(), std::integral_constant<int, p2>());
     }
 };
 
 
 
 template<int p1, int p2, typename Type>
-struct async_out_future : ::boost::process::detail::windows::async_handler
+struct async_out_future : ::boost::process::detail::windows::handler_base_ext,
+                          ::boost::process::detail::windows::require_io_service
 {
     std::shared_ptr<boost::process::async_pipe> pipe;
     std::shared_ptr<std::promise<Type>> promise = std::make_shared<std::promise<Type>>();
@@ -133,10 +122,10 @@ struct async_out_future : ::boost::process::detail::windows::async_handler
     template <typename Executor>
     inline void on_success(Executor &exec)
     {
-
         auto pipe    = this->pipe;
         auto buffer  = this->buffer;
         auto promise = this->promise;
+        ::boost::detail::winapi::CloseHandle(pipe->native_sink());
         boost::asio::async_read(*pipe, *buffer,
                 [pipe, buffer, promise](const boost::system::error_code& ec, std::size_t size)
                 {
@@ -161,26 +150,13 @@ struct async_out_future : ::boost::process::detail::windows::async_handler
         this->buffer  = nullptr;
         this->promise = nullptr;
 
+
     }
 
     template<typename Executor>
-    std::function<void(int, const std::error_code&)> on_exit_handler(Executor & exec)
+    void on_error(Executor &, const std::error_code &) const
     {
-        auto & ios = get_io_service(exec.seq);
-
-        if (!pipe)
-            pipe = std::make_shared<boost::process::async_pipe>(ios);
-
-        auto pipe = this->pipe;
-        return [pipe, &ios](int, const std::error_code & ec)
-                {
-                    ios.post([pipe]
-                              {
-                                    boost::system::error_code ec;
-                                    pipe->close(ec);
-
-                              });
-                };
+        ::boost::detail::winapi::CloseHandle(pipe->native_sink());
     }
 
     template <typename WindowsExecutor>
@@ -189,7 +165,8 @@ struct async_out_future : ::boost::process::detail::windows::async_handler
         if (!pipe)
             pipe = std::make_shared<boost::process::async_pipe>(get_io_service(exec.seq));
 
-        apply_out_handles(exec, pipe->native_sink(), std::integral_constant<int, p1>(), std::integral_constant<int, p2>());
+        apply_out_handles(exec, std::move(*pipe).sink().native_handle(),
+                std::integral_constant<int, p1>(), std::integral_constant<int, p2>());
     }
 };
 
