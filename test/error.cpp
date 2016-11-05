@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(setup_error)
         bp::child c(master_test_suite().argv[1], bp::on_setup(es));
 
     }
-    catch( std::system_error & se)
+    catch( bp::process_error & se)
     {
         has_thrown = true;
         BOOST_CHECK_EQUAL(se.code().value(), 24);
@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(success_error)
 
 
     }
-    catch( std::system_error & se)
+    catch( bp::process_error & se)
     {
         has_thrown = true;
         BOOST_CHECK_EQUAL(se.code().value(), 23);

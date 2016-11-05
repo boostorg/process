@@ -150,7 +150,7 @@ class executor
         if (this->pid == 0)
             write_error(ec, msg);
         else
-            throw std::system_error(ec, msg);
+            throw process_error(ec, msg);
     }
 
 
@@ -167,13 +167,13 @@ class executor
             this->_msg = msg;
         }
         else
-            throw std::system_error(ec, msg);
+            throw process_error(ec, msg);
     }
 
     void check_error(boost::mpl::true_) {};
     void check_error(boost::mpl::false_)
     {
-        throw std::system_error(_ec, _msg);
+        throw process_error(_ec, _msg);
     }
 
     typedef typename ::boost::process::detail::has_error_handler<Sequence>::type has_error_handler;

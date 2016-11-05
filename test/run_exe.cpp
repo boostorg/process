@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
         bp::child c("doesnt-exist");
         BOOST_TEST(false);
     }
-    catch(std::system_error & se)
+    catch(bp::process_error & se)
     {
         BOOST_TEST(true);
     }

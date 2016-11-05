@@ -21,6 +21,7 @@
 #include <system_error>
 #include <boost/system/api_config.hpp>
 
+#include <boost/process/exception.hpp>
 
 #if defined(BOOST_POSIX_API)
 #include <errno.h>
@@ -64,12 +65,12 @@ inline std::error_code get_last_error() noexcept
 
 inline void throw_last_error(const std::string & msg)
 {
-    throw std::system_error(get_last_error(), msg);
+    throw process_error(get_last_error(), msg);
 }
 
 inline void throw_last_error()
 {
-    throw std::system_error(get_last_error());
+    throw process_error(get_last_error());
 }
 
 

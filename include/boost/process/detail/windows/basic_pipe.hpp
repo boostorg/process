@@ -58,11 +58,7 @@ public:
     basic_pipe()
     {
         if (!::boost::detail::winapi::CreatePipe(&_source, &_sink, nullptr, 0))
-            throw std::system_error(
-                    std::error_code(
-                    ::boost::detail::winapi::GetLastError(),
-                    std::system_category()),
-                    "CreatePipe() failed");
+        	throw_last_error("CreatePipe() failed");
 
     }
 
@@ -77,7 +73,7 @@ public:
             if (ec.value() == ::boost::detail::winapi::ERROR_BROKEN_PIPE_)
                 return 0;
             else
-                throw std::system_error(ec, "WriteFile failed");
+                throw process_error(ec, "WriteFile failed");
         }
         return static_cast<int_type>(write_len);
     }
@@ -92,7 +88,7 @@ public:
             if (ec.value() == ::boost::detail::winapi::ERROR_BROKEN_PIPE_)
                 return 0;
             else
-                throw std::system_error(ec, "ReadFile failed");
+                throw process_error(ec, "ReadFile failed");
         }
         return static_cast<int_type>(read_len);
     }

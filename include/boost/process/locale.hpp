@@ -123,7 +123,7 @@ inline std::size_t convert(const char* from,
                  to, to_end, to_next);
 
     if (res != std::codecvt_base::ok)
-         throw std::system_error(res, ::boost::process::codecvt_category(),
+         throw process_error(res, ::boost::process::codecvt_category(),
              "boost::process codecvt to wchar_t");
 
 
@@ -145,7 +145,7 @@ inline std::size_t convert(const wchar_t* from,
 
     if ((res=cvt.out(state, from, from_end, from_next,
            to, to_end, to_next)) != std::codecvt_base::ok)
-               throw std::system_error(res, ::boost::process::codecvt_category(),
+               throw process_error(res, ::boost::process::codecvt_category(),
                    "boost::process codecvt to char");
 
     return to_next - to;

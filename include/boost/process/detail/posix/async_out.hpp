@@ -126,7 +126,7 @@ struct async_out_future : ::boost::process::detail::posix::async_handler
                     if (ec && (ec.value() != EBADF) && (ec.value() == EPERM))
                     {
                         std::error_code e(ec.value(), std::system_category());
-                        promise->set_exception(std::make_exception_ptr(std::system_error(e)));
+                        promise->set_exception(std::make_exception_ptr(process_error(e)));
                     }
                     else
                     {

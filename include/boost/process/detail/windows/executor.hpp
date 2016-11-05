@@ -121,7 +121,7 @@ class executor : public startup_info_impl<Char>
     }
     void internal_error_handle(const std::error_code &ec, const char* msg, boost::mpl::false_, boost::mpl::false_ )
     {
-        throw std::system_error(ec, msg);
+        throw process_error(ec, msg);
     }
 
     struct on_setup_t

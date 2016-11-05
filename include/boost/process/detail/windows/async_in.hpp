@@ -59,7 +59,7 @@ struct async_in_buffer : ::boost::process::detail::windows::async_handler
                     if (ec && (ec.value() != ::boost::detail::winapi::ERROR_BROKEN_PIPE_))
                     {
                         std::error_code e(ec.value(), std::system_category());
-                        promise->set_exception(std::make_exception_ptr(std::system_error(e)));
+                        promise->set_exception(std::make_exception_ptr(process_error(e)));
                     }
                     promise->set_value();
                 });

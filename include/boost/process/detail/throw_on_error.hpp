@@ -21,7 +21,7 @@ struct throw_on_error_ : ::boost::process::detail::handler
     template <class Executor>
     void on_error(Executor&, const std::error_code & ec) const
     {
-        throw std::system_error(ec, "process creation failed");
+        throw process_error(ec, "process creation failed");
     }
 
     const throw_on_error_ &operator()() const {return *this;}

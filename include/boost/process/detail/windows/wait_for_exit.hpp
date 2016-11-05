@@ -24,19 +24,11 @@ inline void wait(child_handle &p, int & exit_code)
 {
     if (::boost::detail::winapi::WaitForSingleObject(p.process_handle(),
         ::boost::detail::winapi::infinite) == ::boost::detail::winapi::wait_failed)
-            throw std::system_error(
-                std::error_code(
-                ::boost::detail::winapi::GetLastError(),
-                std::system_category()),
-                "WaitForSingleObject() failed");
+            throw_last_error("WaitForSingleObject() failed");
 
     ::boost::detail::winapi::DWORD_ _exit_code;
     if (!::boost::detail::winapi::GetExitCodeProcess(p.process_handle(), &_exit_code))
-        throw std::system_error(
-                std::error_code(
-                ::boost::detail::winapi::GetLastError(),
-                 std::system_category()),
-                "GetExitCodeProcess() failed");
+        throw_last_error("GetExitCodeProcess() failed");
 
     ::boost::detail::winapi::CloseHandle(p.proc_info.hProcess);
     p.proc_info.hProcess = ::boost::detail::winapi::INVALID_HANDLE_VALUE_;
@@ -77,21 +69,13 @@ inline bool wait_for(
     ::boost::detail::winapi::DWORD_ wait_code;
     wait_code = ::boost::detail::winapi::WaitForSingleObject(p.process_handle(), ms.count());
     if (wait_code == ::boost::detail::winapi::wait_failed)
-        throw std::system_error(
-            std::error_code(
-            ::boost::detail::winapi::GetLastError(),
-            std::system_category()),
-            "WaitForSingleObject() failed");
+        throw_last_error("WaitForSingleObject() failed");
     else if (wait_code == ::boost::detail::winapi::wait_timeout)
         return false; //
 
     ::boost::detail::winapi::DWORD_ _exit_code;
     if (!::boost::detail::winapi::GetExitCodeProcess(p.process_handle(), &_exit_code))
-        throw std::system_error(
-                std::error_code(
-                ::boost::detail::winapi::GetLastError(),
-                std::system_category()),
-                "GetExitCodeProcess() failed");
+    	throw_last_error("GetExitCodeProcess() failed");
 
     exit_code = static_cast<int>(_exit_code);
     ::boost::detail::winapi::CloseHandle(p.proc_info.hProcess);
@@ -152,21 +136,13 @@ inline bool wait_until(
     wait_code = ::boost::detail::winapi::WaitForSingleObject(p.process_handle(), ms.count());
 
     if (wait_code == ::boost::detail::winapi::wait_failed)
-        throw std::system_error(
-            std::error_code(
-            ::boost::detail::winapi::GetLastError(),
-            std::system_category()),
-            "WaitForSingleObject() failed");
+    	throw_last_error("WaitForSingleObject() failed");
     else if (wait_code == ::boost::detail::winapi::wait_timeout)
         return false;
 
     ::boost::detail::winapi::DWORD_ _exit_code;
     if (!::boost::detail::winapi::GetExitCodeProcess(p.process_handle(), &_exit_code))
-        throw std::system_error(
-            std::error_code(
-            ::boost::detail::winapi::GetLastError(),
-            std::system_category()),
-            "GetExitCodeProcess() failed");
+    	throw_last_error("GetExitCodeProcess() failed");
 
     exit_code = static_cast<int>(_exit_code);
     ::boost::detail::winapi::CloseHandle(p.proc_info.hProcess);
