@@ -26,26 +26,26 @@ namespace boost { namespace process { namespace detail { namespace posix {
 
 inline int apply_out_handles(int handle, std::integral_constant<int, 1>, std::integral_constant<int, -1>)
 {
-    return ::dup2(handle, STDOUT_FILENO);
+    return ::dup3(handle, STDOUT_FILENO, O_CLOEXEC);
 }
 
 inline int apply_out_handles(int handle, std::integral_constant<int, 2>, std::integral_constant<int, -1>)
 {
-    return ::dup2(handle, STDERR_FILENO);
+    return ::dup3(handle, STDERR_FILENO, O_CLOEXEC);
 }
 
 inline int apply_out_handles(int handle, std::integral_constant<int, 1>, std::integral_constant<int, 2>)
 {
-    if (::dup2(handle, STDOUT_FILENO) == -1)
+    if (::dup3(handle, STDOUT_FILENO, O_CLOEXEC) == -1)
         return -1;
-    if (::dup2(handle, STDERR_FILENO) == -1)
+    if (::dup3(handle, STDERR_FILENO, O_CLOEXEC) == -1)
         return -1;
 
     return 0;
 }
 
 template<int p1, int p2, typename Buffer>
-struct async_out_buffer : ::boost::process::detail::posix::async_handler
+struct async_out_buffer : ::boost::process::detail::posix::require_io_service
 {
     Buffer & buf;
 
@@ -64,21 +64,15 @@ struct async_out_buffer : ::boost::process::detail::posix::async_handler
                 [pipe](const boost::system::error_code&, std::size_t size){});
 
         this->pipe = nullptr;
+        ::close(pipe->native_sink());
     }
 
     template<typename Executor>
     void on_error(Executor &) const
     {
-        std::error_code ec;
-        std::move(pipe->sink()).close(ec);
+    	::close(pipe->native_sink());
     }
 
-    template<typename Executor>
-    void on_success(Executor &) const
-    {
-        std::error_code ec;
-        std::move(pipe->sink()).close(ec);
-    }
 
     template <typename Executor>
     void on_exec_setup(Executor &exec)
@@ -86,10 +80,10 @@ struct async_out_buffer : ::boost::process::detail::posix::async_handler
         if (!pipe)
             pipe = std::make_shared<boost::process::async_pipe>(get_io_service(exec.seq));
 
-        int res = apply_out_handles(std::move(pipe->sink()).native_handle(),
+        int res = apply_out_handles(pipe->native_sink(),
                       std::integral_constant<int, p1>(), std::integral_constant<int, p2>());
         if (res == -1)
-            exec.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
+            exec.set_error(::boost::process::detail::get_last_error(), "dup3() failed");
     }
 };
 
@@ -97,7 +91,7 @@ struct async_out_buffer : ::boost::process::detail::posix::async_handler
 
 
 template<int p1, int p2, typename Type>
-struct async_out_future : ::boost::process::detail::posix::async_handler
+struct async_out_future : ::boost::process::detail::posix::require_io_service
 {
     std::shared_ptr<std::promise<Type>> promise = std::make_shared<std::promise<Type>>();
 
@@ -137,6 +131,7 @@ struct async_out_future : ::boost::process::detail::posix::async_handler
                     }
                 });
 
+        ::close(pipe->native_sink());
         this->pipe = nullptr;
 
     }
@@ -144,15 +139,7 @@ struct async_out_future : ::boost::process::detail::posix::async_handler
     template<typename WindowsExecutor>
     void on_error(WindowsExecutor &) const
     {
-        std::error_code ec;
-        std::move(pipe->sink()).close(ec);
-    }
-
-    template<typename WindowsExecutor>
-    void on_success(WindowsExecutor &) const
-    {
-        std::error_code ec;
-        std::move(pipe->sink()).close(ec);
+    	::close(pipe->native_sink());
     }
 
     template <typename Executor>
@@ -161,10 +148,10 @@ struct async_out_future : ::boost::process::detail::posix::async_handler
         if (!pipe)
             pipe = std::make_shared<boost::process::async_pipe>(get_io_service(exec.seq));
 
-        int res = apply_out_handles(std::move(pipe->sink()).native_handle(),
+        int res = apply_out_handles(pipe->native_sink(),
                       std::integral_constant<int, p1>(), std::integral_constant<int, p2>());
         if (res == -1)
-            exec.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
+            exec.set_error(::boost::process::detail::get_last_error(), "dup3() failed");
     }
 
 };
