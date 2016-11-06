@@ -70,7 +70,7 @@ struct async_out_buffer : ::boost::process::detail::posix::handler_base_ext,
     template<typename Executor>
     void on_error(Executor &, const std::error_code &) const
     {
-    	::close(pipe->native_sink());
+        ::close(pipe->native_sink());
     }
 
     template<typename Executor>
@@ -140,7 +140,7 @@ struct async_out_future : ::boost::process::detail::posix::handler_base_ext,
     template<typename Executor>
     void on_error(Executor &, const std::error_code &) const
     {
-    	::close(pipe->native_sink());
+        ::close(pipe->native_sink());
     }
 
     template<typename Executor>

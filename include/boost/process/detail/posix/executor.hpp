@@ -72,7 +72,7 @@ struct on_fork_error_t
     template<typename T>
     void impl(T & t, std::true_type /* is extended */)
     {
-    	t.on_fork_error(exec, error);
+        t.on_fork_error(exec, error);
     }
 
     template<typename T>
@@ -81,8 +81,8 @@ struct on_fork_error_t
     template<typename T>
     void operator()(T & t) const
     {
-    	using type = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
-    	impl(t, std::is_base_of<T, type>());
+        using type = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
+        impl(t, std::is_base_of<T, type>());
     }
 };
 
@@ -96,7 +96,7 @@ struct on_exec_setup_t
     template<typename T>
     void impl(T & t, std::true_type /* is extended */)
     {
-    	t.on_exec_setup(exec, error);
+        t.on_exec_setup(exec, error);
     }
 
     template<typename T>
@@ -105,9 +105,9 @@ struct on_exec_setup_t
     template<typename T>
     void operator()(T & t) const
     {
-    	using type = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
+        using type = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
         if (!exec.error())
-        	impl(t, std::is_base_of<T, type>());
+            impl(t, std::is_base_of<T, type>());
     }
 };
 
@@ -122,7 +122,7 @@ struct on_exec_error_t
     template<typename T>
     void impl(T & t, std::true_type /* is extended */)
     {
-    	t.on_exec_error(exec, error);
+        t.on_exec_error(exec, error);
     }
 
     template<typename T>
@@ -131,8 +131,8 @@ struct on_exec_error_t
     template<typename T>
     void operator()(T & t) const
     {
-    	using type = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
-    	impl(t, std::is_base_of<T, type>());
+        using type = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
+        impl(t, std::is_base_of<T, type>());
     }
 };
 

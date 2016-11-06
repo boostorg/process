@@ -98,7 +98,7 @@ inline bool wait_for(
 
     ::boost::detail::winapi::DWORD_ wait_code;
     wait_code = ::boost::detail::winapi::WaitForSingleObject(p.process_handle(),
-    		         static_cast<::boost::detail::winapi::DWORD_>(ms.count()));
+                     static_cast<::boost::detail::winapi::DWORD_>(ms.count()));
     if (wait_code == ::boost::detail::winapi::wait_failed)
         ec = std::error_code(
             ::boost::detail::winapi::GetLastError(),
@@ -136,7 +136,7 @@ inline bool wait_until(
 
     ::boost::detail::winapi::DWORD_ wait_code;
     wait_code = ::boost::detail::winapi::WaitForSingleObject(p.process_handle(),
-	                static_cast<::boost::detail::winapi::DWORD_>(ms.count()));
+                    static_cast<::boost::detail::winapi::DWORD_>(ms.count()));
 
     if (wait_code == ::boost::detail::winapi::wait_failed)
         throw_last_error("WaitForSingleObject() failed");
