@@ -167,14 +167,14 @@ public:
     }
 
     ///Assign a child process to the group
-    void assign(const child &c)
+    void add(const child &c)
     {
-        _group_handle.assign(c.native_handle());
+        _group_handle.add(c.native_handle());
     }
     ///\overload void assign(const child & c)
-    void assign(const child &c, std::error_code & ec) noexcept
+    void add(const child &c, std::error_code & ec) noexcept
     {
-        _group_handle.assign(c.native_handle(), ec);
+        _group_handle.add(c.native_handle(), ec);
     }
 
     ///Check if the child process is in the group

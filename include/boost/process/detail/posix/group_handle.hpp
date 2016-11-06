@@ -44,12 +44,12 @@ struct group_handle
         return *this;
     }
 
-    void assign(handle_t proc)
+    void add(handle_t proc)
     {   
         if (::setpgid(proc, grp))
             throw_last_error();
     }
-    void assign(handle_t proc, std::error_code & ec) noexcept
+    void add(handle_t proc, std::error_code & ec) noexcept
     {
         if (::setpgid(proc, grp))
             ec = get_last_error();
