@@ -37,13 +37,13 @@ alias system           : /boost//system          ;
 alias thread           : /boost//thread          ;
 alias coroutine        : /boost//coroutine       : <link>static ;
 
-lib multi_ref : multi_ref1.cpp multi_ref2.cpp system ;
+lib multi_ref : multi_ref1.cpp multi_ref2.cpp system : <target-os>windows:<source>shell32 ;
 
 exe sparring_partner : sparring_partner.cpp program_options system filesystem iostreams :
-    <warnings>off
+    <warnings>off <target-os>windows:<source>shell32
     ;
 
-exe sub_launch : sub_launcher.cpp program_options iostreams system filesystem : <warnings>off ;
+exe sub_launch : sub_launcher.cpp program_options iostreams system filesystem : <warnings>off <target-os>windows:<source>shell32 ;
 
 test-suite bare :
     [ run environment.cpp system filesystem  ]

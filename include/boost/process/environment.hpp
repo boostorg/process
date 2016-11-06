@@ -669,7 +669,7 @@ inline std::vector<boost::filesystem::path> path()
 #else
     const ::boost::process::native_environment ne;
     typedef typename ::boost::process::native_environment::const_entry_type value_type;
-    const auto id = "path";
+    const auto id = "PATH";
 #endif
 
     auto itr = std::find_if(ne.cbegin(), ne.cend(),
@@ -686,9 +686,8 @@ inline std::vector<boost::filesystem::path> path()
 
     std::copy(vec.begin(), vec.end(), val.begin());
 
-    return {};
+    return val;
 }
-
 }
 }
 #endif /* INCLUDE_BOOST_PROCESS_DETAIL_ENVIRONMENT_HPP_ */
