@@ -15,15 +15,14 @@
 #include <boost/asio/write.hpp>
 #include <boost/process/async_pipe.hpp>
 #include <memory>
-
-
 #include <future>
 
 namespace boost { namespace process { namespace detail { namespace posix {
 
 
 template<typename Buffer>
-struct async_in_buffer : ::boost::process::detail::posix::require_io_service
+struct async_in_buffer : ::boost::process::detail::posix::handler_base_ext,
+                         ::boost::process::detail::posix::require_io_service
 {
     Buffer & buf;
 
@@ -50,7 +49,7 @@ struct async_in_buffer : ::boost::process::detail::posix::require_io_service
             boost::asio::async_write(*pipe, buf,
                 [pipe, promise](const boost::system::error_code & ec, std::size_t)
                 {
-                    if (ec && (ec.value() != EBADF) && (ec.value() == EPERM))
+                    if (ec && (ec.value() != EBADF) && (ec.value() != EPERM) && (ec.value() != ENOENT))
                     {
                         std::error_code e(ec.value(), std::system_category());
                         promise->set_exception(std::make_exception_ptr(process_error(e)));
@@ -73,14 +72,19 @@ struct async_in_buffer : ::boost::process::detail::posix::require_io_service
         ::close(pipe->native_source());
     }
 
+    template<typename Executor>
+    void on_setup(Executor & exec)
+    {
+        pipe = std::make_shared<boost::process::async_pipe>(get_io_service(exec.seq));
+    }
+
     template <typename Executor>
     void on_exec_setup(Executor &exec)
     {
-        if (!pipe)
-            pipe = std::make_shared<boost::process::async_pipe>(get_io_service(exec.seq));
+        if (::dup2(pipe->native_source(), STDIN_FILENO) == -1)
+            exec.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
 
-        if (::dup3(pipe->native_source(), STDIN_FILENO, O_CLOEXEC) == -1)
-            exec.set_error(::boost::process::detail::get_last_error(), "dup3() failed");
+        ::close(pipe->native_source());
     }
 };
 

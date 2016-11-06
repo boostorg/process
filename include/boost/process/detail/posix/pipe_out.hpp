@@ -25,14 +25,14 @@ struct pipe_out : handler_base_ext
     template<typename T>
     pipe_out(const T & p) : descr_(p.native_sink()) {}
 
-    template<typename WindowsExecutor>
-    void on_error(WindowsExecutor &, const std::error_code &) const
+    template<typename Executor>
+    void on_error(Executor &, const std::error_code &) const
     {
         ::close(descr_);
     }
 
-    template<typename WindowsExecutor>
-    void on_success(WindowsExecutor &) const
+    template<typename Executor>
+    void on_success(Executor &) const
     {
     	::close(descr_);
     }
@@ -45,27 +45,30 @@ template<>
 template<typename Executor>
 void pipe_out<1,-1>::on_exec_setup(Executor &e) const
 {
-    if (::dup3(descr_, STDOUT_FILENO, O_CLOEXEC) == -1)
+    if (::dup2(descr_, STDOUT_FILENO) == -1)
          e.set_error(::boost::process::detail::get_last_error(), "dup3() failed");
+    ::close(descr_);
+
 }
 
 template<>
 template<typename Executor>
 void pipe_out<2,-1>::on_exec_setup(Executor &e) const
 {
-    if (::dup3(descr_, STDERR_FILENO, O_CLOEXEC) == -1)
-         e.set_error(::boost::process::detail::get_last_error(), "dup3() failed");
+    if (::dup2(descr_, STDERR_FILENO) == -1)
+         e.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
+    ::close(descr_);
 }
 
 template<>
 template<typename Executor>
 void pipe_out<1,2>::on_exec_setup(Executor &e) const
 {
-    if (::dup3(descr_, STDOUT_FILENO, O_CLOEXEC) == -1)
-         e.set_error(::boost::process::detail::get_last_error(), "dup3() failed");
-
-    if (::dup3(descr_, STDERR_FILENO, O_CLOEXEC) == -1)
-         e.set_error(::boost::process::detail::get_last_error(), "dup3() failed");
+    if (::dup2(descr_, STDOUT_FILENO) == -1)
+         e.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
+    if (::dup2(descr_, STDERR_FILENO) == -1)
+         e.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
+    ::close(descr_);
 }
 
 }}}}
