@@ -70,13 +70,13 @@ struct on_fork_error_t
     on_fork_error_t(Executor & exec, const std::error_code & error) : exec(exec), error(error) {};
 
     template<typename T>
-    void impl(T & t, std::true_type /* is extended */)
+    void impl(T & t, std::true_type /* is extended */) const
     {
     	t.on_fork_error(exec, error);
     }
 
     template<typename T>
-    void impl(T &t, std::false_type /* is extended */) {}
+    void impl(T &t, std::false_type /* is extended */) const {}
 
     template<typename T>
     void operator()(T & t) const
@@ -94,13 +94,13 @@ struct on_exec_setup_t
     on_exec_setup_t(Executor & exec) : exec(exec) {};
 
     template<typename T>
-    void impl(T & t, std::true_type /* is extended */)
+    void impl(T & t, std::true_type /* is extended */) const
     {
-    	t.on_exec_setup(exec, error);
+    	t.on_exec_setup(exec);
     }
 
     template<typename T>
-    void impl(T &t, std::false_type /* is extended */) {}
+    void impl(T &t, std::false_type /* is extended */) const {}
 
     template<typename T>
     void operator()(T & t) const
@@ -120,13 +120,13 @@ struct on_exec_error_t
     on_exec_error_t(Executor & exec, const std::error_code & error) : exec(exec), ec(error) {};
 
     template<typename T>
-    void impl(T & t, std::true_type /* is extended */)
+    void impl(T & t, std::true_type /* is extended */) const
     {
-    	t.on_exec_error(exec, error);
+    	t.on_exec_error(exec, ec);
     }
 
     template<typename T>
-    void impl(T &t, std::false_type /* is extended */) {}
+    void impl(T &t, std::false_type /* is extended */) const {}
 
     template<typename T>
     void operator()(T & t) const
