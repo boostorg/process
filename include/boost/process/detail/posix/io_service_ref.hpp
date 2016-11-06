@@ -83,6 +83,11 @@ struct io_service_ref : handler_base_ext
                           typename std::remove_reference< boost::mpl::_ > ::type
                           >>(exec.seq);
 
+          //ok, check if there are actually any.
+          if (boost::fusion::empty(asyncs))
+          {
+          	  return;
+          }
           std::vector<std::function<void(int, const std::error_code & ec)>> funcs;
           funcs.reserve(boost::fusion::size(asyncs));
           boost::fusion::for_each(asyncs, async_handler_collector<Executor>(exec, funcs));

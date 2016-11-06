@@ -88,12 +88,6 @@ BOOST_AUTO_TEST_CASE(sync_io, *boost::unit_test::timeout(10))
     is >> i;
     BOOST_CHECK(is.eof());
     BOOST_CHECK(!is);
-    os << 42 << std::endl;
-
-    //seems to be an MSVC error
-#if !defined(BOOST_MSVC) && !defined(BOOST_MSVC_FULL_VER)
-    BOOST_CHECK(os.bad());
-#endif
 }
 
 

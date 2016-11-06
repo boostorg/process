@@ -68,8 +68,22 @@ struct on_fork_error_t
     Executor & exec;
     const std::error_code & error;
     on_fork_error_t(Executor & exec, const std::error_code & error) : exec(exec), error(error) {};
+
     template<typename T>
-    void operator()(T & t) const {t.on_fork_error(exec, error);}
+    void impl(T & t, std::true_type /* is extended */)
+    {
+    	t.on_fork_error(exec, error);
+    }
+
+    template<typename T>
+    void impl(T &t, std::false_type /* is extended */) {}
+
+    template<typename T>
+    void operator()(T & t) const
+    {
+    	using type = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
+    	impl(t, std::is_base_of<T, type>());
+    }
 };
 
 
@@ -78,11 +92,22 @@ struct on_exec_setup_t
 {
     Executor & exec;
     on_exec_setup_t(Executor & exec) : exec(exec) {};
+
+    template<typename T>
+    void impl(T & t, std::true_type /* is extended */)
+    {
+    	t.on_exec_setup(exec, error);
+    }
+
+    template<typename T>
+    void impl(T &t, std::false_type /* is extended */) {}
+
     template<typename T>
     void operator()(T & t) const
     {
+    	using type = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
         if (!exec.error())
-            t.on_exec_setup(exec);
+        	impl(t, std::is_base_of<T, type>());
     }
 };
 
@@ -93,8 +118,22 @@ struct on_exec_error_t
     Executor & exec;
     const std::error_code &ec;
     on_exec_error_t(Executor & exec, const std::error_code & error) : exec(exec), ec(error) {};
+
     template<typename T>
-    void operator()(T & t) const {t.on_exec_error(exec, ec);}
+    void impl(T & t, std::true_type /* is extended */)
+    {
+    	t.on_exec_error(exec, error);
+    }
+
+    template<typename T>
+    void impl(T &t, std::false_type /* is extended */) {}
+
+    template<typename T>
+    void operator()(T & t) const
+    {
+    	using type = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
+    	impl(t, std::is_base_of<T, type>());
+    }
 };
 
 template<typename Executor> on_setup_t  <Executor> call_on_setup  (Executor & exec) {return exec;}
