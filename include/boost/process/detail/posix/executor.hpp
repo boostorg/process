@@ -8,7 +8,7 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #ifndef BOOST_PROCESS_DETAIL_POSIX_EXECUTOR_HPP
-#define BOOST_PROCESS_POSIX_EXECUTOR_HPP
+#define BOOST_PROCESS_DETAIL_POSIX_EXECUTOR_HPP
 
 #include <boost/process/detail/child_decl.hpp>
 #include <boost/process/error.hpp>
