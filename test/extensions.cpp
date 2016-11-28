@@ -15,6 +15,7 @@
 #include <boost/bind.hpp>
 #include <boost/ref.hpp>
 #include <boost/process/child.hpp>
+#include <boost/process/extend.hpp>
 
 
 namespace bp = boost::process;
@@ -54,8 +55,8 @@ BOOST_AUTO_TEST_CASE(extensions)
     bp::child c(
         "Wrong-Command",
         "test",
-        bp::on_setup=re,
-        bp::on_error=se,
+        bp::extend::on_setup=re,
+        bp::extend::on_error=se,
         bp::ignore_error
     );
     BOOST_CHECK(!se.ec);

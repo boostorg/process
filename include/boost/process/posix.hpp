@@ -50,12 +50,7 @@ namespace posix {
  *
  */
 constexpr static ::boost::process::detail::posix::fd_ fd;
-///This handler is invoked if the fork fails.
-constexpr static ::boost::process::detail::make_handler_t<::boost::process::detail::posix::on_fork_error_  >   on_fork_error;
-///This handler is invoked if the fork succeeded.
-constexpr static ::boost::process::detail::make_handler_t<::boost::process::detail::posix::on_exec_setup_  >   on_exec_setup;
-///This handler is invoked if the exec call errored.
-constexpr static ::boost::process::detail::make_handler_t<::boost::process::detail::posix::on_exec_error_     >   on_exec_error;
+
 /** This property lets you modify the handling of `SIGCHLD` for this call. It will be reset afterwards.
 
 It can be set to default, by the expression `sig.dfl()`, set to ignore with `sig.ign()` or

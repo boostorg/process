@@ -80,6 +80,12 @@ struct startup_info_impl
                 nullptr
     };
     startup_info_t & startup_info = startup_info_ex.StartupInfo;
+
+    void set_startup_info_ex()
+    {
+    	startup_info.cb = sizeof(startup_info_ex_t);
+    	creation_flags  = ::boost::detail::winapi::EXTENDED_STARTUPINFO_PRESENT_;
+    }
 };
 
 

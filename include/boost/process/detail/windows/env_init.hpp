@@ -25,8 +25,8 @@ struct env_init : public ::boost::process::detail::handler_base
     env_init(boost::process::basic_environment<Char> && env) : env(std::move(env)) {};
     env_init(const boost::process::basic_environment<Char> & env) : env(env) {};
 
-    ::boost::detail::winapi::DWORD_ creation_flag(char)    {return 0u;}
-    ::boost::detail::winapi::DWORD_ creation_flag(wchar_t)
+    constexpr static ::boost::detail::winapi::DWORD_ creation_flag(char)    {return 0u;}
+    constexpr static ::boost::detail::winapi::DWORD_ creation_flag(wchar_t)
     {
     	return ::boost::detail::winapi::CREATE_UNICODE_ENVIRONMENT_;
     }
@@ -42,7 +42,7 @@ struct env_init : public ::boost::process::detail::handler_base
         }
 
         exec.env = e;
-        exec.creation_flags |= creation_flags(Char());
+        exec.creation_flags |= creation_flag(Char());
     }
 
 };
