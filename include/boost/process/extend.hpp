@@ -12,8 +12,8 @@
 #include <boost/process/detail/windows/executor.hpp>
 #include <boost/process/detail/windows/async_handler.hpp>
 #else
-#include <boost/process/detail/windows/executor.hpp>
-#include <boost/process/detail/windows/async_handler.hpp>
+#include <boost/process/detail/posix/executor.hpp>
+#include <boost/process/detail/posix/async_handler.hpp>
 #endif
 
 namespace boost {
