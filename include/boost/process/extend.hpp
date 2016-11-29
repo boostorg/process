@@ -49,6 +49,7 @@ struct windows_executor;
 using ::boost::process::detail::handler;
 using ::boost::process::detail::api::require_io_service;
 using ::boost::process::detail::api::async_handler;
+using ::boost::process::detail::get_io_service;
 
 constexpr boost::process::detail::make_handler_t<boost::process::detail::on_setup_>   on_setup;
 constexpr boost::process::detail::make_handler_t<boost::process::detail::on_error_>   on_error;

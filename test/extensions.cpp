@@ -61,3 +61,41 @@ BOOST_AUTO_TEST_CASE(extensions)
     );
     BOOST_CHECK(!se.ec);
 }
+
+
+namespace ex = boost::process::extend;
+
+
+std::string st = "not called";
+
+struct overload_handler : ex::handler
+{
+    template <class ...Args>
+    void on_setup(ex::windows_executor<Args...>& exec) const
+    {
+    	st = "windows";
+    	const char* env = exec.env;
+    }
+    template <class ...Args>
+	void on_setup(ex::posix_executor<Args...>& exec) const
+	{
+		st = "posix";
+		char** env = exec.env;
+	}
+};
+
+BOOST_AUTO_TEST_CASE(overload)
+{
+    bp::child c(
+		overload_handler(),
+        bp::ignore_error
+    );
+#if defined(BOOST_WINDOWS_API)
+    BOOST_CHECK_EQUAL(st, "windows");
+#else
+    BOOST_CHECK_EQUAL(st, "posix");
+#endif
+}
+
+
+
