@@ -80,7 +80,7 @@ shell_cmd = shell(ec);
 \attention Launching through the shell will NOT provide proper error handling, i.e.
 you will get an error via the return code.
 */
-constexpr static ::boost::process::detail::shell_ shell;
+constexpr ::boost::process::detail::shell_ shell;
 
 }}
 

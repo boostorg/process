@@ -20,9 +20,6 @@ namespace boost {
   namespace process {
     namespace posix {
       <emphasis>unspecified</emphasis> <globalname alt="boost::process::posix::fd">fd</globalname>;
-      <emphasis>unspecified</emphasis> <globalname alt="boost::process::posix::on_fork_error">on_fork_error</globalname>;
-      <emphasis>unspecified</emphasis> <globalname alt="boost::process::posix::on_exec_setup">on_exec_setup</globalname>;
-      <emphasis>unspecified</emphasis> <globalname alt="boost::process::posix::on_exec_error">on_exec_error</globalname>;
       <emphasis>unspecified</emphasis> <globalname alt="boost::process::posix::sig">sig</globalname>;
       <emphasis>unspecified</emphasis> <globalname alt="boost::process::posix::use_vfork">use_vfork</globalname>;
     }
@@ -49,7 +46,7 @@ namespace posix {
  * Close can also be called with a range of file-descriptors to be closed.
  *
  */
-constexpr static ::boost::process::detail::posix::fd_ fd;
+constexpr ::boost::process::detail::posix::fd_ fd;
 
 /** This property lets you modify the handling of `SIGCHLD` for this call. It will be reset afterwards.
 
@@ -63,12 +60,12 @@ sig(handler);
 
 \warning @ref spawn will automatically use `sig.ign()`, which will override if you pass a custom handler.
  */
-constexpr static ::boost::process::detail::posix::sig_       sig;
+constexpr ::boost::process::detail::posix::sig_       sig;
 /** This property will replace the usage of [fork](http://pubs.opengroup.org/onlinepubs/9699919799/functions/fork.html) by [vfork](http://pubs.opengroup.org/onlinepubs/009695399/functions/vfork.html).
  \note `vfork` is no longer an official part of the posix standard.
 
  */
-constexpr static ::boost::process::detail::posix::use_vfork_ use_vfork;
+constexpr ::boost::process::detail::posix::use_vfork_ use_vfork;
 
 }}}
 

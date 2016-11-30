@@ -475,7 +475,7 @@ spawn("b2", e);
 \warning Passing an empty environment will cause undefined behaviour.
 
  */
-constexpr static boost::process::detail::env_ env{};
+constexpr boost::process::detail::env_ env{};
 
 
 }}

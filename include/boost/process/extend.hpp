@@ -16,6 +16,17 @@
 #include <boost/process/detail/posix/async_handler.hpp>
 #endif
 
+
+/** \file boost/process/extend.hpp
+ *
+ * This header which provides the types and functions provided for custom extensions.
+ *
+ * \xmlonly
+   Please refer to the <link linkend="boost_process.extend">tutorial</link> for more details.
+   \endxmlonly
+ */
+
+
 namespace boost {
 namespace process {
 namespace asio {
@@ -55,13 +66,15 @@ constexpr boost::process::detail::make_handler_t<boost::process::detail::on_setu
 constexpr boost::process::detail::make_handler_t<boost::process::detail::on_error_>   on_error;
 constexpr boost::process::detail::make_handler_t<boost::process::detail::on_success_> on_success;
 
-#if defined(BOOST_POSIX_API)
+#if defined(BOOST_POSIX_API) || defined(BOOST_PROCESS_DOXYGEN)
+///\addtogroup posix only @{
 ///This handler is invoked if the fork fails.
-constexpr static ::boost::process::detail::make_handler_t<::boost::process::detail::posix::on_fork_error_  >   on_fork_error;
+constexpr ::boost::process::detail::make_handler_t<::boost::process::detail::posix::on_fork_error_  >   on_fork_error;
 ///This handler is invoked if the fork succeeded.
-constexpr static ::boost::process::detail::make_handler_t<::boost::process::detail::posix::on_exec_setup_  >   on_exec_setup;
+constexpr ::boost::process::detail::make_handler_t<::boost::process::detail::posix::on_exec_setup_  >   on_exec_setup;
 ///This handler is invoked if the exec call errored.
-constexpr static ::boost::process::detail::make_handler_t<::boost::process::detail::posix::on_exec_error_     >   on_exec_error;
+constexpr ::boost::process::detail::make_handler_t<::boost::process::detail::posix::on_exec_error_     >   on_exec_error;
+///@}
 #endif
 
 }

@@ -103,7 +103,7 @@ It can be used with `std::string`, `std::wstring` and `boost::filesystem::path`.
 
 
  */
-constexpr static ::boost::process::detail::start_dir_ start_dir;
+constexpr ::boost::process::detail::start_dir_ start_dir;
 
 }}
 
