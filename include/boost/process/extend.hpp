@@ -32,27 +32,28 @@ namespace process {
 namespace asio {
 class io_service;
 }
+
 namespace detail {
 template<typename Tuple>
 inline asio::io_service& get_io_service(const Tuple & tup);
 }
 
 
-///Namespace for extensions @attention This is experimental.
+///Namespace for extensions \attention This is experimental.
 namespace extend {
 
 #if defined(BOOST_WINDOWS_API)
 
-template<typename ...Args>
-using windows_executor = ::boost::process::detail::windows::executor<Args...>;
-template<typename ...Args>
+template<typename Char, typename Sequence>
+using windows_executor = ::boost::process::detail::windows::executor<Char, Sequence>;
+template<typename Sequence>
 struct posix_executor;
 
-#else
+#elif defined(BOOST_POSIX_API)
 
-template<typename ...Args>
+template<typename Sequence>
 using posix_executor = ::boost::process::detail::posix::executor<Args...>;
-template<typename ...Args>
+template<typename Char, typename Sequence>
 struct windows_executor;
 
 #endif
@@ -61,7 +62,8 @@ using ::boost::process::detail::handler;
 using ::boost::process::detail::api::require_io_service;
 using ::boost::process::detail::api::async_handler;
 using ::boost::process::detail::get_io_service;
-
+using ::boost::process::detail::get_last_error;
+using ::boost::process::detail::throw_last_error;
 
 ///This handler is invoked before the process in launched, to setup parameters.
 constexpr boost::process::detail::make_handler_t<boost::process::detail::on_setup_>   on_setup;
@@ -77,10 +79,20 @@ constexpr ::boost::process::detail::make_handler_t<::boost::process::detail::pos
 constexpr ::boost::process::detail::make_handler_t<::boost::process::detail::posix::on_exec_setup_  >   on_exec_setup;
 ///This handler is invoked if the exec call errored. \note Only available on posix.
 constexpr ::boost::process::detail::make_handler_t<::boost::process::detail::posix::on_exec_error_     >   on_exec_error;
-///@}
 #endif
 
 #if defined(BOOST_PROCESS_DOXYGEN)
+///Helper function to get the last error code system-independent
+inline std::error_code get_last_error();
+
+///Helper function to get and throw the last system error.
+/// \throws boost::process::process_error
+/// \param msg A message to add to the error code.
+inline void throw_last_error(const std::string & msg);
+///\overload void throw_last_error(const std::string & msg)
+inline void throw_last_error();
+
+
 /** This function gets the io_service from the initializer sequence.
  *
  * \attention Yields a compile-time error if no `io_service` is provided.
@@ -99,7 +111,7 @@ inline asio::io_service& get_io_service(const Sequence & seq);
  */
 struct handler
 {
-	///This function is invoked before the process launch. \note It is not required to be const.
+    ///This function is invoked before the process launch. \note It is not required to be const.
     template <class Executor>
     void on_setup(Executor&) const {}
 
@@ -154,11 +166,11 @@ struct require_io_service {};
 template<typename Executor>
 std::function<void(int, const std::error_code&)> on_exit_handler(Executor & exec)
 {
-	auto handler = this->handler;
-	return [handler](int exit_code, const std::error_code & ec)
-		   {
-				handler(static_cast<int>(exit_code), ec);
-		   };
+    auto handler = this->handler;
+    return [handler](int exit_code, const std::error_code & ec)
+           {
+                handler(static_cast<int>(exit_code), ec);
+           };
 
 }
  \endcode
@@ -169,10 +181,118 @@ std::function<void(int, const std::error_code&)> on_exit_handler(Executor & exec
  *
  * \warning Cannot be used with \ref boost::process::spawn
  */
-struct async_handler : handler, require_io_service.
+struct async_handler : handler, require_io_service
 {
 
 };
+
+///The posix executor type.
+/** This type represents the posix executor and can be used for overloading in a custom handler.
+ * \note It is an alias for the implementation on posix, and a forward-declaration on windows.
+ *
+ * \tparam Sequence The used initializer-sequence, it is fulfills the boost.fusion [sequence](http://www.boost.org/doc/libs/master/libs/fusion/doc/html/fusion/sequence.html) concept.
+ *
+\xmlonly
+The basic structure of the invocation is given below (in pseudo-code).
+
+<xi:include
+     href="/boost/libs/process/doc/posix_pseudocode.xml"
+     xmlns:xi="http://www.w3.org/2001/XInclude" />
+
+\endxmlonly
+ *
+ * \note Error handling is done through a pipe, unless \ref ignore_error is used.
+ */
+template<typename Sequence>
+struct posix_executor
+{
+    ///A reference to the actual initializer-sequence
+     Sequence & seq;
+    ///A pointer to the name of the executable.
+     const char * exe      = nullptr;
+     ///A pointer to the argument-vector.
+     char *const* cmd_line = nullptr;
+     ///A pointer to the environment variables, as default it is set to [environ](http://pubs.opengroup.org/onlinepubs/009695399/basedefs/xbd_chap08.html)
+     char **env      = ::environ;
+     ///The pid of the process - it will be -1 before invoking [fork](http://pubs.opengroup.org/onlinepubs/009695399/functions/fork.html), and after forking either 0 for the new process or a positive value if in the current process. */
+     pid_t pid = -1;
+     ///This shared-pointer holds the exit code. It's done this way, so it can be shared between an `asio::io_service` and \ref child.
+     std::shared_ptr<std::atomic<int>> exit_status = std::make_shared<std::atomic<int>>(still_active);
+
+     ///This function returns a const reference to the error state of the executor.
+     const std::error_code & error() const;
+
+     ///This function can be used to report an error to the executor. This will be handled according to the configuration of the executor, i.e. it
+     /// might throw an exception. \note This is the required way to handle errors in initializers.
+     void set_error(const std::error_code &ec, const std::string &msg);
+     ///\overload void set_error(const std::error_code &ec, const std::string &msg);
+     void set_error(const std::error_code &ec, const char* msg);
+};
+
+///The windows executor type.
+/** This type represents the posix executor and can be used for overloading in a custom handler.
+ *
+ * \note It is an alias for the implementation on posix, and a forward-declaration on windows.
+ * \tparam Sequence The used initializer-sequence, it is fulfills the boost.fusion [sequence](http://www.boost.org/doc/libs/master/libs/fusion/doc/html/fusion/sequence.html) concept.
+ * \tparam Char The used char-type, either `char` or `wchar_t`.
+ *
+ *
+ */
+
+template<typename Char, typename Sequence>
+struct windows_executor
+{
+    ///A reference to the actual initializer-sequence
+     Sequence & seq;
+
+     ///A pointer to the name of the executable. It's null by default.
+     const Char * exe      = nullptr;
+     ///A pointer to the argument-vector. Must be set by some initializer.
+     char  Char* cmd_line = nullptr;
+     ///A pointer to the environment variables. It's null by default.
+     char  Char* env      = nullptr;
+     ///A pointer to the working directory. It's null by default.
+     const Char * work_dir = nullptr;
+
+     ///A pointer to the process-attributes of type [SECURITY_ATTRIBUTES](https://msdn.microsoft.com/en-us/library/windows/desktop/aa379560.aspx). It's null by default.
+     ::boost::detail::winapi::LPSECURITY_ATTRIBUTES_ proc_attrs   = nullptr;
+     ///A pointer to the thread-attributes of type [SECURITY_ATTRIBUTES](https://msdn.microsoft.com/en-us/library/windows/desktop/aa379560.aspx). It' null by default.
+     ::boost::detail::winapi::LPSECURITY_ATTRIBUTES_ thread_attrs = nullptr;
+     ///A logical bool value setting whether handles shall be inherited or not.
+     ::boost::detail::winapi::BOOL_ inherit_handles = false;
+
+     ///The element holding the process-information after process creation. The type is [PROCESS_INFORMATION](https://msdn.microsoft.com/en-us/library/windows/desktop/ms684873.aspx)
+     ::boost::detail::winapi::PROCESS_INFORMATION_ proc_info{nullptr, nullptr, 0,0};
+
+
+     ///This shared-pointer holds the exit code. It's done this way, so it can be shared between an `asio::io_service` and \ref child.
+     std::shared_ptr<std::atomic<int>> exit_status = std::make_shared<std::atomic<int>>(still_active);
+
+     ///This function returns a const reference to the error state of the executor.
+     const std::error_code & error() const;
+
+     ///This function can be used to report an error to the executor. This will be handled according to the configuration of the executor, i.e. it
+     /// might throw an exception. \note This is the required way to handle errors in initializers.
+     void set_error(const std::error_code &ec, const std::string &msg);
+     ///\overload void set_error(const std::error_code &ec, const std::string &msg);
+     void set_error(const std::error_code &ec, const char* msg);
+
+     ///The creation flags of the process
+    ::boost::detail::winapi::DWORD_ creation_flags;
+    ///The type of the [startup-info](https://msdn.microsoft.com/en-us/library/windows/desktop/ms686331.aspx), depending on the char-type.
+    typedef typename detail::startup_info<Char>::type    startup_info_t;
+    ///The type of the [extended startup-info](https://msdn.microsoft.com/de-de/library/windows/desktop/ms686329.aspx), depending the char-type; only defined with winapi-version equal or higher than 6.
+    typedef typename detail::startup_info_ex<Char>::type startup_info_ex_t;
+    ///This function switches the information, so that the extended structure is used. \note It's only defined with winapi-version equal or higher than 6.
+    void set_startup_info_ex();
+    ///This element is an instance or a reference (if \ref startup_info_ex exists) to the [startup-info](https://msdn.microsoft.com/en-us/library/windows/desktop/ms686331.aspx) for the process.
+    startup_info_t startup_info;
+    ///This element is the instance of the  [extended startup-info](https://msdn.microsoft.com/de-de/library/windows/desktop/ms686329.aspx). It is only available with a winapi-version equal or highter than 6.
+    startup_info_ex_t  startup_info_ex;
+};
+
+
+
 #endif
 
 }
