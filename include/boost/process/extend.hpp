@@ -162,7 +162,15 @@ struct require_io_service {};
  *
  \code{.cpp}
 template<typename Executor>
-std::function<void(int, const std::error_code&)> on_exit_handler(Executor & exec);
+std::function<void(int, const std::error_code&)> on_exit_handler(Executor & exec)
+{
+    auto handler = this->handler;
+    return [handler](int exit_code, const std::error_code & ec)
+           {
+                handler(static_cast<int>(exit_code), ec);
+           };
+
+}
  \endcode
 
  The callback will be obtained by calling this function on setup and it will be
@@ -187,14 +195,33 @@ struct async_handler : handler, require_io_service
 As information for extension development, here is the structure of the process launching (in pseudo-code and uml)
 <xi:include href="posix_pseudocode.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
 
+<mediaobject>
+<caption>
 <para>The sequence if when no error occurs.</para>
+</caption>
+<imageobject>
 <imagedata fileref="boost_process/posix_success.svg"/>
+</imageobject>
+</mediaobject>
 
+<mediaobject>
+<caption>
 <para>The sequence if the execution fails.</para>
+</caption>
+<imageobject>
 <imagedata fileref="boost_process/posix_exec_err.svg"/>
+</imageobject>
+</mediaobject>
 
+<mediaobject>
+<caption>
 <para>The sequence if the fork fails.</para>
+</caption>
+<imageobject>
 <imagedata fileref="boost_process/posix_fork_err.svg"/>
+</imageobject>
+</mediaobject>
+
 \endxmlonly
 
 
@@ -236,10 +263,15 @@ struct posix_executor
  *
 
 \xmlonly
-As information for extension development, here is the structure of the process launching (in pseudo-code and uml)
-<xi:include href="windows_pseudocode.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+As information for extension development, here is the structure of the process launching (in pseudo-code and uml)<xi:include href="windows_pseudocode.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<mediaobject>
+<caption>
 <para>The sequence for windows process creation.</para>
+</caption>
+<imageobject>
 <imagedata fileref="boost_process/windows_exec.svg"/>
+</imageobject>
+</mediaobject>
 \endxmlonly
 
  */
