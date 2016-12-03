@@ -48,6 +48,9 @@ template<> struct initializer_tag<std::vector<wchar_t *>> { typedef cmd_or_exe_t
 template<> struct initializer_tag<std::initializer_list<char    *>> { typedef cmd_or_exe_tag<char>     type;};
 template<> struct initializer_tag<std::initializer_list<wchar_t *>> { typedef cmd_or_exe_tag<wchar_t>  type;};
 
+template<> struct initializer_tag<std::initializer_list<const char    *>> { typedef cmd_or_exe_tag<char>     type;};
+template<> struct initializer_tag<std::initializer_list<const wchar_t *>> { typedef cmd_or_exe_tag<wchar_t>  type;};
+
 template<> struct initializer_tag<shell_>
 {
     typedef cmd_or_exe_tag<typename boost::filesystem::path::value_type> type;

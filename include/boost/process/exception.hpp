@@ -19,7 +19,7 @@ namespace process
  */
 struct process_error : std::system_error
 {
-	using std::system_error::system_error;
+    using std::system_error::system_error;
 };
 
 }

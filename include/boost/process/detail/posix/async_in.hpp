@@ -15,15 +15,14 @@
 #include <boost/asio/write.hpp>
 #include <boost/process/async_pipe.hpp>
 #include <memory>
-
-
 #include <future>
 
 namespace boost { namespace process { namespace detail { namespace posix {
 
 
 template<typename Buffer>
-struct async_in_buffer : ::boost::process::detail::posix::async_handler
+struct async_in_buffer : ::boost::process::detail::posix::handler_base_ext,
+                         ::boost::process::detail::posix::require_io_service
 {
     Buffer & buf;
 
@@ -42,9 +41,7 @@ struct async_in_buffer : ::boost::process::detail::posix::async_handler
     template <typename Executor>
     inline void on_success(Executor &exec)
     {
-
         auto  pipe              = this->pipe;
-
         if (this->promise)
         {
             auto promise = this->promise;
@@ -52,7 +49,7 @@ struct async_in_buffer : ::boost::process::detail::posix::async_handler
             boost::asio::async_write(*pipe, buf,
                 [pipe, promise](const boost::system::error_code & ec, std::size_t)
                 {
-                    if (ec && (ec.value() != EBADF) && (ec.value() == EPERM))
+                    if (ec && (ec.value() != EBADF) && (ec.value() != EPERM) && (ec.value() != ENOENT))
                     {
                         std::error_code e(ec.value(), std::system_category());
                         promise->set_exception(std::make_exception_ptr(process_error(e)));
@@ -65,34 +62,29 @@ struct async_in_buffer : ::boost::process::detail::posix::async_handler
             boost::asio::async_write(*pipe, buf,
                 [pipe](const boost::system::error_code&ec, std::size_t size){});
 
+        ::close(pipe->native_source());
         this->pipe = nullptr;
     }
 
     template<typename Executor>
-    std::function<void(int, const std::error_code&)> on_exit_handler(Executor & exec)
+    void on_error(Executor &, const std::error_code &) const
     {
-        auto &ios = get_io_service(exec.seq);
-        if (!pipe)
-            pipe = std::make_shared<boost::process::async_pipe>(ios);
+        ::close(pipe->native_source());
+    }
 
-        auto pipe = this->pipe;
-        return [pipe, &ios](int, const std::error_code& ec)
-               {
-                  ios.post([pipe]
-                      {
-                            boost::system::error_code ec;
-                            pipe->close(ec);
-                      });
-               };
-    };
+    template<typename Executor>
+    void on_setup(Executor & exec)
+    {
+        pipe = std::make_shared<boost::process::async_pipe>(get_io_service(exec.seq));
+    }
+
     template <typename Executor>
     void on_exec_setup(Executor &exec)
     {
-        if (!pipe)
-            pipe = std::make_shared<boost::process::async_pipe>(get_io_service(exec.seq));
-
         if (::dup2(pipe->native_source(), STDIN_FILENO) == -1)
             exec.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
+
+        ::close(pipe->native_source());
     }
 };
 

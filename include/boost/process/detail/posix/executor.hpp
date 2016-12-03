@@ -8,7 +8,7 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #ifndef BOOST_PROCESS_DETAIL_POSIX_EXECUTOR_HPP
-#define BOOST_PROCESS_POSIX_EXECUTOR_HPP
+#define BOOST_PROCESS_DETAIL_POSIX_EXECUTOR_HPP
 
 #include <boost/process/detail/child_decl.hpp>
 #include <boost/process/error.hpp>
@@ -68,8 +68,12 @@ struct on_fork_error_t
     Executor & exec;
     const std::error_code & error;
     on_fork_error_t(Executor & exec, const std::error_code & error) : exec(exec), error(error) {};
+
     template<typename T>
-    void operator()(T & t) const {t.on_fork_error(exec, error);}
+    void operator()(T & t) const
+    {
+        t.on_fork_error(exec, error);
+    }
 };
 
 
@@ -78,11 +82,11 @@ struct on_exec_setup_t
 {
     Executor & exec;
     on_exec_setup_t(Executor & exec) : exec(exec) {};
+
     template<typename T>
     void operator()(T & t) const
     {
-        if (!exec.error())
-            t.on_exec_setup(exec);
+        t.on_exec_setup(exec);
     }
 };
 
@@ -93,8 +97,12 @@ struct on_exec_error_t
     Executor & exec;
     const std::error_code &ec;
     on_exec_error_t(Executor & exec, const std::error_code & error) : exec(exec), ec(error) {};
+
     template<typename T>
-    void operator()(T & t) const {t.on_exec_error(exec, ec);}
+    void operator()(T & t) const
+    {
+        t.on_exec_error(exec, ec);
+    }
 };
 
 template<typename Executor> on_setup_t  <Executor> call_on_setup  (Executor & exec) {return exec;}

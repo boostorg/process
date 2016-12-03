@@ -50,13 +50,11 @@ inline void spawn(Args && ...args)
 {
     typedef typename ::boost::process::detail::has_async_handler<Args...>::type
             has_async;
-    typedef typename ::boost::process::detail::has_io_service<Args...>::type
-            has_ios;
+
 
     static_assert(
-            (!has_async::value) && (!has_ios::value),
-            "Spawn cannot wait for exit, so implicit asyncs "
-            "and asio::io_service cannot be passed");
+            !has_async::value,
+            "Spawn cannot wait for exit, so async properties cannot be used");
 
     auto c = ::boost::process::detail::execute_impl(
 #if defined(BOOST_POSIX_API)

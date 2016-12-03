@@ -12,7 +12,9 @@
 
 namespace boost { namespace process { namespace detail { namespace posix {
 
-struct async_handler : boost::process::detail::posix::handler_base_ext
+struct require_io_service {};
+
+struct async_handler : handler_base_ext, require_io_service
 {
 };
 
@@ -23,6 +25,14 @@ struct is_async_handler<T&> :  std::is_base_of<async_handler, T> {};
 template<typename T>
 struct is_async_handler<const T&> :  std::is_base_of<async_handler, T> {};
 
+template<typename T>
+struct does_require_io_service : std::is_base_of<require_io_service, T> {};
+
+template<typename T>
+struct does_require_io_service<T&> : std::is_base_of<require_io_service, T> {};
+
+template<typename T>
+struct does_require_io_service<const T&> : std::is_base_of<require_io_service, T> {};
 
 
 }}}}

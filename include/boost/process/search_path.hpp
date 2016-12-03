@@ -17,6 +17,7 @@
 #define BOOST_PROCESS_SEARCH_PATH_HPP
 
 #include <boost/process/detail/config.hpp>
+#include <boost/process/environment.hpp>
 
 #if defined(BOOST_POSIX_API)
 #include <boost/process/detail/posix/search_path.hpp>
@@ -25,13 +26,6 @@
 #endif
 
 
-namespace boost { namespace process {
-
-using boost::process::detail::api::search_path;
-
-}}
-
-#if defined(BOOST_PROCESS_DOXYGEN)
 namespace boost { namespace process {
 
 /**
@@ -54,9 +48,31 @@ namespace boost { namespace process {
  * \returns the absolute path to the executable filename or an
  *          empty string if filename isn't found
  */
-boost::filesystem::path search_path(const boost::filesystem::path &filename, const std::string &path = "");
-
+/**
+ * Searches for an executable in path.
+ *
+ * filename must be a basename including the file extension.
+ * It must not include any directory separators (like a slash).
+ * On Windows the file extension may be omitted. The function
+ * will then try the various file extensions for executables on
+ * Windows to find filename.
+ *
+ * The path must be a set of directories. Directories must be
+ * separated by colons on POSIX and by semicolons on Windows.
+ * If path is empty, the environment variable PATH is used.
+ *
+ * \param filename The base of the filename to find
+ *
+ * \param path the set of paths so search, defaults to "PATH" environment variable.
+ *
+ * \returns the absolute path to the executable filename or an
+ *          empty string if filename isn't found
+ */
+inline boost::filesystem::path search_path(const boost::filesystem::path &filename,
+                                    const std::vector<boost::filesystem::path> path = ::boost::this_process::path())
+{
+    return ::boost::process::detail::api::search_path(filename, path);
+}
 }}
-#endif
 
 #endif

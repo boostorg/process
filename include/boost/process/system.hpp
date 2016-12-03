@@ -39,7 +39,7 @@ namespace detail
 
 template<typename IoService, typename ...Args>
 inline int system_impl(
-        std::true_type, /*has async */
+        std::true_type, /*needs ios*/
         std::true_type, /*has io_service*/
         std::false_type, /* has_yield */
         Args && ...args)
@@ -66,7 +66,7 @@ inline int system_impl(
 
 template<typename IoService, typename ...Args>
 inline int system_impl(
-        std::true_type, /*has async */
+        std::true_type,  /*needs ios */
         std::false_type, /*has io_service*/
         std::false_type, /* has_yield */
         Args && ...args)
@@ -83,7 +83,7 @@ inline int system_impl(
 
 template<typename IoService, typename ...Args>
 inline int system_impl(
-        std::false_type, /*has async */
+        std::false_type, /*needs ios*/
         std::true_type, /*has io_service*/
         std::false_type, /* has_yield */
         Args && ...args)
@@ -270,15 +270,15 @@ This will automatically suspend the coroutine until the program is finished.
 template<typename ...Args>
 inline int system(Args && ...args)
 {
-    typedef typename ::boost::process::detail::has_async_handler<Args...>::type
-            has_async;
+    typedef typename ::boost::process::detail::needs_io_service<Args...>::type
+            need_ios;
     typedef typename ::boost::process::detail::has_io_service<Args...>::type
             has_ios;
     typedef typename ::boost::process::detail::has_yield_context<Args...>::type
             has_yield;
 
     return ::boost::process::detail::system_impl<boost::asio::io_service>(
-            has_async(), has_ios(), has_yield(),
+            need_ios(), has_ios(), has_yield(),
             std::forward<Args>(args)...);
 }
 

@@ -126,12 +126,12 @@ struct group_handle
         return *this;
     }
 
-    void assign(handle_t proc)
+    void add(handle_t proc)
     {
         if (!::boost::detail::winapi::AssignProcessToJobObject(_job_object, proc))
             throw_last_error();
     }
-    void assign(handle_t proc, std::error_code & ec) noexcept
+    void add(handle_t proc, std::error_code & ec) noexcept
     {
         if (!::boost::detail::winapi::AssignProcessToJobObject(_job_object, proc))
             ec = get_last_error();

@@ -74,19 +74,19 @@ inline void throw_last_error()
 }
 
 
-template<typename Char> constexpr static Char null_char();
+template<typename Char> constexpr Char null_char();
 template<> constexpr char     null_char<char>     (){return   '\0';}
 template<> constexpr wchar_t  null_char<wchar_t>  (){return  L'\0';}
 
-template<typename Char> constexpr static Char equal_sign();
+template<typename Char> constexpr Char equal_sign();
 template<> constexpr char     equal_sign<char>    () {return  '='; }
 template<> constexpr wchar_t  equal_sign<wchar_t> () {return L'='; }
 
-template<typename Char> constexpr static Char quote_sign();
+template<typename Char> constexpr Char quote_sign();
 template<> constexpr char     quote_sign<char>    () {return  '"'; }
 template<> constexpr wchar_t  quote_sign<wchar_t> () {return L'"'; }
 
-template<typename Char> constexpr static Char space_sign();
+template<typename Char> constexpr Char space_sign();
 template<> constexpr char     space_sign<char>    () {return  ' '; }
 template<> constexpr wchar_t  space_sign<wchar_t> () {return L' '; }
 

@@ -14,6 +14,7 @@
 #include <boost/process/error.hpp>
 #include <boost/process/async.hpp>
 #include <boost/process/io.hpp>
+#include <boost/process/spawn.hpp>
 #include <boost/process/child.hpp>
 
 #include <boost/thread.hpp>
@@ -46,7 +47,7 @@ BOOST_AUTO_TEST_CASE(async_out_future, *boost::unit_test::timeout(2))
     std::ostream ostr(&in_buf);
     ostr << "-string" << endl ;
 
-    bp::child c(
+    bp::spawn(
         master_test_suite().argv[1],
         "test", "--prefix-once", "test",
         bp::std_in  < in_buf > fut_in,
@@ -71,9 +72,6 @@ BOOST_AUTO_TEST_CASE(async_out_future, *boost::unit_test::timeout(2))
     BOOST_REQUIRE_GE(line.size(), val.size());
     if (line >= val)
         BOOST_CHECK(boost::algorithm::starts_with(line, val));
-
-
-    c.wait();
 }
 
 

@@ -25,11 +25,9 @@
 [def bp::native_environment  [classref boost::process::basic_native_environment bp::native_environment]]
 [def boost::this_process::environment [funcref boost::this_process::environment boost::this_process::environment]]
 
-
-[def __wait_for__  [memberref boost::process::child::wait_for wait_for]]
-[def __wait_until__  [memberref boost::process::child::wait_until wait_until]]
-[def __detach__  [memberref boost::process::child::detach detach]]
-
+[def __wait_for__ [memberref boost::process::child::wait_for wait_for]]
+[def __wait_until__ [memberref boost::process::child::wait_until wait_until]]
+[def __detach__ [memberref boost::process::child::detach detach]]
 
 [def __reference__ [link process.reference reference]]
 

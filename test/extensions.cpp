@@ -15,6 +15,7 @@
 #include <boost/bind.hpp>
 #include <boost/ref.hpp>
 #include <boost/process/child.hpp>
+#include <boost/process/extend.hpp>
 
 
 namespace bp = boost::process;
@@ -54,9 +55,47 @@ BOOST_AUTO_TEST_CASE(extensions)
     bp::child c(
         "Wrong-Command",
         "test",
-        bp::on_setup=re,
-        bp::on_error=se,
+        bp::extend::on_setup=re,
+        bp::extend::on_error=se,
         bp::ignore_error
     );
     BOOST_CHECK(!se.ec);
 }
+
+
+namespace ex = boost::process::extend;
+
+
+std::string st = "not called";
+
+struct overload_handler : ex::handler
+{
+    template <class Char, class Sequence>
+    void on_setup(ex::windows_executor<Char, Sequence>& exec) const
+    {
+    	st = "windows";
+    	const char* env = exec.env;
+    }
+    template <class ...Args>
+	void on_setup(ex::posix_executor<Args...>& exec) const
+	{
+		st = "posix";
+		char** env = exec.env;
+	}
+};
+
+BOOST_AUTO_TEST_CASE(overload)
+{
+    bp::child c(
+		overload_handler(),
+        bp::ignore_error
+    );
+#if defined(BOOST_WINDOWS_API)
+    BOOST_CHECK_EQUAL(st, "windows");
+#else
+    BOOST_CHECK_EQUAL(st, "posix");
+#endif
+}
+
+
+

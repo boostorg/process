@@ -270,9 +270,9 @@ struct close_t
 
 }
 ///This constant is a utility to allow syntax like `std_out > close` for closing I/O streams.
-constexpr static boost::process::detail::close_t close;
+constexpr boost::process::detail::close_t close;
 ///This constant is a utility to redirect streams to the null-device.
-constexpr static boost::process::detail::null_t  null;
+constexpr boost::process::detail::null_t  null;
 
 /**
 This property allows to set the input stream for the child process.
@@ -410,7 +410,7 @@ std_in.null();
 
 */
 
-constexpr static boost::process::detail::std_in_<void>   std_in;
+constexpr boost::process::detail::std_in_<void>   std_in;
 
 /**
 This property allows to set the output stream for the child process.
@@ -542,11 +542,11 @@ std_out.null();
 
 */
 
-constexpr static boost::process::detail::std_out_<1> std_out;
+constexpr boost::process::detail::std_out_<1> std_out;
 /**This property allows setting the `stderr` stream. The semantic and syntax is the same as for
  * \xmlonly <globalname alt="boost::process::std_out">std_out</globalname> \endxmlonly .
  */
-constexpr static boost::process::detail::std_out_<2> std_err;
+constexpr boost::process::detail::std_out_<2> std_err;
 
 }}
 #endif /* INCLUDE_BOOST_PROCESS_IO_HPP_ */

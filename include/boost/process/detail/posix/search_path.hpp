@@ -22,23 +22,16 @@ namespace boost { namespace process { namespace detail { namespace posix {
 
 inline boost::filesystem::path search_path(
         const boost::filesystem::path &filename,
-        const std::string &path = ::getenv("PATH"))
+        const std::vector<boost::filesystem::path> &path)
 {
     std::string result;
-    typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-    boost::char_separator<char> sep(":");
-    tokenizer tok(path, sep);
-    for (tokenizer::iterator it = tok.begin(); it != tok.end(); ++it)
+    for (const boost::filesystem::path & pp : path)
     {
-        boost::filesystem::path p = *it;
-        p /= filename;
+        auto p = pp / filename;
         if (!::access(p.c_str(), X_OK))
-        {
-            result = p.string();
-            break;
-        }
+            return p;
     }
-    return result;
+    return "";
 }
 
 }}}}

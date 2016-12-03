@@ -27,8 +27,10 @@ namespace detail {
 
 #if defined(BOOST_POSIX_API)
 using ::boost::process::detail::posix::is_async_handler;
+using ::boost::process::detail::posix::does_require_io_service;
 #else
 using ::boost::process::detail::windows::is_async_handler;
+using ::boost::process::detail::windows::does_require_io_service;
 #endif
 
 template<typename ...Args>
@@ -74,6 +76,25 @@ template<typename T>
 struct has_async_handler<T>
 {
     typedef typename is_async_handler<T>::type type;
+};
+
+template<typename ...Args>
+struct needs_io_service;
+
+template<typename T, typename ...Args>
+struct needs_io_service<T, Args...>
+{
+    typedef typename needs_io_service<Args...>::type next;
+    typedef typename does_require_io_service<T>::type is_ios;
+    typedef typename std::conditional<is_ios::value,
+            std::true_type,
+            next>::type type;
+};
+
+template<typename T>
+struct needs_io_service<T>
+{
+    typedef typename does_require_io_service<T>::type type;
 };
 
 

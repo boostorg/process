@@ -23,7 +23,7 @@ inline boost::filesystem::path shell_path()
     ::boost::detail::winapi::WCHAR_ sysdir[260];
     unsigned int size = ::boost::detail::winapi::get_system_directory(sysdir, sizeof(sysdir));
     if (!size)
-    	throw_last_error("GetSystemDirectory() failed");
+        throw_last_error("GetSystemDirectory() failed");
 
     boost::filesystem::path p = sysdir;
     return p / "cmd.exe";

@@ -13,7 +13,6 @@
 #include <boost/process/detail/config.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
-#include <boost/tokenizer.hpp>
 #include <boost/system/error_code.hpp>
 #include <string>
 #include <stdexcept>
@@ -28,26 +27,21 @@ namespace boost { namespace process { namespace detail { namespace windows {
 
 inline boost::filesystem::path search_path(
         const boost::filesystem::path &filename,
-        const std::string &path = ::getenv("PATH"))
+        const std::vector<boost::filesystem::path> &path)
 {
-    typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-    boost::char_separator<char> sep(";");
-    tokenizer tok(path, sep);
-    for (boost::filesystem::path p : tok)
+    for (const boost::filesystem::path & pp : path)
     {
-        p /= filename;
-        std::array<std::string, 4> extensions =
-            { "", ".exe", ".com", ".bat" };
+        auto p = pp / filename;
+        std::array<std::string, 4> extensions = { "", ".exe", ".com", ".bat" };
         for (boost::filesystem::path ext : extensions)
         {
-            boost::filesystem::path p2 = p;
-            p2 += ext;
+            p += ext;
             boost::system::error_code ec;
-            bool file = boost::filesystem::is_regular_file(p2, ec);
+            bool file = boost::filesystem::is_regular_file(p, ec);
             if (!ec && file &&
-                ::boost::detail::winapi::sh_get_file_info(p2.string().c_str(), 0, 0, 0, ::boost::detail::winapi::SHGFI_EXETYPE_))
+                ::boost::detail::winapi::sh_get_file_info(p.string().c_str(), 0, 0, 0, ::boost::detail::winapi::SHGFI_EXETYPE_))
             {
-                return p2.string();
+                return p;
             }
         }
     }

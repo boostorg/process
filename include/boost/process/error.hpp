@@ -156,10 +156,10 @@ struct initializer_builder<error_tag>
 }
 /**The ignore_error property will disable any error handling. This can be useful
 on linux, where error handling will require a pipe.*/
-constexpr static boost::process::detail::ignore_error_ ignore_error;
+constexpr boost::process::detail::ignore_error_ ignore_error;
 /**The throw_on_error property will enable the exception when launching a process.
 It is unnecessary by default, but may be used, when an additional error_code is provided.*/
-constexpr static boost::process::detail::throw_on_error_ throw_on_error;
+constexpr boost::process::detail::throw_on_error_ throw_on_error;
 /**
 The error property will set the executor to handle any errors by setting an
 [std::error_code](http://en.cppreference.com/w/cpp/error/error_code).
@@ -181,11 +181,11 @@ The overload version is achieved by just passing an object of
 
 
  */
-constexpr static boost::process::detail::error_ error;
+constexpr boost::process::detail::error_ error;
 ///Alias for \xmlonly <globalname alt="boost::process::error">error</globalname> \endxmlonly .
-constexpr static boost::process::detail::error_ error_ref;
+constexpr boost::process::detail::error_ error_ref;
 ///Alias for \xmlonly <globalname alt="boost::process::error">error</globalname> \endxmlonly .
-constexpr static boost::process::detail::error_ error_code;
+constexpr boost::process::detail::error_ error_code;
 
 
 }}

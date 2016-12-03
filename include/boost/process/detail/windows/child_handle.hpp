@@ -32,7 +32,7 @@ struct child_handle
     {
         auto h = ::boost::detail::winapi::OpenProcess(
                 ::boost::detail::winapi::PROCESS_ALL_ACCESS_,
-                static_cast<::boost::detail::winapi::BOOL_>(1),
+                static_cast<::boost::detail::winapi::BOOL_>(0),
                  pid);
 
         if (h == nullptr)

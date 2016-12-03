@@ -23,18 +23,27 @@ struct pipe_in : handler_base_ext
 
     template<typename T>
     pipe_in(const T & p) : descr_(p.native_source()) {}
-//    template<typename CharT, typename Traits>
-//    pipe_in(const boost::process::basic_pipe<CharT, Traits> & p) : descr_(p.native_source()) {}
-//    pipe_in(const boost::process::async_pipe & p)                : descr_(p.native_source()) {}
 
+    template<typename Executor>
+    void on_error(Executor &, const std::error_code &) const
+    {
+        ::close(descr_);
+    }
+
+    template<typename Executor>
+    void on_success(Executor &) const
+    {
+        ::close(descr_);
+    }
 
     template <class Executor>
     void on_exec_setup(Executor &e) const
     {
         if (::dup2(descr_, STDIN_FILENO) == -1)
              e.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
-
+        ::close(descr_);
     }
+
 };
 
 }}}}

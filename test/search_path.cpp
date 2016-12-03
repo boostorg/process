@@ -9,25 +9,30 @@
 
 #define BOOST_TEST_MAIN
 #include <boost/test/included/unit_test.hpp>
-#include <boost/process.hpp>
+#include <boost/process/search_path.hpp>
+#include <boost/filesystem/path.hpp>
 #include <string>
 
 namespace bp = boost::process;
+namespace fs = boost::filesystem;
 
 BOOST_AUTO_TEST_CASE(search_path)
 {
 #if defined(BOOST_WINDOWS_API)
     std::string filename = "cmd";
 #elif defined(BOOST_POSIX_API)
-    std::string filename = "ls";
+    fs::path filename = "ls";
 #endif
 
     BOOST_CHECK(!bp::search_path(filename).empty());
+    auto fs = bp::search_path(filename);
+
+    std::cout << fs << std::endl;
 
 #if defined(BOOST_WINDOWS_API)
-    std::string path = "C:\\Windows;C:\\Windows\\System32";
+    std::vector<fs::path> path = {"C:\\Windows","C:\\Windows\\System32"};
 #elif defined(BOOST_POSIX_API)
-    std::string path = "/usr/local/bin:/usr/bin:/bin";
+    std::vector<fs::path> path = {"/usr/local/bin","/usr/bin","/bin"};
 #endif
 
     BOOST_CHECK(!bp::search_path(filename, path).empty());

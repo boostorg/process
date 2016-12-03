@@ -29,7 +29,7 @@ struct throw_on_error_ : ::boost::process::detail::handler
 
 }
 
-constexpr static boost::process::detail::throw_on_error_ throw_on_error;
+constexpr boost::process::detail::throw_on_error_ throw_on_error;
 
 }}
 
