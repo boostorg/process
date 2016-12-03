@@ -70,8 +70,8 @@ std::string st = "not called";
 
 struct overload_handler : ex::handler
 {
-    template <class ...Args>
-    void on_setup(ex::windows_executor<Args...>& exec) const
+    template <class Char, class Sequence>
+    void on_setup(ex::windows_executor<Char, Sequence>& exec) const
     {
     	st = "windows";
     	const char* env = exec.env;

@@ -28,7 +28,7 @@ struct env_init : public ::boost::process::detail::handler_base
     constexpr static ::boost::detail::winapi::DWORD_ creation_flag(char)    {return 0u;}
     constexpr static ::boost::detail::winapi::DWORD_ creation_flag(wchar_t)
     {
-    	return ::boost::detail::winapi::CREATE_UNICODE_ENVIRONMENT_;
+       return ::boost::detail::winapi::CREATE_UNICODE_ENVIRONMENT_;
     }
 
     template <class WindowsExecutor>

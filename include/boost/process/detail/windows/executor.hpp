@@ -83,8 +83,8 @@ struct startup_info_impl
 
     void set_startup_info_ex()
     {
-    	startup_info.cb = sizeof(startup_info_ex_t);
-    	creation_flags  = ::boost::detail::winapi::EXTENDED_STARTUPINFO_PRESENT_;
+       startup_info.cb = sizeof(startup_info_ex_t);
+       creation_flags  = ::boost::detail::winapi::EXTENDED_STARTUPINFO_PRESENT_;
     }
 };
 

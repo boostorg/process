@@ -11,9 +11,11 @@
 #if defined(BOOST_WINDOWS_API)
 #include <boost/process/detail/windows/executor.hpp>
 #include <boost/process/detail/windows/async_handler.hpp>
+#include <boost/process/detail/windows/asio_fwd.hpp>
 #else
 #include <boost/process/detail/posix/executor.hpp>
 #include <boost/process/detail/posix/async_handler.hpp>
+#include <boost/process/detail/posix/asio_fwd.hpp>
 #endif
 
 
@@ -29,10 +31,6 @@
 
 namespace boost {
 namespace process {
-namespace asio {
-class io_service;
-}
-
 namespace detail {
 template<typename Tuple>
 inline asio::io_service& get_io_service(const Tuple & tup);
@@ -52,7 +50,7 @@ struct posix_executor;
 #elif defined(BOOST_POSIX_API)
 
 template<typename Sequence>
-using posix_executor = ::boost::process::detail::posix::executor<Args...>;
+using posix_executor = ::boost::process::detail::posix::executor<Sequence>;
 template<typename Char, typename Sequence>
 struct windows_executor;
 
@@ -65,20 +63,20 @@ using ::boost::process::detail::get_io_service;
 using ::boost::process::detail::get_last_error;
 using ::boost::process::detail::throw_last_error;
 
-///This handler is invoked before the process in launched, to setup parameters.
+///This handler is invoked before the process in launched, to setup parameters. The required signature is `void(Exec &)`, where `Exec` is a template parameter.
 constexpr boost::process::detail::make_handler_t<boost::process::detail::on_setup_>   on_setup;
-///This handler is invoked if an error occured.
+///This handler is invoked if an error occured. The required signature is `void(auto & exec, const std::error_code&)`, where `Exec` is a template parameter.
 constexpr boost::process::detail::make_handler_t<boost::process::detail::on_error_>   on_error;
-///This handler is invoked if launching the process has succeeded.
+///This handler is invoked if launching the process has succeeded. The required signature is `void(auto & exec)`, where `Exec` is a template parameter.
 constexpr boost::process::detail::make_handler_t<boost::process::detail::on_success_> on_success;
 
 #if defined(BOOST_POSIX_API) || defined(BOOST_PROCESS_DOXYGEN)
-///This handler is invoked if the fork failed. \note Only available on posix.
+///This handler is invoked if the fork failed. The required signature is `void(auto & exec)`, where `Exec` is a template parameter. \note Only available on posix.
 constexpr ::boost::process::detail::make_handler_t<::boost::process::detail::posix::on_fork_error_  >   on_fork_error;
-///This handler is invoked if the fork succeeded. \note Only available on posix.
+///This handler is invoked if the fork succeeded. The required signature is `void(Exec &)`, where `Exec` is a template parameter. \note Only available on posix.
 constexpr ::boost::process::detail::make_handler_t<::boost::process::detail::posix::on_exec_setup_  >   on_exec_setup;
-///This handler is invoked if the exec call errored. \note Only available on posix.
-constexpr ::boost::process::detail::make_handler_t<::boost::process::detail::posix::on_exec_error_     >   on_exec_error;
+///This handler is invoked if the exec call errored. The required signature is `void(auto & exec)`, where `Exec` is a template parameter. \note Only available on posix.
+constexpr ::boost::process::detail::make_handler_t<::boost::process::detail::posix::on_exec_error_  >   on_exec_error;
 #endif
 
 #if defined(BOOST_PROCESS_DOXYGEN)
@@ -164,15 +162,7 @@ struct require_io_service {};
  *
  \code{.cpp}
 template<typename Executor>
-std::function<void(int, const std::error_code&)> on_exit_handler(Executor & exec)
-{
-    auto handler = this->handler;
-    return [handler](int exit_code, const std::error_code & ec)
-           {
-                handler(static_cast<int>(exit_code), ec);
-           };
-
-}
+std::function<void(int, const std::error_code&)> on_exit_handler(Executor & exec);
  \endcode
 
  The callback will be obtained by calling this function on setup and it will be
@@ -191,17 +181,25 @@ struct async_handler : handler, require_io_service
  * \note It is an alias for the implementation on posix, and a forward-declaration on windows.
  *
  * \tparam Sequence The used initializer-sequence, it is fulfills the boost.fusion [sequence](http://www.boost.org/doc/libs/master/libs/fusion/doc/html/fusion/sequence.html) concept.
- *
+
+
 \xmlonly
-The basic structure of the invocation is given below (in pseudo-code).
+As information for extension development, here is the structure of the process launching (in pseudo-code and uml)
+<xi:include href="posix_pseudocode.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
 
-<xi:include
-     href="/boost/libs/process/doc/posix_pseudocode.xml"
-     xmlns:xi="http://www.w3.org/2001/XInclude" />
+<para>The sequence if when no error occurs.</para>
+<imagedata fileref="boost_process/posix_success.svg"/>
 
+<para>The sequence if the execution fails.</para>
+<imagedata fileref="boost_process/posix_exec_err.svg"/>
+
+<para>The sequence if the fork fails.</para>
+<imagedata fileref="boost_process/posix_fork_err.svg"/>
 \endxmlonly
- *
- * \note Error handling is done through a pipe, unless \ref ignore_error is used.
+
+
+\note Error handling if execve fails is done through a pipe, unless \ref ignore_error is used.
+
  */
 template<typename Sequence>
 struct posix_executor
@@ -236,7 +234,14 @@ struct posix_executor
  * \tparam Sequence The used initializer-sequence, it is fulfills the boost.fusion [sequence](http://www.boost.org/doc/libs/master/libs/fusion/doc/html/fusion/sequence.html) concept.
  * \tparam Char The used char-type, either `char` or `wchar_t`.
  *
- *
+
+\xmlonly
+As information for extension development, here is the structure of the process launching (in pseudo-code and uml)
+<xi:include href="windows_pseudocode.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+<para>The sequence for windows process creation.</para>
+<imagedata fileref="boost_process/windows_exec.svg"/>
+\endxmlonly
+
  */
 
 template<typename Char, typename Sequence>

@@ -19,6 +19,4 @@ Here's a simple example of how to start a program with Boost.Process:
 [import ../example/intro.cpp]
 [intro]
 
-[caution This is not yet an official Boost C++ library. It wasn't reviewed and can't be downloaded from [@http://www.boost.org/ www.boost.org]. It is however the latest version of an ongoing effort to create a process management library for Boost. For now the library can be downloaded or cloned from here [@https://github.com/klemens-morgenstern/boost-process/tree/develop https://github.com/klemens-morgenstern/boost-process/tree/develop].]
-
 [endsect]
