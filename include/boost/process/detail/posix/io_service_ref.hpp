@@ -94,8 +94,6 @@ struct io_service_ref : handler_base_ext
           funcs.reserve(boost::fusion::size(asyncs));
           boost::fusion::for_each(asyncs, async_handler_collector<Executor>(exec, funcs));
 
-
-
           wait_handler wh(std::move(funcs), ios, exec.exit_status);
 
           signal_p = wh.signal_.get();
@@ -105,12 +103,11 @@ struct io_service_ref : handler_base_ext
     template <class Executor>
     void on_error(Executor & exec, const std::error_code & ec) const
     {
-    	if (signal_p != nullptr)
-    	{
-    		boost::system::error_code ec;
-    		signal_p->clear(ec);
-    		signal_p->cancel(ec);
-    	}
+        if (signal_p != nullptr)
+        {
+            boost::system::error_code ec;
+            signal_p->cancel(ec);
+        }
     }
 
     struct wait_handler
@@ -128,13 +125,15 @@ struct io_service_ref : handler_base_ext
             : signal_(new boost::asio::signal_set(ios, SIGCHLD)),
               funcs(std::move(funcs)),
               exit_status(exit_status)
-
-
         {
 
         }
         void operator()(const boost::system::error_code & ec_in, int /*signal*/)
         {
+            if (ec_in.value() == boost::asio::error::operation_aborted)
+                return;
+
+
             int status;
             ::wait(&status);
 

@@ -368,7 +368,10 @@ child executor<Sequence>::invoke(boost::mpl::false_, boost::mpl::false_)
     ::close(p[0]);
 
     if (_ec)
+    {
         boost::fusion::for_each(seq, call_on_error(*this, _ec));
+        return child();
+    }
     else
         boost::fusion::for_each(seq, call_on_success(*this));
 
@@ -455,7 +458,10 @@ child executor<Sequence>::invoke(boost::mpl::false_, boost::mpl::true_)
 
 
     if (_ec)
+    {
         boost::fusion::for_each(seq, call_on_error(*this, _ec));
+        return child();
+    }
     else
         boost::fusion::for_each(seq, call_on_success(*this));
 
