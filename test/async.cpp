@@ -156,3 +156,28 @@ BOOST_AUTO_TEST_CASE(async_in_stream, *boost::unit_test::timeout(2))
     c.wait();
 }
 
+
+BOOST_AUTO_TEST_CASE(async_error, *boost::unit_test::timeout(2))
+{
+    using boost::unit_test::framework::master_test_suite;
+    using namespace boost::asio;
+
+    boost::asio::io_service io_service;
+
+    bool exit_called = false;
+    int exit_code = 0;
+    std::error_code ec;
+    bp::child c(
+        "doesn't exist",
+        io_service,
+        bp::on_exit([&](int exit, const std::error_code& ec_in)
+                {
+                    exit_called=true;
+                })
+    );
+
+    BOOST_REQUIRE(ec);
+    io_service.run();
+    BOOST_CHECK(!exit_called);
+}
+

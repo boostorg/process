@@ -74,6 +74,9 @@ struct io_service_ref : handler_base_ext
 
     }
     boost::asio::io_service &get() {return ios;};
+
+    boost::asio::signal_set *signal_p = nullptr;
+
     template <class Executor>
     void on_setup(Executor& exec) const
     {
@@ -96,9 +99,21 @@ struct io_service_ref : handler_base_ext
 
           wait_handler wh(std::move(funcs), ios, exec.exit_status);
 
-          auto signal_p = wh.signal_.get();
+          signal_p = wh.signal_.get();
           signal_p->async_wait(std::move(wh));
     }
+
+    template <class Executor>
+    void on_error(Executor & exec, const std::error_code & ec) const
+    {
+    	if (signal_p != nullptr)
+    	{
+    		boost::system::error_code ec;
+    		signal_p->clear(ec);
+    		signal_p->cancel(ec);
+    	}
+    }
+
     struct wait_handler
     {
         std::shared_ptr<boost::asio::signal_set> signal_;
