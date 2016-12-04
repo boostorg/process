@@ -37,6 +37,14 @@ namespace process {
 namespace detail
 {
 
+struct system_impl_success_check : handler
+{
+    bool succeeded = false;
+
+    template<typename Exec>
+    void on_success(Exec &) { succeeded = true; }
+};
+
 template<typename IoService, typename ...Args>
 inline int system_impl(
         std::true_type, /*needs ios*/
@@ -45,16 +53,19 @@ inline int system_impl(
 {
     IoService & ios = ::boost::process::detail::get_io_service_var(args...);
 
+    system_impl_success_check check;
 
     std::atomic_bool exited{false};
+    bool started = false;
 
     child c(std::forward<Args>(args)...,
+    		check,
             ::boost::process::on_exit(
                 [&](int exit_code, const std::error_code&)
                 {
                     ios.post([&]{exited.store(true);});
                 }));
-    if (!c.valid())
+    if (!c.valid() || !check.succeeded)
         return -1;
 
     while (!exited.load())
