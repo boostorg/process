@@ -78,7 +78,7 @@ struct io_service_ref : handler_base_ext
     boost::asio::signal_set *signal_p = nullptr;
 
     template <class Executor>
-    void on_setup(Executor& exec) const
+    void on_setup(Executor& exec)
     {
           //must be on the heap so I can move it into the lambda.
           auto asyncs = boost::fusion::filter_if<
@@ -88,9 +88,8 @@ struct io_service_ref : handler_base_ext
 
           //ok, check if there are actually any.
           if (boost::fusion::empty(asyncs))
-          {
                 return;
-          }
+
           std::vector<std::function<void(int, const std::error_code & ec)>> funcs;
           funcs.reserve(boost::fusion::size(asyncs));
           boost::fusion::for_each(asyncs, async_handler_collector<Executor>(exec, funcs));
