@@ -88,8 +88,8 @@ before_install:
 
 script:
     # `--coverage` flags required to generate coverage info for Coveralls
-    - ../../../b2 testing.launcher=valgrind address-model=64 architecture=x86 toolset=$TOOLSET cxxflags="--coverage -DBOOST_TRAVISCI_BUILD -std=$CXX_STANDARD" linkflags="--coverage" -sBOOST_BUILD_PATH=.
-
+    - ../../../b2 address-model=64 architecture=x86 toolset=$TOOLSET cxxflags="--coverage -DBOOST_TRAVISCI_BUILD -std=$CXX_STANDARD" linkflags="--coverage" -sBOOST_BUILD_PATH=. 
+    # testing.launcher=valgrind valgrind=on  is disabled, since this doesn't work for vfork.
 after_success:
     # Copying Coveralls data to a separate folder
     - mkdir -p $TRAVIS_BUILD_DIR/coverals
