@@ -24,7 +24,6 @@
 #include <vector>
 #include <sys/wait.h>
 
-
 namespace boost { namespace process { namespace detail { namespace posix {
 
 template<typename Executor>
@@ -80,24 +79,24 @@ struct io_service_ref : handler_base_ext
     template <class Executor>
     void on_setup(Executor& exec)
     {
-          //must be on the heap so I can move it into the lambda.
-          auto asyncs = boost::fusion::filter_if<
-                          is_async_handler<
-                          typename std::remove_reference< boost::mpl::_ > ::type
-                          >>(exec.seq);
+        //must be on the heap so I can move it into the lambda.
+        auto asyncs = boost::fusion::filter_if<
+                        is_async_handler<
+                        typename std::remove_reference< boost::mpl::_ > ::type
+                        >>(exec.seq);
 
-          //ok, check if there are actually any.
-          if (boost::fusion::empty(asyncs))
-                return;
+        //ok, check if there are actually any.
+        if (!boost::fusion::empty(asyncs))
+        {
+            std::vector<std::function<void(int, const std::error_code & ec)>> funcs;
+            funcs.reserve(boost::fusion::size(asyncs));
+            boost::fusion::for_each(asyncs, async_handler_collector<Executor>(exec, funcs));
 
-          std::vector<std::function<void(int, const std::error_code & ec)>> funcs;
-          funcs.reserve(boost::fusion::size(asyncs));
-          boost::fusion::for_each(asyncs, async_handler_collector<Executor>(exec, funcs));
+            wait_handler wh(std::move(funcs), ios, exec.exit_status);
 
-          wait_handler wh(std::move(funcs), ios, exec.exit_status);
-
-          signal_p = wh.signal_.get();
-          signal_p->async_wait(std::move(wh));
+            signal_p = wh.signal_.get();
+            signal_p->async_wait(std::move(wh));
+        }
     }
 
     template <class Executor>
@@ -146,26 +145,6 @@ struct io_service_ref : handler_base_ext
         }
 
     };
-
-    // Posix specific notifies
-    template <class PosixExecutor>
-    void on_fork_setup(PosixExecutor&) const
-    {
-        ios.notify_fork(boost::asio::io_service::fork_prepare);
-    }
-
-    template <class PosixExecutor>
-    void on_fork_success(PosixExecutor&) const
-    {
-        ios.notify_fork(boost::asio::io_service::fork_parent);
-    }
-
-    template <class PosixExecutor>
-    void on_exec_setup(PosixExecutor&) const
-    {
-        ios.notify_fork(boost::asio::io_service::fork_child);
-    }
-
 private:
     boost::asio::io_service &ios;
 };
