@@ -19,7 +19,7 @@ namespace boost { namespace process { namespace detail {
 struct throw_on_error_ : ::boost::process::detail::handler
 {
     template <class Executor>
-    void on_error(Executor&, const std::error_code & ec) const
+    void on_error(Executor& exec, const std::error_code & ec) const
     {
         throw process_error(ec, "process creation failed");
     }

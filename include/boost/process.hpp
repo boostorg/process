@@ -21,6 +21,7 @@
 
 #include <boost/process/args.hpp>
 #include <boost/process/async.hpp>
+#include <boost/process/async_system.hpp>
 #include <boost/process/group.hpp>
 #include <boost/process/child.hpp>
 #include <boost/process/cmd.hpp>
