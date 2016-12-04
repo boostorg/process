@@ -69,7 +69,7 @@ struct async_in_buffer : ::boost::process::detail::windows::handler_base_ext,
             boost::asio::async_write(*pipe, buf,
                 [pipe](const boost::system::error_code&ec, std::size_t size){});
 
-        ::boost::detail::winapi::CloseHandle(pipe->native_source());
+        std::move(*pipe).source().close();
 
 
         this->pipe = nullptr;

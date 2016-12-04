@@ -17,13 +17,19 @@
 
 namespace boost { namespace process { namespace detail { namespace windows {
 
+
+
 template<int p1, int p2>
 struct pipe_out : public ::boost::process::detail::handler_base
 {
     ::boost::detail::winapi::HANDLE_ handle;
 
+    pipe_out(::boost::detail::winapi::HANDLE_ handle) : handle(handle) {}
     template<typename T>
-    pipe_out(const T & p) : handle(p.native_sink()) {}
+    pipe_out(T & p) : handle(p.native_sink())
+    {
+        p.assign_sink(::boost::detail::winapi::INVALID_HANDLE_VALUE_);
+    }
 
     template<typename WindowsExecutor>
     void on_setup(WindowsExecutor &e) const;
@@ -81,6 +87,34 @@ void pipe_out<1,2>::on_setup(WindowsExecutor &e) const
     e.startup_info.dwFlags   |= ::boost::detail::winapi::STARTF_USESTDHANDLES_;
     e.inherit_handles = true;
 }
+
+class async_pipe;
+
+template<int p1, int p2>
+struct async_pipe_out : public pipe_out<p1, p2>
+{
+    boost::asio::windows::stream_handle handle;
+
+    async_pipe_out(async_pipe & p) : pipe_out<p1, p2>(p.native_sink()),
+                                     handle(std::move(p).sink())
+    {
+    }
+
+    template<typename WindowsExecutor>
+    void on_error(WindowsExecutor &, const std::error_code &)
+    {
+        boost::system::error_code ec;
+        handle.close(ec);
+    }
+
+    template<typename WindowsExecutor>
+    void on_success(WindowsExecutor &)
+    {
+        boost::system::error_code ec;
+        handle.close(ec);
+    }
+};
+
 
 }}}}
 

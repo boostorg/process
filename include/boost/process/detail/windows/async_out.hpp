@@ -83,7 +83,7 @@ struct async_out_buffer : ::boost::process::detail::windows::handler_base_ext,
         auto pipe = this->pipe;
         boost::asio::async_read(*pipe, buf,
                 [pipe](const boost::system::error_code&, std::size_t size){});
-        ::boost::detail::winapi::CloseHandle(pipe->native_sink());
+        std::move(*pipe).sink().close();
         this->pipe       = nullptr;
 
     }
@@ -91,7 +91,7 @@ struct async_out_buffer : ::boost::process::detail::windows::handler_base_ext,
     template<typename Executor>
     void on_error(Executor &, const std::error_code &) const
     {
-        ::boost::detail::winapi::CloseHandle(pipe->native_sink());
+        std::move(*pipe).sink().close();
     }
 
     template <typename WindowsExecutor>
@@ -125,7 +125,7 @@ struct async_out_future : ::boost::process::detail::windows::handler_base_ext,
         auto pipe    = this->pipe;
         auto buffer  = this->buffer;
         auto promise = this->promise;
-        ::boost::detail::winapi::CloseHandle(pipe->native_sink());
+        std::move(*pipe).sink().close();
         boost::asio::async_read(*pipe, *buffer,
                 [pipe, buffer, promise](const boost::system::error_code& ec, std::size_t size)
                 {
@@ -156,7 +156,7 @@ struct async_out_future : ::boost::process::detail::windows::handler_base_ext,
     template<typename Executor>
     void on_error(Executor &, const std::error_code &) const
     {
-        ::boost::detail::winapi::CloseHandle(pipe->native_sink());
+        std::move(*pipe).sink().close();
     }
 
     template <typename WindowsExecutor>

@@ -21,8 +21,13 @@ struct pipe_in : handler_base_ext
 {
     int descr_;
 
+    pipe_in(int descr) : descr_(descr) {}
+
     template<typename T>
-    pipe_in(const T & p) : descr_(p.native_source()) {}
+    pipe_in(T & p) : descr_(p.native_source())
+	{
+    	p.assign_source(-1);
+	}
 
     template<typename Executor>
     void on_error(Executor &, const std::error_code &) const
@@ -44,6 +49,33 @@ struct pipe_in : handler_base_ext
         ::close(descr_);
     }
 
+};
+
+class async_pipe;
+
+template<typename = void>
+struct async_pipe_in : public pipe_in
+{
+	boost::asio::posix::stream_descriptor handle;
+
+    async_pipe_in(async_pipe & p) : pipe_in(p.native_source()),
+	                       handle(std::move(p).source())
+	{
+	}
+
+    template<typename Executor>
+    void on_error(Executor &, const std::error_code &)
+    {
+    	boost::system::error_code ec;
+    	handle.close(ec);
+    }
+
+    template<typename Executor>
+    void on_success(Executor &)
+    {
+    	boost::system::error_code ec;
+    	handle.close(ec);
+    }
 };
 
 }}}}

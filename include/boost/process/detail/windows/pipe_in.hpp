@@ -13,15 +13,20 @@
 #include <boost/detail/winapi/process.hpp>
 #include <boost/detail/winapi/handles.hpp>
 #include <boost/process/detail/handler_base.hpp>
-#include <cstdio>
 
 namespace boost { namespace process { namespace detail { namespace windows {
 
 struct pipe_in : public ::boost::process::detail::handler_base
 {
     ::boost::detail::winapi::HANDLE_ handle;
-    template<typename T>
-    pipe_in(const T & p) : handle(p.native_source()) {}
+
+    pipe_in(::boost::detail::winapi::HANDLE_ handle) : handle(handle) {}
+
+    template<typename T> //async_pipe
+    pipe_in(T & p) : handle(p.native_source())
+	{
+    	p.assign_source(::boost::detail::winapi::INVALID_HANDLE_VALUE_);
+	}
 
     template <class WindowsExecutor>
     void on_setup(WindowsExecutor &e) const
@@ -46,6 +51,34 @@ struct pipe_in : public ::boost::process::detail::handler_base
         ::boost::detail::winapi::CloseHandle(handle);
     }
 };
+
+class async_pipe;
+
+template<typename = void>
+struct async_pipe_in : public pipe_in
+{
+	boost::asio::windows::stream_handle handle;
+
+    async_pipe_in(async_pipe & p) : pipe_in(p.native_source()),
+	                       handle(std::move(p).source())
+	{
+	}
+
+    template<typename WindowsExecutor>
+    void on_error(WindowsExecutor &, const std::error_code &)
+    {
+    	boost::system::error_code ec;
+    	handle.close(ec);
+    }
+
+    template<typename WindowsExecutor>
+    void on_success(WindowsExecutor &)
+    {
+    	boost::system::error_code ec;
+    	handle.close(ec);
+    }
+};
+
 
 }}}}
 

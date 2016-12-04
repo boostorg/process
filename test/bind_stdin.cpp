@@ -99,7 +99,6 @@ struct write_handler
 
     void operator()(const boost::system::error_code &ec, std::size_t size)
     {
-        BOOST_REQUIRE(!ec);
         BOOST_REQUIRE_EQUAL(6u, size);
         std::string s;
         is_ >> s;

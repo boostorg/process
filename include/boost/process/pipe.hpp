@@ -67,6 +67,12 @@ public:
     /** Get the native handle of the sink. */
     native_handle native_sink  () const;
 
+    /** Assign a new value to the source */
+    void assign_source(native_handle h);
+    /** Assign a new value to the sink */
+    void assign_sink  (native_handle h);
+
+
     ///Write data to the pipe.
     int_type write(const char_type * data, int_type count);
     ///Read data from the pipe.
