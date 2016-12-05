@@ -174,9 +174,8 @@ struct std_in_
     template<typename Char, typename Traits> api::pipe_in operator=(basic_pstream <Char, Traits> & p)  const {return p.pipe();}
     template<typename Char, typename Traits> api::pipe_in operator<(basic_pstream <Char, Traits> & p)  const {return p.pipe();}
 
-    template<typename = void> api::async_pipe_in<> operator=(async_pipe & p) const {return p;}
-    template<typename = void> api::async_pipe_in<> operator<(async_pipe & p) const {return p;}
-
+    api::async_pipe_in operator=(async_pipe & p) const {return p;}
+    api::async_pipe_in operator<(async_pipe & p) const {return p;}
 
     template<typename T, typename = typename std::enable_if<
             is_const_buffer<T>::value || is_mutable_buffer<T>::value

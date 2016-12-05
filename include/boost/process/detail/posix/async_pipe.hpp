@@ -20,7 +20,7 @@ class async_pipe
     ::boost::asio::posix::stream_descriptor _sink  ;
 public:
     typedef int native_handle_type;
-    typedef ::boost::asio::posix::stream_descriptor   handle_type;
+    typedef ::boost::asio::posix::stream_descriptor handle_type;
 
     inline async_pipe(boost::asio::io_service & ios) : async_pipe(ios, ios) {}
 

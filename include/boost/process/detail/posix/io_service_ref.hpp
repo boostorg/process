@@ -87,16 +87,17 @@ struct io_service_ref : handler_base_ext
 
         //ok, check if there are actually any.
         if (boost::fusion::empty(asyncs))
-        {
-            std::vector<std::function<void(int, const std::error_code & ec)>> funcs;
-            funcs.reserve(boost::fusion::size(asyncs));
-            boost::fusion::for_each(asyncs, async_handler_collector<Executor>(exec, funcs));
+            return;
 
-            wait_handler wh(std::move(funcs), ios, exec.exit_status);
+        std::vector<std::function<void(int, const std::error_code & ec)>> funcs;
+        funcs.reserve(boost::fusion::size(asyncs));
+        boost::fusion::for_each(asyncs, async_handler_collector<Executor>(exec, funcs));
 
-            signal_p = wh.signal_.get();
-            signal_p->async_wait(std::move(wh));
-        }
+        wait_handler wh(std::move(funcs), ios, exec.exit_status);
+
+        signal_p = wh.signal_.get();
+        signal_p->async_wait(std::move(wh));
+
     }
 
     template <class Executor>

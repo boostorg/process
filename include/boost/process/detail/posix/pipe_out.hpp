@@ -81,25 +81,29 @@ class async_pipe;
 template<int p1, int p2>
 struct async_pipe_out : public pipe_out<p1, p2>
 {
-	boost::asio::posix::stream_descriptor handle;
-
-    async_pipe_out(async_pipe & p) : pipe_out<p1, p2>(p.native_sink()),
-                                     handle(std::move(p).sink())
+	async_pipe &pipe;
+	template<typename AsyncPipe>
+    async_pipe_out(AsyncPipe & p) : pipe_out<p1, p2>(p.native_sink()), pipe(p)
     {
     }
 
+	template<typename Pipe, typename Executor>
+	static void close(Pipe & pipe, Executor &)
+	{
+    	boost::system::error_code ec;
+    	std::move(pipe).sink().close(ec);
+	}
+
     template<typename Executor>
-    void on_error(Executor &, const std::error_code &)
+    void on_error(Executor & exec, const std::error_code &)
     {
-        boost::system::error_code ec;
-        handle.close(ec);
+    	close(pipe, exec);
     }
 
     template<typename Executor>
-    void on_success(Executor &)
+    void on_success(Executor &exec)
     {
-        boost::system::error_code ec;
-        handle.close(ec);
+    	close(pipe, exec);
     }
 };
 
