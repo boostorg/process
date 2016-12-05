@@ -99,13 +99,16 @@ class child
     /** \overload void wait() */
     void wait(std::error_code & ec) noexcept;
 
-    /** Wait for the child process to exit for a period of time. */
+    /** Wait for the child process to exit for a period of time.
+     * \return True if child exited while waiting.
+     */
     template< class Rep, class Period >
     bool wait_for  (const std::chrono::duration<Rep, Period>& rel_time);
     /** \overload bool wait_for(const std::chrono::duration<Rep, Period>& rel_time) */
     bool wait_for  (const std::chrono::duration<Rep, Period>& rel_time, std::error_code & ec) noexcept;
 
-    /** Wait for the child process to exit until a point in time. */
+    /** Wait for the child process to exit until a point in time.
+      * \return True if child exited while waiting.*/
     template< class Clock, class Duration >
     bool wait_until(const std::chrono::time_point<Clock, Duration>& timeout_time );
     /** \overload bool wait_until(const std::chrono::time_point<Clock, Duration>& timeout_time )*/
@@ -124,7 +127,13 @@ class child
     /** \overload bool in_group() const */
     bool in_group(std::error_code & ec) const noexcept;
 
-    /** Terminate the child process. */
+    /** Terminate the child process.
+     *
+     *  This function will cause the child process to unconditionally and immediately exit.
+     *  It is implement with [SIGKILL](http://pubs.opengroup.org/onlinepubs/009695399/functions/kill.html) on posix
+     *  and [TerminateProcess](https://technet.microsoft.com/en-us/library/ms686714.aspx) on windows.
+     *
+     */
     void terminate();
 
     /** \overload void terminate() */

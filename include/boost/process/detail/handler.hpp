@@ -66,9 +66,6 @@ private:
 
 }
 
-constexpr boost::process::detail::make_handler_t<boost::process::detail::on_setup_>   on_setup;
-constexpr boost::process::detail::make_handler_t<boost::process::detail::on_error_>   on_error;
-constexpr boost::process::detail::make_handler_t<boost::process::detail::on_success_> on_success;
 
 
 }}

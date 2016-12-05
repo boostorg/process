@@ -25,7 +25,10 @@
 
 #include <type_traits>
 #include <boost/fusion/algorithm/query/find_if.hpp>
+#include <boost/fusion/sequence/intrinsic/begin.hpp>
 #include <boost/fusion/sequence/intrinsic/end.hpp>
+#include <boost/fusion/container/vector/convert.hpp>
+#include <boost/fusion/iterator/deref.hpp>
 #include <boost/fusion/sequence/comparison/equal_to.hpp>
 #include <boost/fusion/container/set/convert.hpp>
 #include <boost/type_index.hpp>
@@ -61,7 +64,7 @@ struct throw_on_error_ : ::boost::process::detail::api::handler_base_ext
     template <class Executor>
     void on_error(Executor&, const std::error_code & ec) const
     {
-        throw std::system_error(ec, "process creation failed");
+        throw process_error(ec, "process creation failed");
     }
 
     const throw_on_error_ &operator()() const {return *this;}
@@ -104,21 +107,37 @@ template<> struct is_error_handler<throw_on_error_> : std::true_type {};
 template<> struct is_error_handler<ignore_error_>   : std::true_type {};
 
 
-//note: is a tuple of pointers to initializers
+
+template<typename Iterator, typename End>
+struct has_error_handler_impl
+{
+    typedef typename boost::fusion::result_of::deref<Iterator>::type ref_type;
+    typedef typename std::remove_reference<ref_type>::type res_type_;
+    typedef typename std::remove_cv<res_type_>::type res_type;
+    typedef typename is_error_handler<res_type>::type cond;
+
+    typedef typename boost::fusion::result_of::next<Iterator>::type next_itr;
+    typedef typename has_error_handler_impl<next_itr, End>::type next;
+
+    typedef typename boost::mpl::or_<cond, next>::type type;
+};
+
+template<typename Iterator>
+struct has_error_handler_impl<Iterator, Iterator>
+{
+    typedef boost::mpl::false_ type;
+};
+
+
 template<typename Sequence>
 struct has_error_handler
 {
-    
-    typedef typename boost::fusion::result_of::as_set<Sequence>::type set_type;
-    typedef typename boost::fusion::result_of::has_key<set_type, set_on_error>::type            t1;
-    typedef typename boost::fusion::result_of::has_key<set_type, set_on_error&>::type         t2;
-    typedef typename boost::fusion::result_of::has_key<set_type, const set_on_error&>::type  t3;
+    typedef typename boost::fusion::result_of::as_vector<Sequence>::type vector_type;
 
-    typedef typename boost::fusion::result_of::has_key<set_type, const throw_on_error_&>::type t4;
-    typedef typename boost::fusion::result_of::has_key<set_type, const ignore_error_&>::type   t5;
-
-    typedef typename boost::mpl::or_<t1,t2,t3, t4, t5>::type type;
-
+    typedef typename has_error_handler_impl<
+            typename boost::fusion::result_of::begin<vector_type>::type,
+            typename boost::fusion::result_of::end<  vector_type>::type
+            >::type type;
 };
 
 template<typename Sequence>
@@ -129,7 +148,6 @@ struct has_ignore_error
     typedef typename boost::fusion::result_of::has_key<set_type, ignore_error_&>::type type2;
     typedef typename boost::fusion::result_of::has_key<set_type, const ignore_error_&>::type type3;
     typedef typename boost::mpl::or_<type1,type2, type3>::type type;
-
 };
 
 struct error_builder
@@ -156,10 +174,10 @@ struct initializer_builder<error_tag>
 }
 /**The ignore_error property will disable any error handling. This can be useful
 on linux, where error handling will require a pipe.*/
-constexpr static boost::process::detail::ignore_error_ ignore_error;
+constexpr boost::process::detail::ignore_error_ ignore_error;
 /**The throw_on_error property will enable the exception when launching a process.
 It is unnecessary by default, but may be used, when an additional error_code is provided.*/
-constexpr static boost::process::detail::throw_on_error_ throw_on_error;
+constexpr boost::process::detail::throw_on_error_ throw_on_error;
 /**
 The error property will set the executor to handle any errors by setting an
 [std::error_code](http://en.cppreference.com/w/cpp/error/error_code).
@@ -181,11 +199,11 @@ The overload version is achieved by just passing an object of
 
 
  */
-constexpr static boost::process::detail::error_ error;
+constexpr boost::process::detail::error_ error;
 ///Alias for \xmlonly <globalname alt="boost::process::error">error</globalname> \endxmlonly .
-constexpr static boost::process::detail::error_ error_ref;
+constexpr boost::process::detail::error_ error_ref;
 ///Alias for \xmlonly <globalname alt="boost::process::error">error</globalname> \endxmlonly .
-constexpr static boost::process::detail::error_ error_code;
+constexpr boost::process::detail::error_ error_code;
 
 
 }}

@@ -14,6 +14,7 @@ import os ;
 if [ os.name ] = NT
 {
   lib ws2_32 ;
+  lib shell32 ;
 }
 
 project : requirements
@@ -23,27 +24,28 @@ project : requirements
   <target-os>linux:<linkflags>-lpthread
   <os>NT,<toolset>cw:<library>ws2_32
   <os>NT,<toolset>gcc:<library>ws2_32
+
 ;
 
-searched-lib shell32 ;
+
 
 import testing ;
 
 
-alias program_options  : /boost//program_options ;
+alias program_options  : /boost//program_options : <link>static ;
 alias filesystem       : /boost//filesystem      ;
 alias iostreams        : /boost//iostreams       ;
 alias system           : /boost//system          ;
 alias thread           : /boost//thread          ;
 alias coroutine        : /boost//coroutine       : <link>static ;
 
-lib multi_ref : multi_ref1.cpp multi_ref2.cpp system ;
+lib multi_ref : multi_ref1.cpp multi_ref2.cpp system : <target-os>windows:<source>shell32 ;
 
 exe sparring_partner : sparring_partner.cpp program_options system filesystem iostreams :
-    <warnings>off
+    <warnings>off <target-os>windows:<source>shell32
     ;
 
-exe sub_launch : sub_launcher.cpp program_options iostreams system filesystem : <warnings>off ;
+exe sub_launch : sub_launcher.cpp program_options iostreams system filesystem : <warnings>off <target-os>windows:<source>shell32 ;
 
 test-suite bare :
     [ run environment.cpp system filesystem  ]
@@ -64,26 +66,32 @@ test-suite execution :
     [ run close_stderr.cpp     system filesystem              : : sparring_partner ]
     [ run close_stdin.cpp      system filesystem              : : sparring_partner ]
     [ run close_stdout.cpp     system filesystem              : : sparring_partner ]
-    [ run coroutine_test.cpp   system filesystem coroutine    : : sparring_partner : <link>static ]
     [ run error.cpp            system filesystem              : : sparring_partner ]
     [ run exit_code.cpp program_options system filesystem     : : sparring_partner ]
     [ run extensions.cpp system filesystem                    : : sparring_partner ]
     [ run env.cpp     program_options system filesystem       : : sparring_partner ]
     [ run group.cpp     system thread filesystem              : : sub_launch       ]
-    [ run posix_specific.cpp     system filesystem            : : sparring_partner : <build>no <target-os>linux:<build>yes   ]
     [ run run_exe.cpp filesystem                              : : sparring_partner ]
     [ run run_exe_path.cpp filesystem                         : : sparring_partner ]
     [ run search_path.cpp filesystem system                   : : : <target-os>windows:<source>shell32 ]
     [ run shell.cpp filesystem system                         : : sparring_partner ]
     [ run shell_path.cpp  filesystem system                   ]
-    [ run show_window.cpp filesystem system                   : : sparring_partner : <build>no <target-os>windows:<build>yes   ]
+    [ run async_system.cpp filesystem system coroutine         : : sparring_partner : <link>static ]
     [ run system_test1.cpp filesystem system                  : : sparring_partner ]
-    [ run system_test2.cpp filesystem system                  : --log_level=all : sparring_partner ]
+    [ run system_test2.cpp filesystem system                  : : sparring_partner ]
     [ run spawn.cpp filesystem system                         : : sparring_partner ]
     [ run start_dir.cpp   filesystem system                   : : sparring_partner ]
     [ run terminate.cpp system filesystem                     : : sparring_partner ]
     [ run throw_on_error.cpp system filesystem                : : sparring_partner ]
-#    [ run vfork.cpp     system filesystem                     : : sparring_partner : <build>no <target-os>linux:<build>yes   ]
     [ run wait.cpp system filesystem                          : : sparring_partner ]
-    [ compile-fail spawn_fail.cpp ]
+    [ compile-fail spawn_fail.cpp        ]
+    [ compile-fail async_system_fail.cpp ]
+    [ run posix_specific.cpp     system filesystem            : : sparring_partner : <build>no <target-os>linux:<build>yes   ]
+    [ run windows_specific.cpp filesystem system                   : : sparring_partner : <build>no <target-os>windows:<build>yes   ]
    : <dependency>bare ;
+
+run vfork.cpp     system filesystem                     : : sparring_partner : <build>no <target-os>linux:<build>yes ;
+explicit vfork ;
+
+   
+   

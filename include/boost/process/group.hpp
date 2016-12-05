@@ -7,6 +7,11 @@
  * \file boost/process/group.hpp
  *
  * Defines a group process class.
+ * For additional information see the platform specific implementations:
+ *
+ *   - [windows - job object](https://msdn.microsoft.com/en-us/library/windows/desktop/ms684161.aspx)
+ *   - [posix - process group](http://pubs.opengroup.org/onlinepubs/009695399/functions/setpgid.html)
+ *
  */
 
 #ifndef BOOST_PROCESS_GROUP_HPP
@@ -115,7 +120,8 @@ public:
     {
         boost::process::detail::api::wait(_group_handle, ec);
     }
-    /** Wait for the process group to exit for period of time. */
+    /** Wait for the process group to exit for period of time.
+      *  \return True if all child processes exited while waiting.*/
     template< class Rep, class Period >
     bool wait_for  (const std::chrono::duration<Rep, Period>& rel_time)
     {
@@ -129,7 +135,8 @@ public:
         return boost::process::detail::api::wait_for(_group_handle, rel_time, ec);
     }
 
-    /** Wait for the process group to exit until a point in time. */
+    /** Wait for the process group to exit until a point in time.
+      *  \return True if all child processes exited while waiting.*/
     template< class Clock, class Duration >
     bool wait_until(const std::chrono::time_point<Clock, Duration>& timeout_time )
     {
@@ -162,14 +169,14 @@ public:
     }
 
     ///Assign a child process to the group
-    void assign(const child &c)
+    void add(const child &c)
     {
-        _group_handle.assign(c.native_handle());
+        _group_handle.add(c.native_handle());
     }
     ///\overload void assign(const child & c)
-    void assign(const child &c, std::error_code & ec) noexcept
+    void add(const child &c, std::error_code & ec) noexcept
     {
-        _group_handle.assign(c.native_handle(), ec);
+        _group_handle.add(c.native_handle(), ec);
     }
 
     ///Check if the child process is in the group

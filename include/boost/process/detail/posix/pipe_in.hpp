@@ -21,19 +21,64 @@ struct pipe_in : handler_base_ext
 {
     int descr_;
 
-    template<typename T>
-    pipe_in(const T & p) : descr_(p.native_source()) {}
-//    template<typename CharT, typename Traits>
-//    pipe_in(const boost::process::basic_pipe<CharT, Traits> & p) : descr_(p.native_source()) {}
-//    pipe_in(const boost::process::async_pipe & p)                : descr_(p.native_source()) {}
+    pipe_in(int descr) : descr_(descr) {}
 
+    template<typename T>
+    pipe_in(T & p) : descr_(p.native_source())
+    {
+        p.assign_source(-1);
+    }
+
+    template<typename Executor>
+    void on_error(Executor &, const std::error_code &) const
+    {
+        ::close(descr_);
+    }
+
+    template<typename Executor>
+    void on_success(Executor &) const
+    {
+        ::close(descr_);
+    }
 
     template <class Executor>
     void on_exec_setup(Executor &e) const
     {
         if (::dup2(descr_, STDIN_FILENO) == -1)
              e.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
+        ::close(descr_);
+    }
 
+};
+
+class async_pipe;
+
+struct async_pipe_in : public pipe_in
+{
+    async_pipe &pipe;
+
+    template<typename AsyncPipe>
+    async_pipe_in(AsyncPipe & p) : pipe_in(p.native_source()), pipe(p)
+    {
+    }
+
+    template<typename Pipe, typename Executor>
+    static void close(Pipe & pipe, Executor &)
+    {
+        boost::system::error_code ec;
+        std::move(pipe).source().close(ec);
+    }
+
+    template<typename Executor>
+    void on_error(Executor & exec, const std::error_code &)
+    {
+        close(pipe, exec);
+    }
+
+    template<typename Executor>
+    void on_success(Executor &exec)
+    {
+        close(pipe, exec);
     }
 };
 

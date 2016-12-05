@@ -19,8 +19,8 @@ class async_pipe
     ::boost::asio::posix::stream_descriptor _source;
     ::boost::asio::posix::stream_descriptor _sink  ;
 public:
-    typedef int native_handle;
-    typedef ::boost::asio::posix::stream_descriptor   handle_type;
+    typedef int native_handle_type;
+    typedef ::boost::asio::posix::stream_descriptor handle_type;
 
     inline async_pipe(boost::asio::io_service & ios) : async_pipe(ios, ios) {}
 
@@ -124,9 +124,11 @@ public:
         return _sink.write_some(buffers);
     }
 
-    native_handle native_source() const {return const_cast<boost::asio::posix::stream_descriptor&>(_source).native();}
-    native_handle native_sink  () const {return const_cast<boost::asio::posix::stream_descriptor&>(_sink  ).native();}
+    native_handle_type native_source() const {return const_cast<boost::asio::posix::stream_descriptor&>(_source).native();}
+    native_handle_type native_sink  () const {return const_cast<boost::asio::posix::stream_descriptor&>(_sink  ).native();}
 
+    void assign_source(native_handle_type h) { _source.assign(h);}
+    void assign_sink  (native_handle_type h) { _sink  .assign(h);}
 
     template<typename MutableBufferSequence,
              typename ReadHandler>
@@ -154,8 +156,8 @@ public:
     const handle_type & sink  () const & {return _sink;}
     const handle_type & source() const & {return _source;}
 
-    handle_type && source()&&  { return std::move(_sink); }
-    handle_type && sink()  &&  { return std::move(_source); }
+    handle_type && sink()  &&  { return std::move(_sink); }
+    handle_type && source()&&  { return std::move(_source); }
 
     handle_type source(::boost::asio::io_service& ios) &&
     {

@@ -76,7 +76,6 @@ struct read_handler
 
     void operator()(const boost::system::error_code &ec, std::size_t size)
     {
-        BOOST_REQUIRE(!ec);
         std::istream is(&buffer_);
         std::string line;
         std::getline(is, line);

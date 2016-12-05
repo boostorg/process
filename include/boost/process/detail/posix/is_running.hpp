@@ -14,7 +14,7 @@
 namespace boost { namespace process { namespace detail { namespace posix {
 
 
-constexpr static int still_active = 0x7F;
+constexpr int still_active = 0x7F;
 static_assert(!WIFEXITED(still_active), "Internal Error");
 
 inline bool is_running(const child_handle &p, int & exit_code)

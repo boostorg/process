@@ -8,7 +8,7 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #ifndef BOOST_PROCESS_DETAIL_POSIX_EXECUTOR_HPP
-#define BOOST_PROCESS_POSIX_EXECUTOR_HPP
+#define BOOST_PROCESS_DETAIL_POSIX_EXECUTOR_HPP
 
 #include <boost/process/detail/child_decl.hpp>
 #include <boost/process/error.hpp>
@@ -21,7 +21,6 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <unistd.h>
-
 
 namespace boost { namespace process { namespace detail { namespace posix {
 
@@ -68,8 +67,12 @@ struct on_fork_error_t
     Executor & exec;
     const std::error_code & error;
     on_fork_error_t(Executor & exec, const std::error_code & error) : exec(exec), error(error) {};
+
     template<typename T>
-    void operator()(T & t) const {t.on_fork_error(exec, error);}
+    void operator()(T & t) const
+    {
+        t.on_fork_error(exec, error);
+    }
 };
 
 
@@ -78,11 +81,11 @@ struct on_exec_setup_t
 {
     Executor & exec;
     on_exec_setup_t(Executor & exec) : exec(exec) {};
+
     template<typename T>
     void operator()(T & t) const
     {
-        if (!exec.error())
-            t.on_exec_setup(exec);
+        t.on_exec_setup(exec);
     }
 };
 
@@ -93,8 +96,25 @@ struct on_exec_error_t
     Executor & exec;
     const std::error_code &ec;
     on_exec_error_t(Executor & exec, const std::error_code & error) : exec(exec), ec(error) {};
+
     template<typename T>
-    void operator()(T & t) const {t.on_exec_error(exec, ec);}
+    void operator()(T & t) const
+    {
+        t.on_exec_error(exec, ec);
+    }
+};
+
+template<typename Executor>
+struct on_fork_success_t
+{
+    Executor & exec;
+    on_fork_success_t(Executor & exec) : exec(exec) {};
+
+    template<typename T>
+    void operator()(T & t) const
+    {
+        t.on_fork_success(exec);
+    }
 };
 
 template<typename Executor> on_setup_t  <Executor> call_on_setup  (Executor & exec) {return exec;}
@@ -109,8 +129,9 @@ template<typename Executor> on_fork_error_t  <Executor> call_on_fork_error  (Exe
     return on_fork_error_t<Executor> (exec, ec);
 }
 
+
 template<typename Executor> on_exec_setup_t  <Executor> call_on_exec_setup  (Executor & exec) {return exec;}
-template<typename Executor> on_exec_error_t  <Executor> call_on_exec_error  (Executor & exec, const std::error_code & ec) 
+template<typename Executor> on_exec_error_t  <Executor> call_on_exec_error  (Executor & exec, const std::error_code & ec)
 {
     return on_exec_error_t<Executor> (exec, ec);
 }
@@ -150,7 +171,7 @@ class executor
         if (this->pid == 0)
             write_error(ec, msg);
         else
-            throw std::system_error(ec, msg);
+            throw process_error(ec, msg);
     }
 
 
@@ -167,19 +188,18 @@ class executor
             this->_msg = msg;
         }
         else
-            throw std::system_error(ec, msg);
+            throw process_error(ec, msg);
     }
 
     void check_error(boost::mpl::true_) {};
     void check_error(boost::mpl::false_)
     {
-        throw std::system_error(_ec, _msg);
+        throw process_error(_ec, _msg);
     }
 
     typedef typename ::boost::process::detail::has_error_handler<Sequence>::type has_error_handler;
     typedef typename ::boost::process::detail::has_ignore_error <Sequence>::type has_ignore_error;
     typedef typename ::boost::process::detail::posix::shall_use_vfork<Sequence>::type shall_use_vfork;
-
 
     inline child invoke(boost::mpl::true_ , boost::mpl::true_ );
     inline child invoke(boost::mpl::false_, boost::mpl::true_ );
@@ -355,12 +375,16 @@ child executor<Sequence>::invoke(boost::mpl::false_, boost::mpl::false_)
     child c(child_handle(pid), exit_status);
 
 
+
     ::close(p[1]);
     _read_error(p[0]);
     ::close(p[0]);
 
     if (_ec)
+    {
         boost::fusion::for_each(seq, call_on_error(*this, _ec));
+        return child();
+    }
     else
         boost::fusion::for_each(seq, call_on_success(*this));
 
@@ -382,7 +406,6 @@ child executor<Sequence>::invoke(boost::mpl::true_, boost::mpl::true_) //ignore 
     boost::fusion::for_each(seq, call_on_setup(*this));
     if (_ec)
         return child();
-
     this->pid = ::vfork();
     if (pid == -1)
     {
@@ -398,7 +421,6 @@ child executor<Sequence>::invoke(boost::mpl::true_, boost::mpl::true_) //ignore 
         boost::fusion::for_each(seq, call_on_exec_error(*this, ec));
         _exit(EXIT_FAILURE);
     }
-
     child c(child_handle(pid), exit_status);
 
     boost::fusion::for_each(seq, call_on_success(*this));
@@ -417,6 +439,7 @@ child executor<Sequence>::invoke(boost::mpl::false_, boost::mpl::true_)
         return child();
     }
     _ec.clear();
+
     this->pid = ::vfork();
     if (pid == -1)
     {
@@ -439,15 +462,17 @@ child executor<Sequence>::invoke(boost::mpl::false_, boost::mpl::true_)
         _exit(EXIT_FAILURE);
         return child();
     }
+    child c(child_handle(pid), exit_status);
 
     check_error(has_error_handler());
-
-    child c(child_handle(pid), exit_status);
 
 
 
     if (_ec)
+    {
         boost::fusion::for_each(seq, call_on_error(*this, _ec));
+        return child();
+    }
     else
         boost::fusion::for_each(seq, call_on_success(*this));
 

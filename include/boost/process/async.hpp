@@ -101,14 +101,23 @@ on_exit=function;
 on_exit(function);
 \endcode
 
-with `function` being a callable object with the signature `(int, const std::error_code&)`.
+with `function` being a callable object with the signature `(int, const std::error_code&)` or an
+`std::future<int>`.
 
 \par Example
 
 \code{.cpp}
 io_service ios;
-spawn("ls", on_exit=[](int exit, const std::error_code& ec_in){});
+
+child c("ls", on_exit=[](int exit, const std::error_code& ec_in){});
+
+std::future<int> exit_code;
+chlid c2("ls", on_exit=exit_code);
+
 \endcode
+
+\note The handler is not invoked when the launch fails.
+\warning When used \ref ignore_error it might gte invoked on error.
 
  */
 constexpr static ::boost::process::detail::on_exit_ on_exit{};

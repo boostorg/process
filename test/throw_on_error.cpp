@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
         );
         thrown = false;
     }
-    catch(std::system_error & )
+    catch(bp::process_error & )
     {
         thrown = true;
     }

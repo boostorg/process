@@ -28,7 +28,8 @@ namespace boost { namespace process { namespace detail { namespace windows {
 
 
 template<typename Buffer>
-struct async_in_buffer : ::boost::process::detail::windows::async_handler
+struct async_in_buffer : ::boost::process::detail::windows::handler_base_ext,
+                         ::boost::process::detail::windows::require_io_service
 {
     Buffer & buf;
 
@@ -59,7 +60,7 @@ struct async_in_buffer : ::boost::process::detail::windows::async_handler
                     if (ec && (ec.value() != ::boost::detail::winapi::ERROR_BROKEN_PIPE_))
                     {
                         std::error_code e(ec.value(), std::system_category());
-                        promise->set_exception(std::make_exception_ptr(std::system_error(e)));
+                        promise->set_exception(std::make_exception_ptr(process_error(e)));
                     }
                     promise->set_value();
                 });
@@ -68,34 +69,25 @@ struct async_in_buffer : ::boost::process::detail::windows::async_handler
             boost::asio::async_write(*pipe, buf,
                 [pipe](const boost::system::error_code&ec, std::size_t size){});
 
+        std::move(*pipe).source().close();
+
+
         this->pipe = nullptr;
     }
 
     template<typename Executor>
-    std::function<void(int, const std::error_code&)> on_exit_handler(Executor & exec)
+    void on_error(Executor &, const std::error_code &) const
     {
-        auto & ios = get_io_service(exec.seq);
-        if (!pipe)
-            pipe = std::make_shared<boost::process::async_pipe>(ios);
-
-        auto pipe = this->pipe;
-        return [pipe, &ios](int, const std::error_code& ec)
-               {
-                  ios.post([pipe]
-                      {
-                            boost::system::error_code ec;
-                            pipe->close(ec);
-                      });
-               };
-
+        ::boost::detail::winapi::CloseHandle(pipe->native_source());
     }
+
     template <typename WindowsExecutor>
     void on_setup(WindowsExecutor &exec)
     {
         if (!pipe)
             pipe = std::make_shared<boost::process::async_pipe>(get_io_service(exec.seq));
 
-        auto source_handle = pipe->native_source();
+        ::boost::detail::winapi::HANDLE_ source_handle = std::move(*pipe).source().native_handle();
 
         boost::detail::winapi::SetHandleInformation(source_handle,
                 boost::detail::winapi::HANDLE_FLAG_INHERIT_,

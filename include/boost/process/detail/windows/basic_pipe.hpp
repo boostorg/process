@@ -55,14 +55,13 @@ public:
     native_handle_type native_source() const {return _source;}
     native_handle_type native_sink  () const {return _sink;}
 
+    void assign_source(native_handle_type h) { _source = h;}
+    void assign_sink  (native_handle_type h) { _sink = h;}
+
     basic_pipe()
     {
         if (!::boost::detail::winapi::CreatePipe(&_source, &_sink, nullptr, 0))
-            throw std::system_error(
-                    std::error_code(
-                    ::boost::detail::winapi::GetLastError(),
-                    std::system_category()),
-                    "CreatePipe() failed");
+            throw_last_error("CreatePipe() failed");
 
     }
 
@@ -74,10 +73,11 @@ public:
                 ))
         {
             auto ec = ::boost::process::detail::get_last_error();
-            if (ec.value() == ::boost::detail::winapi::ERROR_BROKEN_PIPE_)
+            if ((ec.value() == ::boost::detail::winapi::ERROR_BROKEN_PIPE_) ||
+                (ec.value() == ::boost::detail::winapi::ERROR_NO_DATA_))
                 return 0;
             else
-                throw std::system_error(ec, "WriteFile failed");
+                throw process_error(ec, "WriteFile failed");
         }
         return static_cast<int_type>(write_len);
     }
@@ -89,10 +89,11 @@ public:
                 ))
         {
             auto ec = ::boost::process::detail::get_last_error();
-            if (ec.value() == ::boost::detail::winapi::ERROR_BROKEN_PIPE_)
+            if ((ec.value() == ::boost::detail::winapi::ERROR_BROKEN_PIPE_) ||
+                (ec.value() == ::boost::detail::winapi::ERROR_NO_DATA_))
                 return 0;
             else
-                throw std::system_error(ec, "ReadFile failed");
+                throw process_error(ec, "ReadFile failed");
         }
         return static_cast<int_type>(read_len);
     }
@@ -192,10 +193,10 @@ basic_pipe<Char, Traits>& basic_pipe<Char, Traits>::operator=(const basic_pipe &
 template<class Char, class Traits>
 basic_pipe<Char, Traits>& basic_pipe<Char, Traits>::operator=(basic_pipe && lhs)
 {
-    if (_source == ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
+    if (_source != ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
         ::boost::detail::winapi::CloseHandle(_source);
 
-    if (_sink == ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
+    if (_sink != ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
         ::boost::detail::winapi::CloseHandle(_sink);
 
     _source = lhs._source;

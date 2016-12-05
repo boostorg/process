@@ -27,6 +27,8 @@
 #include <iostream>
 #include <thread>
 
+#include <boost/config.hpp>
+
 
 #if defined(BOOST_WINDOWS_API)
 #   include <Windows.h>
@@ -41,7 +43,7 @@ typedef boost::asio::posix::stream_descriptor pipe_end;
 namespace fs = boost::filesystem;
 namespace bp = boost::process;
 
-BOOST_AUTO_TEST_CASE(sync_io, *boost::unit_test::timeout(2))
+BOOST_AUTO_TEST_CASE(sync_io, *boost::unit_test::timeout(10))
 {
     std::cout << "sync_io" << std::endl;
     using boost::unit_test::framework::master_test_suite;
@@ -76,6 +78,16 @@ BOOST_AUTO_TEST_CASE(sync_io, *boost::unit_test::timeout(2))
     is >> s;
     BOOST_CHECK_EQUAL(s, "abc3.1415");
 
+    c.terminate();
+    c.wait();
+
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+    int i = -1;
+    is >> i;
+    BOOST_CHECK(is.eof());
+    BOOST_CHECK(!is);
 }
 
 
@@ -87,7 +99,6 @@ struct write_handler
 
     void operator()(const boost::system::error_code &ec, std::size_t size)
     {
-        BOOST_REQUIRE(!ec);
         BOOST_REQUIRE_EQUAL(6u, size);
         std::string s;
         is_ >> s;

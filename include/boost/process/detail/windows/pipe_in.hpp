@@ -13,18 +13,20 @@
 #include <boost/detail/winapi/process.hpp>
 #include <boost/detail/winapi/handles.hpp>
 #include <boost/process/detail/handler_base.hpp>
-#include <cstdio>
 
 namespace boost { namespace process { namespace detail { namespace windows {
 
 struct pipe_in : public ::boost::process::detail::handler_base
 {
     ::boost::detail::winapi::HANDLE_ handle;
-    template<typename T>
-    pipe_in(const T & p) : handle(p.native_source()) {}
-    //template<typename CharT, typename Traits>
-    //pipe_in(const boost::process::basic_pipe<CharT, Traits> & p) : handle(p.native_source()) {}
-    //pipe_in(const boost::process::async_pipe & p)                : handle(p.native_source()) {}
+
+    pipe_in(::boost::detail::winapi::HANDLE_ handle) : handle(handle) {}
+
+    template<typename T> //async_pipe
+    pipe_in(T & p) : handle(p.native_source())
+    {
+        p.assign_source(::boost::detail::winapi::INVALID_HANDLE_VALUE_);
+    }
 
     template <class WindowsExecutor>
     void on_setup(WindowsExecutor &e) const
@@ -36,8 +38,51 @@ struct pipe_in : public ::boost::process::detail::handler_base
         e.startup_info.hStdInput = handle;
         e.startup_info.dwFlags  |= boost::detail::winapi::STARTF_USESTDHANDLES_;
         e.inherit_handles = true;
-   }
+    }
+    template<typename WindowsExecutor>
+    void on_error(WindowsExecutor &, const std::error_code &) const
+    {
+        ::boost::detail::winapi::CloseHandle(handle);
+    }
+
+    template<typename WindowsExecutor>
+    void on_success(WindowsExecutor &) const
+    {
+        ::boost::detail::winapi::CloseHandle(handle);
+    }
 };
+
+class async_pipe;
+
+struct async_pipe_in : public pipe_in
+{
+    async_pipe &pipe;
+
+    template<typename AsyncPipe>
+    async_pipe_in(AsyncPipe & p) : pipe_in(p.native_source()), pipe(p)
+    {
+    }
+
+    template<typename Pipe, typename Executor>
+    static void close(Pipe & pipe, Executor &)
+    {
+        boost::system::error_code ec;
+        std::move(pipe).source().close(ec);
+    }
+
+    template<typename Executor>
+    void on_error(Executor & exec, const std::error_code &)
+    {
+        close(pipe, exec);
+    }
+
+    template<typename Executor>
+    void on_success(Executor &exec)
+    {
+        close(pipe, exec);
+    }
+};
+
 
 }}}}
 

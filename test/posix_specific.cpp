@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE(execve_throw_on_error, *boost::unit_test::timeout(2))
         bp::spawn("doesnt-exist");
         BOOST_CHECK(false);
     }
-    catch (std::system_error &e)
+    catch (bp::process_error &e)
     {
         BOOST_CHECK(e.code());
         BOOST_CHECK_EQUAL(e.code().value(), ENOENT);

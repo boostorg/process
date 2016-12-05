@@ -156,30 +156,26 @@ public:
 
     /** Get the native handle of the source. */
     native_handle native_source() const {return const_cast<boost::asio::windows::stream_handle&>(_source).native();}
-    /** Get the native handle of the source. */
+    /** Get the native handle of the sink. */
     native_handle native_sink  () const {return const_cast<boost::asio::windows::stream_handle&>(_sink  ).native();}
 
     /** Start an asynchronous read.
-
-     * See the boost.asio documentation for more details.
+     *
+     * See the [boost.asio documentation](http://www.boost.org/doc/libs/1_60_0/doc/html/boost_asio/reference/AsyncReadStream.html) for more details.
      */
     template<typename MutableBufferSequence,
              typename ReadHandler>
-    BOOST_ASIO_INITFN_RESULT_TYPE(
-          ReadHandler, void(boost::system::error_code, std::size_t))
-      async_read_some(
+    detail::dummy async_read_some(
         const MutableBufferSequence & buffers,
               ReadHandler &&handler);
 
     /** Start an asynchronous write.
 
-     * See the boost.asio documentation for more details.
+     * See the [boost.asio documentation](http://www.boost.org/doc/libs/1_60_0/doc/html/boost_asio/reference/AsyncWriteStream.html) for more details.
      */
     template<typename ConstBufferSequence,
              typename WriteHandler>
-    BOOST_ASIO_INITFN_RESULT_TYPE(
-              WriteHandler, void(boost::system::error_code, std::size_t))
-      async_write_some(
+    detail::dummy async_write_some(
         const ConstBufferSequence & buffers,
         WriteHandler && handler);
 

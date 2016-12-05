@@ -26,11 +26,8 @@ struct on_exit_ : boost::process::detail::windows::async_handler
     template<typename Executor>
     std::function<void(int, const std::error_code&)> on_exit_handler(Executor & exec)
     {
-
         auto handler = this->handler;
-        ::boost::detail::winapi::PROCESS_INFORMATION_ & proc = exec.proc_info;
-        auto process_handle = proc.hProcess;
-        return [handler, process_handle](int exit_code, const std::error_code & ec)
+        return [handler](int exit_code, const std::error_code & ec)
                {
                     handler(static_cast<int>(exit_code), ec);
                };

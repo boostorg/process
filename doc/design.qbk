@@ -5,7 +5,7 @@ to launch processes. Its aim is to provide all functionality that is available o
 those systems and allow the user to do all related things, which require using the OS APIs.
 
 [*This library does not try to provide a full library for everything process related] 
-In many discussions the proposal was made to build boost.process into a DSEL of some sort. 
+In many discussions the proposal was made to build boost.process into a DSEL [footnote Domain Specific Embedded Language] of some sort. 
 This is not the goal, it rather provides the facilities to build such a DSEL-Library on top of it. 
 Therefore the library also does [*not] force any particular use (such as only asynchronous communication) on its user. 
 It rather could be integrated with such a library.  
@@ -33,7 +33,7 @@ Both styles can also be mixed in some cases.
 system("gcc", "-c", args+={"main.cpp"});
 ```
 
-In the following this the avaible styles will be described. Note that the
+In the following section the avaible styles will be described. Note that the
 overload style is implemented via type traits, so the types will be listed. 
 
 [caution There is no guarantee in which order the arguments will be applied! 
@@ -66,6 +66,7 @@ system(exe="grep", args={"-c", "false", "/etc/passwd"}); //exe-/args-
 
 [note If a '"' sign is used in the argument style, it will be passed as part of the argument.
 If the same effect it wanted with the cmd syntax, it ought to be escaped, i.e. '\\\"'. ]
+[note On windows the path will only be searched for the executable in the command style.]
 [endsect]
 
 [section:plat_ext Extensions]
@@ -85,7 +86,8 @@ child c("ls", on_setup([](){cout << "On Setup" << endl;});
 ```
 
 
-[note On posix all those callbacks will be handles by this process, not the created one.]
+[note On posix all those callbacks will be handled by this process, not the created one. 
+This is different for the posix extensions, which can be executed on the forked process.]
 [endsect]
 
 [endsect] 

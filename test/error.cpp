@@ -13,8 +13,10 @@
 
 #include <boost/process/error.hpp>
 #include <boost/process/child.hpp>
+#include <boost/process/extend.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <system_error>
+
 
 
 namespace bp = boost::process;
@@ -46,7 +48,7 @@ BOOST_AUTO_TEST_CASE(setup_error)
     {
         es.ec.assign(42, std::system_category());
         std::error_code ec;
-        bp::child c(master_test_suite().argv[1], ec, bp::on_setup(es));
+        bp::child c(master_test_suite().argv[1], ec, bp::extend::on_setup(es));
 
         BOOST_CHECK(!c.running());
         BOOST_CHECK(ec);
@@ -57,10 +59,10 @@ BOOST_AUTO_TEST_CASE(setup_error)
     {
         es.ec.assign(24, std::system_category());
         es.msg = "MyMessage";
-        bp::child c(master_test_suite().argv[1], bp::on_setup(es));
+        bp::child c(master_test_suite().argv[1], bp::extend::on_setup(es));
 
     }
-    catch( std::system_error & se)
+    catch( bp::process_error & se)
     {
         has_thrown = true;
         BOOST_CHECK_EQUAL(se.code().value(), 24);
@@ -78,7 +80,7 @@ BOOST_AUTO_TEST_CASE(success_error)
     {
         es.ec.assign(22, std::system_category());
         std::error_code ec;
-        bp::child c(master_test_suite().argv[1], ec, bp::on_success(es));
+        bp::child c(master_test_suite().argv[1], ec, bp::extend::on_success(es));
 
 
         BOOST_CHECK(!c.running());
@@ -91,11 +93,11 @@ BOOST_AUTO_TEST_CASE(success_error)
     {
         es.ec.assign(23, std::system_category());
         es.msg = "MyMessage";
-        bp::child c(master_test_suite().argv[1], bp::on_success(es));
+        bp::child c(master_test_suite().argv[1], bp::extend::on_success(es));
 
 
     }
-    catch( std::system_error & se)
+    catch( bp::process_error & se)
     {
         has_thrown = true;
         BOOST_CHECK_EQUAL(se.code().value(), 23);

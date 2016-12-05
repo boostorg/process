@@ -67,6 +67,12 @@ public:
     /** Get the native handle of the sink. */
     native_handle native_sink  () const;
 
+    /** Assign a new value to the source */
+    void assign_source(native_handle h);
+    /** Assign a new value to the sink */
+    void assign_sink  (native_handle h);
+
+
     ///Write data to the pipe.
     int_type write(const char_type * data, int_type count);
     ///Read data from the pipe.
@@ -192,7 +198,7 @@ struct basic_pipebuf : std::basic_streambuf<CharT, Traits>
         this->setg(this->eback(), this->gptr(), this->egptr() + res);
         auto val = *this->gptr();
 
-        return  traits_type::to_int_type(val);
+        return traits_type::to_int_type(val);
     }
 
 
@@ -223,6 +229,8 @@ private:
 
         if (wrt < diff)
             std::move(base + wrt, base + diff, base);
+        else if (wrt == 0) //broken pipe
+            return false;
 
         this->pbump(-wrt);
 

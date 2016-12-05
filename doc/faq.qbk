@@ -71,7 +71,7 @@ not absolutely sure how the output will look.
 
 [section:wchar_t When will the codecvt be used?]
 
-Since windows does not use UTF-8 it is sometimes unavoidable wo use the `wchar_t` version of the WinApi.
+Since windows does not use UTF-8 it is sometimes unavoidable to use the `wchar_t` version of the WinApi.
 To keep this library consistent it provides `wchar_t` support on posix also.
 
 Since the posix api is purely `char` every `wchar_t` based type will be converted into `char`.

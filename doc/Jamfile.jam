@@ -11,14 +11,22 @@ using boostbook ;
 using quickbook ;
 using doxygen ;
 
+
+local images = [ glob images/*.svg ] ;
+install images : $(images) : <location>html/boost_process ;
+install images_glob : $(images) : <location>../../../doc/html/boost_process ;         
+
 doxygen autodoc
 :
   ../../../boost/process.hpp
   [ glob ../../../boost/process/*.hpp ]
 :
+  <doxygen:param>EXCLUDE_SYMBOLS=BOOST_ASIO_INITFN_RESULT_TYPE
   <doxygen:param>PREDEFINED=BOOST_PROCESS_DOXYGEN
   <doxygen:param>HIDE_UNDOC_CLASSES=YES
   <doxygen:param>HIDE_UNDOC_MEMBERS=YES
+  <doxygen:param>EXAMPLE_PATH=.
+  <xsl:path>.
 ;
 
 boostbook standalone
@@ -26,6 +34,7 @@ boostbook standalone
   process.qbk
 :
   <dependency>autodoc
+  <dependency>images 
   <xsl:param>boost.root=../../../..
   <xsl:param>html.stylesheet=../../../../doc/src/boostbook.css
 ;

@@ -24,7 +24,6 @@
 #include <atomic>
 #include <cstring>
 
-
 namespace boost { namespace process {
 
 namespace detail { namespace windows {
@@ -43,7 +42,7 @@ template<> struct startup_info<wchar_t>
     typedef ::boost::detail::winapi::STARTUPINFOW_ type;
 };
 
-#if defined(DISABLED_FOR_NOW) && ( BOOST_USE_WINAPI_VERSION >= BOOST_WINAPI_VERSION_WIN6 )
+#if BOOST_USE_WINAPI_VERSION >= BOOST_WINAPI_VERSION_WIN6
 
 template<typename CharType> struct startup_info_ex;
 
@@ -62,12 +61,12 @@ template<> struct startup_info_ex<wchar_t>
 
 #endif
 
-#if defined(DISABLED_FOR_NOW) && ( BOOST_USE_WINAPI_VERSION >= BOOST_WINAPI_VERSION_WIN6 )
+#if ( BOOST_USE_WINAPI_VERSION >= BOOST_WINAPI_VERSION_WIN6 )
 
 template<typename CharT>
 struct startup_info_impl
 {
-    ::boost::detail::winapi::DWORD_ creation_flags = ::boost::detail::winapi::EXTENDED_STARTUPINFO_PRESENT_;
+    ::boost::detail::winapi::DWORD_ creation_flags = 0;
 
     typedef typename startup_info_ex<CharT>::type startup_info_ex_t;
     typedef typename startup_info<CharT>::type    startup_info_t;
@@ -80,7 +79,13 @@ struct startup_info_impl
                                ::boost::detail::winapi::invalid_handle_value},
                 nullptr
     };
-    startup_info_t & startup_info =  startup_info_ex.StartupInfo;
+    startup_info_t & startup_info = startup_info_ex.StartupInfo;
+
+    void set_startup_info_ex()
+    {
+       startup_info.cb = sizeof(startup_info_ex_t);
+       creation_flags  = ::boost::detail::winapi::EXTENDED_STARTUPINFO_PRESENT_;
+    }
 };
 
 
@@ -98,13 +103,8 @@ struct startup_info_impl
              ::boost::detail::winapi::invalid_handle_value,
              ::boost::detail::winapi::invalid_handle_value,
              ::boost::detail::winapi::invalid_handle_value};
-
-    startup_info_t & get_startup_info() { return startup_info; }
-
 };
-
 #endif
-
 
 
 
@@ -121,7 +121,7 @@ class executor : public startup_info_impl<Char>
     }
     void internal_error_handle(const std::error_code &ec, const char* msg, boost::mpl::false_, boost::mpl::false_ )
     {
-        throw std::system_error(ec, msg);
+        throw process_error(ec, msg);
     }
 
     struct on_setup_t
