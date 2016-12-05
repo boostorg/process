@@ -1,4 +1,5 @@
 [def bp::system [funcref boost::process::system bp::system]]
+[def bp::async_system [funcref boost::process::async_system bp::async_system]]
 [def bp::spawn [funcref boost::process::system bp::spawn]]
 [def bp::child [classref boost::process::child bp::child]]
 [def bp::group [classref boost::process::group bp::group]]
@@ -34,6 +35,7 @@
 [def __detach__ [memberref boost::process::child::detach detach]]
 
 [def __reference__ [link process.reference reference]]
+[def __concepts__ [link boost_process.concepts concepts]]
 
 [def boost::asio::yield_context [@http://www.boost.org/doc/libs/release/doc/html/boost_asio/reference/yield_context.html boost::asio::yield_context]]
 [def boost::asio::coroutine [@http://www.boost.org/doc/libs/release/doc/html/boost_asio/reference/coroutine.html boost::asio::coroutine]]
@@ -42,7 +44,7 @@
 [section:tutorial Tutorial]
 
 In this section we will go step by step through the different features of
-boost.process. For a full description see the __reference__.
+boost.process. For a full description see the __reference__ and the __concepts__ sections.
 
 [section Starting a process]
 
@@ -93,7 +95,8 @@ our program will wait until the child process is completed. This is unwanted,
 especially since compiling can take a while. 
 
 In order to avoid that, boost.process provides several ways to launch a process.
-Besides the already mentioned [funcref boost::process::system system] function,
+Besides the already mentioned [funcref boost::process::system system] function and it's 
+asynchronous version [funcref boost::process::async_system async_system], 
 we can also use the [funcref boost::process::spawn spawn] function or the
 [classref boost::process::child child] class.
 
@@ -295,7 +298,7 @@ int result = c.exit_code();
 [memberref boost::process::child::wait wait] is needed]
  
 To make it even easier, you can use [@http://en.cppreference.com/w/cpp/thread/future std::future] for asynchronous operations
-(you will still need to pass a reference to a io_service) to the launching function, unless you use bp::system.
+(you will still need to pass a reference to a io_service) to the launching function, unless you use bp::system or bp::async_system.
 
 Now we will revisit our first example and read the compiler output asynchronously:
 
@@ -313,7 +316,7 @@ child c("g++", "main.cpp", //set the input
 
 ios.run(); //this will actually block until the compiler is finished
 
-auto err =  fut.get();
+auto err =  data.get();
 ```
 
 [endsect]
@@ -408,7 +411,6 @@ bp::system("stuff", bp::env["VALUE_1"]="foo", bp::env["VALUE_2"]+={"bar1", "bar2
 ```
 
 Please see to the [headerref boost/process/environment.hpp reference] for more information.
-
 
 [endsect]
 [endsect]

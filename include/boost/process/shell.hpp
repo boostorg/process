@@ -79,6 +79,9 @@ shell_cmd = shell(ec);
 
 \attention Launching through the shell will NOT provide proper error handling, i.e.
 you will get an error via the return code.
+
+\attention Executing shell commands that incorporate unsanitized input from an untrusted source makes a program vulnerable to shell injection, a serious security flaw which can result in arbitrary command execution. For this reason, the use of `shell` is strongly discouraged in cases where the command string is constructed from external input:
+
 */
 constexpr ::boost::process::detail::shell_ shell;
 
