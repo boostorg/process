@@ -168,7 +168,7 @@ BOOST_AUTO_TEST_CASE(async_error, *boost::unit_test::timeout(2))
     std::error_code ec;
     bp::child c(
         "doesn't exist",
-		ec,
+        ec,
         io_service,
         bp::on_exit([&](int exit, const std::error_code& ec_in)
                 {

@@ -58,7 +58,7 @@ inline int system_impl(
     std::atomic_bool exited{false};
 
     child c(std::forward<Args>(args)...,
-    		check,
+            check,
             ::boost::process::on_exit(
                 [&](int exit_code, const std::error_code&)
                 {

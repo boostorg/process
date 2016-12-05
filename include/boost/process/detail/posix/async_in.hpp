@@ -70,7 +70,7 @@ struct async_in_buffer : ::boost::process::detail::posix::handler_base_ext,
     template<typename Executor>
     void on_error(Executor &, const std::error_code &) const
     {
-    	std::move(*pipe).source().close();
+        std::move(*pipe).source().close();
     }
 
     template<typename Executor>

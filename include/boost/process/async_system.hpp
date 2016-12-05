@@ -50,8 +50,8 @@ struct async_system_handler : detail::api::async_handler
 
     template<typename ExitHandler_>
     async_system_handler(
-    		boost::asio::io_service & ios,
-			ExitHandler_ && exit_handler) : ios(ios), init(std::forward<ExitHandler_>(exit_handler))
+            boost::asio::io_service & ios,
+            ExitHandler_ && exit_handler) : ios(ios), init(std::forward<ExitHandler_>(exit_handler))
     {
 
     }
@@ -82,7 +82,7 @@ struct async_system_handler : detail::api::async_handler
     {
 #if defined(BOOST_POSIX_API)
         if (errored)
-        	return [](int exit_code, const std::error_code & ec){};
+            return [](int exit_code, const std::error_code & ec){};
 #endif
         auto & h = init.handler;
         return [h](int exit_code, const std::error_code & ec) mutable

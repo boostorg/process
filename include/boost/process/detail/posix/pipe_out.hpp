@@ -26,9 +26,9 @@ struct pipe_out : handler_base_ext
 
     template<typename T>
     pipe_out(T & p) : descr_(p.native_sink())
-	{
-    	p.assign_sink(-1);
-	}
+    {
+        p.assign_sink(-1);
+    }
 
     template<typename Executor>
     void on_error(Executor &, const std::error_code &) const
@@ -81,29 +81,29 @@ class async_pipe;
 template<int p1, int p2>
 struct async_pipe_out : public pipe_out<p1, p2>
 {
-	async_pipe &pipe;
-	template<typename AsyncPipe>
+    async_pipe &pipe;
+    template<typename AsyncPipe>
     async_pipe_out(AsyncPipe & p) : pipe_out<p1, p2>(p.native_sink()), pipe(p)
     {
     }
 
-	template<typename Pipe, typename Executor>
-	static void close(Pipe & pipe, Executor &)
-	{
-    	boost::system::error_code ec;
-    	std::move(pipe).sink().close(ec);
-	}
+    template<typename Pipe, typename Executor>
+    static void close(Pipe & pipe, Executor &)
+    {
+        boost::system::error_code ec;
+        std::move(pipe).sink().close(ec);
+    }
 
     template<typename Executor>
     void on_error(Executor & exec, const std::error_code &)
     {
-    	close(pipe, exec);
+        close(pipe, exec);
     }
 
     template<typename Executor>
     void on_success(Executor &exec)
     {
-    	close(pipe, exec);
+        close(pipe, exec);
     }
 };
 
