@@ -31,18 +31,11 @@
 
 #include <boost/filesystem.hpp>
 
+#include <atomic>
 #include <string>
 #include <chrono>
 #include <istream>
 #include <cstdlib>
-#if defined(BOOST_WINDOWS_API)
-#   include <Windows.h>
-typedef boost::asio::windows::stream_handle pipe_end;
-#elif defined(BOOST_POSIX_API)
-#   include <sys/wait.h>
-#   include <unistd.h>
-typedef boost::asio::posix::stream_descriptor pipe_end;
-#endif
 
 namespace fs = boost::filesystem;
 namespace bp = boost::process;
@@ -75,9 +68,10 @@ BOOST_AUTO_TEST_CASE(explicit_async_io_running, *boost::unit_test::timeout(10))
 
     boost::asio::io_service ios;
 
-    boost::asio::deadline_timer timer{ios, boost::posix_time::seconds(5)};
+    boost::asio::deadline_timer timer{ios};
 
-    bool called = false;
+    std::atomic_bool called = false;
+    timer.expires_from_now(boost::posix_time::seconds(5));
     timer.async_wait(
             [&](const boost::system::error_code &ec)
             {

@@ -56,7 +56,6 @@ inline int system_impl(
     system_impl_success_check check;
 
     std::atomic_bool exited{false};
-    bool started = false;
 
     child c(std::forward<Args>(args)...,
     		check,
