@@ -32,7 +32,7 @@ project : requirements
 import testing ;
 
 
-alias program_options  : /boost//program_options ;
+alias program_options  : /boost//program_options : <link>static ;
 alias filesystem       : /boost//filesystem      ;
 alias iostreams        : /boost//iostreams       ;
 alias system           : /boost//system          ;
