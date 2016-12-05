@@ -12,6 +12,7 @@
 ]
 
 [include introduction.qbk]
+[include concepts.qbk]
 [include tutorial.qbk]
 [include design.qbk]
 [include extend.qbk]

@@ -35,7 +35,7 @@ public:
     typedef typename Traits::int_type  int_type   ;
     typedef typename Traits::pos_type  pos_type   ;
     typedef typename Traits::off_type  off_type   ;
-    typedef          int               native_handle;
+    typedef          int               native_handle_type;
 
     basic_pipe()
     {
@@ -71,8 +71,13 @@ public:
         if (_source != -1)
             ::close(_source);
     }
-    native_handle native_source() const {return _source;}
-    native_handle native_sink  () const {return _sink;}
+    native_handle_type native_source() const {return _source;}
+    native_handle_type native_sink  () const {return _sink;}
+
+    void assign_source(native_handle_type h) { _source = h;}
+    void assign_sink  (native_handle_type h) { _sink = h;}
+
+
 
 
     int_type write(const char_type * data, int_type count)

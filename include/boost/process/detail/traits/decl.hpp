@@ -67,10 +67,6 @@ struct valid_argument_list
     typedef std::integral_constant<bool, value> type;
 };
 
-struct error_tag;
-
-template<>
-struct initializer_tag<std::error_code>;
 
 
 }}}

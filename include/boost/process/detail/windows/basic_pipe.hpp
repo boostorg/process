@@ -55,6 +55,9 @@ public:
     native_handle_type native_source() const {return _source;}
     native_handle_type native_sink  () const {return _sink;}
 
+    void assign_source(native_handle_type h) { _source = h;}
+    void assign_sink  (native_handle_type h) { _sink = h;}
+
     basic_pipe()
     {
         if (!::boost::detail::winapi::CreatePipe(&_source, &_sink, nullptr, 0))

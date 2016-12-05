@@ -1,4 +1,5 @@
 [def bp::system [funcref boost::process::system bp::system]]
+[def bp::async_system [funcref boost::process::async_system bp::async_system]]
 [def bp::spawn [funcref boost::process::system bp::spawn]]
 [def bp::child [classref boost::process::child bp::child]]
 [def bp::group [classref boost::process::group bp::group]]
@@ -10,11 +11,14 @@
 [def std::system [@http://en.cppreference.com/w/cpp/utility/program/system std::system]]
 [def child_running [memberref boost::process::child::running running]]
 [def child_wait [memberref boost::process::child::wait wait]]
+[def child_wait_for [memberref boost::process::child::wait_for wait_for]]
 [def child_exit_code [memberref boost::process::child::exit_code exit_code]]
+[def group_wait_for [memberref boost::process::group::wait_for wait_for]]
 [def bp::on_exit [globalref boost::process::on_exit bp::on_exit]]
 [def bp::null [globalref boost::process::null bp::null]]
 [def child_terminate [memberref boost::process::child::terminate terminate]]
 [def group_terminate [memberref boost::process::group::terminate terminate]]
+[def group_wait [memberref boost::process::group::wait wait]]
 [def bp::std_in [globalref boost::process::std_in bp::std_in]]
 [def bp::std_out [globalref boost::process::std_out bp::std_out]]
 [def bp::std_err [globalref boost::process::std_err bp::std_err]]
@@ -24,20 +28,23 @@
 [def bp::environment  [classref boost::process::basic_environment bp::environment]]
 [def bp::native_environment  [classref boost::process::basic_native_environment bp::native_environment]]
 [def boost::this_process::environment [funcref boost::this_process::environment boost::this_process::environment]]
+[def std::chrono::seconds [@http://en.cppreference.com/w/cpp/chrono/duration std::chrono::seconds]]
 
 [def __wait_for__ [memberref boost::process::child::wait_for wait_for]]
 [def __wait_until__ [memberref boost::process::child::wait_until wait_until]]
 [def __detach__ [memberref boost::process::child::detach detach]]
 
 [def __reference__ [link process.reference reference]]
+[def __concepts__ [link boost_process.concepts concepts]]
 
 [def boost::asio::yield_context [@http://www.boost.org/doc/libs/release/doc/html/boost_asio/reference/yield_context.html boost::asio::yield_context]]
 [def boost::asio::coroutine [@http://www.boost.org/doc/libs/release/doc/html/boost_asio/reference/coroutine.html boost::asio::coroutine]]
+[def bp::env [globalref boost::process::env bp::env]]
 
 [section:tutorial Tutorial]
 
 In this section we will go step by step through the different features of
-boost.process. For a full description see the __reference__.
+boost.process. For a full description see the __reference__ and the __concepts__ sections.
 
 [section Starting a process]
 
@@ -88,7 +95,8 @@ our program will wait until the child process is completed. This is unwanted,
 especially since compiling can take a while. 
 
 In order to avoid that, boost.process provides several ways to launch a process.
-Besides the already mentioned [funcref boost::process::system system] function,
+Besides the already mentioned [funcref boost::process::system system] function and it's 
+asynchronous version [funcref boost::process::async_system async_system], 
 we can also use the [funcref boost::process::spawn spawn] function or the
 [classref boost::process::child child] class.
 
@@ -290,7 +298,7 @@ int result = c.exit_code();
 [memberref boost::process::child::wait wait] is needed]
  
 To make it even easier, you can use [@http://en.cppreference.com/w/cpp/thread/future std::future] for asynchronous operations
-(you will still need to pass a reference to a io_service) to the launching function, unless you use bp::system.
+(you will still need to pass a reference to a io_service) to the launching function, unless you use bp::system or bp::async_system.
 
 Now we will revisit our first example and read the compiler output asynchronously:
 
@@ -308,7 +316,7 @@ child c("g++", "main.cpp", //set the input
 
 ios.run(); //this will actually block until the compiler is finished
 
-auto err =  fut.get();
+auto err =  data.get();
 ```
 
 [endsect]
@@ -316,18 +324,62 @@ auto err =  fut.get();
 
 When launching several processes, processes can be grouped together. 
 This will also apply for a child process, that launches other processes, 
-if they do not modifiy the group membership. E.g. if you call `make` which 
+if they do not modify the group membership. E.g. if you call `make` which 
 launches other processes and call terminate on it, 
 it will not terminate all the child processes of the child unless you use a group.
 
+The two main reasons to use groups are:
+
+# Being able two terminate child processes of the child process
+# Grouping several processes into one, just so they can be terminated at once
+
+If we have program like `make`, which does launch it's own child processes, 
+a call of child_terminate might not suffice. I.e. if we have a makefile launching `gcc` 
+and use the following code, the `gcc` process will still run afterwards:
+
 ```
-bp::group g;
-bp::child c1("foo", g);
-bp::child c2("bar", g);
-g.group_terminate();
+bp::child c("make");
+if (!c.child_wait_for(std::chrono::seconds(10)) //give it 10 seconds
+    c.child_terminate(); //then terminate
 ```
 
-Please see to the [headerref boost/process/group.hpp reference] for more information.
+So in order to also terminate `gcc` we can use a group.
+
+```
+bp::group g;
+bp::child c("make", g);
+if (!g.group_wait_for(std::chrono::seconds(10))
+    g.group_terminate();
+    
+c.child_wait(); //to avoid a zombie process & get the exit code
+```
+
+Now given the example, we still call child_wait to avoid a zombie process. 
+An easier solution for that might be to use [funcref boost::process::spawn spawn].
+
+
+To put two processes into one group, the following code suffices. Spawn already 
+launches a detached process (i.e. without a child-handle), but they can be grouped, 
+to that in the case of a problem, RAII is still a given. 
+
+```
+void f()
+{
+    bp::group g;
+    bp::spawn("foo", g);
+    bp::spawn("bar", g);
+    
+    do_something();
+    
+    g.group_wait();
+};
+```
+
+In the example, it will wait for both processes at the end of the function unless 
+an exception occures. I.e. if an exception is thrown, the group will be terminated.
+
+
+Please see the [headerref boost/process/group.hpp reference] for more information.
 
 [endsect]
 [section:env Environment]
@@ -343,87 +395,22 @@ env["VALUE_1"] = "foo";
 
 //copy it into a environment seperate to the one of this process
 bp::environment env_ = env;  
-//add a value only to the new env
-env_["VALUE_2"] = "bar";
+//append two values to a variable in the new env
+env_["VALUE_2"] += {"bar1", "bar2"};
 
 //launch a process with `env_`
 bp::system("stuff", env_); 
 ```
 
 A more convenient way to modify the environment for the child is the 
-[globalref boost::process::env env] property.
+[globalref boost::process::env env] property, which the example as following:
+
+```
+bp::system("stuff", bp::env["VALUE_1"]="foo", bp::env["VALUE_2"]+={"bar1", "bar2"});
+
+```
 
 Please see to the [headerref boost/process/environment.hpp reference] for more information.
 
-
 [endsect]
-
-
-[section:coro Coroutines]
-[section:stackless Stackless Coroutines]
-
-[note This section presumes knowledge of the boost.asio 
-[@http://www.boost.org/doc/libs/release/doc/html/boost_asio/overview/core/coroutine.html stackless coroutine] feature.]
-
-Stackless coroutines can be implemented rather easily, so there is no need to
-implement extra functionality concerning boost.process. 
-
-```
-struct stackless_t : boost::asio::coroutine
-{
-    bp::child c;
-
-    boost::asio::io_service & ios;
-    
-    stackless_t(boost::asio::io_service & ios) : ios(ios) {}
-    
-    void operator()(
-            boost::system::error_code ec = boost::system::error_code(),
-            std::size_t n = 0)
-    {
-        if (!ec) reenter (this)
-        {
-             c = bp::child("my_program", ios, 
-                    bp::on_exit=
-                    [this](int, const std::error_code&)
-                    {
-                        (*this)(); //this is the reentry for the coroutine
-                    });
-            yield; //yield the thing.
-        }
-    }
-};
-///post the coroutine to a io-service and run it
-int main()
-{
-    boost::asio::io_service ios;
-    ios.post(stackless_t(ios));
-    ios.run();
-    return 0;
-}
-```
-
-[endsect]
-
-[section:stackful Stackful Coroutines]
-
-[note This section presumes knowledge of the boost.asio 
-[@http://www.boost.org/doc/libs/release/doc/html/boost_asio/overview/core/spawn.html stackful coroutine] feature.]
-
-For stackful coroutines this is not as simple, because the members of 
-`boost::asio::yield_context` are not documented. Therefore, boost.process 
-provides a simple way to use stackful coroutines, which looks as follows:
-
-```
-void cr(boost::asio::yield_context yield_)
-{
-    bp::system("my-program", yield_);
-}
-```
-
-This will automatically suspend the coroutine until the child process is finished.
-
-[endsect]
-[endsect]
-
 [endsect]

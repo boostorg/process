@@ -64,13 +64,13 @@ struct async_out_buffer : ::boost::process::detail::posix::handler_base_ext,
                 [pipe](const boost::system::error_code&, std::size_t size){});
 
         this->pipe = nullptr;
-        ::close(pipe->native_sink());
+        std::move(*pipe).sink().close();
     }
 
     template<typename Executor>
     void on_error(Executor &, const std::error_code &) const
     {
-        ::close(pipe->native_sink());
+        std::move(*pipe).sink().close();
     }
 
     template<typename Executor>
@@ -113,12 +113,14 @@ struct async_out_future : ::boost::process::detail::posix::handler_base_ext,
     inline void on_success(Executor &exec)
     {
         auto pipe = this->pipe;
+
         auto buffer  = this->buffer;
         auto promise = this->promise;
+
         boost::asio::async_read(*pipe, *buffer,
                 [pipe, buffer, promise](const boost::system::error_code& ec, std::size_t size)
                 {
-                    if (ec && (ec.value() != EBADF) && (ec.value() != EPERM) && (ec.value() != ENOENT))
+                    if (ec && (ec.value() != ENOENT))
                     {
                         std::error_code e(ec.value(), std::system_category());
                         promise->set_exception(std::make_exception_ptr(process_error(e)));
@@ -133,14 +135,14 @@ struct async_out_future : ::boost::process::detail::posix::handler_base_ext,
                     }
                 });
 
-        ::close(pipe->native_sink());
+        std::move(*pipe).sink().close();
         this->pipe = nullptr;
     }
 
     template<typename Executor>
     void on_error(Executor &, const std::error_code &) const
     {
-        ::close(pipe->native_sink());
+        std::move(*pipe).sink().close();
     }
 
     template<typename Executor>

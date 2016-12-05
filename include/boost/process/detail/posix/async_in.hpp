@@ -62,14 +62,15 @@ struct async_in_buffer : ::boost::process::detail::posix::handler_base_ext,
             boost::asio::async_write(*pipe, buf,
                 [pipe](const boost::system::error_code&ec, std::size_t size){});
 
-        ::close(pipe->native_source());
+        std::move(*pipe).source().close();
+
         this->pipe = nullptr;
     }
 
     template<typename Executor>
     void on_error(Executor &, const std::error_code &) const
     {
-        ::close(pipe->native_source());
+        std::move(*pipe).source().close();
     }
 
     template<typename Executor>

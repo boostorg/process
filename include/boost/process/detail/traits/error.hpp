@@ -4,8 +4,8 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 
-#ifndef BOOST_PROCESS_DETAIL_TRAITS_DECL_HPP_
-#define BOOST_PROCESS_DETAIL_TRAITS_DECL_HPP_
+#ifndef BOOST_PROCESS_DETAIL_TRAITS_ERROR_HPP_
+#define BOOST_PROCESS_DETAIL_TRAITS_ERROR_HPP_
 
 #include <boost/process/detail/config.hpp>
 #include <system_error>
@@ -15,16 +15,10 @@
 
 namespace boost { namespace process { namespace detail {
 
-struct error_tag {};
+struct error_tag;
 
 template<>
-struct make_initializer_t<error_tag>;
-
-
-template<> struct initializer_tag_t<std::error_code> { typedef error_tag type;};
-
-
-
+struct initializer_tag<std::error_code>;
 
 }}}
 

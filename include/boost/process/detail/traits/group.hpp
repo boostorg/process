@@ -4,8 +4,8 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 
-#ifndef BOOST_PROCESS_DETAIL_TRAITS_DECL_HPP_
-#define BOOST_PROCESS_DETAIL_TRAITS_DECL_HPP_
+#ifndef BOOST_PROCESS_DETAIL_TRAITS_GROUP_HPP_
+#define BOOST_PROCESS_DETAIL_TRAITS_GROUP_HPP_
 
 #include <boost/process/detail/config.hpp>
 #include <boost/process/detail/traits/decl.hpp>

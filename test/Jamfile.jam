@@ -24,6 +24,7 @@ project : requirements
   <target-os>linux:<linkflags>-lpthread
   <os>NT,<toolset>cw:<library>ws2_32
   <os>NT,<toolset>gcc:<library>ws2_32
+
 ;
 
 
@@ -31,7 +32,7 @@ project : requirements
 import testing ;
 
 
-alias program_options  : /boost//program_options ;
+alias program_options  : /boost//program_options : <link>static ;
 alias filesystem       : /boost//filesystem      ;
 alias iostreams        : /boost//iostreams       ;
 alias system           : /boost//system          ;
@@ -65,7 +66,6 @@ test-suite execution :
     [ run close_stderr.cpp     system filesystem              : : sparring_partner ]
     [ run close_stdin.cpp      system filesystem              : : sparring_partner ]
     [ run close_stdout.cpp     system filesystem              : : sparring_partner ]
-    [ run coroutine_test.cpp   system filesystem coroutine    : : sparring_partner : <link>static ]
     [ run error.cpp            system filesystem              : : sparring_partner ]
     [ run exit_code.cpp program_options system filesystem     : : sparring_partner ]
     [ run extensions.cpp system filesystem                    : : sparring_partner ]
@@ -76,15 +76,22 @@ test-suite execution :
     [ run search_path.cpp filesystem system                   : : : <target-os>windows:<source>shell32 ]
     [ run shell.cpp filesystem system                         : : sparring_partner ]
     [ run shell_path.cpp  filesystem system                   ]
+    [ run async_system.cpp filesystem system coroutine         : : sparring_partner : <link>static ]
     [ run system_test1.cpp filesystem system                  : : sparring_partner ]
     [ run system_test2.cpp filesystem system                  : : sparring_partner ]
     [ run spawn.cpp filesystem system                         : : sparring_partner ]
     [ run start_dir.cpp   filesystem system                   : : sparring_partner ]
     [ run terminate.cpp system filesystem                     : : sparring_partner ]
     [ run throw_on_error.cpp system filesystem                : : sparring_partner ]
-#    [ run vfork.cpp     system filesystem                     : : sparring_partner : <build>no <target-os>linux:<build>yes   ]
     [ run wait.cpp system filesystem                          : : sparring_partner ]
-    [ compile-fail spawn_fail.cpp ]
+    [ compile-fail spawn_fail.cpp        ]
+    [ compile-fail async_system_fail.cpp ]
     [ run posix_specific.cpp     system filesystem            : : sparring_partner : <build>no <target-os>linux:<build>yes   ]
     [ run windows_specific.cpp filesystem system                   : : sparring_partner : <build>no <target-os>windows:<build>yes   ]
    : <dependency>bare ;
+
+run vfork.cpp     system filesystem                     : : sparring_partner : <build>no <target-os>linux:<build>yes ;
+explicit vfork ;
+
+   
+   

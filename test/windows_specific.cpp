@@ -45,13 +45,13 @@ BOOST_AUTO_TEST_CASE(show_window)
 
 struct set_startup_info
 {
-	int &cnt;
-	template<typename T>
+    int &cnt;
+    template<typename T>
     void operator()(T &e) const
     {
-		cnt++;
-    	BOOST_CHECK_EQUAL(e.startup_info.cb, sizeof(::boost::detail::winapi::STARTUPINFOA_));
-    	e.set_startup_info_ex();
+        cnt++;
+        BOOST_CHECK_EQUAL(e.startup_info.cb, sizeof(::boost::detail::winapi::STARTUPINFOA_));
+        e.set_startup_info_ex();
     }
 
 };
@@ -62,9 +62,9 @@ struct check_startup_info
     template<typename T>
     void operator()(T &e) const
     {
-    	cnt++;
-    	BOOST_CHECK(e.creation_flags &  ::boost::detail::winapi::EXTENDED_STARTUPINFO_PRESENT_);
-    	BOOST_CHECK_EQUAL(e.startup_info.cb, sizeof(::boost::detail::winapi::STARTUPINFOEXA_));
+        cnt++;
+        BOOST_CHECK(e.creation_flags &  ::boost::detail::winapi::EXTENDED_STARTUPINFO_PRESENT_);
+        BOOST_CHECK_EQUAL(e.startup_info.cb, sizeof(::boost::detail::winapi::STARTUPINFOEXA_));
     }
 
 };
@@ -80,8 +80,8 @@ BOOST_AUTO_TEST_CASE(startup_info_ex)
     std::error_code ec;
     bp::child c(
         master_test_suite().argv[1],
-		bp::extend::on_setup(set_startup_info{cnt}),
-		bp::extend::on_success(check_startup_info{cnt}),
+        bp::extend::on_setup(set_startup_info{cnt}),
+        bp::extend::on_success(check_startup_info{cnt}),
         bp::std_out>is,
         ec
     );

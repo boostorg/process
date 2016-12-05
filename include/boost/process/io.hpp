@@ -16,6 +16,7 @@
 #include <future>
 
 #if defined(BOOST_POSIX_API)
+#include <boost/process/detail/posix/asio_fwd.hpp>
 #include <boost/process/detail/posix/close_in.hpp>
 #include <boost/process/detail/posix/close_out.hpp>
 #include <boost/process/detail/posix/null_in.hpp>
@@ -24,8 +25,8 @@
 #include <boost/process/detail/posix/file_out.hpp>
 #include <boost/process/detail/posix/pipe_in.hpp>
 #include <boost/process/detail/posix/pipe_out.hpp>
-#include <boost/process/detail/posix/asio_fwd.hpp>
 #elif defined(BOOST_WINDOWS_API)
+#include <boost/process/detail/windows/asio_fwd.hpp>
 #include <boost/process/detail/windows/close_in.hpp>
 #include <boost/process/detail/windows/close_out.hpp>
 #include <boost/process/detail/windows/null_in.hpp>
@@ -34,7 +35,6 @@
 #include <boost/process/detail/windows/file_out.hpp>
 #include <boost/process/detail/windows/pipe_in.hpp>
 #include <boost/process/detail/windows/pipe_out.hpp>
-#include <boost/process/detail/windows/asio_fwd.hpp>
 #endif
 
 /** \file boost/process/io.hpp
@@ -167,16 +167,15 @@ struct std_in_
     api::file_in operator=(FILE * f)                         const {return f;}
     api::file_in operator<(FILE * f)                         const {return f;}
 
-    template<typename Char, typename Traits> api::pipe_in operator=(const basic_pipe<Char, Traits> & p)      const {return p;}
-    template<typename Char, typename Traits> api::pipe_in operator<(const basic_pipe<Char, Traits> & p)      const {return p;}
-    template<typename Char, typename Traits> api::pipe_in operator=(const basic_opstream<Char, Traits> & p)  const {return p.pipe();}
-    template<typename Char, typename Traits> api::pipe_in operator<(const basic_opstream<Char, Traits> & p)  const {return p.pipe();}
-    template<typename Char, typename Traits> api::pipe_in operator=(const basic_pstream <Char, Traits> & p)  const {return p.pipe();}
-    template<typename Char, typename Traits> api::pipe_in operator<(const basic_pstream <Char, Traits> & p)  const {return p.pipe();}
+    template<typename Char, typename Traits> api::pipe_in operator=(basic_pipe<Char, Traits> & p)      const {return p;}
+    template<typename Char, typename Traits> api::pipe_in operator<(basic_pipe<Char, Traits> & p)      const {return p;}
+    template<typename Char, typename Traits> api::pipe_in operator=(basic_opstream<Char, Traits> & p)  const {return p.pipe();}
+    template<typename Char, typename Traits> api::pipe_in operator<(basic_opstream<Char, Traits> & p)  const {return p.pipe();}
+    template<typename Char, typename Traits> api::pipe_in operator=(basic_pstream <Char, Traits> & p)  const {return p.pipe();}
+    template<typename Char, typename Traits> api::pipe_in operator<(basic_pstream <Char, Traits> & p)  const {return p.pipe();}
 
-    api::pipe_in operator=(const async_pipe & p) const {return p;}
-    api::pipe_in operator<(const async_pipe & p) const {return p;}
-
+    api::async_pipe_in operator=(async_pipe & p) const {return p;}
+    api::async_pipe_in operator<(async_pipe & p) const {return p;}
 
     template<typename T, typename = typename std::enable_if<
             is_const_buffer<T>::value || is_mutable_buffer<T>::value
@@ -225,15 +224,15 @@ struct std_out_
     api::file_out<p1,p2> operator=(FILE * f)  const {return f;}
     api::file_out<p1,p2> operator>(FILE * f)  const {return f;}
 
-    template<typename Char, typename Traits> api::pipe_out<p1,p2> operator=(const basic_pipe<Char, Traits> & p)      const {return p;}
-    template<typename Char, typename Traits> api::pipe_out<p1,p2> operator>(const basic_pipe<Char, Traits> & p)      const {return p;}
-    template<typename Char, typename Traits> api::pipe_out<p1,p2> operator=(const basic_ipstream<Char, Traits> & p)  const {return p.pipe();}
-    template<typename Char, typename Traits> api::pipe_out<p1,p2> operator>(const basic_ipstream<Char, Traits> & p)  const {return p.pipe();}
-    template<typename Char, typename Traits> api::pipe_out<p1,p2> operator=(const basic_pstream <Char, Traits> & p)  const {return p.pipe();}
-    template<typename Char, typename Traits> api::pipe_out<p1,p2> operator>(const basic_pstream <Char, Traits> & p)  const {return p.pipe();}
+    template<typename Char, typename Traits> api::pipe_out<p1,p2> operator=(basic_pipe<Char, Traits> & p)      const {return p;}
+    template<typename Char, typename Traits> api::pipe_out<p1,p2> operator>(basic_pipe<Char, Traits> & p)      const {return p;}
+    template<typename Char, typename Traits> api::pipe_out<p1,p2> operator=(basic_ipstream<Char, Traits> & p)  const {return p.pipe();}
+    template<typename Char, typename Traits> api::pipe_out<p1,p2> operator>(basic_ipstream<Char, Traits> & p)  const {return p.pipe();}
+    template<typename Char, typename Traits> api::pipe_out<p1,p2> operator=(basic_pstream <Char, Traits> & p)  const {return p.pipe();}
+    template<typename Char, typename Traits> api::pipe_out<p1,p2> operator>(basic_pstream <Char, Traits> & p)  const {return p.pipe();}
 
-    api::pipe_out<p1, p2> operator=(const async_pipe & p) const {return api::pipe_out<p1, p2>(p);}
-    api::pipe_out<p1, p2> operator>(const async_pipe & p) const {return api::pipe_out<p1, p2>(p);}
+    api::async_pipe_out<p1, p2> operator=(async_pipe & p) const {return p;}
+    api::async_pipe_out<p1, p2> operator>(async_pipe & p) const {return p;}
 
     api::async_out_buffer<p1, p2, const asio::mutable_buffer>     operator=(const asio::mutable_buffer & buf)     const {return buf;}
     api::async_out_buffer<p1, p2, const asio::mutable_buffers_1> operator=(const asio::mutable_buffers_1 & buf) const {return buf;}

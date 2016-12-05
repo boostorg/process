@@ -73,21 +73,21 @@ struct overload_handler : ex::handler
     template <class Char, class Sequence>
     void on_setup(ex::windows_executor<Char, Sequence>& exec) const
     {
-    	st = "windows";
-    	const char* env = exec.env;
+        st = "windows";
+        const char* env = exec.env;
     }
     template <class ...Args>
-	void on_setup(ex::posix_executor<Args...>& exec) const
-	{
-		st = "posix";
-		char** env = exec.env;
-	}
+    void on_setup(ex::posix_executor<Args...>& exec) const
+    {
+        st = "posix";
+        char** env = exec.env;
+    }
 };
 
 BOOST_AUTO_TEST_CASE(overload)
 {
     bp::child c(
-		overload_handler(),
+        overload_handler(),
         bp::ignore_error
     );
 #if defined(BOOST_WINDOWS_API)

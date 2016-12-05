@@ -37,25 +37,34 @@ namespace process {
 namespace detail
 {
 
+struct system_impl_success_check : handler
+{
+    bool succeeded = false;
+
+    template<typename Exec>
+    void on_success(Exec &) { succeeded = true; }
+};
+
 template<typename IoService, typename ...Args>
 inline int system_impl(
         std::true_type, /*needs ios*/
         std::true_type, /*has io_service*/
-        std::false_type, /* has_yield */
         Args && ...args)
 {
     IoService & ios = ::boost::process::detail::get_io_service_var(args...);
 
+    system_impl_success_check check;
 
     std::atomic_bool exited{false};
 
     child c(std::forward<Args>(args)...,
+            check,
             ::boost::process::on_exit(
                 [&](int exit_code, const std::error_code&)
                 {
                     ios.post([&]{exited.store(true);});
                 }));
-    if (!c.valid())
+    if (!c.valid() || !check.succeeded)
         return -1;
 
     while (!exited.load())
@@ -68,7 +77,6 @@ template<typename IoService, typename ...Args>
 inline int system_impl(
         std::true_type,  /*needs ios */
         std::false_type, /*has io_service*/
-        std::false_type, /* has_yield */
         Args && ...args)
 {
     IoService ios;
@@ -85,7 +93,6 @@ template<typename IoService, typename ...Args>
 inline int system_impl(
         std::false_type, /*needs ios*/
         std::true_type, /*has io_service*/
-        std::false_type, /* has_yield */
         Args && ...args)
 {
     child c(std::forward<Args>(args)...);
@@ -99,7 +106,6 @@ template<typename IoService, typename ...Args>
 inline int system_impl(
         std::false_type, /*has async */
         std::false_type, /*has io_service*/
-        std::false_type, /* has_yield */
         Args && ...args)
 {
     child c(std::forward<Args>(args)...
@@ -113,128 +119,6 @@ inline int system_impl(
     return c.exit_code();
 }
 
-template<typename T>
-constexpr T& remove_yield(T& t) noexcept
-{
-    return t;
-}
-
-template<typename T>
-constexpr T&& remove_yield(T&& t) noexcept
-{
-    return static_cast<T&&>(t);
-}
-
-template<typename Handler>
-constexpr ::boost::process::detail::handler
-    remove_yield(::boost::asio::basic_yield_context<Handler> & yield_) noexcept
-{
-    return {}; //essentially nop.
-}
-
-template<typename Handler>
-constexpr ::boost::process::detail::handler
-    remove_yield(::boost::asio::basic_yield_context<Handler> && yield_) noexcept
-{
-    return {}; //essentially nop.
-}
-
-template<typename ...Args>
-struct get_yield_t;
-
-template<typename First, typename ... Args>
-struct get_yield_t<First, Args...>
-{
-    typedef typename get_yield_t<Args...>::type type;
-};
-
-template<typename First, typename ... Args>
-struct get_yield_t<boost::asio::basic_yield_context<First>, Args...>
-{
-    typedef boost::asio::basic_yield_context<First> type;
-};
-
-template<typename First>
-struct get_yield_t<boost::asio::basic_yield_context<First>>
-{
-    typedef boost::asio::basic_yield_context<First> type;
-};
-
-template<typename Handler, typename ...Args>
-auto get_yield(boost::asio::basic_yield_context<Handler> &&yield_) ->
-        boost::asio::basic_yield_context<Handler> &
-{
-    return yield_;
-}
-
-template<typename Handler, typename ...Args>
-auto get_yield(boost::asio::basic_yield_context<Handler> &yield_) ->
-        boost::asio::basic_yield_context<Handler> &
-{
-    return yield_;
-}
-
-
-template<typename First, typename ...Args>
-auto get_yield(First &&f, Args&&...args) ->
-    typename get_yield_t<typename std::remove_reference<Args>::type...>::type &
-{
-    return get_yield(args...);
-}
-
-template<typename Handler, typename ...Args>
-auto get_yield(boost::asio::basic_yield_context<Handler> &&yield_, Args&&...args) ->
-    typename get_yield_t<typename std::remove_reference<Args>::type...>::type &
-{
-    return yield_;
-}
-
-template<typename Handler, typename ...Args>
-auto get_yield(boost::asio::basic_yield_context<Handler> &yield_, Args&&...args) ->
-    typename get_yield_t<typename std::remove_reference<Args>::type...>::type &
-{
-    return yield_;
-}
-
-
-template<typename IoService, typename T1, typename T2, typename ...Args>
-inline int system_impl(
-        T1, /*has async */
-        T2, /*has io_service*/
-        std::true_type, /* has_yield */
-        Args && ...args)
-{
-
-    auto &yield_ = get_yield(args...);
-
-    auto coro = yield_.coro_.lock();
-    auto & ios = yield_.handler_.dispatcher_.get_io_service();
-    BOOST_ASSERT(coro.use_count());
-
-    int ret = -1;
-    auto l = [coro, &ret, &ios](int ret_, const std::error_code& ec_)
-    {
-        ret = ret_;
-        ios.post(
-                [coro]
-                {
-                    auto & c = *coro;
-                    if (c)
-                        c();
-                 });
-    };
-
-    child c(remove_yield(std::forward<Args>(args))...,
-            ios,
-            boost::process::on_exit=l);
-    if (!c.valid())
-        return -1;
-
-    yield_.ca_();
-
-    return ret;
-}
-
 }
 
 /** Launches a process and waits for its exit.
@@ -245,26 +129,11 @@ all the properties boost.process provides. It will execute the process and wait 
 int ret = system("ls");
 \endcode
 
-\attention When used with Pipes it will almost always result in a dead-lock.
+\attention Using this function with synchronous pipes leads to many potential deadlocks.
 
 When using this function with an asynchronous properties and NOT passing an io_service object,
 the system function will create one and run it. When the io_service is passed to the function,
 the system function will check if it is active, and call the io_service::run function if not.
-
-\par Coroutines
-
-This function also allows to get a `boost::asio::yield_context` passed to use coroutines,
-which will cause the stackful coroutine to yield and return when the process is finished.
-
-
-\code{.cpp}
-void cr(boost::asio::yield_context yield_)
-{
-    system("my-program", yield_);
-}
-\endcode
-
-This will automatically suspend the coroutine until the program is finished.
 
 */
 template<typename ...Args>
@@ -274,11 +143,8 @@ inline int system(Args && ...args)
             need_ios;
     typedef typename ::boost::process::detail::has_io_service<Args...>::type
             has_ios;
-    typedef typename ::boost::process::detail::has_yield_context<Args...>::type
-            has_yield;
-
     return ::boost::process::detail::system_impl<boost::asio::io_service>(
-            need_ios(), has_ios(), has_yield(),
+            need_ios(), has_ios(),
             std::forward<Args>(args)...);
 }
 

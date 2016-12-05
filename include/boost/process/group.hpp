@@ -120,7 +120,8 @@ public:
     {
         boost::process::detail::api::wait(_group_handle, ec);
     }
-    /** Wait for the process group to exit for period of time. */
+    /** Wait for the process group to exit for period of time.
+      *  \return True if all child processes exited while waiting.*/
     template< class Rep, class Period >
     bool wait_for  (const std::chrono::duration<Rep, Period>& rel_time)
     {
@@ -134,7 +135,8 @@ public:
         return boost::process::detail::api::wait_for(_group_handle, rel_time, ec);
     }
 
-    /** Wait for the process group to exit until a point in time. */
+    /** Wait for the process group to exit until a point in time.
+      *  \return True if all child processes exited while waiting.*/
     template< class Clock, class Duration >
     bool wait_until(const std::chrono::time_point<Clock, Duration>& timeout_time )
     {

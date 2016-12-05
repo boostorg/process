@@ -21,7 +21,6 @@ struct handler_base_ext : handler_base
 
     template<typename Executor>
     void on_exec_error  (Executor &, const std::error_code&) const {}
-
 };
 
 
@@ -67,10 +66,6 @@ struct on_exec_error_ : handler_base_ext
 private:
     Handler handler_;
 };
-
-
-
-
 
 }}}}
 
