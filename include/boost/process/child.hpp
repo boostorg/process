@@ -99,13 +99,16 @@ class child
     /** \overload void wait() */
     void wait(std::error_code & ec) noexcept;
 
-    /** Wait for the child process to exit for a period of time. */
+    /** Wait for the child process to exit for a period of time.
+     * \return True if child exited while waiting.
+     */
     template< class Rep, class Period >
     bool wait_for  (const std::chrono::duration<Rep, Period>& rel_time);
     /** \overload bool wait_for(const std::chrono::duration<Rep, Period>& rel_time) */
     bool wait_for  (const std::chrono::duration<Rep, Period>& rel_time, std::error_code & ec) noexcept;
 
-    /** Wait for the child process to exit until a point in time. */
+    /** Wait for the child process to exit until a point in time.
+      * \return True if child exited while waiting.*/
     template< class Clock, class Duration >
     bool wait_until(const std::chrono::time_point<Clock, Duration>& timeout_time );
     /** \overload bool wait_until(const std::chrono::time_point<Clock, Duration>& timeout_time )*/

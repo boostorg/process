@@ -129,26 +129,11 @@ all the properties boost.process provides. It will execute the process and wait 
 int ret = system("ls");
 \endcode
 
-\attention When used with Pipes it will almost always result in a dead-lock.
+\attention Using this function with synchronous pipes leads to many potential deadlocks.
 
 When using this function with an asynchronous properties and NOT passing an io_service object,
 the system function will create one and run it. When the io_service is passed to the function,
 the system function will check if it is active, and call the io_service::run function if not.
-
-\par Coroutines
-
-This function also allows to get a `boost::asio::yield_context` passed to use coroutines,
-which will cause the stackful coroutine to yield and return when the process is finished.
-
-
-\code{.cpp}
-void cr(boost::asio::yield_context yield_)
-{
-    system("my-program", yield_);
-}
-\endcode
-
-This will automatically suspend the coroutine until the program is finished.
 
 */
 template<typename ...Args>
