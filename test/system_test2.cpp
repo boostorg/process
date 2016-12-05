@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(explicit_async_io_running, *boost::unit_test::timeout(10))
 
     boost::asio::deadline_timer timer{ios};
 
-    std::atomic_bool called = false;
+    std::atomic_bool called{false};
     timer.expires_from_now(boost::posix_time::seconds(5));
     timer.async_wait(
             [&](const boost::system::error_code &ec)
