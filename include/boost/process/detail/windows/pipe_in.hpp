@@ -54,28 +54,32 @@ struct pipe_in : public ::boost::process::detail::handler_base
 
 class async_pipe;
 
-template<typename = void>
 struct async_pipe_in : public pipe_in
 {
-	boost::asio::windows::stream_handle handle;
+	async_pipe &pipe;
 
-    async_pipe_in(async_pipe & p) : pipe_in(p.native_source()),
-	                       handle(std::move(p).source())
+	template<typename AsyncPipe>
+    async_pipe_in(AsyncPipe & p) : pipe_in(p.native_source()), pipe(p)
 	{
 	}
 
-    template<typename WindowsExecutor>
-    void on_error(WindowsExecutor &, const std::error_code &)
-    {
+	template<typename Pipe, typename Executor>
+	static void close(Pipe & pipe, Executor &)
+	{
     	boost::system::error_code ec;
-    	handle.close(ec);
+    	std::move(pipe).source().close(ec);
+	}
+
+    template<typename Executor>
+    void on_error(Executor & exec, const std::error_code &)
+    {
+    	close(pipe, exec);
     }
 
-    template<typename WindowsExecutor>
-    void on_success(WindowsExecutor &)
+    template<typename Executor>
+    void on_success(Executor &exec)
     {
-    	boost::system::error_code ec;
-    	handle.close(ec);
+    	close(pipe, exec);
     }
 };
 

@@ -88,33 +88,34 @@ void pipe_out<1,2>::on_setup(WindowsExecutor &e) const
     e.inherit_handles = true;
 }
 
-class async_pipe;
-
 template<int p1, int p2>
 struct async_pipe_out : public pipe_out<p1, p2>
 {
-    boost::asio::windows::stream_handle handle;
-
-    async_pipe_out(async_pipe & p) : pipe_out<p1, p2>(p.native_sink()),
-                                     handle(std::move(p).sink())
+	async_pipe &pipe;
+	template<typename AsyncPipe>
+    async_pipe_out(AsyncPipe & p) : pipe_out<p1, p2>(p.native_sink()), pipe(p)
     {
     }
 
-    template<typename WindowsExecutor>
-    void on_error(WindowsExecutor &, const std::error_code &)
+	template<typename Pipe, typename Executor>
+	static void close(Pipe & pipe, Executor &)
+	{
+    	boost::system::error_code ec;
+    	std::move(pipe).sink().close(ec);
+	}
+
+    template<typename Executor>
+    void on_error(Executor & exec, const std::error_code &)
     {
-        boost::system::error_code ec;
-        handle.close(ec);
+    	close(pipe, exec);
     }
 
-    template<typename WindowsExecutor>
-    void on_success(WindowsExecutor &)
+    template<typename Executor>
+    void on_success(Executor &exec)
     {
-        boost::system::error_code ec;
-        handle.close(ec);
+    	close(pipe, exec);
     }
 };
-
 
 }}}}
 
