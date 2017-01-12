@@ -26,7 +26,7 @@ env:
         # By default is eaual to - BOOST_REMOVE=`basename $TRAVIS_BUILD_DIR`
         # This will force to use local repo content, instead of the Boost's default
         # not needed because process is not yet in boost.
-        #- BOOST_REMOVE=process
+        - BOOST_REMOVE=process
 
     matrix:
         - CXX_STANDARD=c++11 TOOLSET=gcc-5
@@ -79,7 +79,7 @@ before_install:
     - git submodule foreach "git reset --quiet --hard; git clean -fxd"
     - git reset --hard; git clean -fxd
     - git status
-#    - rm -rf $BOOST/libs/$BOOST_REMOVE
+    - rm -rf $BOOST/libs/$BOOST_REMOVE
     - mv $TRAVIS_BUILD_DIR/../$PROJECT_TO_TEST/ $BOOST/libs/$PROJECT_TO_TEST
     - TRAVIS_BUILD_DIR=$BOOST/libs/$PROJECT_TO_TEST
     - ./bootstrap.sh
