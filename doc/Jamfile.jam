@@ -38,3 +38,13 @@ boostbook standalone
   <xsl:param>boost.root=../../../..
   <xsl:param>html.stylesheet=../../../../doc/src/boostbook.css
 ;
+
+###############################################################################
+alias boostdoc
+    : standalone/<format>docbook
+    :
+    :
+    : ;
+explicit boostdoc ;
+alias boostrelease ;
+explicit boostrelease ;
