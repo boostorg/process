@@ -29,12 +29,22 @@ doxygen autodoc
   <xsl:path>.
 ;
 
+import type ;
+type.register XMLPROCESSWORKAROUND : : XML ;
+import generators ;
+generators.register-standard common.copy : XML : XMLPROCESSWORKAROUND ; 
+
+xmlprocessworkaround posix_pseudocode   : posix_pseudocode.xml ; 
+xmlprocessworkaround windows_pseudocode : windows_pseudocode.xml ;
+
 boostbook standalone
 :
   process.qbk
 :
   <dependency>autodoc
-  <dependency>images 
+  <dependency>images
+  <dependency>posix_pseudocode
+  <dependency>windows_pseudocode
   <xsl:param>boost.root=../../../..
   <xsl:param>html.stylesheet=../../../../doc/src/boostbook.css
 ;
@@ -42,7 +52,7 @@ boostbook standalone
 ###############################################################################
 alias boostdoc
     : standalone/<format>docbook
-    :
+    : <dependency>images_glob
     :
     : ;
 explicit boostdoc ;
