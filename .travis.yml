@@ -79,7 +79,7 @@ before_install:
     - git submodule foreach "git reset --quiet --hard; git clean -fxd"
     - git reset --hard; git clean -fxd
     - git status
-    - echo "Removing %BOOST%/libs/%BOOST_REMOVE%"
+    - echo "Removing $BOOST/libs/$BOOST_REMOVE"
     - rm -rf $BOOST/libs/$BOOST_REMOVE
     - mv $TRAVIS_BUILD_DIR/../$PROJECT_TO_TEST/ $BOOST/libs/$PROJECT_TO_TEST
     - TRAVIS_BUILD_DIR=$BOOST/libs/$PROJECT_TO_TEST
