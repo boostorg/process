@@ -16,6 +16,15 @@ local images = [ glob images/*.svg ] ;
 install images : $(images) : <location>html/boost_process ;
 install images_glob : $(images) : <location>../../../doc/html/boost_process ;         
 
+import type ;
+type.register XMLPROCESSWORKAROUND : : XML ;
+import generators ;
+generators.register-standard common.copy : XML : XMLPROCESSWORKAROUND ; 
+
+xmlprocessworkaround posix_pseudocode   : posix_pseudocode.xml   ; 
+xmlprocessworkaround windows_pseudocode : windows_pseudocode.xml ;
+
+
 doxygen autodoc
 :
   ../../../boost/process.hpp
@@ -26,16 +35,12 @@ doxygen autodoc
   <doxygen:param>HIDE_UNDOC_CLASSES=YES
   <doxygen:param>HIDE_UNDOC_MEMBERS=YES
   <doxygen:param>EXAMPLE_PATH=.
+  <dependency>posix_pseudocode
+  <dependency>windows_pseudocode
   <xsl:path>.
 ;
 
-import type ;
-type.register XMLPROCESSWORKAROUND : : XML ;
-import generators ;
-generators.register-standard common.copy : XML : XMLPROCESSWORKAROUND ; 
 
-xmlprocessworkaround posix_pseudocode   : posix_pseudocode.xml ; 
-xmlprocessworkaround windows_pseudocode : windows_pseudocode.xml ;
 
 boostbook standalone
 :
@@ -43,8 +48,6 @@ boostbook standalone
 :
   <dependency>autodoc
   <dependency>images
-  <dependency>posix_pseudocode
-  <dependency>windows_pseudocode
   <xsl:param>boost.root=../../../..
   <xsl:param>html.stylesheet=../../../../doc/src/boostbook.css
 ;
