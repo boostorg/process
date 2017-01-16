@@ -13,8 +13,8 @@ using doxygen ;
 
 
 local images = [ glob images/*.svg ] ;
-install images : $(images) : <location>html/boost_process ;
-install images_glob : $(images) : <location>../../../doc/html/boost_process ;         
+install images      : $(images) : <location>html/boost_process ;
+install images_glob : $(images) : <location>$(BOOST_ROOT)/doc/html/boost_process ;         
 
 import type ;
 type.register XMLPROCESSWORKAROUND : : XML ;
@@ -48,6 +48,7 @@ boostbook standalone
 :
   <dependency>autodoc
   <dependency>images
+  <dependency>images_glob
   <xsl:param>boost.root=../../../..
   <xsl:param>html.stylesheet=../../../../doc/src/boostbook.css
 ;
@@ -55,8 +56,8 @@ boostbook standalone
 ###############################################################################
 alias boostdoc
     : standalone/<format>docbook
+    : 
     : <dependency>images_glob
-    :
     : ;
 explicit boostdoc ;
 alias boostrelease ;
