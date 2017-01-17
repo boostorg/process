@@ -19,12 +19,14 @@ namespace boost { namespace process { namespace detail { namespace posix {
 
 struct pipe_in : handler_base_ext
 {
-    int descr_;
+    int source;
+    int sink; //opposite end
 
-    pipe_in(int descr) : descr_(descr) {}
+    pipe_in(int sink, int source) : source(source), sink(sink) {}
+
 
     template<typename T>
-    pipe_in(T & p) : descr_(p.native_source())
+    pipe_in(T & p) : source(p.native_source()), sink(p.native_sink())
     {
         p.assign_source(-1);
     }
@@ -32,21 +34,22 @@ struct pipe_in : handler_base_ext
     template<typename Executor>
     void on_error(Executor &, const std::error_code &) const
     {
-        ::close(descr_);
+        ::close(source);
     }
 
     template<typename Executor>
     void on_success(Executor &) const
     {
-        ::close(descr_);
+        ::close(source);
     }
 
     template <class Executor>
     void on_exec_setup(Executor &e) const
     {
-        if (::dup2(descr_, STDIN_FILENO) == -1)
+        if (::dup2(source, STDIN_FILENO) == -1)
              e.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
-        ::close(descr_);
+        ::close(source);
+        ::close(sink);
     }
 
 };
@@ -58,7 +61,7 @@ struct async_pipe_in : public pipe_in
     async_pipe &pipe;
 
     template<typename AsyncPipe>
-    async_pipe_in(AsyncPipe & p) : pipe_in(p.native_source()), pipe(p)
+    async_pipe_in(AsyncPipe & p) : pipe_in(p.native_sink(), p.native_source()), pipe(p)
     {
     }
 
