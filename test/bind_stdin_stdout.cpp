@@ -23,7 +23,7 @@
 
 namespace bp = boost::process;
 
-BOOST_AUTO_TEST_CASE(sync_io, *boost::unit_test::timeout(5))
+BOOST_AUTO_TEST_CASE(sync_io, *boost::unit_test::timeout(10))
 {
     using boost::unit_test::framework::master_test_suite;
 
@@ -51,5 +51,5 @@ BOOST_AUTO_TEST_CASE(sync_io, *boost::unit_test::timeout(5))
     
     os.pipe().close();
     
-    BOOST_CHECK(c.wait_for(std::chrono::seconds(1)));
+    BOOST_CHECK(c.wait_for(std::chrono::seconds(3)));
 }
