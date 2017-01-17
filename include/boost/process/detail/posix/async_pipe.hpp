@@ -127,8 +127,8 @@ public:
     native_handle_type native_source() const {return const_cast<boost::asio::posix::stream_descriptor&>(_source).native();}
     native_handle_type native_sink  () const {return const_cast<boost::asio::posix::stream_descriptor&>(_sink  ).native();}
 
-    void assign_source(native_handle_type h) { _source.assign(h);}
-    void assign_sink  (native_handle_type h) { _sink  .assign(h);}
+    void assign_source(native_handle_type h) { _source = handle_type(_source.get_io_service(), h);}
+    void assign_sink  (native_handle_type h) { _sink   = handle_type(_sink.  get_io_service(), h);}
 
     template<typename MutableBufferSequence,
              typename ReadHandler>
@@ -162,13 +162,13 @@ public:
     handle_type source(::boost::asio::io_service& ios) &&
     {
         ::boost::asio::posix::stream_descriptor stolen(ios, _source.native_handle());
-        _source.assign(-1);
+        _source = handle_type(_source.get_io_service());
         return stolen;
     }
     handle_type sink  (::boost::asio::io_service& ios) &&
     {
         ::boost::asio::posix::stream_descriptor stolen(ios, _sink.native_handle());
-        _sink.assign(-1);
+        _sink = handle_type(_sink.get_io_service());
         return stolen;
     }
 
