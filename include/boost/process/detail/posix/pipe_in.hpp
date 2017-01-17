@@ -22,6 +22,9 @@ struct pipe_in : handler_base_ext
     int source;
     int sink; //opposite end
 
+    pipe_in(int sink, int source) : source(source), sink(sink) {}
+
+
     template<typename T>
     pipe_in(T & p) : source(p.native_source()), sink(p.native_sink())
     {
@@ -58,7 +61,7 @@ struct async_pipe_in : public pipe_in
     async_pipe &pipe;
 
     template<typename AsyncPipe>
-    async_pipe_in(AsyncPipe & p) : pipe_in(p), pipe(p)
+    async_pipe_in(AsyncPipe & p) : pipe_in(p.native_sink(), p.native_source()), pipe(p)
     {
     }
 
