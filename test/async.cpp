@@ -64,7 +64,6 @@ BOOST_AUTO_TEST_CASE(async_future, *boost::unit_test::timeout(2))
 
     boost::asio::io_service io_service;
 
-    int exit_code = 0;
     std::error_code ec;
     std::future<int> fut;
     bp::child c(

@@ -25,7 +25,11 @@
 
 #if defined(BOOST_POSIX_API)
 #include <errno.h>
+#if ! defined(__APPLE__)
 #include <features.h>
+#else
+extern char **environ;
+#endif
 #elif defined(BOOST_WINDOWS_API)
 #include <boost/detail/winapi/get_last_error.hpp>
 #else
