@@ -1,6 +1,6 @@
 #[Boost Process (Boost.Process)](https://github.com/klemens-morgenstern/boost-process)
 
-Boost.process is not yet part of the [Boost C++ Libraries](http://github.com/boostorg). It is a library for comfortable management of processes.
+Boost.process is not yet part of the [Boost C++ Libraries](http://github.com/boostorg), but will probably be released in boost 1.64. It is a library for comfortable management of processes.
 
 ### Test results
 
@@ -21,4 +21,4 @@ Distributed under the [Boost Software License, Version 1.0](http://www.boost.org
 
 ### Dependency
 
-This library requires boost 1.63. Since this is not released yet you can clone the winapi module from [here](https://github.com/boostorg/winapi) to get it to work. You will need to overwrite the current code in boost/libs/winapi.
+This library requires boost 1.63. Since this is not released yet you can clone the winapi module from [here](https://github.com/boostorg/winapi) to get it to work on windows.
