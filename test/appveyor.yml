@@ -12,7 +12,7 @@
 
 init:
     - set BRANCH_TO_TEST=%APPVEYOR_REPO_BRANCH%
-#    - set BOOST_REMOVE=dll
+    - set BOOST_REMOVE=process
 
 os: Visual Studio 2015
 configuration: Debug
@@ -53,7 +53,7 @@ before_build:
     - git reset --hard
     - git clean -fxd
     - git status
-#    - rm -rf %BOOST%/libs/%BOOST_REMOVE%
+    - rm -rf %BOOST%/libs/%BOOST_REMOVE%
     - mv %APPVEYOR_BUILD_FOLDER% %BOOST%/libs/%PROJECT_TO_TEST%
     - set TRAVIS_BUILD_DIR=%BOOST%/libs/%PROJECT_TO_TEST%
 

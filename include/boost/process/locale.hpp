@@ -71,7 +71,7 @@ inline std::locale default_locale()
 # elif defined(macintosh) || defined(__APPLE__) || defined(__APPLE_CC__) \
 || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__HAIKU__)
     std::locale global_loc = std::locale();
-    return std::locale(global_loc, new std::utf8_codecvt_facet);
+    return std::locale(global_loc, new std::codecvt_utf8<wchar_t>);
 # else  // Other POSIX
     // ISO C calls std::locale("") "the locale-specific native environment", and this
     // locale is the default for many POSIX-based operating systems such as Linux.

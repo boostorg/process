@@ -38,7 +38,7 @@ namespace detail
 {
 
 template<typename ExitHandler>
-struct async_system_handler : detail::api::async_handler
+struct async_system_handler : ::boost::process::detail::api::async_handler
 {
     boost::asio::io_service & ios;
     boost::asio::detail::async_result_init<

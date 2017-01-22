@@ -37,30 +37,6 @@ namespace boost { namespace process {
  * will then try the various file extensions for executables on
  * Windows to find filename.
  *
- * The path must be a set of directories. Directories must be
- * separated by colons on POSIX and by semicolons on Windows.
- * If path is empty, the environment variable PATH is used.
- *
- * \param filename The base of the filename to find
- *
- * \param path the set of paths so search, defaults to "PATH" environment variable.
- *
- * \returns the absolute path to the executable filename or an
- *          empty string if filename isn't found
- */
-/**
- * Searches for an executable in path.
- *
- * filename must be a basename including the file extension.
- * It must not include any directory separators (like a slash).
- * On Windows the file extension may be omitted. The function
- * will then try the various file extensions for executables on
- * Windows to find filename.
- *
- * The path must be a set of directories. Directories must be
- * separated by colons on POSIX and by semicolons on Windows.
- * If path is empty, the environment variable PATH is used.
- *
  * \param filename The base of the filename to find
  *
  * \param path the set of paths so search, defaults to "PATH" environment variable.
