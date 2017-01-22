@@ -250,12 +250,12 @@ inline child basic_execute_impl(Args && ... args)
     //typedef typename boost::fusion::result_of::as_vector<decltype(inits)>::type  inits_t;
     typedef typename boost::fusion::result_of::as_vector<decltype(others)>::type others_t;
     //  typedef decltype(others) others_t;
-    typedef typename detail::make_builders_from_view<
+    typedef typename ::boost::process::detail::make_builders_from_view<
             typename boost::fusion::result_of::begin<others_t>::type,
             typename boost::fusion::result_of::end  <others_t>::type>::type builder_t;
 
     builder_t builders;
-    detail::builder_ref<builder_t> builder_ref(builders);
+    ::boost::process::detail::builder_ref<builder_t> builder_ref(builders);
 
     boost::fusion::for_each(others, builder_ref);
     auto other_inits = ::boost::process::detail::get_initializers(builders);

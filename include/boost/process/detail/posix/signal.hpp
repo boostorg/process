@@ -18,7 +18,13 @@ namespace boost { namespace process { namespace detail { namespace posix {
 
 struct sig_init_ : handler_base_ext
 {
-    sig_init_ (::sighandler_t handler) : _handler(handler) {}
+#if ! defined (__APPLE__)
+	using sighandler_t = ::sighandler_t;
+#else
+	using sighandler_t = void(*)(int);
+#endif
+
+    sig_init_ (sighandler_t handler) : _handler(handler) {}
 
     template <class PosixExecutor>
     void on_exec_setup(PosixExecutor&)
