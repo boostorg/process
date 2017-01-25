@@ -67,6 +67,9 @@ constexpr ::boost::process::detail::posix::sig_       sig;
  */
 constexpr ::boost::process::detail::posix::use_vfork_ use_vfork;
 
+
+using ::boost::process::detail::posix::sighandler_t;
+
 }}}
 
 #endif /* BOOST_PROCESS_POSIX_HPP_ */
