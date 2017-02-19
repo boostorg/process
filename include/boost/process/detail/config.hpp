@@ -25,7 +25,7 @@
 
 #if defined(BOOST_POSIX_API)
 #include <errno.h>
-#if ! defined(__APPLE__)
+#if defined(__GLIBC__)
 #include <features.h>
 #else
 extern char **environ;
