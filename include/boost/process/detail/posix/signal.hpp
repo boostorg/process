@@ -16,7 +16,7 @@
 
 namespace boost { namespace process { namespace detail { namespace posix {
 
-#if ! defined (__APPLE__)
+#if defined(__GLIBC__)
 	using sighandler_t = ::sighandler_t;
 #else
 	using sighandler_t = void(*)(int);
