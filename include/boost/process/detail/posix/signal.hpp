@@ -16,13 +16,15 @@
 
 namespace boost { namespace process { namespace detail { namespace posix {
 
-struct sig_init_ : handler_base_ext
-{
-#if ! defined (__APPLE__)
+#if defined(__GLIBC__)
 	using sighandler_t = ::sighandler_t;
 #else
 	using sighandler_t = void(*)(int);
 #endif
+
+
+struct sig_init_ : handler_base_ext
+{
 
     sig_init_ (sighandler_t handler) : _handler(handler) {}
 
@@ -53,16 +55,16 @@ struct sig_init_ : handler_base_ext
     }
 private:
     bool _reset = false;
-    ::sighandler_t _old{0};
-    ::sighandler_t _handler{0};
+    ::boost::process::detail::posix::sighandler_t _old{0};
+    ::boost::process::detail::posix::sighandler_t _handler{0};
 };
 
 struct sig_
 {
     constexpr sig_() {}
 
-    sig_init_ operator()(::sighandler_t h) const {return h;}
-    sig_init_ operator= (::sighandler_t h) const {return h;}
+    sig_init_ operator()(::boost::process::detail::posix::sighandler_t h) const {return h;}
+    sig_init_ operator= (::boost::process::detail::posix::sighandler_t h) const {return h;}
     sig_init_ dfl() const {return SIG_DFL;}
     sig_init_ ign() const {return SIG_IGN;}
 

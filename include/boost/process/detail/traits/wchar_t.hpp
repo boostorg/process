@@ -180,7 +180,7 @@ struct char_converter<wchar_t, std::vector<char* >>
         std::transform(in.begin(), in.end(), ret.begin(),
                 [](const char* st)
                 {
-                    std::size_t sz;
+                    std::size_t sz = 0;
                     while (st[sz] != '\0') sz++;
                     return convert(st, st + sz);
                 });
@@ -197,7 +197,7 @@ struct char_converter<wchar_t, std::initializer_list<char *>>
         std::transform(in.begin(), in.end(), ret.begin(),
                 [](const char* st)
                 {
-                    std::size_t sz;
+                    std::size_t sz = 0;
                     while (st[sz] != '\0') sz++;
                     return convert(st, st + sz);
                 });
@@ -244,7 +244,7 @@ struct char_converter<char, std::vector<wchar_t* >>
         std::transform(in.begin(), in.end(), ret.begin(),
                 [](const wchar_t* st)
                 {
-                    std::size_t sz;
+                    std::size_t sz = 0;
                     while (st[sz] != L'\0') sz++;
                     return convert(st, st + sz);
                 });
@@ -261,7 +261,7 @@ struct char_converter<char, std::initializer_list<wchar_t * >>
         std::transform(in.begin(), in.end(), ret.begin(),
                 [](const wchar_t* st)
                 {
-                    std::size_t sz;
+                    std::size_t sz = 0;
                     while (st[sz] != L'\0') sz++;
                     return convert(st, st + sz);
                 });

@@ -18,6 +18,7 @@ namespace boost { namespace process { namespace detail {
 template<template <class> class Template>
 struct make_handler_t
 {
+    constexpr make_handler_t() {}
     template<typename Handler>
     constexpr Template<Handler> operator()(Handler handler) const {return Template<Handler>(handler);}
     template<typename Handler>
