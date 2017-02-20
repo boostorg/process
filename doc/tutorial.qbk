@@ -1,12 +1,13 @@
 [def bp::system [funcref boost::process::system bp::system]]
 [def bp::async_system [funcref boost::process::async_system bp::async_system]]
-[def bp::spawn [funcref boost::process::system bp::spawn]]
+[def bp::spawn [funcref boost::process::spawn bp::spawn]]
 [def bp::child [classref boost::process::child bp::child]]
 [def bp::group [classref boost::process::group bp::group]]
 [def bp::ipstream [classref boost::process::ipstream bp::ipstream]]
 [def bp::opstream [classref boost::process::opstream bp::opstream]]
 [def bp::pstream [classref boost::process::pstream bp::pstream]]
 [def bp::pipe  [classref boost::process::pipe bp::pipe]]
+[def bp::search_path  [funcref boost::process::search_path bp::search_path]]
 [def boost_org  [@www.boost.org "www.boost.org"]]
 [def std::system [@http://en.cppreference.com/w/cpp/utility/program/system std::system]]
 [def child_running [memberref boost::process::child::running running]]
@@ -63,6 +64,10 @@ Which we can write exactly like this in boost.process.
 namespace bp = boost::process; //we will assume this for all further examples
 int result = bp::system("g++ main.cpp");
 ```
+
+[note In most of the cases the command has to be given with a valid path, i.e. the `PATH` 
+variable will not be searched automatically. For the sake of simplicity, the examples here
+will not use the bp::search_path function. ]
 
 The first thing we can do, is to separate the command and the executable into
 two parts, so it is more readable and can be built by a function.

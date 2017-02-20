@@ -141,8 +141,6 @@ inline bool wait_until(
     pid_t ret;
     int status;
 
-    auto start = std::chrono::system_clock::now();
-
     bool time_out_occured = false;
     do
     {
