@@ -9,37 +9,38 @@
 
 #include <boost/process.hpp>
 #include <boost/process/posix.hpp>
+#include <boost/process/extend.hpp>
 #include <iostream>
 #include <fstream>
 #include <unistd.h>
 #include <errno.h>
 
-using namespace boost::process;
+namespace bp = boost::process;
 
 int main()
 {
 
     //duplicate our pipe descriptor into literal position 4
-    pipe p;
-    system("test", posix::fd.bind(4, p.native_sink())    );
+    bp::pipe p;
+    bp::system("test", bp::posix::fd.bind(4, p.native_sink()));
 
 
     //close file-descriptor from explicit integral value
-    system("test", posix::fd.close(STDIN_FILENO));
+    bp::system("test", bp::posix::fd.close(STDIN_FILENO));
 
     //close file-descriptors from explicit integral values
-    system("test", posix::fd.close({STDIN_FILENO, STDOUT_FILENO}));
+    bp::system("test", bp::posix::fd.close({STDIN_FILENO, STDOUT_FILENO}));
 
     //add custom handlers
     const char *env[2] = { 0 };
     env[0] = "LANG=de";
-    system("test",
-        on_setup([env](auto &e) { e.env = const_cast<char**>(env); }),
-        posix::on_fork_error([](auto&)
+    bp::system("test",
+        bp::extend::on_setup([env](auto &e) { e.env = const_cast<char**>(env); }),
+        bp::extend::on_fork_error([](auto&, const std::error_code & ec)
             { std::cerr << errno << std::endl; }),
-        posix::on_exec_setup([](auto&)
+        bp::extend::on_exec_setup([](auto&)
             { ::chroot("/new/root/directory/"); }),
-        posix::on_exec_error([](auto&)
+        bp::extend::on_exec_error([](auto&, const std::error_code & ec)
             { std::ofstream ofs("log.txt"); if (ofs) ofs << errno; })
     );
 

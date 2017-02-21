@@ -30,9 +30,9 @@ struct on_fork_error_ : handler_base_ext
     explicit on_fork_error_(Handler handler) : handler_(handler) {}
 
     template <class Executor>
-    void on_fork_error(Executor &e) const
+    void on_fork_error(Executor &e, const std::error_code &ec) const
     {
-        handler_(e);
+        handler_(e, ec);
     }
 private:
     Handler handler_;
@@ -59,9 +59,9 @@ struct on_exec_error_ : handler_base_ext
     explicit on_exec_error_(Handler handler) : handler_(handler) {}
 
     template <class Executor>
-    void on_exec_error(Executor &e) const
+    void on_exec_error(Executor &e, const std::error_code &ec) const
     {
-        handler_(e);
+        handler_(e, ec);
     }
 private:
     Handler handler_;
