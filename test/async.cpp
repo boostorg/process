@@ -54,6 +54,7 @@ BOOST_AUTO_TEST_CASE(async_wait, *boost::unit_test::timeout(2))
     io_service.run();
     BOOST_CHECK(exit_called);
     BOOST_CHECK_EQUAL(exit_code, 123);
+    BOOST_CHECK_EQUAL(c.exit_code(), 123);
 }
 
 
