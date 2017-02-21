@@ -139,7 +139,7 @@ struct io_service_ref : handler_base_ext
 
             std::error_code ec(ec_in.value(), std::system_category());
             int val = WEXITSTATUS(status);
-            exit_status->store(val);
+            exit_status->store(status);
 
             for (auto & func : funcs)
                 func(val, ec);
