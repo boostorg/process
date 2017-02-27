@@ -110,8 +110,11 @@ struct exe_cmd_init<char> : boost::process::detail::api::handler_base_ext
     template <class Executor>
     void on_setup(Executor& exec) 
     {
-        if (exe.empty())
+        if (exe.empty()) //cmd style
+        {
             exec.exe = args.front().c_str();
+            exec.cmd_style = true;
+        }
         else
             exec.exe = &exe.front();
 
