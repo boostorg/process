@@ -42,10 +42,10 @@ inline int execvpe(const char* filename, char * const arg_list[], char* env[])
 	{
 		if (ec)
 			return -1;
-		::boost::process::environment env;
-		env._env_impl = env;
-		env.reload();
-		auto vec = env["PATH"].to_vector();
+		::boost::process::environment env_;
+		env_._env_impl = env;
+		env_.reload();
+		auto vec = env_["PATH"].to_vector();
 		std::vector<boost::filesystem::path> val;
 	    val.resize(vec.size());
 
