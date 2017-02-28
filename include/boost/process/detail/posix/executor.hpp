@@ -30,7 +30,7 @@
 
 namespace boost { namespace process { namespace detail { namespace posix {
 
-inline int execvpe(const char* filename, const char * arg_list[], char* env[])
+inline int execvpe(const char* filename, char * const arg_list[], char* const env[])
 {
 #if defined(__GLIBC__)
 	return ::execvpe(filename, arg_list, env);
