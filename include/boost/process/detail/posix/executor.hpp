@@ -33,26 +33,26 @@ namespace boost { namespace process { namespace detail { namespace posix {
 inline int execvpe(const char* filename, char * const arg_list[], char* env[])
 {
 #if defined(__GLIBC__)
-	return ::execvpe(filename, arg_list, env);
+    return ::execvpe(filename, arg_list, env);
 #else
-	//use my own implementation
-	std::string fn = filename;
-	boost::system::error_code ec;
-	if ((fn.find('/') != std::string::npos) && !boost::filesystem::exists(fn, ec))
-	{
-		if (ec)
-			return -1;
-		::boost::process::environment env_;
-		env_._env_impl = env;
-		env_.reload();
-		auto vec = env_["PATH"].to_vector();
-		std::vector<boost::filesystem::path> val;
-	    val.resize(vec.size());
+    //use my own implementation
+    std::string fn = filename;
+    boost::system::error_code ec;
+    if ((fn.find('/') != std::string::npos) && !boost::filesystem::exists(fn, ec))
+    {
+        if (ec)
+            return -1;
+        ::boost::process::environment env_;
+        env_._env_impl = env;
+        env_.reload();
+        auto vec = env_["PATH"].to_vector();
+        std::vector<boost::filesystem::path> val;
+        val.resize(vec.size());
 
-	    std::copy(vec.begin(), vec.end(), val.begin());
-		fn = search_path(fn, val).string();
-	}
-	return ::execve(fn.c_str(), arg_list, env);
+        std::copy(vec.begin(), vec.end(), val.begin());
+        fn = search_path(fn, val).string();
+    }
+    return ::execve(fn.c_str(), arg_list, env);
 #endif
 }
 
@@ -342,9 +342,9 @@ child executor<Sequence>::invoke(boost::mpl::true_, boost::mpl::false_) //ignore
     {
         boost::fusion::for_each(seq, call_on_exec_setup(*this));
         if (cmd_style)
-        	::boost::process::detail::posix::execvpe(exe, cmd_line, env);
+            ::boost::process::detail::posix::execvpe(exe, cmd_line, env);
         else
-        	::execve(exe, cmd_line, env);
+            ::execve(exe, cmd_line, env);
         auto ec = boost::process::detail::get_last_error();
         boost::fusion::for_each(seq, call_on_exec_error(*this, ec));
         _exit(EXIT_FAILURE);
@@ -397,9 +397,9 @@ child executor<Sequence>::invoke(boost::mpl::false_, boost::mpl::false_)
 
         boost::fusion::for_each(seq, call_on_exec_setup(*this));
         if (cmd_style)
-        	::boost::process::detail::posix::execvpe(exe, cmd_line, env);
+            ::boost::process::detail::posix::execvpe(exe, cmd_line, env);
         else
-        	::execve(exe, cmd_line, env);
+            ::execve(exe, cmd_line, env);
         _ec = boost::process::detail::get_last_error();
         _msg = "execve failed";
         boost::fusion::for_each(seq, call_on_exec_error(*this, _ec));
@@ -493,9 +493,9 @@ child executor<Sequence>::invoke(boost::mpl::false_, boost::mpl::true_)
         boost::fusion::for_each(seq, call_on_exec_setup(*this));
 
         if (cmd_style)
-        	::boost::process::detail::posix::execvpe(exe, cmd_line, env);
+            ::boost::process::detail::posix::execvpe(exe, cmd_line, env);
         else
-        	::execve(exe, cmd_line, env);
+            ::execve(exe, cmd_line, env);
 
         _ec = boost::process::detail::get_last_error();
         _msg = "execve failed";
