@@ -50,7 +50,7 @@ inline int execvpe(const char* filename, char * const arg_list[], char* env[])
 	    val.resize(vec.size());
 
 	    std::copy(vec.begin(), vec.end(), val.begin());
-		fn = search_path(fn, val);
+		fn = search_path(fn, val).string();
 	}
 	return ::execve(fn.c_str(), arg_list, env);
 #endif
