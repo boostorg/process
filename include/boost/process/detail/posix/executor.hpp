@@ -23,10 +23,10 @@
 #include <unistd.h>
 
 #if !defined(__GLIBC__)
-#include <boost/process/detail/posix/search_path.hpp>
-#include <boost/process/environment.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/classification.hpp>
 #endif
-
 
 namespace boost { namespace process { namespace detail { namespace posix {
 
@@ -37,20 +37,27 @@ inline int execvpe(const char* filename, char * const arg_list[], char* env[])
 #else
     //use my own implementation
     std::string fn = filename;
-    boost::system::error_code ec;
-    if ((fn.find('/') == std::string::npos) && !boost::filesystem::exists(fn, ec))
+    if ((fn.find('/') == std::string::npos) && ::access(fn.c_str(), X_OK))
     {
-        if (ec)
-            return -1;
-        ::boost::process::environment env_;
-        env_._env_impl = env;
-        env_.reload();
-        auto vec = env_["PATH"].to_vector();
-        std::vector<boost::filesystem::path> val;
-        val.resize(vec.size());
+        auto e = ::environ;
+        while ((*e != nullptr) && !boost::starts_with(*e, "PATH="))
+            e++;
 
-        std::copy(vec.begin(), vec.end(), val.begin());
-        fn = search_path(fn, val).native();
+        if (e != nullptr)
+        {
+            std::vector<std::string> path; 
+            boost::split(path, *e, boost::is_any_of(":"));
+
+            for (const std::string & pp : path)
+            {
+                auto p = pp + "/" + filename;
+                if (!::access(p.c_str(), X_OK))
+                {
+                    fn = p;
+                    break;
+                }
+            }
+        }
     }
     return ::execve(fn.c_str(), arg_list, env);
 #endif

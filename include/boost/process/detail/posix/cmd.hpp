@@ -22,7 +22,6 @@ namespace posix
 {
 
 
-
 template<typename Char>
 inline std::vector<std::basic_string<Char>> build_cmd(const std::basic_string<Char> & value)
 {
@@ -61,7 +60,9 @@ struct cmd_setter_ : handler_base_ext
     template <class Executor>
     void on_setup(Executor& exec) 
     {
+        exec.exe = _cmd_impl.front();
         exec.cmd_line = &_cmd_impl.front();
+        exec.cmd_style = true;
     }
     string_type str() const
     {
