@@ -44,7 +44,8 @@ BOOST_AUTO_TEST_CASE(excplicit)
     );
 
     BOOST_CHECK(!ec);
-    BOOST_TEST_MESSAGE(ec.message());
+    if (ec)
+        BOOST_TEST_MESSAGE(ec.message());
     BOOST_CHECK_EQUAL(ret, 42);
 }
 
@@ -64,6 +65,7 @@ BOOST_AUTO_TEST_CASE(implicit)
     );
 
     BOOST_CHECK(!ec);
-    BOOST_TEST_MESSAGE(ec.message());
+    if (ec)
+        BOOST_TEST_MESSAGE(ec.message());
     BOOST_CHECK_EQUAL(ret, 21);
 }

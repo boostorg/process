@@ -63,7 +63,7 @@ test-suite execution :
     [ run bind_stdout.cpp     system filesystem               : : sparring_partner ]
     [ run bind_stdout_stderr.cpp     system filesystem        : : sparring_partner ]
     [ run pipe_fwd.cpp         system filesystem              : : sparring_partner ]
-    [ run cmd_test.cpp         system filesystem              : --log_level=all : sparring_partner ]
+    [ run cmd_test.cpp         system filesystem              : : sparring_partner ]
     [ run close_stderr.cpp     system filesystem              : : sparring_partner ]
     [ run close_stdin.cpp      system filesystem              : : sparring_partner ]
     [ run close_stdout.cpp     system filesystem              : : sparring_partner ]
