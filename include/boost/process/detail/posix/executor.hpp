@@ -38,7 +38,7 @@ inline int execvpe(const char* filename, char * const arg_list[], char* env[])
     //use my own implementation
     std::string fn = filename;
     boost::system::error_code ec;
-    if ((fn.find('/') != std::string::npos) && !boost::filesystem::exists(fn, ec))
+    if ((fn.find('/') == std::string::npos) && !boost::filesystem::exists(fn, ec))
     {
         if (ec)
             return -1;
