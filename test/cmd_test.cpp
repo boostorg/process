@@ -21,6 +21,8 @@
 
 #include <system_error>
 
+#include <boost/algorithm/string/case_conv.hpp>
+
 #include <boost/system/error_code.hpp>
 #include <cstdlib>
 
@@ -36,7 +38,13 @@ BOOST_AUTO_TEST_CASE(excplicit)
 
     fs::path pth = master_test_suite().argv[1];
     auto env = boost::this_process::environment();
-    env["PATH"] += fs::canonical(fs::absolute(pth.parent_path())).string();
+
+    auto itr = std::find_if(env.begin(), env.end(),
+    		[](const bp::native_environment::entry_type & e){return boost::to_upper_copy(e.get_name()) == "PATH";});
+
+    BOOST_REQUIRE(itr != env.end());
+
+    (*itr) += fs::canonical(fs::absolute(pth.parent_path())).string();
 
     int ret = bp::system(
         bp::cmd="sparring_partner --exit-code 42",
@@ -57,7 +65,13 @@ BOOST_AUTO_TEST_CASE(implicit)
 
     fs::path pth = master_test_suite().argv[1];
     auto env = boost::this_process::environment();
-    env["PATH"] += fs::canonical(fs::absolute(pth.parent_path())).string();
+
+    auto itr = std::find_if(env.begin(), env.end(),
+    		[](const bp::native_environment::entry_type & e){return boost::to_upper_copy(e.get_name()) == "PATH";});
+
+    BOOST_REQUIRE(itr != env.end());
+
+    (*itr) += fs::canonical(fs::absolute(pth.parent_path())).string();
 
     int ret = bp::system(
         "sparring_partner --exit-code 21",
