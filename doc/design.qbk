@@ -66,7 +66,8 @@ system(exe="grep", args={"-c", "false", "/etc/passwd"}); //exe-/args-
 
 [note If a '"' sign is used in the argument style, it will be passed as part of the argument.
 If the same effect it wanted with the cmd syntax, it ought to be escaped, i.e. '\\\"'. ]
-[note On windows the path will only be searched for the executable in the command style.]
+[note The `PATH` variable will automatically be searched in the command style, 
+but the one of the launching process, not the one passed to the child process.]
 [endsect]
 
 [section:plat_ext Extensions]

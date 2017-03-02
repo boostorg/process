@@ -6,8 +6,8 @@
 [def __posix_executor__ [classref boost::process::extend::posix_executor ex::posix_executor]]
 [def __windows_executor__ [classref boost::process::extend::windows_executor ex::windows_executor]]
 [def io_service  [@http://www.boost.org/doc/libs/release/doc/html/boost_asio/reference/io_service.html boost::asio::io_service]]
-[def __require_io_service__ [globalref boost::process::extend::require_io_service ex::require_io_service]]
-[def __async_handler__ [globalref boost::process::extend::async_handler ex::async_handler]]
+[def __require_io_service__ [classref boost::process::extend::require_io_service ex::require_io_service]]
+[def __async_handler__ [classref boost::process::extend::async_handler ex::async_handler]]
 [def __get_io_service__ [funcref boost::process::extend::get_io_service ex::get_io_service]]
 
 [section:extend Extensions]

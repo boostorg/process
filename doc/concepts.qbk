@@ -9,7 +9,7 @@ windows and posix have in common.
 [section:pipes Pipes]
 Pipes are a facility for communication between different threads, processes and in some cases machines, the operating system provides.
 
-The typical feature of a pipe is, that it is one channel, two which two handles are given, one for reading (source), one for writing (sink).
+The typical feature of a pipe is, that it is one channel, to which two handles are given, one for reading (source), one for writing (sink).
 In that it is different than other facilities (like sockets) and provides another way to manage the connectivity: if one side of the pipe is closed 
 (i.e. the pipe is broken), the other is notified.
 
@@ -57,8 +57,8 @@ Every process is identified by a unique number[footnote it is unique as long as 
 
 [section:exit_code Exit code]
 A process will return an integer value indicating whether it was successful. On posix
-there are more codes associated with that, but not so on windows. Therefor there is not such encoding currently in the library.
-Howevern an exit code of zero means the process was successful, while one different than zero indicates an error. 
+there are more codes associated with that, but not so on windows. Therefore there is not such encoding currently in the library.
+However an exit code of zero means the process was successful, while one different than zero indicates an error. 
 [endsect]
 
 [section:termination Termination]
@@ -74,7 +74,7 @@ library and only the hard terminate is.
 [section:env Environment]
 
 The environment is a map of variables local to every process. The most significant one for this library
- is the `PATH` variable, which containes a list of paths, that ought to be searched for executables. A shell will do this automatically, 
+ is the `PATH` variable, which contains a list of paths, that ought to be searched for executables. A shell will do this automatically, 
  while this library provides a function for that. 
 
 [endsect]

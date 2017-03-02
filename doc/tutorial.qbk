@@ -2,11 +2,13 @@
 [def bp::async_system [funcref boost::process::async_system bp::async_system]]
 [def bp::spawn [funcref boost::process::spawn bp::spawn]]
 [def bp::child [classref boost::process::child bp::child]]
+[def bp::cmd [classref boost::process::cmd bp::cmd]]
 [def bp::group [classref boost::process::group bp::group]]
 [def bp::ipstream [classref boost::process::ipstream bp::ipstream]]
 [def bp::opstream [classref boost::process::opstream bp::opstream]]
 [def bp::pstream [classref boost::process::pstream bp::pstream]]
 [def bp::pipe  [classref boost::process::pipe bp::pipe]]
+[def bp::async_pipe [classref boost::process::async_pipe bp::async_pipe]]
 [def bp::search_path  [funcref boost::process::search_path bp::search_path]]
 [def boost_org  [@www.boost.org "www.boost.org"]]
 [def std::system [@http://en.cppreference.com/w/cpp/utility/program/system std::system]]
@@ -30,6 +32,7 @@
 [def bp::native_environment  [classref boost::process::basic_native_environment bp::native_environment]]
 [def boost::this_process::environment [funcref boost::this_process::environment boost::this_process::environment]]
 [def std::chrono::seconds [@http://en.cppreference.com/w/cpp/chrono/duration std::chrono::seconds]]
+[def std::vector [@http://en.cppreference.com/w/cpp/container/vector std::vector]]
 
 [def __wait_for__ [memberref boost::process::child::wait_for wait_for]]
 [def __wait_until__ [memberref boost::process::child::wait_until wait_until]]
@@ -65,38 +68,44 @@ namespace bp = boost::process; //we will assume this for all further examples
 int result = bp::system("g++ main.cpp");
 ```
 
-[note In most of the cases the command has to be given with a valid path, i.e. the `PATH` 
-variable will not be searched automatically. For the sake of simplicity, the examples here
-will not use the bp::search_path function. ]
+If a single string (or the explicit form bp::cmd), it will be interpreted as a command line. 
+That will cause the execution function to search the `PATH` variable to find the executable. 
+The alternative is the `exe-args` style, where the first string will be interpreted as a filename (including the path),
+and the rest as arguments passed to said function.   
 
-The first thing we can do, is to separate the command and the executable into
-two parts, so it is more readable and can be built by a function.
+[note For more details on the `cmd`/`exe-args` style look [link boost_process.design.arg_cmd_style here]]
+
+So as a first step, we'll use the `exe-args` style.
 
 ```
-int result = bp::system("g++", "main.cpp");
+int result = bp::system("/usr/bin/g++", "main.cpp");
 ```
 
 With that sytax we still have "g++" hard-coded, so let's assume we get the string
 from an external source as `boost::filesystem::path`, we can do this too.
 
 ```
-boost::filesystem::path p = "g++"; //or get it from somewhere else.
+boost::filesystem::path p = "/usr/bin/g++"; //or get it from somewhere else.
 int result = bp::system(p, "main.cpp");
 ```
 
-Now, there is a subtle difference between the two syntaxes, i.e. passing a
-single string or passing multiple. When passing multiple string, the first string will be
-interpreted as the name of a file and the rest as arguments; 
-when passing one string it will be interpreted as a command. 
+Now we might want to find the `g++` executable in the `PATH`-variable, as the `cmd` syntax would do. 
+`Boost.process` provides a function to this end: bp::search_path.
 
-For more details please see the [link boost_process.design.arg_cmd_style design description].
+```
+boost::filesystem::path p = bp::search_path("g++"); //or get it from somewhere else.
+int result = bp::system(p, "main.cpp");
+```
+
+[note [funcref boost::process::search_path search_path] will search for any executable with that name. 
+This also includes to add a file suffix on windows, such as `.exe` or `.bat`.]
 
 [endsect]
 
 [section:launch_mode Launch functions]
 
 Given that in our example used the [funcref boost::process::system system] function, 
-our program will wait until the child process is completed. This is unwanted, 
+our program will wait until the child process is completed. This maybe unwanted, 
 especially since compiling can take a while. 
 
 In order to avoid that, boost.process provides several ways to launch a process.
@@ -106,19 +115,19 @@ we can also use the [funcref boost::process::spawn spawn] function or the
 [classref boost::process::child child] class.
 
 The [funcref boost::process::spawn spawn] function launches a process and 
-immediately detaches so, so no handle will be returned and the process will be ignored.
+immediately detaches it, so no handle will be returned and the process will be ignored.
 This is not what we need for compiling, but maybe we want to entertain the user,
 while compiling:
 
 ```
-bp::spawn("chrome", boost_org);
+bp::spawn(bp::search_path("chrome"), boost_org);
 ```
 
-Now for the more sensible approach for compiling, we want a non-blocking execution. 
+Now for the more sensible approach for compiling: a non-blocking execution. 
 To implement that, we directly call the constructor of [classref boost::process::child child].
 
 ```
-bp::child c("g++", "main.cpp");
+bp::child c(bp::search_path("g++"), "main.cpp");
 
 while (c.child_running())
     do_some_stuff();
@@ -149,7 +158,7 @@ will change the behaviour, so that instead of throwing an exception, the error w
 
 ```
 std::error_code ec;
-bp::system c("g++", "main.cpp", ec);
+bp::system c("g++ main.cpp", ec);
 ```
 [endsect]
 [section:io Synchronous I/O]
@@ -159,20 +168,20 @@ The default depends on the system, but usually this will just write it to the sa
 If this shall be guaranteed, the streams can be explicitly forwarded like this.
 
 ```
-   bp::system("g++", bp::std_out > stdout, bp::std_err > stderr, bp::std_in < stdin);
+   bp::system("g++ main.cpp", bp::std_out > stdout, bp::std_err > stderr, bp::std_in < stdin);
 ``` 
 
 Now for the first example, we might want to just ignore the output, which can be done by redirecting it to the null-device.
 This can be achieved this way:
 
 ```
-bp::system("g++", "main.cpp", bp::std_out > bp::null);
+bp::system("g++ main.cpp", bp::std_out > bp::null);
 ```
 
 Alternatively we can also easily redirect the output to a file:
 
 ```
-bp::system("g++", "main.cpp", bp::std_out > "gcc_out.log");
+bp::system("g++ main.cpp", bp::std_out > "gcc_out.log");
 ```
 
 Now, let's take a more visual example for reading data. 
@@ -191,7 +200,7 @@ wrap around the [classref boost::process::pipe pipe] and provide an implementati
 std::vector<std::string> read_outline(std::string & file)
 {
     bp::ipstream is; //reading pipe-stream
-    bp::child c("nm", file, bp::std_out > is);
+    bp::child c(bp::search_patk("nm"), file, bp::std_out > is);
     
     std::vector<std::string> data;
     std::string line;
@@ -239,22 +248,20 @@ std::vector<std::string> read_demangled_outline(const std::string & file)
     std::vector<std::string> outline;
     
     //we just use the same pipe, so the 
-    bp::child nm("nm", file, bp::std_out > p); 
-    bp::child filt("c++filt", bp::std_in < p, bp::std_out > is);
+    bp::child nm(bp::search_path("nm"), file,  bp::std_out > p); 
+    bp::child filt(bp::search_path("c++filt"), bp::std_in < p, bp::std_out > is);
     
-    while (nm.running()) //nm finishes automatically, so then we can terminate c++filt.
-    {
-        std::string line;
-        std::getline(is, line);
+    std::string line;
+    while (filt.running() && std::getline(is, line)) //when nm finished the pipe closes and c++filt exits
         outline.push_back(line);
-    }
+
     nm.child_wait();
-    filt.child_terminate(); 
+    filt.wait(); 
 }
 
 ```  
 
-Now this forwards the data from `nm` to `c++filt` without your process needing to do anything.
+This forwards the data from `nm` to `c++filt` without your process needing to do anything.
 
 [endsect]
 [section:async_io Asynchronous I/O]
@@ -275,7 +282,7 @@ std::vector<char> buf;
 
 bp::async_pipe ap(ios);
 
-child c("g++", "main.cpp", bp::std_out > ap);
+bp::child c(bp::search_path("g++"), "main.cpp", bp::std_out > ap);
 
 asio_async_read(ap, asio_buffer(buf), 
                 [](const boost::system::error_code &ec, std::size_t size){});
@@ -292,7 +299,7 @@ provided we also pass a reference to an io_service.
 io_service ios;
 std::vector<char> buf;
 
-child c("g++", "main.cpp", bp::std_out > asio_buffer(buf), ios);
+bp::child c(bp::search_path("g++"), "main.cpp", bp::std_out > asio_buffer(buf), ios);
 
 ios.run();
 c.wait();

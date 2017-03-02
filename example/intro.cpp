@@ -15,7 +15,7 @@ using namespace boost::process;
 int main()
 {
     ipstream pipe_stream;
-    child c("gcc.exe", "--version", std_out > pipe_stream);
+    child c("gcc --version", std_out > pipe_stream);
 
     std::string line;
 
