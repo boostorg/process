@@ -24,7 +24,7 @@ template<> struct is_wchar_t<boost::filesystem::path> : std::is_same<typename bo
 
 template<> struct is_wchar_t<const wchar_t* > : std::true_type {};
 
-template<> struct is_wchar_t<wchar_t* > { typedef std::true_type type;};
+template<> struct is_wchar_t<wchar_t* > : std::true_type {};
 
 template<std::size_t Size> struct is_wchar_t<const wchar_t [Size]>    : std::true_type {};
 template<std::size_t Size> struct is_wchar_t<const wchar_t (&)[Size]> : std::true_type {};
