@@ -47,6 +47,7 @@ BOOST_AUTO_TEST_CASE(empty)
     BOOST_CHECK(ev.empty());
     BOOST_CHECK_EQUAL(ev.size(), 0u);
     BOOST_CHECK_EQUAL(ev.end() - ev.begin(), 0);
+    ev.clear();
 }
 
 BOOST_AUTO_TEST_CASE(wempty)
@@ -71,6 +72,7 @@ BOOST_AUTO_TEST_CASE(wempty)
     BOOST_CHECK(ev.empty());
     BOOST_CHECK_EQUAL(ev.size(), 0u);
     BOOST_CHECK_EQUAL(ev.end() - ev.begin(), 0);
+    ev.clear();
 }
 
 BOOST_AUTO_TEST_CASE(compare)
@@ -110,6 +112,8 @@ BOOST_AUTO_TEST_CASE(compare)
 
         BOOST_CHECK(ni == wnat.end());
     }
+    env.clear();
+    wenv.clear();
 }
 
 BOOST_AUTO_TEST_CASE(insert_remove)
@@ -133,4 +137,16 @@ BOOST_AUTO_TEST_CASE(insert_remove)
 
     BOOST_CHECK_EQUAL(env.size(), sz);
 
+    env.clear();
+
 }
+
+BOOST_AUTO_TEST_CASE(andrejnau)
+{
+    bp::environment env;
+    env["a"] = "1";
+    env["b"] = "2";
+    env["c"] = "3";
+    env.clear();
+}
+
