@@ -296,10 +296,10 @@ public:
     void erase(const string_type & id)
     {
         implementation_type::reset(id);
+        this->reload();
     }
     std::pair<iterator,bool> emplace(const string_type & id, const string_type & value)
     {
-        auto p = this->_env_impl;
         auto st1 = id + ::boost::process::detail::equal_sign<Char>();
         auto f = find(id);
         if (f != end())
@@ -613,7 +613,7 @@ public:
     using base_type = basic_environment_impl<Char, detail::api::native_environment_impl>;
     using base_type::base_type;
     using base_type::operator=;
-    };
+};
 
 ///Type definition to hold a seperate environment.
 template<typename Char>

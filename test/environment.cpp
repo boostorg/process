@@ -141,12 +141,99 @@ BOOST_AUTO_TEST_CASE(insert_remove)
 
 }
 
-BOOST_AUTO_TEST_CASE(andrejnau)
+BOOST_AUTO_TEST_CASE(clear_empty_my)
+{
+    bp::native_environment env;
+
+    bp::environment e = env;
+
+    const std::size_t sz = env.size();
+
+    BOOST_TEST_MESSAGE("Current native size: " << sz);
+
+    BOOST_REQUIRE_EQUAL(env.count("boost_process_a"), 0u);
+    BOOST_REQUIRE_EQUAL(env.count("boost_process_b"), 0u);
+    BOOST_REQUIRE_EQUAL(env.count("boost_process_c"), 0u);
+
+    env["boost_process_a"] = "1";
+    env["boost_process_b"] = "2";
+    env["boost_process_c"] = "3";
+
+    BOOST_CHECK_EQUAL(env.at("boost_process_a").to_string(), "1");
+    BOOST_CHECK_EQUAL(env.at("boost_process_b").to_string(), "2");
+    BOOST_CHECK_EQUAL(env.at("boost_process_c").to_string(), "3");
+    BOOST_CHECK_EQUAL(env.size(), sz + 3u);
+    BOOST_CHECK_EQUAL(std::distance(env.begin(),  env.end()),  sz + 3);
+    BOOST_CHECK_EQUAL(std::distance(env.cbegin(), env.cend()), sz + 3);
+
+    env.erase("boost_process_a");
+    BOOST_CHECK_EQUAL(env.size(), sz + 2u);
+    BOOST_CHECK_EQUAL(env.count("boost_process_a"), 0u);
+    BOOST_CHECK_EQUAL(env.at   ("boost_process_b").to_string(), "2");
+    BOOST_CHECK_EQUAL(env.at   ("boost_process_c").to_string(), "3");
+
+    BOOST_CHECK_EQUAL(std::distance(env.begin(),  env.end()),  sz + 2);
+    BOOST_CHECK_EQUAL(std::distance(env.cbegin(), env.cend()), sz + 2);
+
+    env.erase("boost_process_b");
+    BOOST_CHECK_EQUAL(env.size(), sz + 1u);
+    BOOST_CHECK_EQUAL(env.count("boost_process_a"), 0u);
+    BOOST_CHECK_EQUAL(env.count("boost_process_b"), 0u);
+    BOOST_CHECK_EQUAL(env.at   ("boost_process_c").to_string(), "3");
+
+    BOOST_CHECK_EQUAL(std::distance(env.begin(),  env.end()),  sz + 1);
+    BOOST_CHECK_EQUAL(std::distance(env.cbegin(), env.cend()), sz + 1);
+
+    env.clear();
+    //note: windows puts an entry without a name into the list, so it might not be empty after clear.
+    BOOST_CHECK_LE(env.size(), sz);
+
+    BOOST_CHECK_LE(std::distance(env.begin(),  env.end()),  sz);
+    BOOST_CHECK_LE(std::distance(env.cbegin(), env.cend()), sz);
+
+    for (auto && ee : e)
+    	env.emplace(ee.get_name(), ee.to_string());
+}
+
+BOOST_AUTO_TEST_CASE(clear_empty)
 {
     bp::environment env;
+    BOOST_CHECK(env.empty());
+    BOOST_CHECK_EQUAL(env.size(), 0u);
     env["a"] = "1";
     env["b"] = "2";
     env["c"] = "3";
-    env.clear();
-}
 
+    BOOST_CHECK_EQUAL(env.at("a").to_string(), "1");
+    BOOST_CHECK_EQUAL(env.at("b").to_string(), "2");
+    BOOST_CHECK_EQUAL(env.at("c").to_string(), "3");
+    BOOST_CHECK_EQUAL(env.size(), 3u);
+    BOOST_CHECK_EQUAL(std::distance(env.begin(), env.end()), 3u);
+    BOOST_CHECK_EQUAL(std::distance(env.cbegin(), env.cend()), 3u);
+
+    env.erase("a");
+    BOOST_CHECK_EQUAL(env.size(), 2u);
+    BOOST_CHECK_EQUAL(env.count("a"), 0u);
+    BOOST_CHECK_EQUAL(env.at("b").to_string(), "2");
+    BOOST_CHECK_EQUAL(env.at("c").to_string(), "3");
+
+    BOOST_CHECK_EQUAL(std::distance(env.begin(), env.end()), 2u);
+    BOOST_CHECK_EQUAL(std::distance(env.cbegin(), env.cend()), 2u);
+
+    env.erase("b");
+    BOOST_CHECK_EQUAL(env.size(), 1u);
+    BOOST_CHECK_EQUAL(env.count("a"), 0u);
+    BOOST_CHECK_EQUAL(env.count("b"), 0u);
+    BOOST_CHECK_EQUAL(env.at("c").to_string(), "3");
+
+    BOOST_CHECK_EQUAL(std::distance(env.begin(), env.end()), 1u);
+    BOOST_CHECK_EQUAL(std::distance(env.cbegin(), env.cend()), 1u);
+
+    env.clear();
+    BOOST_CHECK(env.empty());
+    BOOST_CHECK_EQUAL(env.size(), 0u);
+
+    BOOST_CHECK_EQUAL(std::distance(env.begin(), env.end()), 0u);
+    BOOST_CHECK_EQUAL(std::distance(env.cbegin(), env.cend()), 0u);
+
+}
