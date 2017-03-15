@@ -58,7 +58,7 @@ struct async_system_handler : ::boost::process::detail::api::async_handler
 
 
     template<typename Exec>
-    void on_error(Exec & exec, const std::error_code & ec)
+    void on_error(Exec&, const std::error_code & ec)
     {
 #if defined(BOOST_POSIX_API)
         errored = true;
@@ -78,7 +78,7 @@ struct async_system_handler : ::boost::process::detail::api::async_handler
     }
 
     template<typename Executor>
-    std::function<void(int, const std::error_code&)> on_exit_handler(Executor & exec)
+    std::function<void(int, const std::error_code&)> on_exit_handler(Executor&)
     {
 #if defined(BOOST_POSIX_API)
         if (errored)
