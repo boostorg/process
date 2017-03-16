@@ -139,8 +139,9 @@ struct entry : const_entry<Char, Environment>
         {
             string_type st = this->_data;
             this->_env->set(this->_name, st + api::env_seperator<value_type>() + value);
-
         }
+
+
         this->reload();
 
     }
@@ -288,7 +289,7 @@ public:
         while (*p != nullptr)
         {
             if (std::equal(st1.begin(), st1.end(), *p))
-                break;
+                return 1u;
             p++;
         }
         return 0u;
@@ -300,16 +301,14 @@ public:
     }
     std::pair<iterator,bool> emplace(const string_type & id, const string_type & value)
     {
-        auto st1 = id + ::boost::process::detail::equal_sign<Char>();
         auto f = find(id);
-        if (f != end())
+        if (f == end())
         {
             implementation_type::set(id, value);
             return std::pair<iterator, bool>(find(id), true);
-
         }
         else
-            return std::pair<iterator, bool>(f, true);
+            return std::pair<iterator, bool>(f, false);
     }
     using implementation_type::implementation_type;
     using implementation_type::operator=;
@@ -326,8 +325,9 @@ public:
     }
     void clear()
     {
-        for (auto && i : *this)
-            implementation_type::reset(i.get_name());
+        while (!empty())
+            implementation_type::reset(begin()->get_name());
+
         this->reload();
     }
 

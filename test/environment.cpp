@@ -10,7 +10,6 @@
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_IGNORE_SIGCHLD
 #include <boost/test/included/unit_test.hpp>
-
 #include <boost/process/environment.hpp>
 
 namespace bp = boost::process;
@@ -112,8 +111,11 @@ BOOST_AUTO_TEST_CASE(compare)
 
         BOOST_CHECK(ni == wnat.end());
     }
+    BOOST_TEST_PASSPOINT();
     env.clear();
+    BOOST_TEST_PASSPOINT();
     wenv.clear();
+    BOOST_TEST_PASSPOINT();
 }
 
 BOOST_AUTO_TEST_CASE(insert_remove)
@@ -151,35 +153,39 @@ BOOST_AUTO_TEST_CASE(clear_empty_my)
 
     BOOST_TEST_MESSAGE("Current native size: " << sz);
 
-    BOOST_REQUIRE_EQUAL(env.count("boost_process_a"), 0u);
-    BOOST_REQUIRE_EQUAL(env.count("boost_process_b"), 0u);
-    BOOST_REQUIRE_EQUAL(env.count("boost_process_c"), 0u);
+    BOOST_REQUIRE_EQUAL(env.count("BOOST_PROCESS_TEST_VAR_a"), 0u);
+    BOOST_REQUIRE_EQUAL(env.count("BOOST_PROCESS_TEST_VAR_b"), 0u);
+    BOOST_REQUIRE_EQUAL(env.count("BOOST_PROCESS_TEST_VAR_c"), 0u);
 
-    env["boost_process_a"] = "1";
-    env["boost_process_b"] = "2";
-    env["boost_process_c"] = "3";
+    env["BOOST_PROCESS_TEST_VAR_a"] = "1";
+    env["BOOST_PROCESS_TEST_VAR_b"] = "2";
+    env.emplace("BOOST_PROCESS_TEST_VAR_c", "3");
 
-    BOOST_CHECK_EQUAL(env.at("boost_process_a").to_string(), "1");
-    BOOST_CHECK_EQUAL(env.at("boost_process_b").to_string(), "2");
-    BOOST_CHECK_EQUAL(env.at("boost_process_c").to_string(), "3");
+    BOOST_CHECK_EQUAL(env.count("BOOST_PROCESS_TEST_VAR_a"), 1u);
+    BOOST_CHECK_EQUAL(env.count("BOOST_PROCESS_TEST_VAR_b"), 1u);
+    BOOST_CHECK_EQUAL(env.count("BOOST_PROCESS_TEST_VAR_c"), 1u);
+
+    BOOST_CHECK_EQUAL(env.at("BOOST_PROCESS_TEST_VAR_a").to_string(), "1");
+    BOOST_CHECK_EQUAL(env.at("BOOST_PROCESS_TEST_VAR_b").to_string(), "2");
+    BOOST_CHECK_EQUAL(env.at("BOOST_PROCESS_TEST_VAR_c").to_string(), "3");
     BOOST_CHECK_EQUAL(env.size(), sz + 3u);
     BOOST_CHECK_EQUAL(std::distance(env.begin(),  env.end()),  sz + 3);
     BOOST_CHECK_EQUAL(std::distance(env.cbegin(), env.cend()), sz + 3);
 
-    env.erase("boost_process_a");
+    env.erase("BOOST_PROCESS_TEST_VAR_a");
     BOOST_CHECK_EQUAL(env.size(), sz + 2u);
-    BOOST_CHECK_EQUAL(env.count("boost_process_a"), 0u);
-    BOOST_CHECK_EQUAL(env.at   ("boost_process_b").to_string(), "2");
-    BOOST_CHECK_EQUAL(env.at   ("boost_process_c").to_string(), "3");
+    BOOST_CHECK_EQUAL(env.count("BOOST_PROCESS_TEST_VAR_a"), 0u);
+    BOOST_CHECK_EQUAL(env.at   ("BOOST_PROCESS_TEST_VAR_b").to_string(), "2");
+    BOOST_CHECK_EQUAL(env.at   ("BOOST_PROCESS_TEST_VAR_c").to_string(), "3");
 
     BOOST_CHECK_EQUAL(std::distance(env.begin(),  env.end()),  sz + 2);
     BOOST_CHECK_EQUAL(std::distance(env.cbegin(), env.cend()), sz + 2);
 
-    env.erase("boost_process_b");
+    env.erase("BOOST_PROCESS_TEST_VAR_b");
     BOOST_CHECK_EQUAL(env.size(), sz + 1u);
-    BOOST_CHECK_EQUAL(env.count("boost_process_a"), 0u);
-    BOOST_CHECK_EQUAL(env.count("boost_process_b"), 0u);
-    BOOST_CHECK_EQUAL(env.at   ("boost_process_c").to_string(), "3");
+    BOOST_CHECK_EQUAL(env.count("BOOST_PROCESS_TEST_VAR_a"), 0u);
+    BOOST_CHECK_EQUAL(env.count("BOOST_PROCESS_TEST_VAR_b"), 0u);
+    BOOST_CHECK_EQUAL(env.at   ("BOOST_PROCESS_TEST_VAR_c").to_string(), "3");
 
     BOOST_CHECK_EQUAL(std::distance(env.begin(),  env.end()),  sz + 1);
     BOOST_CHECK_EQUAL(std::distance(env.cbegin(), env.cend()), sz + 1);
