@@ -305,6 +305,7 @@ public:
         if (f == end())
         {
             implementation_type::set(id, value);
+            this->reload();
             return std::pair<iterator, bool>(find(id), true);
         }
         else
@@ -325,8 +326,12 @@ public:
     }
     void clear()
     {
-        while (!empty())
-            implementation_type::reset(begin()->get_name());
+        std::vector<string_type> names;
+        names.resize(size());
+        std::transform(cbegin(), cend(), names.begin(), [](const const_entry_type & cet){return cet.get_name();});
+
+        for (auto & nm : names)
+            implementation_type::reset(nm);
 
         this->reload();
     }
