@@ -55,6 +55,8 @@ namespace detail {
  * \note If the destructor is called without a previous detach or wait, the group will be terminated.
  *
  * \attention If a default-constructed group is used before being used in a process launch, the behaviour is undefined.
+ *
+ * \attention Waiting for groups is currently broken on windows and will most likely result in a dead-lock.
  */
 class group
 {
