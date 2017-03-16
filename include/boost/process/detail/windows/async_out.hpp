@@ -78,11 +78,11 @@ struct async_out_buffer : ::boost::process::detail::windows::handler_base_ext,
     {
     }
     template <typename Executor>
-    inline void on_success(Executor &exec)
+    inline void on_success(Executor&)
     {
         auto pipe = this->pipe;
         boost::asio::async_read(*pipe, buf,
-                [pipe](const boost::system::error_code&, std::size_t size){});
+                [pipe](const boost::system::error_code&, std::size_t){});
         std::move(*pipe).sink().close();
         this->pipe       = nullptr;
 
@@ -120,14 +120,14 @@ struct async_out_future : ::boost::process::detail::windows::handler_base_ext,
         fut = promise->get_future();
     }
     template <typename Executor>
-    inline void on_success(Executor &exec)
+    inline void on_success(Executor&)
     {
         auto pipe    = this->pipe;
         auto buffer  = this->buffer;
         auto promise = this->promise;
         std::move(*pipe).sink().close();
         boost::asio::async_read(*pipe, *buffer,
-                [pipe, buffer, promise](const boost::system::error_code& ec, std::size_t size)
+                [pipe, buffer, promise](const boost::system::error_code& ec, std::size_t)
                 {
                     if (ec && (ec.value() != ::boost::detail::winapi::ERROR_BROKEN_PIPE_))
                     {

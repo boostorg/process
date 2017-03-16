@@ -32,7 +32,7 @@ inline boost::filesystem::path search_path(
     for (const boost::filesystem::path & pp : path)
     {
         auto p = pp / filename;
-        std::array<std::string, 4> extensions = { "", ".exe", ".com", ".bat" };
+        std::array<std::string, 4> extensions {{ "", ".exe", ".com", ".bat" }};
         for (boost::filesystem::path ext : extensions)
         {
             p += ext;

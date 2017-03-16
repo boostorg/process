@@ -112,10 +112,10 @@ template<typename Char, typename Sequence>
 class executor : public startup_info_impl<Char>
 {
 
-    void internal_error_handle(const std::error_code &ec, const char* msg, boost::mpl::false_, boost::mpl::true_) {}
-    void internal_error_handle(const std::error_code &ec, const char* msg, boost::mpl::true_,  boost::mpl::true_) {}
+    void internal_error_handle(const std::error_code &, const char*, boost::mpl::false_, boost::mpl::true_) {}
+    void internal_error_handle(const std::error_code &, const char*, boost::mpl::true_,  boost::mpl::true_) {}
 
-    void internal_error_handle(const std::error_code &ec, const char* msg, boost::mpl::true_,  boost::mpl::false_ )
+    void internal_error_handle(const std::error_code &ec, const char*, boost::mpl::true_,  boost::mpl::false_ )
     {
         this->_ec = ec;
     }

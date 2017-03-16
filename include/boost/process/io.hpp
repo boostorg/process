@@ -251,7 +251,7 @@ struct std_out_
             (((p1 == 1) && (pin == 2)) ||
              ((p1 == 2) && (pin == 1)))
              && (p2 == -1)>::type>
-    constexpr std_out_<1, 2> operator& (const std_out_<pin> &lhs) const
+    constexpr std_out_<1, 2> operator& (const std_out_<pin>&) const
     {
         return std_out_<1, 2> ();
     }
