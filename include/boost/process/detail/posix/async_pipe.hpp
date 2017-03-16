@@ -306,7 +306,7 @@ async_pipe::operator basic_pipe<CharT, Traits>() const
             ::boost::process::detail::throw_last_error("dup()");
     }
 
-    return {source, sink};
+    return basic_pipe<CharT, Traits>{source, sink};
 }
 
 
