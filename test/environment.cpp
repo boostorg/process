@@ -24,7 +24,7 @@ std::ostream & operator<<(std::ostream & str, const std::wstring & ws)
 }
 }
 
-BOOST_AUTO_TEST_CASE(empty)
+BOOST_AUTO_TEST_CASE(empty,  *boost::unit_test::timeout(5))
 {
     bp::environment ev ;
     BOOST_CHECK(ev.empty());
@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(empty)
     ev.clear();
 }
 
-BOOST_AUTO_TEST_CASE(wempty)
+BOOST_AUTO_TEST_CASE(wempty,  *boost::unit_test::timeout(5))
 {
     bp::wenvironment ev ;
     BOOST_CHECK(ev.empty());
@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(wempty)
     ev.clear();
 }
 
-BOOST_AUTO_TEST_CASE(compare)
+BOOST_AUTO_TEST_CASE(compare,  *boost::unit_test::timeout(5))
 {
     auto nat = boost::this_process::environment();
     bp::environment env = nat;
@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE(compare)
     BOOST_TEST_PASSPOINT();
 }
 
-BOOST_AUTO_TEST_CASE(insert_remove)
+BOOST_AUTO_TEST_CASE(insert_remove,  *boost::unit_test::timeout(5))
 {
     bp::environment env(boost::this_process::environment());
 
@@ -143,7 +143,7 @@ BOOST_AUTO_TEST_CASE(insert_remove)
 
 }
 
-BOOST_AUTO_TEST_CASE(clear_empty_my)
+BOOST_AUTO_TEST_CASE(clear_empty_my,  *boost::unit_test::timeout(5))
 {
     bp::native_environment env;
 
@@ -159,7 +159,7 @@ BOOST_AUTO_TEST_CASE(clear_empty_my)
 
     env["BOOST_PROCESS_TEST_VAR_a"] = "1";
     env["BOOST_PROCESS_TEST_VAR_b"] = "2";
-    env.emplace("BOOST_PROCESS_TEST_VAR_c", "3");
+    BOOST_CHECK(env.emplace("BOOST_PROCESS_TEST_VAR_c", "3").second);
 
     BOOST_CHECK_EQUAL(env.count("BOOST_PROCESS_TEST_VAR_a"), 1u);
     BOOST_CHECK_EQUAL(env.count("BOOST_PROCESS_TEST_VAR_b"), 1u);
@@ -198,10 +198,10 @@ BOOST_AUTO_TEST_CASE(clear_empty_my)
     BOOST_CHECK_LE(std::distance(env.cbegin(), env.cend()), sz);
 
     for (auto && ee : e)
-    	env.emplace(ee.get_name(), ee.to_string());
+        env.emplace(ee.get_name(), ee.to_string());
 }
 
-BOOST_AUTO_TEST_CASE(clear_empty)
+BOOST_AUTO_TEST_CASE(clear_empty,  *boost::unit_test::timeout(5))
 {
     bp::environment env;
     BOOST_CHECK(env.empty());

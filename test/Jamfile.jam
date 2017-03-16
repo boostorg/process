@@ -49,6 +49,7 @@ exe sub_launch : sub_launcher.cpp program_options iostreams system filesystem : 
 
 test-suite bare :
     [ run environment.cpp system filesystem  ]
+    [ run async_pipe.cpp system filesystem ]
     [ run pipe.cpp        system filesystem  ]
     ;
 
