@@ -301,7 +301,9 @@ struct env_
 template<typename Char>
 struct env_builder
 {
-    basic_environment<Char> env = basic_native_environment<Char>();
+    basic_environment<Char> env;
+    env_builder() : env{basic_native_environment<Char>()} {}
+
     void operator()(const basic_environment<Char> & e)
     {
         env = e;
