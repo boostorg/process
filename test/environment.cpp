@@ -217,20 +217,20 @@ BOOST_AUTO_TEST_CASE(clear_empty,  *boost::unit_test::timeout(5))
     BOOST_CHECK_EQUAL(std::distance(env.begin(), env.end()), 3u);
     BOOST_CHECK_EQUAL(std::distance(env.cbegin(), env.cend()), 3u);
 
-    env.erase("a");
+    env.erase("c");
     BOOST_CHECK_EQUAL(env.size(), 2u);
-    BOOST_CHECK_EQUAL(env.count("a"), 0u);
+    BOOST_CHECK_EQUAL(env.at("a").to_string(), "1");
     BOOST_CHECK_EQUAL(env.at("b").to_string(), "2");
-    BOOST_CHECK_EQUAL(env.at("c").to_string(), "3");
+    BOOST_CHECK_EQUAL(env.count("c"), 0u);
 
     BOOST_CHECK_EQUAL(std::distance(env.begin(), env.end()), 2u);
     BOOST_CHECK_EQUAL(std::distance(env.cbegin(), env.cend()), 2u);
 
     env.erase("b");
     BOOST_CHECK_EQUAL(env.size(), 1u);
-    BOOST_CHECK_EQUAL(env.count("a"), 0u);
+    BOOST_CHECK_EQUAL(env.at("a").to_string(), "1");
     BOOST_CHECK_EQUAL(env.count("b"), 0u);
-    BOOST_CHECK_EQUAL(env.at("c").to_string(), "3");
+    BOOST_CHECK_EQUAL(env.count("c"), 0u);
 
     BOOST_CHECK_EQUAL(std::distance(env.begin(), env.end()), 1u);
     BOOST_CHECK_EQUAL(std::distance(env.cbegin(), env.cend()), 1u);

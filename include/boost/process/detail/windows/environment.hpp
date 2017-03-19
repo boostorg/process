@@ -300,10 +300,8 @@ inline void  basic_environment_impl<Char>::reset(const string_type &id)
 
     auto end = itr;
 
-    while (*end != '\0')
-        end++;
+    while (*++end != '\0');
 
-    end ++; //to point behind the last null-char
 
     _data.erase(itr, end);//and remove it
     reload();
