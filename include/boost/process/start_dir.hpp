@@ -66,7 +66,7 @@ struct start_dir_
 
 };
 
-template<> struct is_wchar_t<api::start_dir_init<wchar_t>> { typedef std::true_type type;};
+template<> struct is_wchar_t<api::start_dir_init<wchar_t>> : std::true_type {};
 
 template<>
 struct char_converter<char, api::start_dir_init<wchar_t>>

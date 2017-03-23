@@ -193,6 +193,23 @@ struct char_converter<wchar_t, env_init<char>>
     }
 };
 
+template<>
+struct char_converter<char, basic_environment<wchar_t>>
+{
+    static basic_environment<char> conv(const basic_environment<wchar_t> & in)
+    {
+        return { basic_environment<char>(in) };
+    }
+};
+
+template<>
+struct char_converter<wchar_t, basic_environment<char>>
+{
+    static basic_environment<wchar_t> conv(const basic_environment<char> & in)
+    {
+        return { basic_environment<wchar_t>(in) };
+    }
+};
 
 template<typename Char>
 struct env_proxy
@@ -284,7 +301,9 @@ struct env_
 template<typename Char>
 struct env_builder
 {
-    basic_environment<Char> env = basic_native_environment<Char>();
+    basic_environment<Char> env;
+    env_builder() : env{basic_native_environment<Char>()} {}
+
     void operator()(const basic_environment<Char> & e)
     {
         env = e;
