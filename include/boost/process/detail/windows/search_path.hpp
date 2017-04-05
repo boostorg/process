@@ -31,10 +31,11 @@ inline boost::filesystem::path search_path(
 {
     for (const boost::filesystem::path & pp : path)
     {
-        auto p = pp / filename;
+        auto full = pp / filename;
         std::array<std::string, 4> extensions {{ "", ".exe", ".com", ".bat" }};
         for (boost::filesystem::path ext : extensions)
         {
+            auto p = full;
             p += ext;
             boost::system::error_code ec;
             bool file = boost::filesystem::is_regular_file(p, ec);
