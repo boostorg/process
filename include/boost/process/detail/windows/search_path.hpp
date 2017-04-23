@@ -43,13 +43,13 @@ inline boost::filesystem::path search_path(
     auto it_ex = extensions.begin();
     it_ex++;
     it_ex = std::transform(extensions_in.begin(), extensions_in.end(), it_ex,
-    			[](const std::wstring & ws){return boost::to_lower_copy(ws, ::boost::process::detail::process_locale());});
+                [](const std::wstring & ws){return boost::to_lower_copy(ws, ::boost::process::detail::process_locale());});
 
     std::transform(extensions_in.begin(), extensions_in.end(), it_ex,
-    			[](const std::wstring & ws){return boost::to_upper_copy(ws, ::boost::process::detail::process_locale());});
+                [](const std::wstring & ws){return boost::to_upper_copy(ws, ::boost::process::detail::process_locale());});
 
 
-	std::copy(std::make_move_iterator(extensions_in.begin()), std::make_move_iterator(extensions_in.end()), extensions.begin() + 1);
+    std::copy(std::make_move_iterator(extensions_in.begin()), std::make_move_iterator(extensions_in.end()), extensions.begin() + 1);
 
 
     for (auto & ext : extensions)
@@ -60,8 +60,8 @@ inline boost::filesystem::path search_path(
         auto p = pp / filename;
         for (boost::filesystem::path ext : extensions)
         {
-        	boost::filesystem::path pp = p;
-        	pp += ext;
+            boost::filesystem::path pp = p;
+            pp += ext;
             boost::system::error_code ec;
             bool file = boost::filesystem::is_regular_file(pp, ec);
             if (!ec && file &&
