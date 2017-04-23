@@ -78,7 +78,7 @@ public:
 
     ~async_pipe()
     {
-    	boost::system::error_code ec;
+        boost::system::error_code ec;
         close(ec);
     }
 
