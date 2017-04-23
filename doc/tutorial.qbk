@@ -278,7 +278,7 @@ With [@http://www.boost.org/doc/libs/release/libs/asio/ boost.asio] this is what
 
 ```
 io_service ios;
-std::vector<char> buf;
+std::vector<char> buf(4096);
 
 bp::async_pipe ap(ios);
 
