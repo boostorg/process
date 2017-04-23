@@ -78,10 +78,8 @@ public:
 
     ~async_pipe()
     {
-        if (_sink .native()  != ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
-            ::boost::detail::winapi::CloseHandle(_sink.native());
-        if (_source.native() != ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
-            ::boost::detail::winapi::CloseHandle(_source.native());
+    	boost::system::error_code ec;
+        close(ec);
     }
 
     template<class CharT, class Traits = std::char_traits<CharT>>
