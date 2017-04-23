@@ -99,6 +99,7 @@ auto res = fut.get();
 \endcode
 
 \note `boost/process/async.hpp` must also be included for this to work.
+\note `boost/process/async.hpp` must also be included for this to work.
 
 \par Closing
 
