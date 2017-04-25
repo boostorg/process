@@ -81,7 +81,7 @@ So as a first step, we'll use the `exe-args` style.
 int result = bp::system("/usr/bin/g++", "main.cpp");
 ```
 
-With that sytax we still have "g++" hard-coded, so let's assume we get the string
+With that syntax we still have "g++" hard-coded, so let's assume we get the string
 from an external source as `boost::filesystem::path`, we can do this too.
 
 ```
@@ -200,7 +200,7 @@ wrap around the [classref boost::process::pipe pipe] and provide an implementati
 std::vector<std::string> read_outline(std::string & file)
 {
     bp::ipstream is; //reading pipe-stream
-    bp::child c(bp::search_patk("nm"), file, bp::std_out > is);
+    bp::child c(bp::search_path("nm"), file, bp::std_out > is);
     
     std::vector<std::string> data;
     std::string line;
