@@ -72,6 +72,11 @@ inline void throw_last_error(const std::string & msg)
     throw process_error(get_last_error(), msg);
 }
 
+inline void throw_last_error(const char * msg)
+{
+    throw process_error(get_last_error(), msg);
+}
+
 inline void throw_last_error()
 {
     throw process_error(get_last_error());
