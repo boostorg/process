@@ -40,7 +40,6 @@ BOOST_AUTO_TEST_CASE(args, *boost::unit_test::timeout(2))
     if (ec)
         std::cout << "EC: " << ec.message() << std::endl;
     BOOST_REQUIRE(!ec);
-    return ;
 
     std::string s;
 
@@ -87,7 +86,7 @@ BOOST_AUTO_TEST_CASE(cmd, *boost::unit_test::timeout(2))
         ec
     );
     BOOST_REQUIRE(!ec);
-    return ;
+
     std::string s;
 
     std::getline(is, s);
