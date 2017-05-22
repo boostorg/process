@@ -50,7 +50,7 @@ which also have file-like names, but are in a different scope than the actual fi
 
 [section:process Processes]
 
-A process is an independently executable entity, which is different from a thread, in that it has it's own resources. 
+A process is an independently executable entity, which is different from a thread, in that it has its own resources. 
 Those include memory and hardware resources.
 
 Every process is identified by a unique number[footnote it is unique as long as the process is active], called the process identification digit, `pid`. 
