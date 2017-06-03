@@ -1,6 +1,6 @@
 # [Boost Process (Boost.Process)](https://github.com/klemens-morgenstern/boost-process)
 
-Boost.process is not yet part of the [Boost C++ Libraries](http://github.com/boostorg), but will probably be released in boost 1.64. It is a library for comfortable management of processes.
+Boost.process is a library for comfortable management of processes, released with boost 1.64.0.
 
 ### Test results
 
