@@ -26,9 +26,11 @@ inline void wait(const child_handle &p, int & exit_code)
     do
     {
         ret = ::waitpid(p.pid, &status, 0);
-    } while (((ret == -1) && (errno == EINTR)) || (ret != -1 && !WIFEXITED(status)));
+    } while (((ret == -1) && (errno == EINTR)) || (ret != -1 && !WIFEXITED(status) && !WIFSIGNALED(status)));
     if (ret == -1)
         boost::process::detail::throw_last_error("waitpid(2) failed");
+    if (WIFSIGNALED(status))
+        throw process_error(std::error_code(), "process terminated due to receipt of a signal");
      exit_code = status;
 }
 
