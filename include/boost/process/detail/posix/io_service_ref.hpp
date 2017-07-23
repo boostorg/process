@@ -77,7 +77,7 @@ struct io_service_ref : handler_base_ext
     boost::asio::signal_set *signal_p = nullptr;
 
     template <class Executor>
-    void on_setup(Executor& exec)
+    void on_success(Executor& exec)
     {
         //must be on the heap so I can move it into the lambda.
         auto asyncs = boost::fusion::filter_if<
@@ -93,38 +93,32 @@ struct io_service_ref : handler_base_ext
         funcs.reserve(boost::fusion::size(asyncs));
         boost::fusion::for_each(asyncs, async_handler_collector<Executor>(exec, funcs));
 
-        wait_handler wh(std::move(funcs), ios, exec.exit_status);
+        wait_handler wh(std::move(funcs), ios, exec.exit_status, exec.pid);
 
         signal_p = wh.signal_.get();
         signal_p->async_wait(std::move(wh));
 
     }
 
-    template <class Executor>
-    void on_error(Executor & exec, const std::error_code & ec) const
-    {
-        if (signal_p != nullptr)
-        {
-            boost::system::error_code ec;
-            signal_p->cancel(ec);
-        }
-    }
 
     struct wait_handler
     {
         std::shared_ptr<boost::asio::signal_set> signal_;
         std::vector<std::function<void(int, const std::error_code & ec)>> funcs;
         std::shared_ptr<std::atomic<int>> exit_status;
+        pid_t pid;
 
         wait_handler(const wait_handler & ) = default;
         wait_handler(wait_handler && )      = default;
         wait_handler(
                 std::vector<std::function<void(int, const std::error_code & ec)>> && funcs,
                 boost::asio::io_service & ios,
-                const std::shared_ptr<std::atomic<int>> &exit_status)
+                const std::shared_ptr<std::atomic<int>> &exit_status,
+                pid_t pid)
             : signal_(new boost::asio::signal_set(ios, SIGCHLD)),
               funcs(std::move(funcs)),
-              exit_status(exit_status)
+              exit_status(exit_status),
+              pid(pid)
         {
 
         }
@@ -135,7 +129,9 @@ struct io_service_ref : handler_base_ext
 
 
             int status;
-            ::wait(&status);
+            int ret = ::waitpid(pid, &status, WNOHANG);
+            if (ret != pid) // not our business, wait more...
+                return signal_->async_wait(std::move(*this));
 
             std::error_code ec(ec_in.value(), std::system_category());
             int val = WEXITSTATUS(status);
