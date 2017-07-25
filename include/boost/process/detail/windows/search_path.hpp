@@ -65,7 +65,7 @@ inline boost::filesystem::path search_path(
             boost::system::error_code ec;
             bool file = boost::filesystem::is_regular_file(pp, ec);
             if (!ec && file &&
-                ::boost::detail::winapi::sh_get_file_info(pp.string().c_str(), 0, 0, 0, ::boost::detail::winapi::SHGFI_EXETYPE_))
+                ::boost::detail::winapi::sh_get_file_info(pp.native().c_str(), 0, 0, 0, ::boost::detail::winapi::SHGFI_EXETYPE_))
             {
                 return pp;
             }
