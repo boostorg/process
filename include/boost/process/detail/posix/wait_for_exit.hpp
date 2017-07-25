@@ -43,10 +43,12 @@ inline void wait(const child_handle &p, int & exit_code, std::error_code &ec) no
     {
         ret = ::waitpid(p.pid, &status, 0);
     } 
-    while (((ret == -1) && (errno == EINTR)) || (ret != -1 && !WIFEXITED(status)));
+    while (((ret == -1) && (errno == EINTR)) || (ret != -1 && !WIFEXITED(status) && !WIFSIGNALED(status)));
     
     if (ret == -1)
         ec = boost::process::detail::get_last_error();
+    else if (WIFSIGNALED(status))
+        ec = std::make_error_code(std::errc::no_such_process);
     else
     {
         ec.clear();
@@ -79,12 +81,14 @@ inline bool wait_for(
             break;
         }
     } 
-    while (((ret == -1) && errno == EINTR)       || 
-           ((ret != -1) && !WIFEXITED(status)));
+    while (((ret == -1) && errno == EINTR)                               ||
+           ((ret != -1) && !WIFEXITED(status) && !WIFSIGNALED(status)));
 
 
     if (ret == -1)
         boost::process::detail::throw_last_error("waitpid(2) failed");
+    if (WIFSIGNALED(status))
+        throw process_error(std::error_code(), "process terminated due to receipt of a signal");
      
     exit_code = status;
 
@@ -116,12 +120,14 @@ inline bool wait_for(
             break;
         }
     } 
-    while (((ret == -1) && errno == EINTR)       || 
-           ((ret != -1) && !WIFEXITED(status)));
+    while (((ret == -1) && errno == EINTR)                               ||
+           ((ret != -1) && !WIFEXITED(status) && !WIFSIGNALED(status)));
 
 
     if (ret == -1)
         ec = boost::process::detail::get_last_error();
+    else if (WIFSIGNALED(status))
+        ec = std::make_error_code(std::errc::no_such_process);
     else
     {
         ec.clear();
@@ -153,12 +159,14 @@ inline bool wait_until(
             break;
         }
     } 
-    while (((ret == -1) && errno == EINTR)       || 
-           ((ret != -1) && !WIFEXITED(status)));
+    while (((ret == -1) && errno == EINTR)                               ||
+           ((ret != -1) && !WIFEXITED(status) && !WIFSIGNALED(status)));
 
 
     if (ret == -1)
         boost::process::detail::throw_last_error("waitpid(2) failed");
+    if (WIFSIGNALED(status))
+        throw process_error(std::error_code(), "process terminated due to receipt of a signal");
 
     exit_code = status;
 
@@ -187,12 +195,14 @@ inline bool wait_until(
             break;
         }
     } 
-    while (((ret == -1) && errno == EINTR)       || 
-           ((ret != -1) && !WIFEXITED(status)));
+    while (((ret == -1) && errno == EINTR)                               ||
+           ((ret != -1) && !WIFEXITED(status) && !WIFSIGNALED(status)));
 
 
     if (ret == -1)
         ec = boost::process::detail::get_last_error();
+    else if (WIFSIGNALED(status))
+        ec = std::make_error_code(std::errc::no_such_process);
     else
     {
         ec.clear();
