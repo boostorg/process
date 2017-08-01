@@ -23,7 +23,7 @@
 
 namespace bp = boost::process;
 
-BOOST_AUTO_TEST_CASE(wait_for, *boost::unit_test::timeout(2))
+BOOST_AUTO_TEST_CASE(wait_for)
 {
     using boost::unit_test::framework::master_test_suite;
 
@@ -35,13 +35,30 @@ BOOST_AUTO_TEST_CASE(wait_for, *boost::unit_test::timeout(2))
     );
     BOOST_REQUIRE(!ec);
 
-    BOOST_CHECK(!c.wait_for(std::chrono::milliseconds(600)));
-    BOOST_CHECK(c.wait_for(std::chrono::milliseconds(600)));
-
-
+    BOOST_CHECK(!c.wait_for(std::chrono::milliseconds(200)));
+    BOOST_CHECK( c.wait_for(std::chrono::milliseconds(1000)));
 }
 
-BOOST_AUTO_TEST_CASE(wait_until, *boost::unit_test::timeout(2))
+BOOST_AUTO_TEST_CASE(wait_for_ec)
+{
+    using boost::unit_test::framework::master_test_suite;
+
+    std::error_code ec;
+    bp::child c(
+        master_test_suite().argv[1],
+        bp::args+={"test", "--wait", "1"},
+        ec
+    );
+    BOOST_REQUIRE(!ec);
+
+    BOOST_CHECK(!c.wait_for(std::chrono::milliseconds(400),ec));
+    BOOST_CHECK( c.wait_for(std::chrono::milliseconds(1000),ec));
+
+    BOOST_CHECK_MESSAGE(!ec, ec.message());
+}
+
+
+BOOST_AUTO_TEST_CASE(wait_until)
 {
     using boost::unit_test::framework::master_test_suite;
     std::error_code ec;
@@ -51,16 +68,37 @@ BOOST_AUTO_TEST_CASE(wait_until, *boost::unit_test::timeout(2))
         bp::args+={"test", "--wait", "1"},
         ec
     );
+    BOOST_REQUIRE(!ec);
+
     auto now = std::chrono::system_clock::now();
 
-    auto t1 = now + std::chrono::milliseconds(600);
+    auto t1 = now + std::chrono::milliseconds(400);
     auto t2 = now + std::chrono::milliseconds(1200);
 
     BOOST_CHECK(!c.wait_until(t1));
-    BOOST_CHECK(c.wait_until(t2));
+    BOOST_CHECK( c.wait_until(t2));
 
+}
+
+BOOST_AUTO_TEST_CASE(wait_until_ec)
+{
+    using boost::unit_test::framework::master_test_suite;
+    std::error_code ec;
+
+    bp::child c(
+        master_test_suite().argv[1],
+        bp::args+={"test", "--wait", "1"},
+        ec
+    );
     BOOST_REQUIRE(!ec);
 
+    auto now = std::chrono::system_clock::now();
 
+    auto t1 = now + std::chrono::milliseconds(400);
+    auto t2 = now + std::chrono::milliseconds(1200);
 
+    BOOST_CHECK(!c.wait_until(t1, ec));
+    BOOST_CHECK( c.wait_until(t2, ec));
+
+    BOOST_CHECK_MESSAGE(!ec, ec.message());
 }
