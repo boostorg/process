@@ -8,9 +8,11 @@
 #define BOOST_PROCESS_DETAIL_POSIX_SIGCHLD_SERVICE_HPP_
 
 #include <boost/asio/signal_set.hpp>
+#include <boost/asio/strand.hpp>
 #include <boost/optional.hpp>
 #include <signal.h>
 #include <functional>
+#include <sys/wait.h>
 
 namespace boost { namespace process { namespace detail { namespace posix {
 
@@ -32,60 +34,71 @@ public:
         void (int, std::error_code))
     async_wait(::pid_t pid, SignalHandler && handler)
     {
-    	boost::asio::detail::async_result_init<
-		SignalHandler, void(boost::system::error_code)> init{std::forward<SignalHandler>(handler)};
-
-    	auto & h = init.handler;
-    	_strand.post(
-    			[pid, h]
-				{
-    				if (_receivers.empty())
-    					_signal_set.async_wait(
-    							[this](const boost::system::error_code & ec, int)
-								{
-    								_strand.post([ec]{});
-    								this->_handle_signal(ec);
-								});
-    				_receivers.emplace_back(pid, h);
-				});
+        boost::asio::detail::async_result_init<
+        SignalHandler, void(boost::system::error_code)> init{std::forward<SignalHandler>(handler)};
+        auto & h = init.handler;
+        _strand.post(
+                [this, pid, h]
+                {
+                    if (_receivers.empty())
+                        _signal_set.async_wait(
+                                [this](const boost::system::error_code & ec, int)
+                                {
+                                    _strand.post([this,ec]{this->_handle_signal(ec);});
+                                });
+                    _receivers.emplace_back(pid, h);
+                });
 
         return init.result.get();
+    }
+    void shutdown_service() override
+    {
+        _receivers.clear();
     }
 
     void cancel()
     {
-    	_signal_set.cancel();
+        _signal_set.cancel();
     }
     void cancel(boost::system::error_code & ec)
     {
-    	_signal_set.cancel(ec);
+        _signal_set.cancel(ec);
     }
 };
 
 
 void sigchld_service::_handle_signal(const boost::system::error_code & ec)
 {
-	std::error_code ec_{ec.value(), std::system_category()};
+    std::error_code ec_{ec.value(), std::system_category()};
 
-	if (ec_)
-	{
-		for (auto & r : _receivers)
-			r.second(-1, ec_);
-	}
-	pid_t pid;
-	int status;
-    int ret = ::waitpid(pid, &status, WNOHANG);
+    if (ec_)
+    {
+        for (auto & r : _receivers)
+            r.second(-1, ec_);
+        return;
+    }
+    int status;
+    int pid = ::waitpid(0, &status, WNOHANG);
 
     auto itr = std::find_if(_receivers.cbegin(), _receivers.cend(),
-    		[](const std::pair<::pid_t, std::function<void(int, std::error_code)>> & p)
-			{
-    			return p.first == pid;
-			});
-
+            [&pid](const std::pair<::pid_t, std::function<void(int, std::error_code)>> & p)
+            {
+                return p.first == pid;
+            });
     if (itr != _receivers.cend())
     {
-    	itr->second(WEXITSTATUS(ret), ec_);
-    	_receivers.erase(itr);
+        _strand.get_io_service().wrap(itr->second)(WEXITSTATUS(status), ec_);
+        //itr->second(WEXITSTATUS(ret), ec_);
+        _receivers.erase(itr);
+    }
+    if (!_receivers.empty())
+    {
+        _signal_set.async_wait(
+            [this](const boost::system::error_code & ec, int)
+            {
+                _strand.post([ec]{});
+                this->_handle_signal(ec);
+            });
     }
 }
 

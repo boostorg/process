@@ -74,16 +74,10 @@ struct io_service_ref : handler_base_ext
 
     }
     boost::asio::io_service &get() {return ios;};
-
-    //::boost::process::detail::posix::sigchld_service service{boost::asio::};
-
+    
     template <class Executor>
     void on_success(Executor& exec)
     {
-
-    	auto &service = boost::asio::use_service<
-    						::boost::process::detail::posix::sigchld_service>(ios);
-
         //must be on the heap so I can move it into the lambda.
         auto asyncs = boost::fusion::filter_if<
                         is_async_handler<
@@ -102,16 +96,17 @@ struct io_service_ref : handler_base_ext
 
         auto wh = [funcs, es](int val, const std::error_code & ec)
 				{
-        			es.store(val);
+        			es->store(val);
                     for (auto & func : funcs)
                         func(val, ec);
 				};
 
-        service.async_wait(exec.pid, std::move(wh));
+        sigchld_service.async_wait(exec.pid, std::move(wh));
     }
 
 private:
     boost::asio::io_service &ios;
+    boost::process::detail::posix::sigchld_service &sigchld_service = boost::asio::use_service<boost::process::detail::posix::sigchld_service>(ios);
 };
 
 }}}}
