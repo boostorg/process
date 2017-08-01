@@ -85,6 +85,7 @@ test-suite with-valgrind :
     [ run terminate.cpp system filesystem                     : : sparring_partner ]
     [ run throw_on_error.cpp system filesystem                : : sparring_partner ]
     [ run wait.cpp system filesystem                          : : sparring_partner ]
+    [ run wait_for.cpp system filesystem                      : : sparring_partner ]
     [ run on_exit.cpp  system filesystem                      : : sparring_partner ]
     [ run on_exit2.cpp system filesystem                      : : sparring_partner ]
     [ run on_exit3.cpp system filesystem                      : : sparring_partner ]
