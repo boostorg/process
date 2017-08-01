@@ -72,7 +72,7 @@ inline bool wait_for(
     auto time_out = start + rel_time;
     auto utime_out = std::chrono::duration_cast<std::chrono::microseconds>(time_out).count();
 
-    ::ualarm(utime_out);
+    ::ualarm(utime_out, 0);
 
     bool timed_out;
     do
@@ -114,7 +114,7 @@ inline bool wait_for(
     auto utime_out = std::chrono::duration_cast<std::chrono::microseconds>(time_out).count();
     bool timed_out;
 
-    ::ualarm(utime_out);
+    ::ualarm(utime_out, 0);
     do
     {
         ret = ::waitpid(p.pid, &status, WUNTRACED);
@@ -156,7 +156,7 @@ inline bool wait_until(
             std::chrono::duration_cast<std::chrono::microseconds>(
                     time_out - std::chrono::system_clock::now());
 
-    ::ualarm(ms.count());
+    ::ualarm(ms.count(), 0);
     bool timed_out;
     do
     {
@@ -199,7 +199,7 @@ inline bool wait_until(
             std::chrono::duration_cast<std::chrono::microseconds>(
                     time_out - std::chrono::system_clock::now());
 
-    ::ualarm(ms.count());
+    ::ualarm(ms.count(), 0);
     bool timed_out;
 
     do
@@ -211,6 +211,8 @@ inline bool wait_until(
     	  (((ret == -1) && errno == EINTR)                               ||
            ((ret != -1) && !WIFEXITED(status) && !WIFSIGNALED(status))));
 
+    if (timed_out)
+    	return false;
 
     if (ret == -1)
         ec = boost::process::detail::get_last_error();
@@ -222,7 +224,7 @@ inline bool wait_until(
         exit_code = status;
     }
 
-    return !time_out_occured;
+    return true;
 }
 
 }}}}
