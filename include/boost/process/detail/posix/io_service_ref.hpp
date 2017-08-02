@@ -9,7 +9,6 @@
 #include <boost/process/detail/posix/handler.hpp>
 #include <boost/process/detail/posix/async_handler.hpp>
 #include <boost/asio/io_service.hpp>
-#include <boost/asio/signal_set.hpp>
 
 #include <boost/fusion/algorithm/iteration/for_each.hpp>
 #include <boost/fusion/algorithm/transformation/filter_if.hpp>
@@ -17,6 +16,8 @@
 #include <boost/fusion/view/transform_view.hpp>
 #include <boost/fusion/container/vector/convert.hpp>
 
+
+#include <boost/process/detail/posix/sigchld_service.hpp>
 
 #include <functional>
 #include <type_traits>
@@ -73,9 +74,7 @@ struct io_service_ref : handler_base_ext
 
     }
     boost::asio::io_service &get() {return ios;};
-
-    boost::asio::signal_set *signal_p = nullptr;
-
+    
     template <class Executor>
     void on_success(Executor& exec)
     {
@@ -93,57 +92,21 @@ struct io_service_ref : handler_base_ext
         funcs.reserve(boost::fusion::size(asyncs));
         boost::fusion::for_each(asyncs, async_handler_collector<Executor>(exec, funcs));
 
-        wait_handler wh(std::move(funcs), ios, exec.exit_status, exec.pid);
+        auto & es = exec.exit_status;
 
-        signal_p = wh.signal_.get();
-        signal_p->async_wait(std::move(wh));
+        auto wh = [funcs, es](int val, const std::error_code & ec)
+				{
+        			es->store(val);
+                    for (auto & func : funcs)
+                        func(WEXITSTATUS(val), ec);
+				};
 
+        sigchld_service.async_wait(exec.pid, std::move(wh));
     }
 
-
-    struct wait_handler
-    {
-        std::shared_ptr<boost::asio::signal_set> signal_;
-        std::vector<std::function<void(int, const std::error_code & ec)>> funcs;
-        std::shared_ptr<std::atomic<int>> exit_status;
-        pid_t pid;
-
-        wait_handler(const wait_handler & ) = default;
-        wait_handler(wait_handler && )      = default;
-        wait_handler(
-                std::vector<std::function<void(int, const std::error_code & ec)>> && funcs,
-                boost::asio::io_service & ios,
-                const std::shared_ptr<std::atomic<int>> &exit_status,
-                pid_t pid)
-            : signal_(new boost::asio::signal_set(ios, SIGCHLD)),
-              funcs(std::move(funcs)),
-              exit_status(exit_status),
-              pid(pid)
-        {
-
-        }
-        void operator()(const boost::system::error_code & ec_in, int /*signal*/)
-        {
-            if (ec_in.value() == boost::asio::error::operation_aborted)
-                return;
-
-
-            int status;
-            int ret = ::waitpid(pid, &status, WNOHANG);
-            if (ret != pid) // not our business, wait more...
-                return signal_->async_wait(std::move(*this));
-
-            std::error_code ec(ec_in.value(), std::system_category());
-            int val = WEXITSTATUS(status);
-            exit_status->store(status);
-
-            for (auto & func : funcs)
-                func(val, ec);
-        }
-
-    };
 private:
     boost::asio::io_service &ios;
+    boost::process::detail::posix::sigchld_service &sigchld_service = boost::asio::use_service<boost::process::detail::posix::sigchld_service>(ios);
 };
 
 }}}}
