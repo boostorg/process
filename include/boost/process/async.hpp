@@ -118,7 +118,7 @@ chlid c2("ls", on_exit=exit_code);
 
 \note The handler is not invoked when the launch fails.
 \warning When used \ref ignore_error it might get invoked on error.
-\warning All `on_exit` use one signal(SIGCHLD) on poisx, which is only guaranteed to work when all use the same `io_service`.
+\warning All `on_exit` use one signal(SIGCHLD) on posix, which is only guaranteed to work when all use the same `io_service`.
  */
 constexpr static ::boost::process::detail::on_exit_ on_exit{};
 #endif
