@@ -98,7 +98,7 @@ struct io_service_ref : handler_base_ext
 				{
         			es->store(val);
                     for (auto & func : funcs)
-                        func(val, ec);
+                        func(WEXITSTATUS(val), ec);
 				};
 
         sigchld_service.async_wait(exec.pid, std::move(wh));

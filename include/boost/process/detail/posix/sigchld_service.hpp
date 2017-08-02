@@ -87,8 +87,7 @@ void sigchld_service::_handle_signal(const boost::system::error_code & ec)
             });
     if (itr != _receivers.cend())
     {
-        _strand.get_io_service().wrap(itr->second)(WEXITSTATUS(status), ec_);
-        //itr->second(WEXITSTATUS(ret), ec_);
+        _strand.get_io_service().wrap(itr->second)(status, ec_);
         _receivers.erase(itr);
     }
     if (!_receivers.empty())
