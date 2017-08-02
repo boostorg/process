@@ -27,11 +27,11 @@ BOOST_AUTO_TEST_CASE(double_ios, *boost::unit_test::timeout(6))
     }
 
     namespace bp = boost::process;
-    boost::asio::io_service ios1, ios2;
+    boost::asio::io_service ios;
     std::chrono::steady_clock::time_point p1, p2;
 
     // launch a child that will sleep for 2s
-    auto c1 = bp::child(master_test_suite().argv[0], "sleep", "2", ios1,
+    auto c1 = bp::child(master_test_suite().argv[0], "sleep", "2", ios,
         bp::on_exit([&p1](int, const std::error_code&)
     { p1 = std::chrono::steady_clock::now(); }));
 
@@ -39,17 +39,12 @@ BOOST_AUTO_TEST_CASE(double_ios, *boost::unit_test::timeout(6))
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
     // launch a child that will sleep for 4s
-    auto c2 = bp::child(master_test_suite().argv[0], "sleep", "4", ios2,
+    auto c2 = bp::child(master_test_suite().argv[0], "sleep", "4", ios,
         bp::on_exit([&p2](int, const std::error_code&)
     { p2 = std::chrono::steady_clock::now(); }));
 
-    // wait for the notifications
-    while (!ios1.stopped() || !ios2.stopped())
-    {       
-        ios1.poll();
-        ios2.poll();
-    }
 
+    ios.run();
     BOOST_REQUIRE((p2 - p1) > std::chrono::seconds(1));
 }
 
