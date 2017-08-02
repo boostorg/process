@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE(double_ios_threaded, *boost::unit_test::timeout(6))
     { p2 = std::chrono::steady_clock::now(); }));
 
     // wait for the notifications
-    std::thread ([&ios1] { ios.run(); }).join();
+    std::thread ([&ios] { ios.run(); }).join();
 
     BOOST_REQUIRE((p2 - p1) > std::chrono::seconds(1));
 }
