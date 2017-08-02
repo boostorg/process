@@ -103,7 +103,7 @@ struct async_foo : __handler__, __require_io_service__
     tempalte<typename Executor>
     void on_setup(Executor & exec)
     {
-        __io_service__ & ios = __get_io_service__(exec.seq); //gives us a reference and a compiler error if not present.
+        io_service & ios = __get_io_service__(exec.seq); //gives us a reference and a compiler error if not present.
         //do something with ios
     }
 };
