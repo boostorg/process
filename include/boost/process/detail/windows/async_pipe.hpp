@@ -78,10 +78,8 @@ public:
 
     ~async_pipe()
     {
-        if (_sink .native()  != ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
-            ::boost::detail::winapi::CloseHandle(_sink.native());
-        if (_source.native() != ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
-            ::boost::detail::winapi::CloseHandle(_source.native());
+        boost::system::error_code ec;
+        close(ec);
     }
 
     template<class CharT, class Traits = std::char_traits<CharT>>
@@ -100,20 +98,26 @@ public:
         if (_sink.is_open())
         {
             _sink.close();
-            _sink.assign(::boost::detail::winapi::INVALID_HANDLE_VALUE_);
+            _sink = handle_type(_sink.get_io_service());
         }
         if (_source.is_open())
         {
             _source.close();
-            _source.assign(::boost::detail::winapi::INVALID_HANDLE_VALUE_);
+            _source = handle_type(_source.get_io_service());
         }
     }
     void close(boost::system::error_code & ec)
     {
         if (_sink.is_open())
+        {
             _sink.close(ec);
+            _sink = handle_type(_sink.get_io_service());
+        }
         if (_source.is_open())
+        {
             _source.close(ec);
+            _source = handle_type(_source.get_io_service());
+        }
     }
 
     bool is_open() const
@@ -345,23 +349,23 @@ async_pipe::operator basic_pipe<CharT, Traits>() const
     auto source_in = const_cast<::boost::asio::windows::stream_handle &>(_source).native();
     auto sink_in   = const_cast<::boost::asio::windows::stream_handle &>(_sink).native();
 
-    if (source == ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
-        _source = ::boost::detail::winapi::INVALID_HANDLE_VALUE_;
+    if (source_in == ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
+        source = ::boost::detail::winapi::INVALID_HANDLE_VALUE_;
     else if (!::boost::detail::winapi::DuplicateHandle(
             proc, source_in, proc, &source, 0,
             static_cast<::boost::detail::winapi::BOOL_>(true),
              ::boost::detail::winapi::DUPLICATE_SAME_ACCESS_))
         throw_last_error("Duplicate Pipe Failed");
 
-    if (sink == ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
-        _sink = ::boost::detail::winapi::INVALID_HANDLE_VALUE_;
+    if (sink_in == ::boost::detail::winapi::INVALID_HANDLE_VALUE_)
+        sink = ::boost::detail::winapi::INVALID_HANDLE_VALUE_;
     else if (!::boost::detail::winapi::DuplicateHandle(
             proc, sink_in, proc, &sink, 0,
             static_cast<::boost::detail::winapi::BOOL_>(true),
              ::boost::detail::winapi::DUPLICATE_SAME_ACCESS_))
         throw_last_error("Duplicate Pipe Failed");
 
-    return {source, sink};
+    return basic_pipe<CharT, Traits>{source, sink};
 }
 
 inline bool operator==(const async_pipe & lhs, const async_pipe & rhs)

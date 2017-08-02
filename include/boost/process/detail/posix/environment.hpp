@@ -106,21 +106,22 @@ public:
     using string_type = std::basic_string<char_type>;
     using native_handle_type = char_type **;
 
-    void reload() {}
+    void reload() {this->_env_impl = ::environ;}
 
     string_type get(const pointer_type id) { return getenv(id); }
     void        set(const pointer_type id, const pointer_type value)
     {
-        auto val = std::string(id) + "=" + value;
-        auto res = ::setenv(id, value, true);
+        auto res = ::setenv(id, value, 1);
         if (res != 0)
             boost::process::detail::throw_last_error();
+        reload();
     }
     void      reset(const pointer_type id)
     {
         auto res = ::unsetenv(id);
         if (res != 0)
             boost::process::detail::throw_last_error();
+        reload();
     }
 
     string_type get(const string_type & id) {return get(id.c_str());}
@@ -134,7 +135,7 @@ public:
     native_environment_impl & operator=(native_environment_impl && ) = default;
     native_handle_type _env_impl = environ;
 
-    native_handle_type native_handle() const {return environ;}
+    native_handle_type native_handle() const {return ::environ;}
 };
 
 
@@ -258,13 +259,9 @@ inline void basic_environment_impl<Char>::set(const string_type &id, const strin
     );
 
     if (itr != _data.end())
-    {
         *itr = id + equal_sign<Char>() + value;
-    }
     else 
-    {
         _data.push_back(id + equal_sign<Char>() + value);
-    }
 
     reload();
 }

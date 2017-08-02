@@ -24,7 +24,7 @@ struct on_exit_ : boost::process::detail::windows::async_handler
     }
 
     template<typename Executor>
-    std::function<void(int, const std::error_code&)> on_exit_handler(Executor & exec)
+    std::function<void(int, const std::error_code&)> on_exit_handler(Executor&)
     {
         auto handler = this->handler;
         return [handler](int exit_code, const std::error_code & ec)

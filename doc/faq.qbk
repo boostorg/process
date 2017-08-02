@@ -24,8 +24,8 @@ vector<string> demangle(vector<string> in)
  
 ```
 We switched the read and write operation up, so that's causing a dead-lock.
-This locks immediately. This is because `c++filt` expects input, before 
-outputting any data. The launching process on the other hand wait's for it's output.
+This locks immediately. This is because `c++filt` expects input, before
+outputting any data. The launching process on the other hand waits for its output.
 
 [endsect]
 

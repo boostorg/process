@@ -60,7 +60,7 @@ inline int system_impl(
     child c(std::forward<Args>(args)...,
             check,
             ::boost::process::on_exit(
-                [&](int exit_code, const std::error_code&)
+                [&](int, const std::error_code&)
                 {
                     ios.post([&]{exited.store(true);});
                 }));

@@ -21,8 +21,8 @@ inline bool compare_handles(boost::detail::winapi::HANDLE_ lhs, boost::detail::w
     if (lhs == rhs)
         return true;
 
-    ::boost::detail::winapi::BY_HANDLE_FILE_INFORMATION_ lhs_info{0,0,0,0,0,0,0,0,0,0};
-    ::boost::detail::winapi::BY_HANDLE_FILE_INFORMATION_ rhs_info{0,0,0,0,0,0,0,0,0,0};
+    ::boost::detail::winapi::BY_HANDLE_FILE_INFORMATION_ lhs_info{0,{0,0},{0,0},{0,0},0,0,0,0,0,0};
+    ::boost::detail::winapi::BY_HANDLE_FILE_INFORMATION_ rhs_info{0,{0,0},{0,0},{0,0},0,0,0,0,0,0};
 
     if (!::boost::detail::winapi::GetFileInformationByHandle(lhs, &lhs_info))
         ::boost::process::detail::throw_last_error("GetFileInformationByHandle");

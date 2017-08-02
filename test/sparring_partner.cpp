@@ -28,7 +28,7 @@
 #   include <boost/iostreams/stream.hpp>
 #   include <unistd.h>
 #elif defined(BOOST_WINDOWS_API)
-#   include <Windows.h>
+#   include <windows.h>
 #endif
 
 

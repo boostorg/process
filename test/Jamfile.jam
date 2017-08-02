@@ -49,10 +49,11 @@ exe sub_launch : sub_launcher.cpp program_options iostreams system filesystem : 
 
 test-suite bare :
     [ run environment.cpp system filesystem  ]
+    [ run async_pipe.cpp system filesystem ]
     [ run pipe.cpp        system filesystem  ]
     ;
 
-test-suite execution :
+test-suite with-valgrind :
     [ run async.cpp       system thread filesystem            : : sparring_partner ]
     [ run async_fut.cpp   system thread filesystem            : : sparring_partner ]
     [ run args_cmd.cpp    system filesystem                   : : sparring_partner ]
@@ -77,7 +78,6 @@ test-suite execution :
     [ run search_path.cpp filesystem system                   : : : <target-os>windows:<source>shell32 ]
     [ run shell.cpp filesystem system                         : : sparring_partner ]
     [ run shell_path.cpp  filesystem system                   ]
-    [ run async_system.cpp filesystem system coroutine        : : sparring_partner : <link>static ]
     [ run system_test1.cpp filesystem system                  : : sparring_partner ]
     [ run system_test2.cpp filesystem system                  : : sparring_partner ]
     [ run spawn.cpp filesystem system                         : : sparring_partner ]
@@ -85,14 +85,19 @@ test-suite execution :
     [ run terminate.cpp system filesystem                     : : sparring_partner ]
     [ run throw_on_error.cpp system filesystem                : : sparring_partner ]
     [ run wait.cpp system filesystem                          : : sparring_partner ]
+    [ run wait_for.cpp system filesystem                      : : sparring_partner ]
+    [ run on_exit.cpp  system filesystem                      : : sparring_partner ]
+    [ run on_exit2.cpp system filesystem                      : : sparring_partner ]
+    [ run on_exit3.cpp system filesystem                      : : sparring_partner ]
     [ compile-fail spawn_fail.cpp        ]
     [ compile-fail async_system_fail.cpp ]
     [ run posix_specific.cpp     system filesystem            : : sparring_partner : <build>no <target-os>linux:<build>yes   ]
     [ run windows_specific.cpp filesystem system              : : sparring_partner : <build>no <target-os>windows:<build>yes   ]
    : <dependency>bare ;
 
-run vfork.cpp     system filesystem                     : : sparring_partner : <build>no <target-os>linux:<build>yes ;
-explicit vfork ;
+test-suite without-valgrind :
+    [ run async_system.cpp filesystem system coroutine        : : sparring_partner : <link>static ]
+    [ run vfork.cpp     system filesystem                     : : sparring_partner : <build>no <target-os>linux:<build>yes ]
+    ;
 
-   
-   
+

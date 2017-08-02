@@ -98,13 +98,13 @@ struct needs_io_service<T>
 };
 
 template<typename ...Args>
-boost::asio::io_service &get_io_service_var(boost::asio::io_service & f, Args&...args)
+boost::asio::io_service &get_io_service_var(boost::asio::io_service & f, Args&...)
 {
     return f;
 }
 
 template<typename First, typename ...Args>
-boost::asio::io_service &get_io_service_var(First & f, Args&...args)
+boost::asio::io_service &get_io_service_var(First&, Args&...args)
 {
     return get_io_service_var(args...);
 }

@@ -165,22 +165,26 @@ inline bool wait_until(
             std::chrono::duration_cast<std::chrono::milliseconds>(
                     timeout_time - std::chrono::system_clock::now());
 
-    ::boost::detail::winapi::DWORD_ _exit_code = 1;
+    ::boost::detail::winapi::DWORD_ wait_code;
+    wait_code = ::boost::detail::winapi::WaitForSingleObject(p.process_handle(),
+                    static_cast<::boost::detail::winapi::DWORD_>(ms.count()));
 
-    if (::boost::detail::winapi::WaitForSingleObject(p.process_handle(),
-            static_cast<::boost::detail::winapi::DWORD_>(ms.count()))
-                == ::boost::detail::winapi::wait_failed)
+    if (wait_code == ::boost::detail::winapi::wait_failed)
         ec = std::error_code(
             ::boost::detail::winapi::GetLastError(),
             std::system_category());
-    else if (!::boost::detail::winapi::GetExitCodeProcess(p.process_handle(), &_exit_code))
+    else if (wait_code == ::boost::detail::winapi::wait_timeout)
+    	return false;
+
+    ::boost::detail::winapi::DWORD_ _exit_code;
+    if (!::boost::detail::winapi::GetExitCodeProcess(p.process_handle(), &_exit_code))
         ec = std::error_code(
             ::boost::detail::winapi::GetLastError(),
             std::system_category());
     else
         ec.clear();
 
-    exit_code = static_cast<int>(exit_code);
+    exit_code = static_cast<int>(_exit_code);
     ::boost::detail::winapi::CloseHandle(p.proc_info.hProcess);
     p.proc_info.hProcess = ::boost::detail::winapi::INVALID_HANDLE_VALUE_;
     return true;

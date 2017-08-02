@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(excplicit)
     auto env = boost::this_process::environment();
 
     auto itr = std::find_if(env.begin(), env.end(),
-    		[](const bp::native_environment::entry_type & e){return boost::to_upper_copy(e.get_name()) == "PATH";});
+            [](const bp::native_environment::entry_type & e){return boost::to_upper_copy(e.get_name()) == "PATH";});
 
     BOOST_REQUIRE(itr != env.end());
 
@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE(implicit)
     auto env = boost::this_process::environment();
 
     auto itr = std::find_if(env.begin(), env.end(),
-    		[](const bp::native_environment::entry_type & e){return boost::to_upper_copy(e.get_name()) == "PATH";});
+            [](const bp::native_environment::entry_type & e){return boost::to_upper_copy(e.get_name()) == "PATH";});
 
     BOOST_REQUIRE(itr != env.end());
 

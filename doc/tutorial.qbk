@@ -81,7 +81,7 @@ So as a first step, we'll use the `exe-args` style.
 int result = bp::system("/usr/bin/g++", "main.cpp");
 ```
 
-With that sytax we still have "g++" hard-coded, so let's assume we get the string
+With that syntax we still have "g++" hard-coded, so let's assume we get the string
 from an external source as `boost::filesystem::path`, we can do this too.
 
 ```
@@ -109,8 +109,8 @@ our program will wait until the child process is completed. This maybe unwanted,
 especially since compiling can take a while. 
 
 In order to avoid that, boost.process provides several ways to launch a process.
-Besides the already mentioned [funcref boost::process::system system] function and it's 
-asynchronous version [funcref boost::process::async_system async_system], 
+Besides the already mentioned [funcref boost::process::system system] function and its
+asynchronous version [funcref boost::process::async_system async_system],
 we can also use the [funcref boost::process::spawn spawn] function or the
 [classref boost::process::child child] class.
 
@@ -200,7 +200,7 @@ wrap around the [classref boost::process::pipe pipe] and provide an implementati
 std::vector<std::string> read_outline(std::string & file)
 {
     bp::ipstream is; //reading pipe-stream
-    bp::child c(bp::search_patk("nm"), file, bp::std_out > is);
+    bp::child c(bp::search_path("nm"), file, bp::std_out > is);
     
     std::vector<std::string> data;
     std::string line;
@@ -278,7 +278,7 @@ With [@http://www.boost.org/doc/libs/release/libs/asio/ boost.asio] this is what
 
 ```
 io_service ios;
-std::vector<char> buf;
+std::vector<char> buf(4096);
 
 bp::async_pipe ap(ios);
 
@@ -342,10 +342,10 @@ it will not terminate all the child processes of the child unless you use a grou
 
 The two main reasons to use groups are:
 
-# Being able two terminate child processes of the child process
+# Being able to terminate child processes of the child process
 # Grouping several processes into one, just so they can be terminated at once
 
-If we have program like `make`, which does launch it's own child processes, 
+If we have program like `make`, which does launch its own child processes, 
 a call of child_terminate might not suffice. I.e. if we have a makefile launching `gcc` 
 and use the following code, the `gcc` process will still run afterwards:
 
@@ -388,7 +388,7 @@ void f()
 ```
 
 In the example, it will wait for both processes at the end of the function unless 
-an exception occures. I.e. if an exception is thrown, the group will be terminated.
+an exception occurs. I.e. if an exception is thrown, the group will be terminated.
 
 
 Please see the [headerref boost/process/group.hpp reference] for more information.
@@ -405,7 +405,7 @@ auto env = boost::this_process::environment();
 //add a variable to the current environment
 env["VALUE_1"] = "foo";
 
-//copy it into a environment seperate to the one of this process
+//copy it into a environment separate to the one of this process
 bp::environment env_ = env;  
 //append two values to a variable in the new env
 env_["VALUE_2"] += {"bar1", "bar2"};

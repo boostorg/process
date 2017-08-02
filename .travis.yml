@@ -65,7 +65,7 @@ before_install:
     - BOOST=$HOME/boost-local
     - git init $BOOST
     - cd $BOOST
-    - if [ $(BRANCH_TO_TEST) = "master" ]; then
+    - if [ $BRANCH_TO_TEST = "master" ]; then
       BOOST_BRANCH=master; 
       else BOOST_BRANCH=develop; fi
     - git remote add --no-tags -t $BOOST_BRANCH origin https://github.com/boostorg/boost.git
@@ -89,8 +89,8 @@ before_install:
 
 script:
     # `--coverage` flags required to generate coverage info for Coveralls
-    - ../../../b2 address-model=64 architecture=x86 testing.launcher=valgrind valgrind=on toolset=$TOOLSET cxxflags="--coverage -DBOOST_TRAVISCI_BUILD -std=$CXX_STANDARD" linkflags="--coverage" -sBOOST_BUILD_PATH=. 
-    - ../../../b2 vfork address-model=64 architecture=x86 toolset=$TOOLSET cxxflags="--coverage -DBOOST_TRAVISCI_BUILD -std=$CXX_STANDARD" linkflags="--coverage" -sBOOST_BUILD_PATH=. 
+    - ../../../b2 with-valgrind address-model=64 architecture=x86 testing.launcher=valgrind valgrind=on toolset=$TOOLSET cxxflags="--coverage -DBOOST_TRAVISCI_BUILD -std=$CXX_STANDARD" linkflags="--coverage" -sBOOST_BUILD_PATH=. 
+    - ../../../b2 without-valgrind address-model=64 architecture=x86 toolset=$TOOLSET cxxflags="--coverage -DBOOST_TRAVISCI_BUILD -std=$CXX_STANDARD" linkflags="--coverage" -sBOOST_BUILD_PATH=. 
 after_success:
     # Copying Coveralls data to a separate folder
     - mkdir -p $TRAVIS_BUILD_DIR/coverals
