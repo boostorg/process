@@ -233,7 +233,8 @@ class executor
     void check_error(boost::mpl::true_) {};
     void check_error(boost::mpl::false_)
     {
-        throw process_error(_ec, _msg);
+        if (_ec)
+            throw process_error(_ec, _msg);
     }
 
     typedef typename ::boost::process::detail::has_error_handler<Sequence>::type has_error_handler;
