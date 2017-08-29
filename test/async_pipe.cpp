@@ -9,6 +9,7 @@
 #include <boost/test/included/unit_test.hpp>
 #include <iostream>
 #include <thread>
+#include <vector>
 #include <boost/algorithm/string/predicate.hpp>
 
 #include <boost/process/async_pipe.hpp>
@@ -61,5 +62,26 @@ BOOST_AUTO_TEST_CASE(closed_transform)
     bp::pipe p  = static_cast<bp::pipe>(ap);
     BOOST_CHECK(!p.is_open());
 
+}
+
+
+BOOST_AUTO_TEST_CASE(closed_transform)
+{
+    asio::io_service ios;
+
+    std::vector<std::thread> threads;
+    for (int i = 0; i < std::thread::hardware_concurrency(); i++)
+    {
+        threads.emplace_back([&s]
+        {
+            std::vector<bp::async_pipe*> pipes;
+            for (size_t i = 0; i < 100; i++)
+                pipes.push_back(new bp::async_pipe(s));
+            for (auto &p : pipes)
+                delete p;
+        });
+    }
+    for (auto &t : threads)
+        t.join();
 }
 

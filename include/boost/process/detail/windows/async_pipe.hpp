@@ -15,6 +15,7 @@
 #include <boost/detail/winapi/process.hpp>
 #include <boost/process/detail/windows/basic_pipe.hpp>
 #include <boost/asio/windows/stream_handle.hpp>
+#include <atomic>
 #include <system_error>
 #include <string>
 
@@ -26,7 +27,7 @@ inline std::string make_pipe_name()
 
     auto pid = ::boost::detail::winapi::GetCurrentProcessId();
 
-    static unsigned long long cnt = 0;
+    static std::atomic_size_t cnt = 0;
     name += std::to_string(pid);
     name += "_";
     name += std::to_string(cnt++);
