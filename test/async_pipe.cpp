@@ -64,8 +64,7 @@ BOOST_AUTO_TEST_CASE(closed_transform)
 
 }
 
-
-BOOST_AUTO_TEST_CASE(closed_transform)
+BOOST_AUTO_TEST_CASE(multithreaded_async_pipe)
 {
     asio::io_service ios;
 
@@ -84,4 +83,3 @@ BOOST_AUTO_TEST_CASE(closed_transform)
     for (auto &t : threads)
         t.join();
 }
-
