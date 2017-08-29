@@ -27,7 +27,7 @@ inline std::string make_pipe_name()
 
     auto pid = ::boost::detail::winapi::GetCurrentProcessId();
 
-    static std::atomic_size_t cnt = 0;
+    static std::atomic_uint64_t cnt = 0;
     name += std::to_string(pid);
     name += "_";
     name += std::to_string(cnt++);
