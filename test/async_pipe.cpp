@@ -71,11 +71,11 @@ BOOST_AUTO_TEST_CASE(multithreaded_async_pipe)
     std::vector<std::thread> threads;
     for (int i = 0; i < std::thread::hardware_concurrency(); i++)
     {
-        threads.emplace_back([&s]
+        threads.emplace_back([&ios]
         {
             std::vector<bp::async_pipe*> pipes;
             for (size_t i = 0; i < 100; i++)
-                pipes.push_back(new bp::async_pipe(s));
+                pipes.push_back(new bp::async_pipe(ios));
             for (auto &p : pipes)
                 delete p;
         });
