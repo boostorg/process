@@ -53,7 +53,7 @@ inline std::error_code get_last_error() noexcept
 }
 
 //copied from linux spec.
-#if defined (__USE_XOPEN_EXTENDED) && !defined (__USE_XOPEN2K8) || defined( __USE_BSD)
+#if (_XOPEN_SOURCE >= 500 || _XOPEN_SOURCE && _XOPEN_SOURCE_EXTENDED) && !(_POSIX_C_SOURCE >= 200809L || _XOPEN_SOURCE >= 700)
 #define BOOST_POSIX_HAS_VFORK 1
 #endif
 
