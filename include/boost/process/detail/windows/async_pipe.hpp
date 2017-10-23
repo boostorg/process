@@ -42,12 +42,12 @@ public:
     typedef ::boost::detail::winapi::HANDLE_ native_handle_type;
     typedef ::boost::asio::windows::stream_handle   handle_type;
 
-    inline async_pipe(boost::asio::io_service & ios,
+    inline async_pipe(boost::asio::io_context & ios,
                       const std::string & name = make_pipe_name())
                     : async_pipe(ios, ios, name) {}
 
-    inline async_pipe(boost::asio::io_service & ios_source,
-                      boost::asio::io_service & ios_sink,
+    inline async_pipe(boost::asio::io_context & ios_source,
+                      boost::asio::io_context & ios_sink,
                       const std::string & name = make_pipe_name());
 
     inline async_pipe(const async_pipe& rhs);
@@ -57,15 +57,15 @@ public:
         rhs._sink  .assign (::boost::detail::winapi::INVALID_HANDLE_VALUE_);
     }
     template<class CharT, class Traits = std::char_traits<CharT>>
-    explicit async_pipe(::boost::asio::io_service & ios_source,
-                        ::boost::asio::io_service & ios_sink,
+    explicit async_pipe(::boost::asio::io_context & ios_source,
+                        ::boost::asio::io_context & ios_sink,
                          const basic_pipe<CharT, Traits> & p)
             : _source(ios_source, p.native_source()), _sink(ios_sink, p.native_sink())
     {
     }
 
     template<class CharT, class Traits = std::char_traits<CharT>>
-    explicit async_pipe(boost::asio::io_service & ios, const basic_pipe<CharT, Traits> & p)
+    explicit async_pipe(boost::asio::io_context & ios, const basic_pipe<CharT, Traits> & p)
             : async_pipe(ios, ios, p)
     {
     }
@@ -98,12 +98,12 @@ public:
         if (_sink.is_open())
         {
             _sink.close();
-            _sink = handle_type(_sink.get_io_service());
+            _sink = handle_type(_sink.get_io_context());
         }
         if (_source.is_open())
         {
             _source.close();
-            _source = handle_type(_source.get_io_service());
+            _source = handle_type(_source.get_io_context());
         }
     }
     void close(boost::system::error_code & ec)
@@ -111,12 +111,12 @@ public:
         if (_sink.is_open())
         {
             _sink.close(ec);
-            _sink = handle_type(_sink.get_io_service());
+            _sink = handle_type(_sink.get_io_context());
         }
         if (_source.is_open())
         {
             _source.close(ec);
-            _source = handle_type(_source.get_io_service());
+            _source = handle_type(_source.get_io_context());
         }
     }
 
@@ -127,9 +127,9 @@ public:
     void async_close()
     {
         if (_sink.is_open())
-            _sink.get_io_service().  post([this]{_sink.close();});
+            _sink.get_io_context().  post([this]{_sink.close();});
         if (_source.is_open())
-            _source.get_io_service().post([this]{_source.close();});
+            _source.get_io_context().post([this]{_source.close();});
     }
 
     template<typename MutableBufferSequence>
@@ -174,20 +174,20 @@ public:
     handle_type && source() && { return std::move(_source); }
     handle_type && sink()   && { return std::move(_sink); }
 
-    handle_type source(::boost::asio::io_service& ios) &&
+    handle_type source(::boost::asio::io_context& ios) &&
     {
         ::boost::asio::windows::stream_handle stolen(ios, _source.native_handle());
         _source.assign(::boost::detail::winapi::INVALID_HANDLE_VALUE_);
         return stolen;
     }
-    handle_type sink  (::boost::asio::io_service& ios) &&
+    handle_type sink  (::boost::asio::io_context& ios) &&
     {
         ::boost::asio::windows::stream_handle stolen(ios, _sink.native_handle());
         _sink.assign(::boost::detail::winapi::INVALID_HANDLE_VALUE_);
         return stolen;
     }
 
-    handle_type source(::boost::asio::io_service& ios) const &
+    handle_type source(::boost::asio::io_context& ios) const &
     {
         auto proc = ::boost::detail::winapi::GetCurrentProcess();
 
@@ -203,7 +203,7 @@ public:
 
         return ::boost::asio::windows::stream_handle(ios, source);
     }
-    handle_type sink  (::boost::asio::io_service& ios) const &
+    handle_type sink  (::boost::asio::io_context& ios) const &
     {
         auto proc = ::boost::detail::winapi::GetCurrentProcess();
 
@@ -224,8 +224,8 @@ public:
 
 
 async_pipe::async_pipe(const async_pipe& p)  :
-    _source(const_cast<handle_type&>(p._source).get_io_service()),
-    _sink  (const_cast<handle_type&>(p._sink).get_io_service())
+    _source(const_cast<handle_type&>(p._source).get_io_context()),
+    _sink  (const_cast<handle_type&>(p._sink).get_io_context())
 {
     auto proc = ::boost::detail::winapi::GetCurrentProcess();
 
@@ -257,8 +257,8 @@ async_pipe::async_pipe(const async_pipe& p)  :
 }
 
 
-async_pipe::async_pipe(boost::asio::io_service & ios_source,
-                       boost::asio::io_service & ios_sink,
+async_pipe::async_pipe(boost::asio::io_context & ios_source,
+                       boost::asio::io_context & ios_sink,
                        const std::string & name) : _source(ios_source), _sink(ios_sink)
 {
     static constexpr int FILE_FLAG_OVERLAPPED_  = 0x40000000; //temporary
@@ -315,9 +315,9 @@ async_pipe& async_pipe::operator=(const async_pipe & p)
              ::boost::detail::winapi::DUPLICATE_SAME_ACCESS_))
         throw_last_error("Duplicate Pipe Failed");
 
-    //so we also assign the io_service
-    _source = ::boost::asio::windows::stream_handle(source_in.get_io_service(), source);
-    _sink = ::boost::asio::windows::stream_handle(source_in.get_io_service(), sink);
+    //so we also assign the io_context
+    _source = ::boost::asio::windows::stream_handle(source_in.get_io_context(), source);
+    _sink = ::boost::asio::windows::stream_handle(source_in.get_io_context(), sink);
 
     return *this;
 }

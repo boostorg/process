@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(async_wait, *boost::unit_test::timeout(2))
     using boost::unit_test::framework::master_test_suite;
     using namespace boost::asio;
 
-    boost::asio::io_service io_service;
+    boost::asio::io_context io_context;
 
     bool exit_called = false;
     int exit_code = 0;
@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(async_wait, *boost::unit_test::timeout(2))
         master_test_suite().argv[1],
         "test", "--exit-code", "123",
         ec,
-        io_service,
+        io_context,
         bp::on_exit([&](int exit, const std::error_code& ec_in)
                 {
                     exit_code = exit; exit_called=true;
@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(async_wait, *boost::unit_test::timeout(2))
     );
 
     BOOST_REQUIRE(!ec);
-    io_service.run();
+    io_context.run();
     BOOST_CHECK(exit_called);
     BOOST_CHECK_EQUAL(exit_code, 123);
     BOOST_CHECK_EQUAL(c.exit_code(), 123);
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(async_future, *boost::unit_test::timeout(2))
     using boost::unit_test::framework::master_test_suite;
     using namespace boost::asio;
 
-    boost::asio::io_service io_service;
+    boost::asio::io_context io_context;
 
     std::error_code ec;
     std::future<int> fut;
@@ -71,12 +71,12 @@ BOOST_AUTO_TEST_CASE(async_future, *boost::unit_test::timeout(2))
         master_test_suite().argv[1],
         "test", "--exit-code", "42",
         ec,
-        io_service,
+        io_context,
         bp::on_exit=fut
     );
 
     BOOST_REQUIRE(!ec);
-    io_service.run();
+    io_context.run();
     BOOST_REQUIRE(fut.valid());
     BOOST_CHECK_EQUAL(fut.get(), 42);
 }
@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(async_out_stream, *boost::unit_test::timeout(2))
 {
     using boost::unit_test::framework::master_test_suite;
 
-    boost::asio::io_service io_service;
+    boost::asio::io_context io_context;
 
 
     std::error_code ec;
@@ -96,12 +96,12 @@ BOOST_AUTO_TEST_CASE(async_out_stream, *boost::unit_test::timeout(2))
     bp::child c(master_test_suite().argv[1],
                 "test", "--echo-stdout", "abc",
                 bp::std_out > buf,
-                io_service,
+                io_context,
                 ec);
     BOOST_REQUIRE(!ec);
 
 
-    io_service.run();
+    io_context.run();
     std::istream istr(&buf);
 
     std::string line;
@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE(async_in_stream, *boost::unit_test::timeout(2))
 
     using boost::unit_test::framework::master_test_suite;
 
-    boost::asio::io_service io_service;
+    boost::asio::io_context io_context;
 
 
     std::error_code ec;
@@ -135,13 +135,13 @@ BOOST_AUTO_TEST_CASE(async_in_stream, *boost::unit_test::timeout(2))
         "test", "--prefix-once", "test",
         bp::std_in  < in_buf,
         bp::std_out > buf,
-        io_service,
+        io_context,
         ec
     );
     BOOST_REQUIRE(!ec);
 
 
-    io_service.run();
+    io_context.run();
     std::istream istr(&buf);
 
     std::string line;
@@ -162,14 +162,14 @@ BOOST_AUTO_TEST_CASE(async_error, *boost::unit_test::timeout(2))
     using boost::unit_test::framework::master_test_suite;
     using namespace boost::asio;
 
-    boost::asio::io_service io_service;
+    boost::asio::io_context io_context;
 
     bool exit_called = false;
     std::error_code ec;
     bp::child c(
         "doesn't exist",
         ec,
-        io_service,
+        io_context,
         bp::on_exit([&](int exit, const std::error_code& ec_in)
                 {
                     exit_called=true;
@@ -177,7 +177,7 @@ BOOST_AUTO_TEST_CASE(async_error, *boost::unit_test::timeout(2))
     );
 
     BOOST_REQUIRE(ec);
-    io_service.run();
+    io_context.run();
     BOOST_CHECK(!exit_called);
 }
 

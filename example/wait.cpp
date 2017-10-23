@@ -21,14 +21,14 @@ int main()
     }
 
     {
-        boost::asio::io_service io_service;
+        boost::asio::io_context io_context;
 
         bp::child c(
             "test.exe",
-            io_service,
+            io_context,
             bp::on_exit([&](int exit, const std::error_code& ec_in){})
         );
 
-        io_service.run();
+        io_context.run();
     }
 }

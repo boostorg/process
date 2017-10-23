@@ -8,7 +8,7 @@
 
 #include <boost/process/detail/handler_base.hpp>
 #include <boost/process/detail/windows/async_handler.hpp>
-#include <boost/asio/io_service.hpp>
+#include <boost/asio/io_context.hpp>
 #include <boost/asio/windows/object_handle.hpp>
 #include <boost/detail/winapi/process.hpp>
 #include <boost/detail/winapi/handles.hpp>
@@ -70,14 +70,14 @@ struct async_handler_collector
 };
 
 //Also set's up waiting for the exit, so it can close async stuff.
-struct io_service_ref : boost::process::detail::handler_base
+struct io_context_ref : boost::process::detail::handler_base
 {
 
-    io_service_ref(boost::asio::io_service & ios)
+    io_context_ref(boost::asio::io_context & ios)
             : ios(ios)
     {
     }
-    boost::asio::io_service &get() {return ios;};
+    boost::asio::io_context &get() {return ios;};
 
     template <class Executor>
     void on_success(Executor& exec) const
@@ -127,7 +127,7 @@ struct io_service_ref : boost::process::detail::handler_base
         wait_handler(const wait_handler & ) = delete;
         wait_handler(wait_handler && ) = default;
         wait_handler(std::vector<std::function<void(int, const std::error_code & ec)>> && funcs,
-                     boost::asio::io_service & ios, void * handle,
+                     boost::asio::io_context & ios, void * handle,
                      const std::shared_ptr<std::atomic<int>> &exit_status)
                 : funcs(std::move(funcs)),
                   handle(new boost::asio::windows::object_handle(ios, handle)),
@@ -152,7 +152,7 @@ struct io_service_ref : boost::process::detail::handler_base
     };
 
 private:
-    boost::asio::io_service &ios;
+    boost::asio::io_context &ios;
 };
 
 }}}}

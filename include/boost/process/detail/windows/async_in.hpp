@@ -29,7 +29,7 @@ namespace boost { namespace process { namespace detail { namespace windows {
 
 template<typename Buffer>
 struct async_in_buffer : ::boost::process::detail::windows::handler_base_ext,
-                         ::boost::process::detail::windows::require_io_service
+                         ::boost::process::detail::windows::require_io_context
 {
     Buffer & buf;
 
@@ -85,7 +85,7 @@ struct async_in_buffer : ::boost::process::detail::windows::handler_base_ext,
     void on_setup(WindowsExecutor &exec)
     {
         if (!pipe)
-            pipe = std::make_shared<boost::process::async_pipe>(get_io_service(exec.seq));
+            pipe = std::make_shared<boost::process::async_pipe>(get_io_context(exec.seq));
 
         ::boost::detail::winapi::HANDLE_ source_handle = std::move(*pipe).source().native_handle();
 

@@ -24,7 +24,7 @@ namespace asio = boost::asio;
 
 BOOST_AUTO_TEST_CASE(plain_async, *boost::unit_test::timeout(5))
 {
-    asio::io_service ios;
+    asio::io_context ios;
     bp::async_pipe pipe{ios};
 
     std::string st = "test-string\n";
@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(plain_async, *boost::unit_test::timeout(5))
 
 BOOST_AUTO_TEST_CASE(closed_transform)
 {
-    asio::io_service ios;
+    asio::io_context ios;
 
     bp::async_pipe ap{ios};
 
