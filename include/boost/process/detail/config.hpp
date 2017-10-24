@@ -31,7 +31,7 @@
 extern char **environ;
 #endif
 #elif defined(BOOST_WINDOWS_API)
-#include <boost/detail/winapi/get_last_error.hpp>
+#include <boost/winapi/get_last_error.hpp>
 #else
 #error "System API not supported by boost.process"
 #endif
@@ -63,7 +63,7 @@ namespace api = windows;
 
 inline std::error_code get_last_error() noexcept
 {
-    return std::error_code(::boost::detail::winapi::GetLastError(), std::system_category());
+    return std::error_code(::boost::winapi::GetLastError(), std::system_category());
 }
 #endif
 

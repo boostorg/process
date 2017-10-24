@@ -10,8 +10,8 @@
 #include <boost/process/detail/windows/async_handler.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/windows/object_handle.hpp>
-#include <boost/detail/winapi/process.hpp>
-#include <boost/detail/winapi/handles.hpp>
+#include <boost/winapi/process.hpp>
+#include <boost/winapi/handles.hpp>
 
 #include <boost/fusion/algorithm/iteration/for_each.hpp>
 #include <boost/fusion/algorithm/transformation/filter_if.hpp>
@@ -93,16 +93,16 @@ struct io_context_ref : boost::process::detail::handler_base
             return;
         }
 
-        ::boost::detail::winapi::PROCESS_INFORMATION_ & proc = exec.proc_info;
-        auto this_proc = ::boost::detail::winapi::GetCurrentProcess();
+        ::boost::winapi::PROCESS_INFORMATION_ & proc = exec.proc_info;
+        auto this_proc = ::boost::winapi::GetCurrentProcess();
 
         auto proc_in = proc.hProcess;;
-        ::boost::detail::winapi::HANDLE_ process_handle;
+        ::boost::winapi::HANDLE_ process_handle;
 
-        if (!::boost::detail::winapi::DuplicateHandle(
+        if (!::boost::winapi::DuplicateHandle(
               this_proc, proc_in, this_proc, &process_handle, 0,
-              static_cast<::boost::detail::winapi::BOOL_>(true),
-               ::boost::detail::winapi::DUPLICATE_SAME_ACCESS_))
+              static_cast<::boost::winapi::BOOL_>(true),
+               ::boost::winapi::DUPLICATE_SAME_ACCESS_))
 
         exec.set_error(::boost::process::detail::get_last_error(),
                                  "Duplicate Pipe Failed");
@@ -141,8 +141,8 @@ struct io_context_ref : boost::process::detail::handler_base
             if (ec_in)
                 ec = std::error_code(ec_in.value(), std::system_category());
 
-            ::boost::detail::winapi::DWORD_ code;
-            ::boost::detail::winapi::GetExitCodeProcess(handle->native(), &code);
+            ::boost::winapi::DWORD_ code;
+            ::boost::winapi::GetExitCodeProcess(handle->native(), &code);
             exit_status->store(code);
 
             for (auto & func : funcs)
