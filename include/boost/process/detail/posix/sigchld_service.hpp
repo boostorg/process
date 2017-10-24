@@ -80,7 +80,7 @@ void sigchld_service::_handle_signal(const boost::system::error_code & ec)
     int status;
     int pid = ::waitpid(0, &status, WNOHANG);
 
-    auto itr = std::find_if(_receivers.cbegin(), _receivers.cend(),
+    auto itr = std::find_if(_receivers.begin(), _receivers.end(),
             [&pid](const std::pair<::pid_t, std::function<void(int, std::error_code)>> & p)
             {
                 return p.first == pid;
