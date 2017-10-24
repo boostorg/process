@@ -22,7 +22,7 @@ namespace bp = boost::process;;
 
 void fail_func()
 {
-    boost::asio::io_service ios;
+    boost::asio::io_context ios;
 
     bp::async_system(ios, boost::asio::use_future, "foo", bp::ignore_error);
 }

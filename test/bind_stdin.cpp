@@ -111,9 +111,9 @@ BOOST_AUTO_TEST_CASE(async_io, *boost::unit_test::timeout(2))
     std::cout << "async_io" << std::endl;
     using boost::unit_test::framework::master_test_suite;
 
-    boost::asio::io_service io_service;
+    boost::asio::io_context io_context;
 
-    bp::async_pipe p1(io_service);
+    bp::async_pipe p1(io_context);
     bp::ipstream is;
 
     boost::asio::streambuf sb;
@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE(async_io, *boost::unit_test::timeout(2))
     boost::asio::async_write(p1, sb,
         write_handler(is));
 
-    io_service.run();
+    io_context.run();
 
     c.wait();
 }

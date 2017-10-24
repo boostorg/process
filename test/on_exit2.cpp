@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_CASE(double_ios, *boost::unit_test::timeout(6))
     }
 
     namespace bp = boost::process;
-    boost::asio::io_service ios;
+    boost::asio::io_context ios;
     std::chrono::steady_clock::time_point p1, p2;
 
     // launch a child that will sleep for 2s

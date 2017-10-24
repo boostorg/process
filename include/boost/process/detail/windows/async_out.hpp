@@ -67,7 +67,7 @@ inline void apply_out_handles(Executor &e, void* handle, std::integral_constant<
 
 template<int p1, int p2, typename Buffer>
 struct async_out_buffer : ::boost::process::detail::windows::handler_base_ext,
-                          ::boost::process::detail::windows::require_io_service
+                          ::boost::process::detail::windows::require_io_context
 {
     Buffer & buf;
 
@@ -98,7 +98,7 @@ struct async_out_buffer : ::boost::process::detail::windows::handler_base_ext,
     void on_setup(WindowsExecutor &exec)
     {
         if (!pipe)
-            pipe = std::make_shared<boost::process::async_pipe>(get_io_service(exec.seq));
+            pipe = std::make_shared<boost::process::async_pipe>(get_io_context(exec.seq));
         apply_out_handles(exec, std::move(*pipe).sink().native_handle(),
                 std::integral_constant<int, p1>(), std::integral_constant<int, p2>());
     }
@@ -108,7 +108,7 @@ struct async_out_buffer : ::boost::process::detail::windows::handler_base_ext,
 
 template<int p1, int p2, typename Type>
 struct async_out_future : ::boost::process::detail::windows::handler_base_ext,
-                          ::boost::process::detail::windows::require_io_service
+                          ::boost::process::detail::windows::require_io_context
 {
     std::shared_ptr<boost::process::async_pipe> pipe;
     std::shared_ptr<std::promise<Type>> promise = std::make_shared<std::promise<Type>>();
@@ -166,7 +166,7 @@ struct async_out_future : ::boost::process::detail::windows::handler_base_ext,
     void on_setup(WindowsExecutor &exec)
     {
         if (!pipe)
-            pipe = std::make_shared<boost::process::async_pipe>(get_io_service(exec.seq));
+            pipe = std::make_shared<boost::process::async_pipe>(get_io_context(exec.seq));
 
         apply_out_handles(exec, std::move(*pipe).sink().native_handle(),
                 std::integral_constant<int, p1>(), std::integral_constant<int, p2>());

@@ -41,7 +41,7 @@ int main()
 {
     std::error_code ec;
 
-    boost::asio::io_service ios;
+    boost::asio::io_context ios;
 
     bp::spawn(
         "dummy",
