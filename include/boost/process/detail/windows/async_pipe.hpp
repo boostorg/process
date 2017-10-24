@@ -143,8 +143,8 @@ public:
         return _sink.write_some(buffers);
     }
 
-    native_handle_type native_source() const {return const_cast<boost::asio::windows::stream_handle&>(_source).native();}
-    native_handle_type native_sink  () const {return const_cast<boost::asio::windows::stream_handle&>(_sink  ).native();}
+    native_handle_type native_source() const {return const_cast<boost::asio::windows::stream_handle&>(_source).native_handle();}
+    native_handle_type native_sink  () const {return const_cast<boost::asio::windows::stream_handle&>(_sink  ).native_handle();}
 
     template<typename MutableBufferSequence,
              typename ReadHandler>
@@ -192,7 +192,7 @@ public:
         auto proc = ::boost::winapi::GetCurrentProcess();
 
         ::boost::winapi::HANDLE_ source;
-        auto source_in = const_cast<handle_type&>(_source).native();
+        auto source_in = const_cast<handle_type&>(_source).native_handle();
         if (source_in == ::boost::winapi::INVALID_HANDLE_VALUE_)
             source = ::boost::winapi::INVALID_HANDLE_VALUE_;
         else if (!::boost::winapi::DuplicateHandle(
@@ -208,7 +208,7 @@ public:
         auto proc = ::boost::winapi::GetCurrentProcess();
 
         ::boost::winapi::HANDLE_ sink;
-        auto sink_in = const_cast<handle_type&>(_sink).native();
+        auto sink_in = const_cast<handle_type&>(_sink).native_handle();
         if (sink_in == ::boost::winapi::INVALID_HANDLE_VALUE_)
             sink = ::boost::winapi::INVALID_HANDLE_VALUE_;
         else if (!::boost::winapi::DuplicateHandle(
@@ -233,8 +233,8 @@ async_pipe::async_pipe(const async_pipe& p)  :
     ::boost::winapi::HANDLE_ sink;
 
     //cannot get the handle from a const object.
-    auto source_in = const_cast<handle_type&>(p._source).native();
-    auto sink_in   = const_cast<handle_type&>(p._sink).native();
+    auto source_in = const_cast<handle_type&>(p._source).native_handle();
+    auto sink_in   = const_cast<handle_type&>(p._sink).native_handle();
 
     if (source_in == ::boost::winapi::INVALID_HANDLE_VALUE_)
         source = ::boost::winapi::INVALID_HANDLE_VALUE_;
@@ -299,18 +299,18 @@ async_pipe& async_pipe::operator=(const async_pipe & p)
     auto &source_in = const_cast<::boost::asio::windows::stream_handle &>(p._source);
     auto &sink_in   = const_cast<::boost::asio::windows::stream_handle &>(p._sink);
 
-    if (source_in.native() == ::boost::winapi::INVALID_HANDLE_VALUE_)
+    if (source_in.native_handle() == ::boost::winapi::INVALID_HANDLE_VALUE_)
         source = ::boost::winapi::INVALID_HANDLE_VALUE_;
     else if (!::boost::winapi::DuplicateHandle(
-            proc, source_in.native(), proc, &source, 0,
+            proc, source_in.native_handle(), proc, &source, 0,
             static_cast<::boost::winapi::BOOL_>(true),
              ::boost::winapi::DUPLICATE_SAME_ACCESS_))
         throw_last_error("Duplicate Pipe Failed");
 
-    if (sink_in.native()   == ::boost::winapi::INVALID_HANDLE_VALUE_)
+    if (sink_in.native_handle()   == ::boost::winapi::INVALID_HANDLE_VALUE_)
         sink = ::boost::winapi::INVALID_HANDLE_VALUE_;
     else if (!::boost::winapi::DuplicateHandle(
-            proc, sink_in.native(), proc, &sink, 0,
+            proc, sink_in.native_handle(), proc, &sink, 0,
             static_cast<::boost::winapi::BOOL_>(true),
              ::boost::winapi::DUPLICATE_SAME_ACCESS_))
         throw_last_error("Duplicate Pipe Failed");
@@ -325,10 +325,10 @@ async_pipe& async_pipe::operator=(const async_pipe & p)
 async_pipe& async_pipe::operator=(async_pipe && rhs)
 {
     if (_source.native_handle() != ::boost::winapi::INVALID_HANDLE_VALUE_)
-        ::boost::winapi::CloseHandle(_source.native());
+        ::boost::winapi::CloseHandle(_source.native_handle());
 
     if (_sink.native_handle()   != ::boost::winapi::INVALID_HANDLE_VALUE_)
-        ::boost::winapi::CloseHandle(_sink.native());
+        ::boost::winapi::CloseHandle(_sink.native_handle());
 
     _source.assign(rhs._source.native_handle());
     _sink  .assign(rhs._sink  .native_handle());
@@ -346,8 +346,8 @@ async_pipe::operator basic_pipe<CharT, Traits>() const
     ::boost::winapi::HANDLE_ sink;
 
     //cannot get the handle from a const object.
-    auto source_in = const_cast<::boost::asio::windows::stream_handle &>(_source).native();
-    auto sink_in   = const_cast<::boost::asio::windows::stream_handle &>(_sink).native();
+    auto source_in = const_cast<::boost::asio::windows::stream_handle &>(_source).native_handle();
+    auto sink_in   = const_cast<::boost::asio::windows::stream_handle &>(_sink).native_handle();
 
     if (source_in == ::boost::winapi::INVALID_HANDLE_VALUE_)
         source = ::boost::winapi::INVALID_HANDLE_VALUE_;
