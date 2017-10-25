@@ -142,7 +142,7 @@ struct io_context_ref : boost::process::detail::handler_base
                 ec = std::error_code(ec_in.value(), std::system_category());
 
             ::boost::winapi::DWORD_ code;
-            ::boost::winapi::GetExitCodeProcess(handle->native(), &code);
+            ::boost::winapi::GetExitCodeProcess(handle->native_handle(), &code);
             exit_status->store(code);
 
             for (auto & func : funcs)
