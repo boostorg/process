@@ -64,7 +64,7 @@ struct check_startup_info
     {
         cnt++;
         BOOST_CHECK(e.creation_flags &  ::boost::winapi::EXTENDED_STARTUPINFO_PRESENT_);
-        BOOST_CHECK_EQUAL(e.startup_info.cb, sizeof(::boost::detail::winapi::STARTUPINFOEXA_));
+        BOOST_CHECK_EQUAL(e.startup_info.cb, sizeof(::boost::winapi::STARTUPINFOEXA_));
     }
 
 };
