@@ -76,8 +76,8 @@ struct overload_handler : ex::handler
         st = "windows";
         const char* env = exec.env;
     }
-    template <class ...Args>
-    void on_setup(ex::posix_executor<Args...>& exec) const
+    template <class Sequence>
+    void on_setup(ex::posix_executor<Sequence>& exec) const
     {
         st = "posix";
         char** env = exec.env;
