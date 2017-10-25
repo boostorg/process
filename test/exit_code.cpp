@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE(async_wait)
 
 #if defined(BOOST_WINDOWS_API)
     windows::object_handle handle(io_context, c.native_handle());
-    handle.async_wait(wait_handler(handle.native()));
+    handle.async_wait(wait_handler(handle.native_handle()));
 #endif
     std::cout << "async_wait 1" << std::endl;
     io_context.run();
