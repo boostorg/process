@@ -14,7 +14,7 @@
 #include <boost/process/async_system.hpp>
 
 #include <string>
-#include <boost/asio/io_service.hpp>
+#include <boost/asio/io_context.hpp>
 #include <boost/asio/spawn.hpp>
 #include <boost/asio/coroutine.hpp>
 #include <boost/asio/use_future.hpp>
@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(stackful, *boost::unit_test::timeout(15))
 
     bool did_something_else = false;
 
-    boost::asio::io_service ios;
+    boost::asio::io_context ios;
     auto stackful =
             [&](boost::asio::yield_context yield_)
             {
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(stackful_except, *boost::unit_test::timeout(15))
 
     bool did_something_else = false;
 
-    boost::asio::io_service ios;
+    boost::asio::io_context ios;
     auto stackful =
             [&](boost::asio::yield_context yield_)
             {
@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE(stackful_error, *boost::unit_test::timeout(15))
 
     bool did_something_else = false;
 
-    boost::asio::io_service ios;
+    boost::asio::io_context ios;
     auto stackful =
             [&](boost::asio::yield_context yield_)
             {
@@ -111,16 +111,16 @@ BOOST_AUTO_TEST_CASE(stackless, *boost::unit_test::timeout(15))
 {
     using boost::unit_test::framework::master_test_suite;
 
-    boost::asio::io_service ios;
+    boost::asio::io_context ios;
 
     bool did_something_else = false;
 
     struct stackless_t : boost::asio::coroutine
     {
-        boost::asio::io_service & ios;
+        boost::asio::io_context & ios;
         bool & did_something_else;
 
-        stackless_t(boost::asio::io_service & ios_,
+        stackless_t(boost::asio::io_context & ios_,
                     bool & did_something_else)
                         : ios(ios_), did_something_else(did_something_else) {}
         void operator()(
@@ -153,7 +153,7 @@ BOOST_AUTO_TEST_CASE(future, *boost::unit_test::timeout(15))
 {
     using boost::unit_test::framework::master_test_suite;
 
-    boost::asio::io_service ios;
+    boost::asio::io_context ios;
 
     std::future<int> fut = bp::async_system(
                               ios, boost::asio::use_future,
@@ -172,7 +172,7 @@ BOOST_AUTO_TEST_CASE(future_error, *boost::unit_test::timeout(15))
 {
     using boost::unit_test::framework::master_test_suite;
 
-    boost::asio::io_service ios;
+    boost::asio::io_context ios;
 
     std::future<int> fut = bp::async_system(
                               ios, boost::asio::use_future,

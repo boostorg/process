@@ -8,10 +8,10 @@
 
 #include <boost/process/detail/handler_base.hpp>
 #include <boost/process/detail/windows/async_handler.hpp>
-#include <boost/asio/io_service.hpp>
+#include <boost/asio/io_context.hpp>
 #include <boost/asio/windows/object_handle.hpp>
-#include <boost/detail/winapi/process.hpp>
-#include <boost/detail/winapi/handles.hpp>
+#include <boost/winapi/process.hpp>
+#include <boost/winapi/handles.hpp>
 
 #include <boost/fusion/algorithm/iteration/for_each.hpp>
 #include <boost/fusion/algorithm/transformation/filter_if.hpp>
@@ -70,14 +70,14 @@ struct async_handler_collector
 };
 
 //Also set's up waiting for the exit, so it can close async stuff.
-struct io_service_ref : boost::process::detail::handler_base
+struct io_context_ref : boost::process::detail::handler_base
 {
 
-    io_service_ref(boost::asio::io_service & ios)
+    io_context_ref(boost::asio::io_context & ios)
             : ios(ios)
     {
     }
-    boost::asio::io_service &get() {return ios;};
+    boost::asio::io_context &get() {return ios;};
 
     template <class Executor>
     void on_success(Executor& exec) const
@@ -93,16 +93,16 @@ struct io_service_ref : boost::process::detail::handler_base
             return;
         }
 
-        ::boost::detail::winapi::PROCESS_INFORMATION_ & proc = exec.proc_info;
-        auto this_proc = ::boost::detail::winapi::GetCurrentProcess();
+        ::boost::winapi::PROCESS_INFORMATION_ & proc = exec.proc_info;
+        auto this_proc = ::boost::winapi::GetCurrentProcess();
 
         auto proc_in = proc.hProcess;;
-        ::boost::detail::winapi::HANDLE_ process_handle;
+        ::boost::winapi::HANDLE_ process_handle;
 
-        if (!::boost::detail::winapi::DuplicateHandle(
+        if (!::boost::winapi::DuplicateHandle(
               this_proc, proc_in, this_proc, &process_handle, 0,
-              static_cast<::boost::detail::winapi::BOOL_>(true),
-               ::boost::detail::winapi::DUPLICATE_SAME_ACCESS_))
+              static_cast<::boost::winapi::BOOL_>(true),
+               ::boost::winapi::DUPLICATE_SAME_ACCESS_))
 
         exec.set_error(::boost::process::detail::get_last_error(),
                                  "Duplicate Pipe Failed");
@@ -127,7 +127,7 @@ struct io_service_ref : boost::process::detail::handler_base
         wait_handler(const wait_handler & ) = delete;
         wait_handler(wait_handler && ) = default;
         wait_handler(std::vector<std::function<void(int, const std::error_code & ec)>> && funcs,
-                     boost::asio::io_service & ios, void * handle,
+                     boost::asio::io_context & ios, void * handle,
                      const std::shared_ptr<std::atomic<int>> &exit_status)
                 : funcs(std::move(funcs)),
                   handle(new boost::asio::windows::object_handle(ios, handle)),
@@ -141,8 +141,8 @@ struct io_service_ref : boost::process::detail::handler_base
             if (ec_in)
                 ec = std::error_code(ec_in.value(), std::system_category());
 
-            ::boost::detail::winapi::DWORD_ code;
-            ::boost::detail::winapi::GetExitCodeProcess(handle->native(), &code);
+            ::boost::winapi::DWORD_ code;
+            ::boost::winapi::GetExitCodeProcess(handle->native_handle(), &code);
             exit_status->store(code);
 
             for (auto & func : funcs)
@@ -152,7 +152,7 @@ struct io_service_ref : boost::process::detail::handler_base
     };
 
 private:
-    boost::asio::io_service &ios;
+    boost::asio::io_context &ios;
 };
 
 }}}}

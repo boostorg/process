@@ -18,14 +18,14 @@ namespace boost { namespace process { namespace detail { namespace posix {
 
 class sigchld_service : public boost::asio::detail::service_base<sigchld_service>
 {
-    boost::asio::io_service::strand _strand{get_io_service()};
-    boost::asio::signal_set _signal_set{get_io_service(), SIGCHLD};
+    boost::asio::io_context::strand _strand{get_io_context()};
+    boost::asio::signal_set _signal_set{get_io_context(), SIGCHLD};
 
     std::vector<std::pair<::pid_t, std::function<void(int, std::error_code)>>> _receivers;
     inline void _handle_signal(const boost::system::error_code & ec);
 public:
-    sigchld_service(boost::asio::io_service & io_service)
-        : boost::asio::detail::service_base<sigchld_service>(io_service)
+    sigchld_service(boost::asio::io_context & io_context)
+        : boost::asio::detail::service_base<sigchld_service>(io_context)
     {
     }
 
@@ -34,9 +34,9 @@ public:
         void (int, std::error_code))
     async_wait(::pid_t pid, SignalHandler && handler)
     {
-        boost::asio::detail::async_result_init<
-        SignalHandler, void(boost::system::error_code)> init{std::forward<SignalHandler>(handler)};
-        auto & h = init.handler;
+        boost::asio::async_completion<
+        SignalHandler, void(boost::system::error_code)> init{handler};
+        auto & h = init.completion_handler;
         _strand.post(
                 [this, pid, h]
                 {
@@ -80,14 +80,14 @@ void sigchld_service::_handle_signal(const boost::system::error_code & ec)
     int status;
     int pid = ::waitpid(0, &status, WNOHANG);
 
-    auto itr = std::find_if(_receivers.cbegin(), _receivers.cend(),
+    auto itr = std::find_if(_receivers.begin(), _receivers.end(),
             [&pid](const std::pair<::pid_t, std::function<void(int, std::error_code)>> & p)
             {
                 return p.first == pid;
             });
     if (itr != _receivers.cend())
     {
-        _strand.get_io_service().wrap(itr->second)(status, ec_);
+        _strand.get_io_context().wrap(itr->second)(status, ec_);
         _receivers.erase(itr);
     }
     if (!_receivers.empty())

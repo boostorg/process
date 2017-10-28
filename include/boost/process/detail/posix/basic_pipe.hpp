@@ -105,8 +105,10 @@ public:
 
     void close()
     {
-        ::close(_source);
-        ::close(_sink);
+        if (_source != -1)
+            ::close(_source);
+        if (_sink != -1)
+            ::close(_sink);
         _source = -1;
         _sink   = -1;
     }

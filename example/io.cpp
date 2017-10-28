@@ -44,14 +44,14 @@ int main()
 
     }
     {
-        boost::asio::io_service io_service;
-        bp::async_pipe p1(io_service);
-        bp::async_pipe p2(io_service);
+        boost::asio::io_context io_context;
+        bp::async_pipe p1(io_context);
+        bp::async_pipe p2(io_context);
         bp::system(
             "test.exe",
             bp::std_out > p2,
             bp::std_in < p1,
-            io_service,
+            io_context,
             bp::on_exit([&](int exit, const std::error_code& ec_in)
                 {
                     p1.async_close();
@@ -64,7 +64,7 @@ int main()
         boost::asio::async_read (p2, boost::asio::buffer(in_buf), []( const boost::system::error_code&, std::size_t){});
     }
     {
-        boost::asio::io_service io_service;
+        boost::asio::io_context io_context;
         std::vector<char> in_buf;
         std::string value = "my_string";
         bp::system(
@@ -75,7 +75,7 @@ int main()
     }
 
     {
-        boost::asio::io_service io_service;
+        boost::asio::io_context io_context;
         std::future<std::vector<char>> in_buf;
         std::future<void> write_fut;
         std::string value = "my_string";

@@ -3,12 +3,12 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BOOST_PROCESS_POSIX_IO_SERVICE_REF_HPP_
-#define BOOST_PROCESS_POSIX_IO_SERVICE_REF_HPP_
+#ifndef BOOST_PROCESS_POSIX_IO_CONTEXT_REF_HPP_
+#define BOOST_PROCESS_POSIX_IO_CONTEXT_REF_HPP_
 
 #include <boost/process/detail/posix/handler.hpp>
 #include <boost/process/detail/posix/async_handler.hpp>
-#include <boost/asio/io_service.hpp>
+#include <boost/asio/io_context.hpp>
 
 #include <boost/fusion/algorithm/iteration/for_each.hpp>
 #include <boost/fusion/algorithm/transformation/filter_if.hpp>
@@ -67,13 +67,13 @@ struct async_handler_collector
 };
 
 //Also set's up waiting for the exit, so it can close async stuff.
-struct io_service_ref : handler_base_ext
+struct io_context_ref : handler_base_ext
 {
-    io_service_ref(boost::asio::io_service & ios) : ios(ios)
+    io_context_ref(boost::asio::io_context & ios) : ios(ios)
     {
 
     }
-    boost::asio::io_service &get() {return ios;};
+    boost::asio::io_context &get() {return ios;};
     
     template <class Executor>
     void on_success(Executor& exec)
@@ -105,10 +105,10 @@ struct io_service_ref : handler_base_ext
     }
 
 private:
-    boost::asio::io_service &ios;
+    boost::asio::io_context &ios;
     boost::process::detail::posix::sigchld_service &sigchld_service = boost::asio::use_service<boost::process::detail::posix::sigchld_service>(ios);
 };
 
 }}}}
 
-#endif /* BOOST_PROCESS_WINDOWS_IO_SERVICE_REF_HPP_ */
+#endif /* BOOST_PROCESS_WINDOWS_IO_CONTEXT_REF_HPP_ */

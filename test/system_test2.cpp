@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE(explicit_async_io, *boost::unit_test::timeout(2))
 {
     using boost::unit_test::framework::master_test_suite;
 
-    boost::asio::io_service ios;
+    boost::asio::io_context ios;
 
     std::future<std::string> fut;
 
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(explicit_async_io_running, *boost::unit_test::timeout(10))
 {
     using boost::unit_test::framework::master_test_suite;
 
-    boost::asio::io_service ios;
+    boost::asio::io_context ios;
     std::future<std::string> fut;
     std::error_code ec;
 

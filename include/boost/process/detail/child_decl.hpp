@@ -103,7 +103,7 @@ public:
     {
         if (valid() && !_exited())
         {
-            int code; 
+            int code = -1;
             auto res = boost::process::detail::api::is_running(_child_handle, code);
             if (!res && !_exited())
                 _exit_status->store(code);

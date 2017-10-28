@@ -50,7 +50,7 @@ struct set_startup_info
     void operator()(T &e) const
     {
         cnt++;
-        BOOST_CHECK_EQUAL(e.startup_info.cb, sizeof(::boost::detail::winapi::STARTUPINFOA_));
+        BOOST_CHECK_EQUAL(e.startup_info.cb, sizeof(::boost::winapi::STARTUPINFOA_));
         e.set_startup_info_ex();
     }
 
@@ -63,8 +63,8 @@ struct check_startup_info
     void operator()(T &e) const
     {
         cnt++;
-        BOOST_CHECK(e.creation_flags &  ::boost::detail::winapi::EXTENDED_STARTUPINFO_PRESENT_);
-        BOOST_CHECK_EQUAL(e.startup_info.cb, sizeof(::boost::detail::winapi::STARTUPINFOEXA_));
+        BOOST_CHECK(e.creation_flags &  ::boost::winapi::EXTENDED_STARTUPINFO_PRESENT_);
+        BOOST_CHECK_EQUAL(e.startup_info.cb, sizeof(::boost::winapi::STARTUPINFOEXA_));
     }
 
 };
