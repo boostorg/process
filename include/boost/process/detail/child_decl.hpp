@@ -79,6 +79,7 @@ public:
         _child_handle= std::move(lhs._child_handle);
         _exit_status = std::move(lhs._exit_status);
         _attached    = lhs._attached;
+        _terminated  = lhs._terminated;
         lhs._attached = false;
         return *this;
     };
