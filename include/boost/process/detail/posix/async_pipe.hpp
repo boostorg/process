@@ -70,9 +70,9 @@ public:
     ~async_pipe()
     {
         if (_sink .native_handle()  != -1)
-            _sink.close();
+            ::close(_sink.native_handle());
         if (_source.native_handle() != -1)
-            _source.close();
+            ::close(_source.native_handle());
     }
 
     template<class CharT, class Traits = std::char_traits<CharT>>
