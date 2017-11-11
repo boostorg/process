@@ -11,6 +11,7 @@
 #include <boost/asio/posix/stream_descriptor.hpp>
 #include <system_error>
 #include <string>
+#include <utility>
 
 namespace boost { namespace process { namespace detail { namespace posix {
 
@@ -264,16 +265,8 @@ async_pipe& async_pipe::operator=(const async_pipe & p)
 
 async_pipe& async_pipe::operator=(async_pipe && lhs)
 {
-    if (_source.native_handle() == -1)
-         ::close(_source.native_handle());
-
-    if (_sink.native_handle()   == -1)
-        ::close(_sink.native_handle());
-
-    _source.assign(lhs._source.native_handle());
-    _sink  .assign(lhs._sink  .native_handle());
-    lhs._source.assign(-1);
-    lhs._sink  .assign(-1);
+    std::swap(_source, lhs._source);
+    std::swap(_sink, lhs._sink);
     return *this;
 }
 
