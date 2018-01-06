@@ -165,10 +165,10 @@ public:
     {
         if (valid() && !_exited())
         {
-            int code;
-            auto res = boost::process::detail::api::is_running(_child_handle, code, ec);
+            int exit_code = 0;
+            auto res = boost::process::detail::api::is_running(_child_handle, exit_code, ec);
             if (!res && !_exited())
-                _exit_status->store(code);
+                _exit_status->store(exit_code);
 
             return res;
         }
