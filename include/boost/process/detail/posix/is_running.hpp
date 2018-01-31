@@ -70,7 +70,22 @@ inline bool is_running(int code)
 
 inline int eval_exit_status(int code)
 {
-    return WEXITSTATUS(code);
+    if (WIFEXITED(code))
+    {
+        return WEXITSTATUS(code);
+    }
+    else if (WIFSIGNALED(code))
+    {
+        return WTERMSIG(code);
+    }
+    else if (WIFSTOPPED(code))
+    {
+        return WSTOPSIG(code);
+    }
+    else
+    {
+        return code;
+    }
 }
 
 }}}}
