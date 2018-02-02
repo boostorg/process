@@ -96,8 +96,12 @@ test-suite with-valgrind :
    : <dependency>bare ;
 
 test-suite without-valgrind :
-    [ run async_system.cpp filesystem system coroutine        : : sparring_partner : <link>static ]
-    [ run vfork.cpp     system filesystem                     : : sparring_partner : <build>no <target-os>linux:<build>yes ]
+    [ run async_system_future.cpp filesystem system coroutine           : : sparring_partner : <link>static ]
+    [ run async_system_stackful.cpp filesystem system coroutine         : : sparring_partner : <link>static ]
+    [ run async_system_stackful_error.cpp filesystem system coroutine   : : sparring_partner : <link>static ]
+    [ run async_system_stackful_except.cpp filesystem system coroutine  : : sparring_partner : <link>static ]
+    [ run async_system_stackless.cpp filesystem system coroutine        : : sparring_partner : <link>static ]
+    [ run vfork.cpp     system filesystem                               : : sparring_partner : <build>no <target-os>linux:<build>yes ]
     ;
 
 
