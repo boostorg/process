@@ -24,43 +24,29 @@
 #include <array>
 
 namespace bp = boost::process;
-BOOST_AUTO_TEST_CASE(stackless, *boost::unit_test::timeout(15))
+BOOST_AUTO_TEST_CASE(stackful, *boost::unit_test::timeout(15))
 {
     using boost::unit_test::framework::master_test_suite;
 
-    boost::asio::io_context ios;
-
     bool did_something_else = false;
 
-    struct stackless_t : boost::asio::coroutine
-    {
-        boost::asio::io_context & ios;
-        bool & did_something_else;
-
-        stackless_t(boost::asio::io_context & ios_,
-                    bool & did_something_else)
-                        : ios(ios_), did_something_else(did_something_else) {}
-        void operator()(
-                boost::system::error_code ec = boost::system::error_code(),
-                std::size_t exit_code = 0)
-        {
-            if (!ec) reenter (this)
+    boost::asio::io_context ios;
+    auto stackful =
+            [&](boost::asio::yield_context yield_)
             {
-                yield bp::async_system(
-                        ios, *this,
+                int ret =
+                    bp::async_system(
+                        ios, yield_,
                         master_test_suite().argv[1],
-                        "test", "--exit-code", "42");
+                        "test", "--exit-code", "123");
 
-                BOOST_CHECK_EQUAL(exit_code, 42);
+                BOOST_CHECK_EQUAL(ret, 123);
                 BOOST_CHECK(did_something_else);
-            }
-        }
-    } stackless{ios, did_something_else};
+            };
 
-    ios.post([&]{stackless();});
+    boost::asio::spawn(ios, stackful);
     ios.post([&]{did_something_else = true;});
 
     ios.run();
-
     BOOST_CHECK(did_something_else);
 }
