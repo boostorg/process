@@ -29,7 +29,7 @@ struct show_window : ::boost::process::detail::handler_base
     }
 };
 
-struct create_no_window_ : public ::boost::process::extend::handler
+struct create_no_window_ : public ::boost::process::detail::handler_base
 {
     template <class Executor>
     void on_setup(Executor &exec) const
