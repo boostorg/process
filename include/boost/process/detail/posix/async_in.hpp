@@ -86,6 +86,7 @@ struct async_in_buffer : ::boost::process::detail::posix::handler_base_ext,
             exec.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
 
         ::close(pipe->native_source());
+        ::close(pipe->native_sink());
     }
 };
 
