@@ -70,7 +70,6 @@ struct async_pipe_in : public pipe_in
     {
         boost::system::error_code ec;
         std::move(pipe).source().close(ec);
-        std::move(pipe).sink().close(ec);
     }
 
     template<typename Executor>
