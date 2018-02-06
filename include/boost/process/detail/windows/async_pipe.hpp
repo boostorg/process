@@ -265,7 +265,11 @@ async_pipe::async_pipe(boost::asio::io_context & ios_source,
     static constexpr int FILE_FLAG_OVERLAPPED_  = 0x40000000; //temporary
 
     ::boost::winapi::HANDLE_ source = ::boost::winapi::create_named_pipe(
+#if defined(BOOST_NO_ANSI_APIS)
+            ::boost::process::detail::convert(name).c_str(),
+#else
             name.c_str(),
+#endif
             ::boost::winapi::PIPE_ACCESS_INBOUND_
             | FILE_FLAG_OVERLAPPED_, //write flag
             0, 1, 8192, 8192, 0, nullptr);
@@ -277,7 +281,11 @@ async_pipe::async_pipe(boost::asio::io_context & ios_source,
     _source.assign(source);
 
     ::boost::winapi::HANDLE_ sink = boost::winapi::create_file(
+#if defined(BOOST_NO_ANSI_APIS)
+            ::boost::process::detail::convert(name).c_str(),
+#else
             name.c_str(),
+#endif
             ::boost::winapi::GENERIC_WRITE_, 0, nullptr,
             ::boost::winapi::OPEN_EXISTING_,
             FILE_FLAG_OVERLAPPED_, //to allow read

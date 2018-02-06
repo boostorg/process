@@ -97,7 +97,7 @@ inline ::boost::winapi::BOOL_ WINAPI query_information_job_object(
         ::boost::winapi::DWORD_ cbJobObjectInfoLength,
         ::boost::winapi::DWORD_ *lpReturnLength)
 {
-    static ::boost::winapi::HMODULE_ h = ::boost::winapi::get_module_handle("Kernel32.dll");
+    static ::boost::winapi::HMODULE_ h = ::boost::winapi::get_module_handle(L"Kernel32.dll");
     static query_information_job_object_p f = reinterpret_cast<query_information_job_object_p>(::boost::winapi::get_proc_address(h, "QueryInformationJobObject"));
 
     return (*f)(hJob, JobObjectInfoClass, lpJobObjectInfo, cbJobObjectInfoLength, lpReturnLength);
@@ -124,7 +124,7 @@ inline ::boost::winapi::BOOL_ WINAPI set_information_job_object(
         void * lpJobObjectInfo,
         ::boost::winapi::DWORD_ cbJobObjectInfoLength)
 {
-    static ::boost::winapi::HMODULE_ h = ::boost::winapi::get_module_handle("Kernel32.dll");
+    static ::boost::winapi::HMODULE_ h = ::boost::winapi::get_module_handle(L"Kernel32.dll");
     static set_information_job_object_p f = reinterpret_cast<set_information_job_object_p>(::boost::winapi::get_proc_address(h, "SetInformationJobObject"));
 
     return (*f)(hJob, JobObjectInfoClass, lpJobObjectInfo, cbJobObjectInfoLength);
