@@ -45,11 +45,19 @@ struct file_descriptor
     }
 
     file_descriptor(const std::string & path , mode_t mode = read_write)
-        : file_descriptor(path.c_str(), mode) {}
+#if defined(BOOST_NO_ANSI_APIS)
+        : file_descriptor(::boost::process::detail::convert(path), mode)
+#else
+        : file_descriptor(path.c_str(), mode)
+#endif
+    {}
     file_descriptor(const std::wstring & path, mode_t mode = read_write)
         : file_descriptor(path.c_str(), mode) {}
 
     file_descriptor(const char*    path, mode_t mode = read_write)
+#if defined(BOOST_NO_ANSI_APIS)
+        : file_descriptor(std::string(path), mode)
+#else
         : _handle(
                 ::boost::winapi::create_file(
                         path,
@@ -62,8 +70,8 @@ struct file_descriptor
                         ::boost::winapi::FILE_ATTRIBUTE_NORMAL_,
                         nullptr
                 ))
+#endif
     {
-
     }
     file_descriptor(const wchar_t * path, mode_t mode = read_write)
         : _handle(

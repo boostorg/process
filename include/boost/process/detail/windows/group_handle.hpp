@@ -103,7 +103,7 @@ struct group_handle
     }
 
 
-    group_handle() : group_handle(::boost::winapi::CreateJobObjectA(nullptr, nullptr))
+    group_handle() : group_handle(::boost::winapi::CreateJobObjectW(nullptr, nullptr))
     {
 
     }

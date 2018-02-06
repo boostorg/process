@@ -15,6 +15,7 @@ if [ os.name ] = NT
 {
   lib ws2_32 ;
   lib shell32 ;
+  lib Advapi32 ;
 }
 
 project : requirements
@@ -24,7 +25,6 @@ project : requirements
   <target-os>linux:<linkflags>-lpthread
   <os>NT,<toolset>cw:<library>ws2_32
   <os>NT,<toolset>gcc:<library>ws2_32
-
 ;
 
 
@@ -48,9 +48,12 @@ exe sparring_partner : sparring_partner.cpp program_options system filesystem io
 exe sub_launch : sub_launcher.cpp program_options iostreams system filesystem : <warnings>off <target-os>windows:<source>shell32 ;
 
 test-suite bare :
-    [ run environment.cpp system filesystem  ]
-    [ run async_pipe.cpp system filesystem ]
-    [ run pipe.cpp        system filesystem  ]
+    [ run environment.cpp system filesystem ]
+    [ run async_pipe.cpp  system filesystem ]
+    [ run pipe.cpp        system filesystem ]
+    [ compile no_ansi_apps.cpp ]
+    [ compile-fail spawn_fail.cpp        ]
+    [ compile-fail async_system_fail.cpp ]
     ;
 
 test-suite with-valgrind :
@@ -89,8 +92,6 @@ test-suite with-valgrind :
     [ run on_exit.cpp  system filesystem                      : : sparring_partner ]
     [ run on_exit2.cpp system filesystem                      : : sparring_partner ]
     [ run on_exit3.cpp system filesystem                      : : sparring_partner ]
-    [ compile-fail spawn_fail.cpp        ]
-    [ compile-fail async_system_fail.cpp ]
     [ run posix_specific.cpp     system filesystem            : : sparring_partner : <build>no <target-os>linux:<build>yes   ]
     [ run windows_specific.cpp filesystem system              : : sparring_partner : <build>no <target-os>windows:<build>yes   ]
    : <dependency>bare ;

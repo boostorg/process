@@ -41,11 +41,15 @@ class windows_file_codecvt
      wchar_t* to, wchar_t* to_end, wchar_t*& to_next) const override
    {
      boost::ignore_unused(state);
-     ::boost::winapi::UINT_ codepage = AreFileApisANSI() ?
-             ::boost::winapi::CP_ACP_ :
-             ::boost::winapi::CP_OEMCP_;
 
-     int count;
+       auto codepage =
+#if !defined(BOOST_NO_ANSI_APIS)
+               ::boost::winapi::AreFileApisANSI() ?
+               ::boost::winapi::CP_ACP_ :
+#endif
+               ::boost::winapi::CP_OEMCP_;
+
+     int count = 0;
      if ((count = ::boost::winapi::MultiByteToWideChar(codepage,
              ::boost::winapi::MB_PRECOMPOSED_, from,
        static_cast<int>(from_end - from), to, static_cast<int>(to_end - to))) == 0)
@@ -64,11 +68,15 @@ class windows_file_codecvt
      char* to, char* to_end, char*& to_next) const override
    {
      boost::ignore_unused(state);
-     auto codepage = ::boost::winapi::AreFileApisANSI() ?
+     auto codepage =
+#if !defined(BOOST_NO_ANSI_APIS)
+                   ::boost::winapi::AreFileApisANSI() ?
                        ::boost::winapi::CP_ACP_ :
+#endif
                      ::boost::winapi::CP_OEMCP_;
+     int count = 0;
 
-     int count;
+
      if ((count = ::boost::winapi::WideCharToMultiByte(codepage,
                    ::boost::winapi::WC_NO_BEST_FIT_CHARS_, from,
                   static_cast<int>(from_end - from), to, static_cast<int>(to_end - to), 0, 0)) == 0)
