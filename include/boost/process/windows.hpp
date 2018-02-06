@@ -53,7 +53,7 @@ constexpr ::boost::process::detail::windows::show_window<::boost::winapi::SW_SHO
 ///Activates and displays a window. If the window is minimized or maximized, the system restores it to its original size and position. An application should specify this flag when displaying the window for the first time.
 constexpr ::boost::process::detail::windows::show_window<::boost::winapi::SW_SHOWNORMAL_     > show_normal;
 
-///Adds the [CREATE_NO_WINDOWS](https://msdn.microsoft.com/en-us/library/windows/desktop/ms684863(v=vs.85).aspx) flag.
+///Adds the [CREATE_NO_WINDOW](https://msdn.microsoft.com/en-us/library/windows/desktop/ms684863(v=vs.85).aspx) flag.
 constexpr ::boost::process::detail::windows::create_no_window_ create_no_window;
 
 }}}
