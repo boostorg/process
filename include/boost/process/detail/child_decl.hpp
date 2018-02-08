@@ -103,62 +103,42 @@ public:
 
     bool running()
     {
-        if (valid() && !_exited())
-        {
-            int code = -1;
-            auto res = boost::process::detail::api::is_running(_child_handle, code);
-            if (!res && !_exited())
-                _exit_status->store(code);
-
-            return res;
-        }
-        return false;
+        std::error_code ec;
+        bool b = running(ec);
+        boost::process::detail::throw_error(ec, "running error");
+        return b;
     }
 
     void terminate()
     {
-        if (valid() && running())
-            boost::process::detail::api::terminate(_child_handle);
-
-        _terminated = true;
+        std::error_code ec;
+        terminate(ec);
+        boost::process::detail::throw_error(ec, "terminate error");
     }
 
     void wait()
     {
-        if (!_exited() && valid())
-        {
-            int exit_code = 0;
-            boost::process::detail::api::wait(_child_handle, exit_code);
-            _exit_status->store(exit_code);
-        }
+        std::error_code ec;
+        wait(ec);
+        boost::process::detail::throw_error(ec, "wait error");
     }
 
     template< class Rep, class Period >
-    bool wait_for  (const std::chrono::duration<Rep, Period>& rel_time)
+    bool wait_for (const std::chrono::duration<Rep, Period>& rel_time)
     {
-        if (!_exited())
-        {
-            int exit_code = 0;
-            auto b = boost::process::detail::api::wait_for(_child_handle, exit_code, rel_time);
-            if (!b)
-                return false;
-            _exit_status->store(exit_code);
-        }
-        return true;
+        std::error_code ec;
+        bool b = wait_for(rel_time, ec);
+        boost::process::detail::throw_error(ec, "wait_for error");
+        return b;
     }
 
     template< class Clock, class Duration >
     bool wait_until(const std::chrono::time_point<Clock, Duration>& timeout_time )
     {
-        if (!_exited())
-        {
-            int exit_code = 0;
-            auto b = boost::process::detail::api::wait_until(_child_handle, exit_code, timeout_time);
-            if (!b)
-                return false;
-            _exit_status->store(exit_code);
-        }
-        return true;
+        std::error_code ec;
+        bool b = wait_until(timeout_time, ec);
+        boost::process::detail::throw_error(ec, "wait_until error");
+        return b;
     }
 
     bool running(std::error_code & ec) noexcept
@@ -194,17 +174,9 @@ public:
     }
 
     template< class Rep, class Period >
-    bool wait_for  (const std::chrono::duration<Rep, Period>& rel_time, std::error_code & ec) noexcept
+    bool wait_for (const std::chrono::duration<Rep, Period>& rel_time, std::error_code & ec) noexcept
     {
-        if (!_exited())
-        {
-            int exit_code = 0;
-            auto b = boost::process::detail::api::wait_for(_child_handle, exit_code, rel_time, ec);
-            if (!b)
-                return false;
-            _exit_status->store(exit_code);
-        }
-        return true;
+        return wait_until(std::chrono::steady_clock::now() + rel_time, ec);
     }
 
     template< class Clock, class Duration >

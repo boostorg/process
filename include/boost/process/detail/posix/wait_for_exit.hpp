@@ -43,7 +43,7 @@ inline void wait(const child_handle &p, int & exit_code) noexcept
 {
     std::error_code ec;
     wait(p, exit_code, ec);
-    boost::process::detail::throw_error(ec, "wait");
+    boost::process::detail::throw_error(ec, "waitpid(2) failed in wait");
 }
 
 template< class Clock, class Duration >
@@ -91,7 +91,7 @@ inline bool wait_until(
 {
     std::error_code ec;
     bool b = wait_until(p, exit_code, time_out, ec);
-    boost::process::detail::throw_error(ec, "wait_until");
+    boost::process::detail::throw_error(ec, "waitpid(2) failed in wait_until");
     return b;
 }
 
@@ -113,7 +113,7 @@ inline bool wait_for(
 {
     std::error_code ec;
     bool b = wait_for(p, exit_code, rel_time, ec);
-    boost::process::detail::throw_error(ec, "wait_for");
+    boost::process::detail::throw_error(ec, "waitpid(2) failed in wait_for");
     return b;
 }
 

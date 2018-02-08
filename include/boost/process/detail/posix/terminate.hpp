@@ -19,15 +19,6 @@
 
 namespace boost { namespace process { namespace detail { namespace posix {
 
-
-inline void terminate(const child_handle &p)
-{
-    if (::kill(p.pid, SIGKILL) == -1)
-        boost::process::detail::throw_last_error("kill(2) failed");
-    int status;
-    ::waitpid(p.pid, &status, 0); //just to clean it up
-}
-
 inline void terminate(const child_handle &p, std::error_code &ec) noexcept
 {
     if (::kill(p.pid, SIGKILL) == -1)
@@ -37,6 +28,13 @@ inline void terminate(const child_handle &p, std::error_code &ec) noexcept
 
     int status;
     ::waitpid(p.pid, &status, 0); //just to clean it up
+}
+
+inline void terminate(const child_handle &p)
+{
+    std::error_code ec;
+    terminate(p, ec);
+    boost::process::detail::throw_error(ec, "kill(2) failed");
 }
 
 }}}}
