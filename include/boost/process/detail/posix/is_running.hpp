@@ -22,33 +22,11 @@ inline bool is_running(int code)
     return !WIFEXITED(code) && !WIFSIGNALED(code);
 }
 
-inline bool is_running(const child_handle &p, int & exit_code)
-{
-    int status; 
-    auto ret = ::waitpid(p.pid, &status, WNOHANG|WUNTRACED);
-    
-    if (ret == -1)
-    {
-        if (errno != ECHILD) //because it no child is running, than this one isn't either, obviously.
-            ::boost::process::detail::throw_last_error("is_running error");
-
-        return false;
-    }
-    else if (ret == 0)
-        return true;
-    else //exited
-    {
-        if (!is_running(status))
-            exit_code = status;
-        return false;
-    }
-}
-
 inline bool is_running(const child_handle &p, int & exit_code, std::error_code &ec) noexcept
 {
     int status;
     auto ret = ::waitpid(p.pid, &status, WNOHANG|WUNTRACED); 
-    
+
     if (ret == -1)
     {
         if (errno != ECHILD) //because it no child is running, than this one isn't either, obviously.
@@ -60,12 +38,20 @@ inline bool is_running(const child_handle &p, int & exit_code, std::error_code &
     else
     {
         ec.clear();
-        
+
         if (!is_running(status))
             exit_code = status;
-        
+
         return false;
     }
+}
+
+inline bool is_running(const child_handle &p, int & exit_code)
+{
+    std::error_code ec;
+    bool b = is_running(p, exit_code, ec);
+    boost::process::detail::throw_error(ec, "waitpid(2) failed in is_running");
+    return b;
 }
 
 inline int eval_exit_status(int code)
