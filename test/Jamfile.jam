@@ -21,6 +21,7 @@ if [ os.name ] = NT
 project : requirements
   <toolset>msvc:<define>_SCL_SECURE_NO_WARNINGS
   <toolset>msvc:<define>_CRT_SECURE_NO_DEPRECATE
+  <toolset>msvc:<cxxflags>/bigobj
   <target-os>windows:<define>WIN32_LEAN_AND_MEAN
   <target-os>linux:<linkflags>-lpthread
   <os>NT,<toolset>cw:<library>ws2_32
