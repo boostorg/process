@@ -25,7 +25,7 @@ inline bool is_running(int code)
 inline bool is_running(const child_handle &p, int & exit_code, std::error_code &ec) noexcept
 {
     int status;
-    auto ret = ::waitpid(p.pid, &status, WNOHANG|WUNTRACED); 
+    auto ret = ::waitpid(p.pid, &status, WNOHANG);
 
     if (ret == -1)
     {
@@ -63,10 +63,6 @@ inline int eval_exit_status(int code)
     else if (WIFSIGNALED(code))
     {
         return WTERMSIG(code);
-    }
-    else if (WIFSTOPPED(code))
-    {
-        return WSTOPSIG(code);
     }
     else
     {
