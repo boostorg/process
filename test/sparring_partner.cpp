@@ -51,6 +51,7 @@ int main(int argc, char *argv[])
         ("is-nul-stdout", bool_switch())
         ("is-nul-stderr", bool_switch())
         ("loop", bool_switch())
+        ("abort", bool_switch())
         ("prefix", value<std::string>())
         ("prefix-once", value<std::string>())
         ("pwd", bool_switch())
@@ -146,6 +147,10 @@ int main(int argc, char *argv[])
     else if (vm["loop"].as<bool>())
     {
         while (true);
+    }
+    else if (vm["abort"].as<bool>())
+    {
+        std::abort();
     }
     else if (vm.count("prefix"))
     {

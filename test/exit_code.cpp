@@ -48,6 +48,26 @@ BOOST_AUTO_TEST_CASE(sync_wait)
     c.wait();
 }
 
+BOOST_AUTO_TEST_CASE(sync_wait_terminated)
+{
+    using boost::unit_test::framework::master_test_suite;
+
+    std::error_code ec;
+    bp::child c(
+        master_test_suite().argv[1],
+        "test", "--abort",
+        ec
+    );
+    BOOST_REQUIRE(!ec);
+    c.wait();
+    int exit_code = c.exit_code();
+
+
+    BOOST_CHECK(exit_code != 0);
+
+    c.wait();
+}
+
 #if defined(BOOST_WINDOWS_API)
 struct wait_handler
 {
