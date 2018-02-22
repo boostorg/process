@@ -177,6 +177,39 @@ BOOST_AUTO_TEST_CASE(async_wait_different_contexts, *boost::unit_test::timeout(3
     BOOST_CHECK_EQUAL(c2.exit_code(), 2);
 }
 
+BOOST_AUTO_TEST_CASE(async_wait_terminated, *boost::unit_test::timeout(2))
+{
+    using boost::unit_test::framework::master_test_suite;
+    using namespace boost::asio;
+
+    boost::asio::io_context io_context;
+
+    std::error_code ec;
+
+    bool exit_called = false;
+    int exit_code = 0;
+    bp::child c(
+        master_test_suite().argv[1],
+        "test", "--abort",
+        ec,
+        io_context,
+        bp::on_exit([&](int exit, const std::error_code& ec_in)
+                {
+                    BOOST_CHECK(!exit_called);
+                    exit_code = exit; exit_called=true;
+                    BOOST_TEST_MESSAGE(ec_in.message());
+                    BOOST_CHECK(!ec_in);
+                })
+    );
+    BOOST_REQUIRE(!ec);
+
+    io_context.run();
+
+    BOOST_CHECK(exit_called);
+    BOOST_CHECK(exit_code != 0);
+    BOOST_CHECK_EQUAL(c.exit_code(), exit_code);
+}
+
 
 BOOST_AUTO_TEST_CASE(async_future, *boost::unit_test::timeout(2))
 {
