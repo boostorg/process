@@ -177,7 +177,7 @@ BOOST_AUTO_TEST_CASE(async_wait_different_contexts, *boost::unit_test::timeout(3
     BOOST_CHECK_EQUAL(c2.exit_code(), 2);
 }
 
-BOOST_AUTO_TEST_CASE(async_wait_terminated, *boost::unit_test::timeout(2))
+BOOST_AUTO_TEST_CASE(async_wait_abort, *boost::unit_test::timeout(2))
 {
     using boost::unit_test::framework::master_test_suite;
     using namespace boost::asio;
