@@ -82,16 +82,16 @@ inline void throw_last_error()
     throw process_error(get_last_error());
 }
 
-inline void throw_error(const std::error_code& err)
+inline void throw_error(const std::error_code& ec)
 {
-  if (err)
-    throw process_error(err);
+    if (ec)
+        throw process_error(ec);
 }
 
-inline void throw_error(const std::error_code& err, const char* location)
+inline void throw_error(const std::error_code& ec, const char* msg)
 {
-  if (err)
-    throw process_error(err, location);
+    if (ec)
+        throw process_error(ec, msg);
 }
 
 template<typename Char> constexpr Char null_char();

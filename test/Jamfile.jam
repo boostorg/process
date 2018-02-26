@@ -21,6 +21,7 @@ if [ os.name ] = NT
 project : requirements
   <toolset>msvc:<define>_SCL_SECURE_NO_WARNINGS
   <toolset>msvc:<define>_CRT_SECURE_NO_DEPRECATE
+  <toolset>msvc:<cxxflags>/bigobj
   <target-os>windows:<define>WIN32_LEAN_AND_MEAN
   <target-os>linux:<linkflags>-lpthread
   <os>NT,<toolset>cw:<library>ws2_32
@@ -45,6 +46,10 @@ exe sparring_partner : sparring_partner.cpp program_options system filesystem io
     <warnings>off <target-os>windows:<source>shell32
     ;
 
+exe exit_argc : exit_argc.cpp :
+    <warnings>off <target-os>windows:<source>shell32
+    ;
+
 exe sub_launch : sub_launcher.cpp program_options iostreams system filesystem : <warnings>off <target-os>windows:<source>shell32 ;
 
 test-suite bare :
@@ -59,6 +64,7 @@ test-suite bare :
 test-suite with-valgrind :
     [ run async.cpp       system thread filesystem            : : sparring_partner ]
     [ run async_fut.cpp   system thread filesystem            : : sparring_partner ]
+    [ run args_handling.cpp  system thread filesystem         : : exit_argc        ]
     [ run args_cmd.cpp    system filesystem                   : : sparring_partner ]
     [ run wargs_cmd.cpp    system filesystem                  : : sparring_partner ]
     [ run bind_stderr.cpp     filesystem                      : : sparring_partner ]

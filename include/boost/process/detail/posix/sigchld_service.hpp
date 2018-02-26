@@ -77,19 +77,28 @@ void sigchld_service::_handle_signal(const boost::system::error_code & ec)
             r.second(-1, ec_);
         return;
     }
-    int status;
-    int pid = ::waitpid(0, &status, WNOHANG);
 
-    auto itr = std::find_if(_receivers.begin(), _receivers.end(),
-            [&pid](const std::pair<::pid_t, std::function<void(int, std::error_code)>> & p)
-            {
-                return p.first == pid;
-            });
-    if (itr != _receivers.cend())
-    {
-        _strand.get_io_context().wrap(itr->second)(status, ec_);
-        _receivers.erase(itr);
+    for (auto & r : _receivers) {
+        int status;
+        int pid = ::waitpid(r.first, &status, WNOHANG);
+        if (pid < 0) {
+            // error (eg: the process no longer exists)
+            r.second(-1, get_last_error());
+            r.first = 0; // mark for deletion
+        } else if (pid == r.first) {
+            r.second(status, ec_);
+            r.first = 0; // mark for deletion
+        }
+        // otherwise the process is still around
     }
+
+    _receivers.erase(std::remove_if(_receivers.begin(), _receivers.end(),
+            [](const std::pair<::pid_t, std::function<void(int, std::error_code)>> & p)
+            {
+                return p.first == 0;
+            }),
+            _receivers.end());
+
     if (!_receivers.empty())
     {
         _signal_set.async_wait(
