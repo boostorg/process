@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(sync_wait)
     c.wait();
 }
 
-BOOST_AUTO_TEST_CASE(sync_wait_terminated)
+BOOST_AUTO_TEST_CASE(sync_wait_abort)
 {
     using boost::unit_test::framework::master_test_suite;
 
