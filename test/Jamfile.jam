@@ -59,6 +59,7 @@ test-suite bare :
     [ compile no_ansi_apps.cpp ]
     [ compile-fail spawn_fail.cpp        ]
     [ compile-fail async_system_fail.cpp ]
+    [ compile asio_no_deprecated.cpp ]
     ;
 
 test-suite with-valgrind :
