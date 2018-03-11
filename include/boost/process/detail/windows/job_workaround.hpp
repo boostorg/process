@@ -82,7 +82,7 @@ typedef struct _JOBOBJECT_EXTENDED_LIMIT_INFORMATION_ {
   _Out_opt_ LPDWORD            lpReturnLength
 );
  */
-typedef ::boost::winapi::BOOL_  ( WINAPI *query_information_job_object_p)(
+typedef ::boost::winapi::BOOL_  ( BOOST_WINAPI_WINAPI_CC *query_information_job_object_p)(
         ::boost::winapi::HANDLE_,
         JOBOBJECTINFOCLASS_,
         void *,
@@ -90,7 +90,7 @@ typedef ::boost::winapi::BOOL_  ( WINAPI *query_information_job_object_p)(
         ::boost::winapi::DWORD_ *);
 
 
-inline ::boost::winapi::BOOL_ WINAPI query_information_job_object(
+inline ::boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC query_information_job_object(
         ::boost::winapi::HANDLE_ hJob,
         JOBOBJECTINFOCLASS_ JobObjectInfoClass,
         void * lpJobObjectInfo,
@@ -110,7 +110,7 @@ inline ::boost::winapi::BOOL_ WINAPI query_information_job_object(
   _In_ DWORD              cbJobObjectInfoLength
 );*/
 
-typedef ::boost::winapi::BOOL_  ( WINAPI *set_information_job_object_p)(
+typedef ::boost::winapi::BOOL_  ( BOOST_WINAPI_WINAPI_CC *set_information_job_object_p)(
         ::boost::winapi::HANDLE_,
         JOBOBJECTINFOCLASS_,
         void *,
@@ -118,7 +118,7 @@ typedef ::boost::winapi::BOOL_  ( WINAPI *set_information_job_object_p)(
 
 }
 
-inline ::boost::winapi::BOOL_ WINAPI set_information_job_object(
+inline ::boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC set_information_job_object(
         ::boost::winapi::HANDLE_ hJob,
         JOBOBJECTINFOCLASS_ JobObjectInfoClass,
         void * lpJobObjectInfo,
