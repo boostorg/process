@@ -125,6 +125,18 @@ public:
         return _sink.write_some(buffers);
     }
 
+    template<typename MutableBufferSequence>
+    std::size_t read_some(const MutableBufferSequence & buffers, boost::system::error_code & ec) noexcept
+    {
+        return _source.read_some(buffers, ec);
+    }
+    template<typename MutableBufferSequence>
+    std::size_t write_some(const MutableBufferSequence & buffers, boost::system::error_code & ec) noexcept
+    {
+        return _sink.write_some(buffers, ec);
+    }
+
+
     native_handle_type native_source() const {return const_cast<boost::asio::posix::stream_descriptor&>(_source).native_handle();}
     native_handle_type native_sink  () const {return const_cast<boost::asio::posix::stream_descriptor&>(_sink  ).native_handle();}
 
