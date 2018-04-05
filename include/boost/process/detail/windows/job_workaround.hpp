@@ -90,7 +90,7 @@ typedef ::boost::winapi::BOOL_  (*query_information_job_object_p)(
         ::boost::winapi::DWORD_ *);
 
 
-inline ::boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC query_information_job_object(
+inline ::boost::winapi::BOOL_ query_information_job_object(
         ::boost::winapi::HANDLE_ hJob,
         JOBOBJECTINFOCLASS_ JobObjectInfoClass,
         void * lpJobObjectInfo,
@@ -118,7 +118,7 @@ typedef ::boost::winapi::BOOL_  (*set_information_job_object_p)(
 
 }
 
-inline ::boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC set_information_job_object(
+inline ::boost::winapi::BOOL_ set_information_job_object(
         ::boost::winapi::HANDLE_ hJob,
         JOBOBJECTINFOCLASS_ JobObjectInfoClass,
         void * lpJobObjectInfo,
