@@ -148,7 +148,7 @@ public:
         const MutableBufferSequence & buffers,
               ReadHandler &&handler)
     {
-        _source.async_read_some(buffers, std::forward<ReadHandler>(handler));
+        return _source.async_read_some(buffers, std::forward<ReadHandler>(handler));
     }
 
     template<typename ConstBufferSequence,
@@ -159,7 +159,7 @@ public:
         const ConstBufferSequence & buffers,
         WriteHandler&& handler)
     {
-        _sink.async_write_some(buffers, std::forward<WriteHandler>(handler));
+        return _sink.async_write_some(buffers, std::forward<WriteHandler>(handler));
     }
 
 
