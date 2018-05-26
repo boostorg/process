@@ -94,8 +94,8 @@ struct entry : const_entry<Char, Environment>
     explicit entry(string_type&& name, pointer data, environment_t & env) :
         father(std::move(name), data, env) {}
 
-    explicit entry(string_type &&name, environment_t & env) :
-        father(std::move(name), env) {}
+    explicit entry(string_type &&name, environment_t & env_) :
+        father(std::move(name), env_) {}
 
     entry(const entry&) = default;
     entry& operator=(const entry&) = default;
