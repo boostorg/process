@@ -55,9 +55,9 @@ inline boost::filesystem::path search_path(
     for (auto & ext : extensions)
         boost::to_lower(ext);
 
-    for (const boost::filesystem::path & pp : path)
+    for (const boost::filesystem::path & pp_ : path)
     {
-        auto p = pp / filename;
+        auto p = pp_ / filename;
         for (boost::filesystem::path ext : extensions)
         {
             boost::filesystem::path pp = p;

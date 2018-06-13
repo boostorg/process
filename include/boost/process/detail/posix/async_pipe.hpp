@@ -148,7 +148,7 @@ public:
         const MutableBufferSequence & buffers,
               ReadHandler &&handler)
     {
-        _source.async_read_some(buffers, std::forward<ReadHandler>(handler));
+        return _source.async_read_some(buffers, std::forward<ReadHandler>(handler));
     }
 
     template<typename ConstBufferSequence,
@@ -159,7 +159,7 @@ public:
         const ConstBufferSequence & buffers,
         WriteHandler&& handler)
     {
-        _sink.async_write_some(buffers, std::forward<WriteHandler>(handler));
+        return _sink.async_write_some(buffers, std::forward<WriteHandler>(handler));
     }
 
 
@@ -250,8 +250,8 @@ async_pipe& async_pipe::operator=(const async_pipe & p)
     int sink;
 
     //cannot get the handle from a const object.
-    auto source_in = const_cast<::boost::asio::posix::stream_descriptor &>(_source).native_handle();
-    auto sink_in   = const_cast<::boost::asio::posix::stream_descriptor &>(_sink).native_handle();
+    auto source_in = const_cast<::boost::asio::posix::stream_descriptor &>(p._source).native_handle();
+    auto sink_in   = const_cast<::boost::asio::posix::stream_descriptor &>(p._sink).native_handle();
     if (source_in == -1)
         source = -1;
     else

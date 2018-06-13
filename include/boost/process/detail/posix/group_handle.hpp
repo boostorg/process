@@ -56,7 +56,7 @@ struct group_handle
     {
         return ::getpgid(proc) == grp;
     }
-    bool has(handle_t proc, std::error_code & ec) noexcept
+    bool has(handle_t proc, std::error_code &) noexcept
     {
         return ::getpgid(proc) == grp;
     }
