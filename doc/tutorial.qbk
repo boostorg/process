@@ -296,7 +296,7 @@ provided we also pass a reference to an io_service.
 
 ```
 io_service ios;
-std::vector<char> buf;
+std::vector<char> buf(4096);
 
 bp::child c(bp::search_path("g++"), "main.cpp", bp::std_out > asio_buffer(buf), ios);
 
