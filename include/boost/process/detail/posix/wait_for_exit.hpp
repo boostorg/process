@@ -87,7 +87,7 @@ template< class Clock, class Duration >
 inline bool wait_until(
         const child_handle &p,
         int & exit_code,
-        const std::chrono::time_point<Clock, Duration>& time_out) noexcept
+        const std::chrono::time_point<Clock, Duration>& time_out)
 {
     std::error_code ec;
     bool b = wait_until(p, exit_code, time_out, ec);
@@ -109,7 +109,7 @@ template< class Rep, class Period >
 inline bool wait_for(
         const child_handle &p,
         int & exit_code,
-        const std::chrono::duration<Rep, Period>& rel_time) noexcept
+        const std::chrono::duration<Rep, Period>& rel_time)
 {
     std::error_code ec;
     bool b = wait_for(p, exit_code, rel_time, ec);
