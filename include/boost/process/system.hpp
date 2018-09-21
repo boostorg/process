@@ -85,6 +85,8 @@ inline int system_impl(
         return -1;
 
     ios.run();
+    if (c.running())
+        c.wait();
     return c.exit_code();
 }
 

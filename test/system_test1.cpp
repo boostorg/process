@@ -67,15 +67,15 @@ BOOST_AUTO_TEST_CASE(implicit_async_io, *boost::unit_test::timeout(2))
 
     std::future<std::string> fut;
     std::error_code ec;
-    bp::system(
+    int res = bp::system(
         master_test_suite().argv[1],
         "test", "--echo-stdout", "abc",
         bp::std_out > fut,
         ec
     );
     BOOST_REQUIRE(!ec);
-
     BOOST_REQUIRE(fut.valid());
+    BOOST_CHECK_EQUAL(res, 0);
     BOOST_CHECK(boost::starts_with(
             fut.get(), "abc"));
 }
