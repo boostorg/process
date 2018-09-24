@@ -9,22 +9,82 @@
 #include <boost/winapi/config.hpp>
 #include <boost/winapi/basic_types.hpp>
 #include <boost/winapi/dll.hpp>
+#include <boost/winapi/overlapped.hpp>
 
 #if defined( BOOST_USE_WINDOWS_H )
 #include <windows.h>
-#endif
+#else
+extern "C"
+{
+BOOST_SYMBOL_IMPORT ::boost::winapi::HANDLE_ BOOST_WINAPI_WINAPI_CC CreateIoCompletionPort(
+        ::boost::winapi::HANDLE_    FileHandle,
+        ::boost::winapi::HANDLE_    ExistingCompletionPort,
+        ::boost::winapi::ULONG_PTR_ CompletionKey,
+        ::boost::winapi::DWORD_     NumberOfConcurrentThreads
+);
 
+BOOST_SYMBOL_IMPORT ::boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC GetQueuedCompletionStatus(
+        ::boost::winapi::HANDLE_       CompletionPort,
+        ::boost::winapi::LPDWORD_      lpNumberOfBytes,
+        ::boost::winapi::ULONG_PTR_    *lpCompletionKey,
+        _OVERLAPPED **lpOverlapped,
+        ::boost::winapi::DWORD_        dwMilliseconds
+);
+
+}
+#endif
 namespace boost { namespace process { namespace detail { namespace windows { namespace workaround {
+
+extern "C"
+{
+
+struct JOBOBJECT_ASSOCIATE_COMPLETION_PORT_
+{
+    ::boost::winapi::PVOID_  CompletionKey;
+    ::boost::winapi::HANDLE_ CompletionPort;
+};
+
+constexpr static int JOB_OBJECT_MSG_END_OF_JOB_TIME_          = 1;
+constexpr static int JOB_OBJECT_MSG_END_OF_PROCESS_TIME_      = 2;
+constexpr static int JOB_OBJECT_MSG_ACTIVE_PROCESS_LIMIT_     = 3;
+constexpr static int JOB_OBJECT_MSG_ACTIVE_PROCESS_ZERO_      = 4;
+constexpr static int JOB_OBJECT_MSG_NEW_PROCESS_              = 6;
+constexpr static int JOB_OBJECT_MSG_EXIT_PROCESS_             = 7;
+constexpr static int JOB_OBJECT_MSG_ABNORMAL_EXIT_PROCESS_    = 8;
+constexpr static int JOB_OBJECT_MSG_PROCESS_MEMORY_LIMIT_     = 9;
+constexpr static int JOB_OBJECT_MSG_JOB_MEMORY_LIMIT_         = 10;
+constexpr static int JOB_OBJECT_MSG_NOTIFICATION_LIMIT_       = 11;
+constexpr static int JOB_OBJECT_MSG_JOB_CYCLE_TIME_LIMIT_     = 12;
+constexpr static int JOB_OBJECT_MSG_SILO_TERMINATED_          = 13;
+
+}
+
+BOOST_FORCEINLINE ::boost::winapi::BOOL_  get_queued_completion_status(
+        ::boost::winapi::HANDLE_       CompletionPort,
+        ::boost::winapi::LPDWORD_      lpNumberOfBytes,
+        ::boost::winapi::ULONG_PTR_    *lpCompletionKey,
+        ::boost::winapi::LPOVERLAPPED_ *lpOverlapped,
+        ::boost::winapi::DWORD_        dwMilliseconds)
+{
+    return ::GetQueuedCompletionStatus(
+                CompletionPort,
+                lpNumberOfBytes,
+                lpCompletionKey,
+                reinterpret_cast<::_OVERLAPPED**>(lpOverlapped),
+                dwMilliseconds);
+}
 
 #if defined( BOOST_USE_WINDOWS_H )
 
 constexpr auto static JobObjectExtendedLimitInformation_ = ::JobObjectExtendedLimitInformation;
+constexpr auto static JobObjectAssociateCompletionPortInformation_ = ::JobObjectAssociateCompletionPortInformation;
+constexpr auto static JobObjectBasicAccountingInformation_ = ::JobObjectBasicAccountingInformation;
 
 using JOBOBJECT_BASIC_LIMIT_INFORMATION_ = ::JOBOBJECT_BASIC_LIMIT_INFORMATION;
 using JOBOBJECTINFOCLASS_ = ::JOBOBJECTINFOCLASS;
 using IO_COUNTERS_ = ::IO_COUNTERS;
 using JOBOBJECT_EXTENDED_LIMIT_INFORMATION_ = ::JOBOBJECT_EXTENDED_LIMIT_INFORMATION;
-
+using JOBOBJECT_BASIC_ACCOUNTING_INFORMATION_ = ::JOBOBJECT_BASIC_ACCOUNTING_INFORMATION;
 
 inline ::boost::winapi::BOOL_ query_information_job_object(
         ::boost::winapi::HANDLE_ hJob,
@@ -96,6 +156,17 @@ typedef struct _JOBOBJECT_BASIC_LIMIT_INFORMATION_
     ::boost::winapi::DWORD_ SchedulingClass;
 } JOBOBJECT_BASIC_LIMIT_INFORMATION_;
 
+
+typedef struct _JOBOBJECT_BASIC_ACCOUNTING_INFORMATION_ {
+    ::boost::winapi::LARGE_INTEGER_ TotalUserTime;
+    ::boost::winapi::LARGE_INTEGER_ TotalKernelTime;
+    ::boost::winapi::LARGE_INTEGER_ ThisPeriodTotalUserTime;
+    ::boost::winapi::LARGE_INTEGER_ ThisPeriodTotalKernelTime;
+    ::boost::winapi::DWORD_         TotalPageFaultCount;
+    ::boost::winapi::DWORD_         TotalProcesses;
+    ::boost::winapi::DWORD_         ActiveProcesses;
+    ::boost::winapi::DWORD_         TotalTerminatedProcesses;
+} JOBOBJECT_BASIC_ACCOUNTING_INFORMATION_;
 
 typedef struct _IO_COUNTERS_
 {
