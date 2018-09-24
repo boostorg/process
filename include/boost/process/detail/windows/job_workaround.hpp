@@ -10,6 +10,47 @@
 #include <boost/winapi/basic_types.hpp>
 #include <boost/winapi/dll.hpp>
 
+
+#if defined( BOOST_USE_WINDOWS_H )
+#include <windows.h>
+
+namespace boost { namespace process { namespace detail { namespace windows { namespace workaround {
+
+constexpr auto static JobObjectExtendedLimitInformation_ = ::JobObjectExtendedLimitInformation_;
+
+using JOBOBJECT_BASIC_LIMIT_INFORMATION_ = ::JOBOBJECT_BASIC_LIMIT_INFORMATION;
+using JOBOBJECTINFOCLASS_ = ::JOBOBJECTINFOCLASS;
+using IO_COUNTERS_ = ::IO_COUNTERS;
+using JOBOBJECT_EXTENDED_LIMIT_INFORMATION_ = ::JOBOBJECT_EXTENDED_LIMIT_INFORMATION;
+
+
+inline ::boost::winapi::BOOL_ query_information_job_object(
+        ::boost::winapi::HANDLE_ hJob,
+        JOBOBJECTINFOCLASS_ JobObjectInfoClass,
+        void * lpJobObjectInfo,
+        ::boost::winapi::DWORD_ cbJobObjectInfoLength,
+        ::boost::winapi::DWORD_ *lpReturnLength)
+{
+    return ::QueryInformationJobObject(hJob, JobObjectInfoClass, lpJobObjectInfo, cbJobObjectInfoLength, lpReturnLength);
+}
+
+inline ::boost::winapi::BOOL_ set_information_job_object(
+        ::boost::winapi::HANDLE_ hJob,
+        JOBOBJECTINFOCLASS_ JobObjectInfoClass,
+        void * lpJobObjectInfo,
+        ::boost::winapi::DWORD_ cbJobObjectInfoLength)
+{
+    return ::SetInformationJobObject(hJob, JobObjectInfoClass, lpJobObjectInfo, cbJobObjectInfoLength);
+}
+
+
+}
+
+
+}}}}}
+
+#endif
+
 namespace boost { namespace process { namespace detail { namespace windows { namespace workaround {
 
 //this import workaround is to keep it a header-only library. and enums cannot be imported from the winapi.
@@ -82,7 +123,7 @@ typedef struct _JOBOBJECT_EXTENDED_LIMIT_INFORMATION_ {
   _Out_opt_ LPDWORD            lpReturnLength
 );
  */
-typedef ::boost::winapi::BOOL_  (*query_information_job_object_p)(
+typedef ::boost::winapi::BOOL_ (BOOST_WINAPI_WINAPI_CC * query_information_job_object_p)(
         ::boost::winapi::HANDLE_,
         JOBOBJECTINFOCLASS_,
         void *,
@@ -110,7 +151,7 @@ inline ::boost::winapi::BOOL_ query_information_job_object(
   _In_ DWORD              cbJobObjectInfoLength
 );*/
 
-typedef ::boost::winapi::BOOL_  (*set_information_job_object_p)(
+typedef ::boost::winapi::BOOL_ (BOOST_WINAPI_WINAPI_CC * set_information_job_object_p)(
         ::boost::winapi::HANDLE_,
         JOBOBJECTINFOCLASS_,
         void *,
