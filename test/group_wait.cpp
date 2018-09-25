@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE(wait_group_test, *boost::unit_test::timeout(5))
 }
 
 
-BOOST_AUTO_TEST_CASE(wait_group_test_timeout, *boost::unit_test::timeout(5))
+BOOST_AUTO_TEST_CASE(wait_group_test_timeout, *boost::unit_test::timeout(15))
 {
     using boost::unit_test::framework::master_test_suite;
 
@@ -102,7 +102,8 @@ BOOST_AUTO_TEST_CASE(wait_group_test_timeout, *boost::unit_test::timeout(5))
     BOOST_CHECK(!c1.running());
     BOOST_CHECK(c2.running());
 
-    c1.terminate();
-    c2.terminate();
+    BOOST_CHECK(!g.wait_for(std::chrono::seconds(5), ec));
 
+    BOOST_CHECK(!c1.running());
+    BOOST_CHECK(!c2.running());
 }

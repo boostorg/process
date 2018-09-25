@@ -17,6 +17,8 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#include <iostream>
+
 namespace boost { namespace process { namespace detail { namespace posix {
 
 inline void wait(const group_handle &p, std::error_code &ec) noexcept
@@ -35,7 +37,6 @@ inline void wait(const group_handle &p, std::error_code &ec) noexcept
 
         //ECHILD --> no child processes left.
         ret = ::waitid(P_PGID, p.grp, &status, WEXITED | WNOHANG);
-        auto lec = get_last_error();
     } 
     while ((ret != -1) || (errno != ECHILD));
    
@@ -58,31 +59,52 @@ inline bool wait_until(
         const std::chrono::time_point<Clock, Duration>& time_out,
         std::error_code & ec) noexcept
 {
-    pid_t ret;
-    int status;
 
-    bool timed_out;
+    ::sigset_t  sigset;
+    ::siginfo_t siginfo;
+
+    ::sigemptyset(&sigset);
+    ::sigaddset(&sigset, SIGCHLD);
+
+    auto get_timespec = 
+            [](const Duration & dur)
+            {
+                ::timespec ts;
+                ts.tv_sec  = std::chrono::duration_cast<std::chrono::seconds>(dur).count();
+                ts.tv_nsec = std::chrono::duration_cast<std::chrono::nanoseconds>(dur).count() % 1000000000;
+                return ts;
+            };
+
+
+    bool timed_out = false;
+    int ret;
+
+    struct ::sigaction old_sig;
+    if (-1 == ::sigaction(SIGCHLD, nullptr, &old_sig))
+    {
+        ec = get_last_error();
+        return false;
+    }
 
     do
     {
-        ret = ::waitpid(-p.grp, &status, WNOHANG);
-        if (ret == 0)
-        {
-            timed_out = Clock::now() >= time_out;
-            if (timed_out)
-                return false;
-        }
-    }
-    while ((ret == 0) ||
-          (((ret == -1) && errno == EINTR) ||
-           ((ret != -1) && !WIFEXITED(status) && !WIFSIGNALED(status))));
+        auto ts = get_timespec(time_out - Clock::now());
+        ret = ::sigtimedwait(&sigset, nullptr, &ts);
+        if ((ret == SIGCHLD) && (old_sig.sa_handler != SIG_DFL) && (old_sig.sa_handler != SIG_IGN))
+            old_sig.sa_handler(ret);
 
-    if (ret == -1)
+        errno = 0;
+        //check if we're done
+        ret = ::waitid(P_PGID, p.grp, &siginfo, WEXITED | WNOHANG);
+    } 
+    while (((ret != -1) || (errno != ECHILD)) && !(timed_out = (Clock::now() >= time_out)))  ;
+   
+    if (errno != ECHILD)
         ec = boost::process::detail::get_last_error();
     else
         ec.clear();
 
-    return true;
+    return !timed_out;
 }
 
 template< class Clock, class Duration >
