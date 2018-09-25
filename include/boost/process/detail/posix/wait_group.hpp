@@ -100,11 +100,16 @@ inline bool wait_until(
     while (((ret != -1) || (errno != ECHILD)) && !(timed_out = (Clock::now() >= time_out)))  ;
    
     if (errno != ECHILD)
+    {
         ec = boost::process::detail::get_last_error();
+        return !timed_out;
+    }
     else
+    {
         ec.clear();
+        return true; //even if timed out, there are no child procs left
+    }
 
-    return !timed_out;
 }
 
 template< class Clock, class Duration >
