@@ -28,7 +28,8 @@ inline void wait(const child_handle &p, int & exit_code, std::error_code &ec) no
     {
         ret = ::waitpid(p.pid, &status, 0);
     } 
-    while (((ret == -1) && (errno == EINTR)) || (ret != -1 && !WIFEXITED(status) && !WIFSIGNALED(status)));
+    while (((ret == -1) && (errno == EINTR)) || 
+           (ret != -1 && !WIFEXITED(status) && !WIFSIGNALED(status)));
 
     if (ret == -1)
         ec = boost::process::detail::get_last_error();
@@ -53,14 +54,43 @@ inline bool wait_until(
         const std::chrono::time_point<Clock, Duration>& time_out,
         std::error_code & ec) noexcept
 {
+
+    ::sigset_t  sigset;
+
+    ::sigemptyset(&sigset);
+    ::sigaddset(&sigset, SIGCHLD);
+
+    auto get_timespec = 
+            [](const Duration & dur)
+            {
+                ::timespec ts;
+                ts.tv_sec  = std::chrono::duration_cast<std::chrono::seconds>(dur).count();
+                ts.tv_nsec = std::chrono::duration_cast<std::chrono::nanoseconds>(dur).count() % 1000000000;
+                return ts;
+            };
+
     pid_t ret;
     int status;
+
+    struct ::sigaction old_sig;
+    if (-1 == ::sigaction(SIGCHLD, nullptr, &old_sig))
+    {
+        ec = get_last_error();
+        return false;
+    }
 
     bool timed_out;
 
     do
     {
+        auto ts = get_timespec(time_out - Clock::now());
+        auto ret_sig = ::sigtimedwait(&sigset, nullptr, &ts);
+        errno = 0;
         ret = ::waitpid(p.pid, &status, WNOHANG);
+
+        if ((ret_sig == SIGCHLD) && (old_sig.sa_handler != SIG_DFL) && (old_sig.sa_handler != SIG_IGN))
+            old_sig.sa_handler(ret);
+
         if (ret == 0)
         {
             timed_out = Clock::now() >= time_out;
