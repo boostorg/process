@@ -17,8 +17,6 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-#include <iostream>
-
 namespace boost { namespace process { namespace detail { namespace posix {
 
 inline void wait(const group_handle &p, std::error_code &ec) noexcept
@@ -90,14 +88,23 @@ inline bool wait_until(
     {
         auto ts = get_timespec(time_out - Clock::now());
         ret = ::sigtimedwait(&sigset, nullptr, &ts);
+        errno = 0;
         if ((ret == SIGCHLD) && (old_sig.sa_handler != SIG_DFL) && (old_sig.sa_handler != SIG_IGN))
             old_sig.sa_handler(ret);
 
-        errno = 0;
+        ret = ::waitpid(-p.grp, &siginfo.si_status, 0); //so in case it exited, we wanna reap it first
+        if (ret == -1)
+        {
+            ec = get_last_error();
+            return false; 
+        }
+
+
         //check if we're done
         ret = ::waitid(P_PGID, p.grp, &siginfo, WEXITED | WNOHANG);
+
     } 
-    while (((ret != -1) || (errno != ECHILD)) && !(timed_out = (Clock::now() >= time_out)))  ;
+    while (((ret != -1) || (errno != ECHILD)) && !(timed_out = (Clock::now() > time_out)))  ;
    
     if (errno != ECHILD)
     {
@@ -107,7 +114,7 @@ inline bool wait_until(
     else
     {
         ec.clear();
-        return true; //even if timed out, there are no child procs left
+        return true; //even if timed out, there are no child proccessess left
     }
 
 }

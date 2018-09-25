@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE(wait_group_test_timeout, *boost::unit_test::timeout(15))
 
     bp::child c2(
             master_test_suite().argv[1],
-            "--wait", "5",
+            "--wait", "3",
             g,
             ec
     );
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(wait_group_test_timeout, *boost::unit_test::timeout(15))
     BOOST_CHECK(c2.running());
 
     BOOST_CHECK(g.wait_for(std::chrono::seconds(5), ec));
-
+    BOOST_CHECK_MESSAGE(!ec, std::to_string(ec.value()) + " == " + ec.message());
     BOOST_CHECK(!c1.running());
     BOOST_CHECK(!c2.running());
 }
