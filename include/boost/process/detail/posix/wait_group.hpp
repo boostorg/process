@@ -22,15 +22,24 @@ namespace boost { namespace process { namespace detail { namespace posix {
 inline void wait(const group_handle &p, std::error_code &ec) noexcept
 {
     pid_t ret;
-    int status;
+    siginfo_t  status;
 
     do
     {
-        ret = ::waitpid(-p.grp, &status, 0);
-    } 
-    while (((ret == -1) && (errno == EINTR)) || (ret != -1 && !WIFEXITED(status) && !WIFSIGNALED(status)));
+        ret = ::waitpid(-p.grp, &status.si_status, 0);
+        if (ret == -1)
+        {
+            ec = get_last_error();
+            return; 
+        }
 
-    if (ret == -1)
+        //ECHILD --> no child processes left.
+        ret = ::waitid(P_PGID, p.grp, &status, WEXITED | WNOHANG);
+        auto lec = get_last_error();
+    } 
+    while ((ret != -1) || (errno != ECHILD));
+   
+    if (errno != ECHILD)
         ec = boost::process::detail::get_last_error();
     else
         ec.clear();
