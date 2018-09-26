@@ -51,11 +51,11 @@ inline bool wait_impl(const group_handle & p, std::error_code & ec, int wait_tim
         if (wait_time != ::boost::winapi::infinite)
         {
             auto now = std::chrono::system_clock::now();
-            auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(start_time - now);
+            auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time);
             wait_time -= diff.count();
             start_time = now;
             if (wait_time <= 0)
-                return true; //time out
+                return true; //timeout with other source
         }
 
     }
