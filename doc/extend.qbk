@@ -120,8 +120,8 @@ struct async_bar : __handler, __async_handler__
     template<typename Executor>
     std::function<void(int, const std::error_code&)> on_exit_handler(Executor & exec)
     {
-        auto handler = this->handler;
-        return [handler](int exit_code, const std::error_code & ec)
+        auto handler_ = this->handler;
+        return [handler_](int exit_code, const std::error_code & ec)
                {
                    std::cout << "hello world, I exited with " << exit_code << std::endl; 
                };

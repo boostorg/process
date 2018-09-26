@@ -41,28 +41,28 @@ struct async_in_buffer : ::boost::process::detail::posix::handler_base_ext,
     template <typename Executor>
     inline void on_success(Executor)
     {
-        auto  pipe              = this->pipe;
+        auto  pipe_              = this->pipe;
         if (this->promise)
         {
-            auto promise = this->promise;
+            auto promise_ = this->promise;
 
-            boost::asio::async_write(*pipe, buf,
-                [pipe, promise](const boost::system::error_code & ec, std::size_t)
+            boost::asio::async_write(*pipe_, buf,
+                [pipe_, promise_](const boost::system::error_code & ec, std::size_t)
                 {
                     if (ec && (ec.value() != EBADF) && (ec.value() != EPERM) && (ec.value() != ENOENT))
                     {
                         std::error_code e(ec.value(), std::system_category());
-                        promise->set_exception(std::make_exception_ptr(process_error(e)));
+                        promise_->set_exception(std::make_exception_ptr(process_error(e)));
                     }
                     else
-                        promise->set_value();
+                        promise_->set_value();
                 });
         }
         else
-            boost::asio::async_write(*pipe, buf,
-                [pipe](const boost::system::error_code&, std::size_t){});
+            boost::asio::async_write(*pipe_, buf,
+                [pipe_](const boost::system::error_code&, std::size_t){});
 
-        std::move(*pipe).source().close();
+        std::move(*pipe_).source().close();
 
         this->pipe = nullptr;
     }
