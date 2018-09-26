@@ -29,8 +29,8 @@ env:
         - BOOST_REMOVE=process
 
     matrix:
-        - CXX_STANDARD=c++11 TOOLSET=gcc-5
-        - CXX_STANDARD=c++1y TOOLSET=gcc-5
+        - CXX_STANDARD=gnu++11 TOOLSET=gcc-5
+        - CXX_STANDARD=gnu++1y TOOLSET=gcc-5
 
 
 ###############################################################################################################
