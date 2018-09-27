@@ -164,10 +164,10 @@ struct require_io_context {};
 template<typename Executor>
 std::function<void(int, const std::error_code&)> on_exit_handler(Executor & exec)
 {
-    auto handler = this->handler;
-    return [handler](int exit_code, const std::error_code & ec)
+    auto handler_ = this->handler;
+    return [handler_](int exit_code, const std::error_code & ec)
            {
-                handler(static_cast<int>(exit_code), ec);
+                handler_(static_cast<int>(exit_code), ec);
            };
 
 }
