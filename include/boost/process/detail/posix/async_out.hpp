@@ -114,30 +114,30 @@ struct async_out_future : ::boost::process::detail::posix::handler_base_ext,
     template <typename Executor>
     inline void on_success(Executor &)
     {
-        auto pipe = this->pipe;
+        auto pipe_ = this->pipe;
 
-        auto buffer  = this->buffer;
-        auto promise = this->promise;
+        auto buffer_  = this->buffer;
+        auto promise_ = this->promise;
 
-        boost::asio::async_read(*pipe, *buffer,
-                [pipe, buffer, promise](const boost::system::error_code& ec, std::size_t)
+        boost::asio::async_read(*pipe_, *buffer_,
+                [pipe_, buffer_, promise_](const boost::system::error_code& ec, std::size_t)
                 {
                     if (ec && (ec.value() != ENOENT))
                     {
                         std::error_code e(ec.value(), std::system_category());
-                        promise->set_exception(std::make_exception_ptr(process_error(e)));
+                        promise_->set_exception(std::make_exception_ptr(process_error(e)));
                     }
                     else
                     {
-                        std::istream is (buffer.get());
+                        std::istream is (buffer_.get());
                         Type arg;
-                        arg.resize(buffer->size());
-                        is.read(&*arg.begin(), buffer->size());
-                        promise->set_value(std::move(arg));
+                        arg.resize(buffer_->size());
+                        is.read(&*arg.begin(), buffer_->size());
+                        promise_->set_value(std::move(arg));
                     }
                 });
 
-        std::move(*pipe).sink().close();
+        std::move(*pipe_).sink().close();
         this->pipe = nullptr;
     }
 
