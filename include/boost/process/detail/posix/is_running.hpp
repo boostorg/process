@@ -16,8 +16,11 @@ namespace boost { namespace process { namespace detail { namespace posix {
 // Use the "stopped" state (WIFSTOPPED) to indicate "not terminated".
 // This bit arrangement of status codes is not guaranteed by POSIX, but (according to comments in
 // the glibc <bits/waitstatus.h> header) is the same across systems in practice.
-constexpr int still_active = 0x7F;
-static_assert(!WIFEXITED(still_active) && !WIFSIGNALED(still_active), "Internal Error");
+constexpr int still_active = 0x017f;
+static_assert(WIFSTOPPED(still_active), "Expected still_active to indicate WIFSTOPPED");
+static_assert(!WIFEXITED(still_active), "Expected still_active to not indicate WIFEXITED");
+static_assert(!WIFSIGNALED(still_active), "Expected still_active to not indicate WIFSIGNALED");
+static_assert(!WIFCONTINUED(still_active), "Expected still_active to not indicate WIFCONTINUED");
 
 inline bool is_running(int code)
 {
