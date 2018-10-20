@@ -313,7 +313,7 @@ To make it even easier, you can use [@http://en.cppreference.com/w/cpp/thread/fu
 Now we will revisit our first example and read the compiler output asynchronously:
 
 ```
-boost::asio::io_service ios;
+io_service ios;
 
 std::future<std::string> data;
 
