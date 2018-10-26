@@ -223,7 +223,7 @@ private:
             return false;
 
         auto base = this->pbase();
-        auto wrt = _pipe.write(base,
+        std::ptrdiff_t wrt = _pipe.write(base,
                 static_cast<typename pipe_type::int_type>(this->pptr() - base));
         std::ptrdiff_t diff = this->pptr() - base;
 
@@ -272,7 +272,7 @@ public:
     ///Copy constructor.
     basic_ipstream(const basic_ipstream & ) = delete;
     ///Move constructor.
-    basic_ipstream(basic_ipstream && lhs) : std::basic_istream<CharT, Traits>(nullptr), _buf(std::move(p))
+    basic_ipstream(basic_ipstream && lhs) : std::basic_istream<CharT, Traits>(nullptr), _buf(std::move(lhs._buf))
     {
         std::basic_istream<CharT, Traits>::rdbuf(&_buf);
     }
@@ -356,7 +356,7 @@ public:
     ///Copy constructor.
     basic_opstream(const basic_opstream & ) = delete;
     ///Move constructor.
-    basic_opstream(basic_opstream && lhs) : std::basic_ostream<CharT, Traits>(nullptr), _buf(std::move(p))
+    basic_opstream(basic_opstream && lhs) : std::basic_ostream<CharT, Traits>(nullptr), _buf(std::move(lhs._buf))
     {
         std::basic_ostream<CharT, Traits>::rdbuf(&_buf);
     }
@@ -439,7 +439,7 @@ public:
     ///Copy constructor.
     basic_pstream(const basic_pstream & ) = delete;
     ///Move constructor.
-    basic_pstream(basic_pstream && lhs) : std::basic_iostream<CharT, Traits>(nullptr), _buf(std::move(p))
+    basic_pstream(basic_pstream && lhs) : std::basic_iostream<CharT, Traits>(nullptr), _buf(std::move(lhs._buf))
     {
         std::basic_iostream<CharT, Traits>::rdbuf(&_buf);
     }
