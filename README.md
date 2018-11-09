@@ -4,10 +4,10 @@ Boost.process is a library for comfortable management of processes, released wit
 
 ### Test results
 
-Branches        | Build         | Tests coverage | 
-----------------|-------------- | -------------- |
-Develop:        | [![Build Status](https://travis-ci.org/klemens-morgenstern/boost-process.svg?branch=develop)](https://travis-ci.org/klemens-morgenstern/boost-process)  [![Build status](https://ci.appveyor.com/api/projects/status/peup7e6m0e1bb5ba?svg=true)](https://ci.appveyor.com/project/klemens-morgenstern/boost-process) | [![Coverage Status](https://coveralls.io/repos/github/klemens-morgenstern/boost-process/badge.svg?branch=develop)](https://coveralls.io/github/klemens-morgenstern/boost-process?branch=develop) |
-Master:         | [![Build Status](https://travis-ci.org/klemens-morgenstern/boost-process.svg?branch=master)](https://travis-ci.org/klemens-morgenstern/boost-process) [![Build status](https://ci.appveyor.com/api/projects/status/peup7e6m0e1bb5ba/branch/master?svg=true)](https://ci.appveyor.com/project/klemens-morgenstern/boost-process/branch/master) | [![Coverage Status](https://coveralls.io/repos/github/klemens-morgenstern/boost-process/badge.svg?branch=master)](https://coveralls.io/github/klemens-morgenstern/boost-process?branch=master)   |
+Branches        | Linux | Windows | Tests coverage | Matrix | 
+----------------|-------|---------| -------------- |--------|
+Develop:        | [![Build Status](https://travis-ci.org/klemens-morgenstern/boost-process.svg?branch=develop)](https://travis-ci.org/klemens-morgenstern/boost-process) | [![Build status](https://ci.appveyor.com/api/projects/status/peup7e6m0e1bb5ba?svg=true)](https://ci.appveyor.com/project/klemens-morgenstern/boost-process) | [![Coverage Status](https://coveralls.io/repos/github/klemens-morgenstern/boost-process/badge.svg?branch=develop)](https://coveralls.io/github/klemens-morgenstern/boost-process?branch=develop) | [![Matrix](https://img.shields.io/badge/matrix-develop-lightgray.svg)](http://www.boost.org/development/tests/develop/developer/process.html)
+Master:         | [![Build Status](https://travis-ci.org/klemens-morgenstern/boost-process.svg?branch=master)](https://travis-ci.org/klemens-morgenstern/boost-process)  | [![Build status](https://ci.appveyor.com/api/projects/status/peup7e6m0e1bb5ba/branch/master?svg=true)](https://ci.appveyor.com/project/klemens-morgenstern/boost-process/branch/master) | [![Coverage Status](https://coveralls.io/repos/github/klemens-morgenstern/boost-process/badge.svg?branch=master)](https://coveralls.io/github/klemens-morgenstern/boost-process?branch=master)   | [![Matrix](https://img.shields.io/badge/matrix-master-lightgray.svg)](http://www.boost.org/development/tests/master/developer/process.html)
 
 [Open Issues](https://github.com/klemens-morgenstern/boost-process/issues)
 
