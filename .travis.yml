@@ -43,6 +43,7 @@ compiler:
 
 os:
     - linux
+    - osx
 
 # Installing additional tools
 addons:
