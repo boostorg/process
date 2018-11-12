@@ -103,8 +103,8 @@ inline bool wait_until(
            ((ret != -1) && !WIFEXITED(status) && !WIFSIGNALED(status))));
 #else
     //if we do not have sigtimedwait, we fork off a child process  to get the signal in time
-    pid_it timeout_pid = ::fork();
-    if (time_out == -1)
+    pid_t timeout_pid = ::fork();
+    if (timeout_pid  == -1)
     {
         ec = boost::process::detail::get_last_error();
         return true;
@@ -112,7 +112,7 @@ inline bool wait_until(
     else if (timeout_pid == 0)
     {
         auto ts = get_timespec(timed_out - Clock::now());
-        ::nsleep(&ts, nullptr);
+        ::nanosleep(&ts, nullptr);
         ::exit(0);
     }
 
