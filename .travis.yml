@@ -97,8 +97,8 @@ before_install:
 
 script:
     # `--coverage` flags required to generate coverage info for Coveralls
-    - ../../../b2 with-valgrind address-model=64 architecture=x86 testing.launcher=valgrind valgrind=on toolset=$TOOLSET cxxflags="--coverage -DBOOST_TRAVISCI_BUILD -std=$CXX_STANDARD" linkflags=$LDFLAGS -sBOOST_BUILD_PATH=.  > python $BOOST/libs/$PROJECT_TO_TEST/filter_section_warning.py
-    - ../../../b2 without-valgrind address-model=64 architecture=x86 toolset=$TOOLSET cxxflags="--coverage -DBOOST_TRAVISCI_BUILD -std=$CXX_STANDARD" linkflags=$LDFLAGS -sBOOST_BUILD_PATH=.  > python $BOOST/libs/$PROJECT_TO_TEST/filter_section_warning.py
+    - python $BOOST/libs/$PROJECT_TO_TEST/filter_section_warning.py ../../../b2 with-valgrind address-model=64 architecture=x86 testing.launcher=valgrind valgrind=on toolset=$TOOLSET cxxflags="--coverage -DBOOST_TRAVISCI_BUILD -std=$CXX_STANDARD" linkflags=$LDFLAGS -sBOOST_BUILD_PATH=.
+    - python $BOOST/libs/$PROJECT_TO_TEST/filter_section_warning.py ../../../b2 without-valgrind address-model=64 architecture=x86 toolset=$TOOLSET cxxflags="--coverage -DBOOST_TRAVISCI_BUILD -std=$CXX_STANDARD" linkflags=$LDFLAGS -sBOOST_BUILD_PATH=.
 after_success:
     # Copying Coveralls data to a separate folder
     - mkdir -p $TRAVIS_BUILD_DIR/coverals
