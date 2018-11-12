@@ -62,6 +62,7 @@ before_install:
     # Set this to the name of the library
     - PROJECT_TO_TEST=`basename $TRAVIS_BUILD_DIR`
     - echo "Testing $PROJECT_TO_TEST"
+    - if [ $ = "osx" ]; then brew install gcc5; fi
     # Cloning Boost libraries (fast nondeep cloning)
     - BOOST=$HOME/boost-local
     - git init $BOOST
