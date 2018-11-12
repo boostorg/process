@@ -9,6 +9,7 @@ for line in sys.stdin:
             or 'note: change section name to' in line):
         next(sys.stdin)
         next(sys.stdin)
+        sys.stdout('.')
     else:
         sys.stdout.write(line)
         sys.stdout.flush()
