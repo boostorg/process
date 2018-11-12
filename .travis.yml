@@ -11,6 +11,8 @@
 # File revision #6
 
 env:
+    - BADGE=linux
+    - BADGE=osx
     global:
         # Autodetect Boost branch by using the following code: - BRANCH_TO_TEST=$TRAVIS_BRANCH
         # or just directly specify it
@@ -31,7 +33,11 @@ env:
     matrix:
         - CXX_STANDARD=gnu++11 TOOLSET=gcc-5
         - CXX_STANDARD=gnu++1y TOOLSET=gcc-5
-
+        exclude:
+        - os: linux
+          env: BADGE=osx
+        - os: osx
+          env: BADGE=linux
 
 ###############################################################################################################
 # From this point and below code is same for all the Boost libs
