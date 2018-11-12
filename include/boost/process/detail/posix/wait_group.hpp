@@ -105,7 +105,54 @@ inline bool wait_until(
         ret = ::waitid(P_PGID, p.grp, &siginfo, WEXITED | WNOHANG);
 
     } 
-    while (((ret != -1) || (errno != ECHILD)) && !(timed_out = (Clock::now() > time_out)))  ;
+    while (((ret != -1) || (errno != ECHILD)) && !(timed_out = (Clock::now() > time_out)));
+#else
+    //if we do not have sigtimedwait, we fork off a child process  to get the signal in time
+    pid_it timeout_pid = ::fork();
+    if (time_out == -1)
+    {
+        ec = boost::process::detail::get_last_error();
+        return true;
+    }
+    else if (timeout_pid == 0)
+    {
+        auto ts = get_timespec(timed_out - Clock::now());
+        ::nsleep(&ts, nullptr);
+        ::exit(0);
+    }
+
+    struct child_cleaner_t
+    {
+        pid_t pid;
+        ~child_cleaner_t()
+        {
+            int res;
+            ::kill(pid, -15);
+            ::waitpid(pid, &res, 0);
+        }
+    };
+    child_cleaner_t child_cleaner{timeout_pid};
+
+    do
+    {
+        ret = ::sigwait(&sigset, nullptr);
+        errno = 0;
+        if ((ret == SIGCHLD) && (old_sig.sa_handler != SIG_DFL) && (old_sig.sa_handler != SIG_IGN))
+            old_sig.sa_handler(ret);
+
+        ret = ::waitpid(-p.grp, &siginfo.si_status, 0); //so in case it exited, we wanna reap it first
+        if (ret == -1)
+        {
+            ec = get_last_error();
+            return false;
+        }
+
+        //check if we're done
+        ret = ::waitid(P_PGID, p.grp, &siginfo, WEXITED | WNOHANG);
+
+    }
+    while (((ret != -1) || (errno != ECHILD)) && !(timed_out = (Clock::now() > time_out)));
+
 #endif
 
     if (errno != ECHILD)
