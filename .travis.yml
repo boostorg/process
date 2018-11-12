@@ -68,7 +68,7 @@ before_install:
     # Set this to the name of the library
     - PROJECT_TO_TEST=`basename $TRAVIS_BUILD_DIR`
     - echo "Testing $PROJECT_TO_TEST"
-    - if [ $TRAVIS_OS_NAME = "osx" ]; then brew install gcc5; fi
+    - if [ $TRAVIS_OS_NAME = "osx" ]; then brew install gcc5; brew install valgrind; LDFLAGS="-lprofile_rt"; else LDFLAGS="--coverage"; fi
     # Cloning Boost libraries (fast nondeep cloning)
     - BOOST=$HOME/boost-local
     - git init $BOOST
@@ -97,8 +97,8 @@ before_install:
 
 script:
     # `--coverage` flags required to generate coverage info for Coveralls
-    - ../../../b2 with-valgrind address-model=64 architecture=x86 testing.launcher=valgrind valgrind=on toolset=$TOOLSET cxxflags="--coverage -DBOOST_TRAVISCI_BUILD -std=$CXX_STANDARD" linkflags="--coverage" -sBOOST_BUILD_PATH=. 
-    - ../../../b2 without-valgrind address-model=64 architecture=x86 toolset=$TOOLSET cxxflags="--coverage -DBOOST_TRAVISCI_BUILD -std=$CXX_STANDARD" linkflags="--coverage" -sBOOST_BUILD_PATH=. 
+    - ../../../b2 with-valgrind address-model=64 architecture=x86 testing.launcher=valgrind valgrind=on toolset=$TOOLSET cxxflags="--coverage -DBOOST_TRAVISCI_BUILD -std=$CXX_STANDARD" linkflags="--coverage" -sBOOST_BUILD_PATH=. > >(python $BOOST/libs/$PROJECT_TO_TEST/filter_section_warning.py)
+    - ../../../b2 without-valgrind address-model=64 architecture=x86 toolset=$TOOLSET cxxflags="--coverage -DBOOST_TRAVISCI_BUILD -std=$CXX_STANDARD" linkflags="--coverage" -sBOOST_BUILD_PATH=. > >(python $BOOST/libs/$PROJECT_TO_TEST/filter_section_warning.py)
 after_success:
     # Copying Coveralls data to a separate folder
     - mkdir -p $TRAVIS_BUILD_DIR/coverals
@@ -119,7 +119,7 @@ after_success:
     # ... erasing data that is not related to this project directly
     - OTHER_LIBS=`grep "submodule .*" .gitmodules | sed 's/\[submodule\ "\(.*\)"\]/"\*\/boost\/\1\.hpp" "\*\/boost\/\1\/\*"/g'| sed "/\"\*\/boost\/process\/\*\"/d" | sed ':a;N;$!ba;s/\n/ /g'`
     - echo $OTHER_LIBS
-    - eval "$LCOV --remove $TRAVIS_BUILD_DIR/coverals/coverage.info $OTHER_LIBS -o $TRAVIS_BUILD_DIR/coverals/coverage.info"
+    - eval "$LCOV --remove $TRAVIS_BUILD_DIR/coverals/coverage.info $OTHER_LIBS -o $TRAVIS_BUILD_DIR/coverals/coverage.info" > /dev/null
 
     # Sending data to Coveralls
     - cd $TRAVIS_BUILD_DIR
