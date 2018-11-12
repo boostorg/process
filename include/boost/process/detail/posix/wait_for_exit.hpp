@@ -57,8 +57,8 @@ inline bool wait_until(
 
     ::sigset_t  sigset;
 
-    ::sigemptyset(&sigset);
-    ::sigaddset(&sigset, SIGCHLD);
+    sigemptyset(&sigset);
+    sigaddset(&sigset, SIGCHLD);
 
     auto get_timespec = 
             [](const Duration & dur)
@@ -81,6 +81,7 @@ inline bool wait_until(
 
     bool timed_out;
 
+#if defined(BOOST_POSIX_HAS_SIGTIMEDWAIT)
     do
     {
         auto ts = get_timespec(time_out - Clock::now());
@@ -101,6 +102,7 @@ inline bool wait_until(
     while ((ret == 0) ||
           (((ret == -1) && errno == EINTR) ||
            ((ret != -1) && !WIFEXITED(status) && !WIFSIGNALED(status))));
+#endif
 
     if (ret == -1)
         ec = boost::process::detail::get_last_error();

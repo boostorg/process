@@ -61,8 +61,9 @@ inline bool wait_until(
     ::sigset_t  sigset;
     ::siginfo_t siginfo;
 
-    ::sigemptyset(&sigset);
-    ::sigaddset(&sigset, SIGCHLD);
+    sigemptyset(&sigset);
+    sigaddset(&sigset, SIGCHLD);
+
 
     auto get_timespec = 
             [](const Duration & dur)
@@ -84,6 +85,7 @@ inline bool wait_until(
         return false;
     }
 
+#if defined(BOOST_POSIX_HAS_SIGTIMEDWAIT)
     do
     {
         auto ts = get_timespec(time_out - Clock::now());
@@ -99,13 +101,13 @@ inline bool wait_until(
             return false; 
         }
 
-
         //check if we're done
         ret = ::waitid(P_PGID, p.grp, &siginfo, WEXITED | WNOHANG);
 
     } 
     while (((ret != -1) || (errno != ECHILD)) && !(timed_out = (Clock::now() > time_out)))  ;
-   
+#endif
+
     if (errno != ECHILD)
     {
         ec = boost::process::detail::get_last_error();

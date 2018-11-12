@@ -57,6 +57,10 @@ inline std::error_code get_last_error() noexcept
 #define BOOST_POSIX_HAS_VFORK 1
 #endif
 
+#if (_POSIX_C_SOURCE >= 199309L)
+#define BOOST_POSIX_HAS_SIGTIMEDWAIT 1
+#endif
+
 #elif defined(BOOST_WINDOWS_API)
 namespace windows {namespace extensions {}}
 namespace api = windows;
