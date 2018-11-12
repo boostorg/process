@@ -11,8 +11,7 @@
 # File revision #6
 
 env:
-    - BADGE=linux
-    - BADGE=osx
+
     global:
         # Autodetect Boost branch by using the following code: - BRANCH_TO_TEST=$TRAVIS_BRANCH
         # or just directly specify it
@@ -29,11 +28,12 @@ env:
         # This will force to use local repo content, instead of the Boost's default
         # not needed because process is not yet in boost.
         - BOOST_REMOVE=process
-
+        - BADGE=linux
+        - BADGE=osx
     matrix:
         - CXX_STANDARD=gnu++11 TOOLSET=gcc-5
         - CXX_STANDARD=gnu++1y TOOLSET=gcc-5
-        exclude:
+    exclude:
         - os: linux
           env: BADGE=osx
         - os: osx
