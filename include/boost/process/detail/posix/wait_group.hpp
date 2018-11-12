@@ -16,6 +16,7 @@
 #include <system_error>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
 namespace boost { namespace process { namespace detail { namespace posix {
 
