@@ -68,7 +68,7 @@ before_install:
     # Set this to the name of the library
     - PROJECT_TO_TEST=`basename $TRAVIS_BUILD_DIR`
     - echo "Testing $PROJECT_TO_TEST"
-    - if [ $TRAVIS_OS_NAME = "osx" ]; then brew install gcc5; brew install valgrind; brew install --with-toolchain llvm; TOOLSET=clang; else LDFLAGS=gcc-5; fi
+    - if [ $TRAVIS_OS_NAME = "osx" ]; then brew install gcc5; brew install valgrind; brew install llvm; TOOLSET=clang; else TOOLSET=gcc-5; fi
     # Cloning Boost libraries (fast nondeep cloning)
     - BOOST=$HOME/boost-local
     - git init $BOOST
