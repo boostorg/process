@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(async_wait, *boost::unit_test::timeout(5))
     bool exit_called_for_c1 = false;
     int exit_code_c1 = 0;
 
-    boost::asio::deadline_timer timeout{io_context, boost::posix_time::seconds(5)};
+    boost::asio::deadline_timer timeout{io_context, boost::posix_time::seconds(2)};
     timeout.async_wait([&](boost::system::error_code ec){if (!ec) io_context.stop();});
 
 
@@ -140,10 +140,10 @@ BOOST_AUTO_TEST_CASE(async_wait_different_contexts, *boost::unit_test::timeout(5
     boost::asio::io_context io_context1;
     boost::asio::io_context io_context2;
 
-    boost::asio::deadline_timer timeout1{io_context1, boost::posix_time::seconds(5)};
+    boost::asio::deadline_timer timeout1{io_context1, boost::posix_time::seconds(2)};
     timeout1.async_wait([&](boost::system::error_code ec){if (!ec) io_context1.stop();});
 
-    boost::asio::deadline_timer timeout2{io_context2, boost::posix_time::seconds(5)};
+    boost::asio::deadline_timer timeout2{io_context2, boost::posix_time::seconds(2)};
     timeout2.async_wait([&](boost::system::error_code ec){if (!ec) io_context2.stop();});
     std::error_code ec;
 
@@ -262,7 +262,7 @@ BOOST_AUTO_TEST_CASE(async_future, *boost::unit_test::timeout(2))
 }
 
 
-BOOST_AUTO_TEST_CASE(async_out_stream, *boost::unit_test::timeout(2))
+BOOST_AUTO_TEST_CASE(async_out_stream, *boost::unit_test::timeout(5))
 {
     using boost::unit_test::framework::master_test_suite;
 
@@ -296,7 +296,7 @@ BOOST_AUTO_TEST_CASE(async_out_stream, *boost::unit_test::timeout(2))
 
 
 
-BOOST_AUTO_TEST_CASE(async_in_stream, *boost::unit_test::timeout(2))
+BOOST_AUTO_TEST_CASE(async_in_stream, *boost::unit_test::timeout(5))
 {
 
     using boost::unit_test::framework::master_test_suite;
