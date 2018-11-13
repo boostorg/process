@@ -117,7 +117,7 @@ inline bool wait_until(
     }
     else if (timeout_pid == 0)
     {
-        auto ts = get_timespec(timed_out - Clock::now());
+        auto ts = get_timespec(time_out - Clock::now());
         ::nanosleep(&ts, nullptr);
         ::exit(0);
     }
