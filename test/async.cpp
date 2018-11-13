@@ -132,7 +132,7 @@ BOOST_AUTO_TEST_CASE(async_wait_sync_wait, *boost::unit_test::timeout(3))
     BOOST_CHECK_EQUAL(c2.exit_code(), 2);
 }
 
-BOOST_AUTO_TEST_CASE(async_wait_different_contexts, *boost::unit_test::timeout(5))
+BOOST_AUTO_TEST_CASE(async_wait_different_contexts, *boost::unit_test::timeout(10))
 {
     using boost::unit_test::framework::master_test_suite;
     using namespace boost::asio;
@@ -143,34 +143,32 @@ BOOST_AUTO_TEST_CASE(async_wait_different_contexts, *boost::unit_test::timeout(5
     boost::asio::deadline_timer timeout1{io_context1, boost::posix_time::seconds(2)};
     timeout1.async_wait([&](boost::system::error_code ec){if (!ec) io_context1.stop();});
 
-    boost::asio::deadline_timer timeout2{io_context2, boost::posix_time::seconds(2)};
+    boost::asio::deadline_timer timeout2{io_context2, boost::posix_time::seconds(7)};
     timeout2.async_wait([&](boost::system::error_code ec){if (!ec) io_context2.stop();});
     std::error_code ec;
 
     bool exit_called_for_c1 = false;
     int exit_code_c1 = 0;
-    bp::child c1;
-    io_context1.post(
-            [&]{c1 = bp::child(
-                        master_test_suite().argv[1],
-                        "test", "--exit-code", "1",
-                        ec,
-                        io_context1,
-                        bp::on_exit([&](int exit, const std::error_code& ec_in)
-                                {
-                                    BOOST_CHECK(!exit_called_for_c1);
-                                    exit_code_c1 = exit; exit_called_for_c1=true;
-                                    BOOST_CHECK(!ec_in);
-                                    timeout1.cancel();
-                                })
-                    );});
+    bp::child c1(
+        master_test_suite().argv[1],
+        "test", "--exit-code", "1",
+        ec,
+        io_context1,
+        bp::on_exit([&](int exit, const std::error_code& ec_in)
+                {
+                    BOOST_CHECK(!exit_called_for_c1);
+                    exit_code_c1 = exit; exit_called_for_c1=true;
+                    BOOST_CHECK(!ec_in);
+                    timeout1.cancel();
+                })
+    );
     BOOST_REQUIRE(!ec);
 
     bool exit_called_for_c2 = false;
     int exit_code_c2 = 0;
     bp::child c2(
         master_test_suite().argv[1],
-        "test", "--exit-code", "2", "--wait", "1",
+        "test", "--exit-code", "2", "--wait", "4",
         ec,
         io_context2,
         bp::on_exit([&](int exit, const std::error_code& ec_in)
