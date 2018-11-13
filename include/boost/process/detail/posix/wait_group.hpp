@@ -16,6 +16,7 @@
 #include <system_error>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
 namespace boost { namespace process { namespace detail { namespace posix {
 
@@ -108,16 +109,16 @@ inline bool wait_until(
     while (((ret != -1) || (errno != ECHILD)) && !(timed_out = (Clock::now() > time_out)));
 #else
     //if we do not have sigtimedwait, we fork off a child process  to get the signal in time
-    pid_it timeout_pid = ::fork();
-    if (time_out == -1)
+    pid_t timeout_pid = ::fork();
+    if (timeout_pid == -1)
     {
         ec = boost::process::detail::get_last_error();
         return true;
     }
     else if (timeout_pid == 0)
     {
-        auto ts = get_timespec(timed_out - Clock::now());
-        ::nsleep(&ts, nullptr);
+        auto ts = get_timespec(time_out - Clock::now());
+        ::nanosleep(&ts, nullptr);
         ::exit(0);
     }
 

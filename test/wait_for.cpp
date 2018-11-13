@@ -8,7 +8,7 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #define BOOST_TEST_MAIN
-#define BOOST_TEST_IGNORE_SIGCHLD
+//#define BOOST_TEST_IGNORE_SIGCHLD
 #include <boost/test/included/unit_test.hpp>
 #include <boost/process/error.hpp>
 #include <boost/process/child.hpp>

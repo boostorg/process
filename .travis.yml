@@ -31,8 +31,8 @@ env:
         - BADGE=linux
         - BADGE=osx
     matrix:
-        - CXX_STANDARD=gnu++11 TOOLSET=gcc-5
-        - CXX_STANDARD=gnu++1y TOOLSET=gcc-5
+        - CXX_STANDARD=gnu++11
+        #- CXX_STANDARD=gnu++1y
     exclude:
         - os: linux
           env: BADGE=osx
@@ -68,7 +68,7 @@ before_install:
     # Set this to the name of the library
     - PROJECT_TO_TEST=`basename $TRAVIS_BUILD_DIR`
     - echo "Testing $PROJECT_TO_TEST"
-    - if [ $TRAVIS_OS_NAME = "osx" ]; then brew install gcc5; brew install valgrind; LDFLAGS="-lprofile_rt"; else LDFLAGS="--coverage"; fi
+    - if [ $TRAVIS_OS_NAME = "osx" ]; then brew install gcc5; brew install valgrind; brew install llvm; TOOLSET=clang; else TOOLSET=gcc-5; fi
     # Cloning Boost libraries (fast nondeep cloning)
     - BOOST=$HOME/boost-local
     - git init $BOOST
@@ -97,8 +97,8 @@ before_install:
 
 script:
     # `--coverage` flags required to generate coverage info for Coveralls
-    - ../../../b2 with-valgrind address-model=64 architecture=x86 testing.launcher=valgrind valgrind=on toolset=$TOOLSET cxxflags="--coverage -DBOOST_TRAVISCI_BUILD -std=$CXX_STANDARD" linkflags="--coverage" -sBOOST_BUILD_PATH=. > >(python $BOOST/libs/$PROJECT_TO_TEST/filter_section_warning.py)
-    - ../../../b2 without-valgrind address-model=64 architecture=x86 toolset=$TOOLSET cxxflags="--coverage -DBOOST_TRAVISCI_BUILD -std=$CXX_STANDARD" linkflags="--coverage" -sBOOST_BUILD_PATH=. > >(python $BOOST/libs/$PROJECT_TO_TEST/filter_section_warning.py)
+    - ../../../b2 with-valgrind address-model=64 architecture=x86 testing.launcher=valgrind valgrind=on toolset=$TOOLSET cxxflags="--coverage -DBOOST_TRAVISCI_BUILD -std=$CXX_STANDARD" linkflags="--coverage" -sBOOST_BUILD_PATH=. 
+    - ../../../b2 without-valgrind address-model=64 architecture=x86 toolset=$TOOLSET cxxflags="--coverage -DBOOST_TRAVISCI_BUILD -std=$CXX_STANDARD" linkflags="--coverage" -sBOOST_BUILD_PATH=. 
 after_success:
     # Copying Coveralls data to a separate folder
     - mkdir -p $TRAVIS_BUILD_DIR/coverals
