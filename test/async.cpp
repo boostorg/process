@@ -149,19 +149,21 @@ BOOST_AUTO_TEST_CASE(async_wait_different_contexts, *boost::unit_test::timeout(5
 
     bool exit_called_for_c1 = false;
     int exit_code_c1 = 0;
-    bp::child c1(
-        master_test_suite().argv[1],
-        "test", "--exit-code", "1",
-        ec,
-        io_context1,
-        bp::on_exit([&](int exit, const std::error_code& ec_in)
-                {
-                    BOOST_CHECK(!exit_called_for_c1);
-                    exit_code_c1 = exit; exit_called_for_c1=true;
-                    BOOST_CHECK(!ec_in);
-                    timeout1.cancel();
-                })
-    );
+    bp::child c1;
+    io_context1.post(
+            [&]{c1 = bp::child(
+                        master_test_suite().argv[1],
+                        "test", "--exit-code", "1",
+                        ec,
+                        io_context1,
+                        bp::on_exit([&](int exit, const std::error_code& ec_in)
+                                {
+                                    BOOST_CHECK(!exit_called_for_c1);
+                                    exit_code_c1 = exit; exit_called_for_c1=true;
+                                    BOOST_CHECK(!ec_in);
+                                    timeout1.cancel();
+                                })
+                    );});
     BOOST_REQUIRE(!ec);
 
     bool exit_called_for_c2 = false;
