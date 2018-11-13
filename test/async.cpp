@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(async_wait, *boost::unit_test::timeout(5))
     int exit_code_c1 = 0;
 
     boost::asio::deadline_timer timeout{io_context, boost::posix_time::seconds(5)};
-    timeout.async_wait([&](auto ec){if (!ec) io_context.stop();});
+    timeout.async_wait([&](boost::system::error_code ec){if (!ec) io_context.stop();});
 
 
     bp::child c1(
@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE(async_wait_sync_wait, *boost::unit_test::timeout(3))
     std::error_code ec;
 
     boost::asio::deadline_timer timeout{io_context, boost::posix_time::seconds(5)};
-    timeout.async_wait([&](auto ec){if (!ec) io_context.stop();});
+    timeout.async_wait([&](boost::system::error_code ec){if (!ec) io_context.stop();});
 
     bp::child c1(
         master_test_suite().argv[1],
@@ -141,10 +141,10 @@ BOOST_AUTO_TEST_CASE(async_wait_different_contexts, *boost::unit_test::timeout(5
     boost::asio::io_context io_context2;
 
     boost::asio::deadline_timer timeout1{io_context1, boost::posix_time::seconds(5)};
-    timeout1.async_wait([&](auto ec){if (!ec) io_context1.stop();});
+    timeout1.async_wait([&](boost::system::error_code ec){if (!ec) io_context1.stop();});
 
     boost::asio::deadline_timer timeout2{io_context2, boost::posix_time::seconds(5)};
-    timeout2.async_wait([&](auto ec){if (!ec) io_context2.stop();});
+    timeout2.async_wait([&](boost::system::error_code ec){if (!ec) io_context2.stop();});
     std::error_code ec;
 
     bool exit_called_for_c1 = false;
@@ -205,7 +205,7 @@ BOOST_AUTO_TEST_CASE(async_wait_abort, *boost::unit_test::timeout(5))
     std::error_code ec;
 
     boost::asio::deadline_timer timeout{io_context, boost::posix_time::seconds(5)};
-    timeout.async_wait([&](auto ec){if (!ec) io_context.stop();});
+    timeout.async_wait([&](boost::system::error_code ec){if (!ec) io_context.stop();});
 
     bool exit_called = false;
     int exit_code = 0;
@@ -254,7 +254,7 @@ BOOST_AUTO_TEST_CASE(async_future, *boost::unit_test::timeout(2))
     BOOST_REQUIRE(!ec);
 
     boost::asio::deadline_timer timeout{io_context, boost::posix_time::seconds(1)};
-    timeout.async_wait([&](auto ec){if (!ec) io_context.stop();});
+    timeout.async_wait([&](boost::system::error_code ec){if (!ec) io_context.stop();});
     io_context.run();
 
     BOOST_REQUIRE(fut.valid());
@@ -274,7 +274,7 @@ BOOST_AUTO_TEST_CASE(async_out_stream, *boost::unit_test::timeout(2))
     boost::asio::streambuf buf;
 
     boost::asio::deadline_timer timeout{io_context, boost::posix_time::seconds(2)};
-    timeout.async_wait([&](auto ec){if (!ec) io_context.stop();});
+    timeout.async_wait([&](boost::system::error_code ec){if (!ec) io_context.stop();});
 
     bp::child c(master_test_suite().argv[1],
                 "test", "--echo-stdout", "abc",
@@ -314,7 +314,7 @@ BOOST_AUTO_TEST_CASE(async_in_stream, *boost::unit_test::timeout(2))
     ostr << "-string" << endl ;
 
     boost::asio::deadline_timer timeout{io_context, boost::posix_time::seconds(2)};
-    timeout.async_wait([&](auto ec){if (!ec) io_context.stop();});
+    timeout.async_wait([&](boost::system::error_code ec){if (!ec) io_context.stop();});
 
     bp::child c(
         master_test_suite().argv[1],
