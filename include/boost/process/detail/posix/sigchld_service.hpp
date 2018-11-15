@@ -39,12 +39,11 @@ public:
 
         auto & h = init.completion_handler;
         _strand.dispatch(
-                [this, pid_, h]
+                [this, pid, h]
                 {
                     //check if the child actually is running first
                     int status;
-                    int pid = ::waitpid(pid_, &status, WNOHANG);
-                    if (pid < 0)
+                    if (::waitpid(pid, &status, WNOHANG) < 0)
                         h(-1, get_last_error());
                     else if (WIFEXITED(status) || WIFSIGNALED(status))
                         h(status, {}); //successfully exited already
