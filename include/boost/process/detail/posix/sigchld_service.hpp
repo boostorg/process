@@ -43,9 +43,10 @@ public:
                 {
                     //check if the child actually is running first
                     int status;
-                    if (::waitpid(pid, &status, WNOHANG) < 0)
+                    auto pid_res = ::waitpid(pid, &status, WNOHANG);
+                    if (pid_res < 0)
                         h(-1, get_last_error());
-                    else if (WIFEXITED(status) || WIFSIGNALED(status))
+                    else if ((pid_res == pid) && (WIFEXITED(status) || WIFSIGNALED(status)))
                         h(status, {}); //successfully exited already
                     else //still running
                     {
