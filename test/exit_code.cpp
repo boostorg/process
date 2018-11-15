@@ -93,7 +93,7 @@ struct wait_handler
 
     void operator()(const boost::system::error_code &ec, int signal)
     {
-        called_ = false;
+        called_ = true;
         BOOST_REQUIRE(!ec);
         BOOST_REQUIRE_EQUAL(SIGCHLD, signal);
         int status;
