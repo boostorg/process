@@ -72,11 +72,12 @@ BOOST_AUTO_TEST_CASE(sync_wait_abort)
 struct wait_handler
 {
     HANDLE handle_;
-
-    wait_handler(HANDLE handle) : handle_(handle) {}
+    bool &called_;
+    wait_handler(HANDLE handle, bool &called) : handle_(handle), called_(called) {}
 
     void operator()(const boost::system::error_code &ec)
     {
+        called_ = true;
         BOOST_REQUIRE(!ec);
         DWORD exit_code;
         BOOST_REQUIRE(GetExitCodeProcess(handle_, &exit_code));
@@ -86,8 +87,13 @@ struct wait_handler
 #elif defined(BOOST_POSIX_API)
 struct wait_handler
 {
+    bool &called_;
+
+    wait_handler (bool & called) : called_(called) {}
+
     void operator()(const boost::system::error_code &ec, int signal)
     {
+        called_ = false;
         BOOST_REQUIRE(!ec);
         BOOST_REQUIRE_EQUAL(SIGCHLD, signal);
         int status;
@@ -104,9 +110,14 @@ BOOST_AUTO_TEST_CASE(async_wait)
 
     boost::asio::io_context io_context;
 
+    boost::asio::deadline_timer timeout{io_context, boost::posix_time::seconds(3)};
+    timeout.async_wait([&](boost::system::error_code ec){if (!ec) io_context.stop();});
+
+
+    bool wh_called = false;
 #if defined(BOOST_POSIX_API)
     signal_set set(io_context, SIGCHLD);
-    set.async_wait(wait_handler());
+    set.async_wait(wait_handler(wh_called));
 #endif
 
     std::error_code ec;
@@ -119,9 +130,10 @@ BOOST_AUTO_TEST_CASE(async_wait)
 
 #if defined(BOOST_WINDOWS_API)
     windows::object_handle handle(io_context, c.native_handle());
-    handle.async_wait(wait_handler(handle.native_handle()));
+    handle.async_wait(wait_handler(handle.native_handle(), wh_called));
 #endif
     std::cout << "async_wait 1" << std::endl;
     io_context.run();
     std::cout << "async_wait 2" << std::endl;
+    BOOST_CHECK_MESSAGE(wh_called, "Wait handler not called");
 }
