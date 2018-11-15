@@ -36,17 +36,28 @@ public:
     {
         boost::asio::async_completion<
         SignalHandler, void(boost::system::error_code)> init{handler};
+
         auto & h = init.completion_handler;
-        _strand.post(
+        _strand.dispatch(
                 [this, pid, h]
                 {
-                    if (_receivers.empty())
-                        _signal_set.async_wait(
-                                [this](const boost::system::error_code & ec, int)
-                                {
-                                    _strand.post([this,ec]{this->_handle_signal(ec);});
-                                });
-                    _receivers.emplace_back(pid, h);
+                    //check if the child actually is running first
+                    int status;
+                    int pid = ::waitpid(r.first, &status, WNOHANG);
+                    if (pid < 0)
+                        h(-1, get_last_error());
+                    else if (!is_running(status))
+                        h(status, {}); //successfully exited already
+                    else //still running
+                    {
+                        if (_receivers.empty())
+                            _signal_set.async_wait(
+                                    [this](const boost::system::error_code &ec, int)
+                                    {
+                                        _strand.dispatch([this, ec]{this->_handle_signal(ec);});
+                                    });
+                        _receivers.emplace_back(pid, h);
+                    }
                 });
 
         return init.result.get();
