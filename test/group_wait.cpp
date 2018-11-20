@@ -41,14 +41,14 @@ BOOST_AUTO_TEST_CASE(wait_group_test, *boost::unit_test::timeout(5))
 
     bp::child c1(
             master_test_suite().argv[1],
-            "--wait", "1",
+            "--wait", "2",
             g,
             ec
     );
 
     bp::child c2(
             master_test_suite().argv[1],
-            "--wait", "1",
+            "--wait", "2",
             g,
             ec
     );
@@ -57,9 +57,10 @@ BOOST_AUTO_TEST_CASE(wait_group_test, *boost::unit_test::timeout(5))
     BOOST_CHECK(c2.running());
 
     BOOST_REQUIRE(!ec);
-    BOOST_REQUIRE(c1.in_group());
-    BOOST_REQUIRE(c2.in_group());
-
+    BOOST_REQUIRE(c1.in_group(ec));
+    BOOST_CHECK_MESSAGE(ec, ec.message());
+    BOOST_REQUIRE(c2.in_group(ec));
+    BOOST_CHECK_MESSAGE(ec, ec.message());
     g.wait();
 
     BOOST_CHECK(!c1.running());
