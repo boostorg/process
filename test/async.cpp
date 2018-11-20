@@ -369,6 +369,10 @@ BOOST_AUTO_TEST_CASE(async_error, *boost::unit_test::timeout(2))
     );
 
     BOOST_REQUIRE(ec);
+
+    boost::asio::deadline_timer timeout{io_context, boost::posix_time::seconds(1)};
+    timeout.async_wait([&](boost::system::error_code ec){if (!ec) io_context.stop();});
+
     io_context.run();
 
     BOOST_CHECK(!exit_called);
