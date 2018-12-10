@@ -23,10 +23,13 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/asio/deadline_timer.hpp>
 
-
 using namespace std;
 
 namespace bp = boost::process;
+
+#if __APPLE__
+auto abort_sig = signal(SIGALRM, +[](int){std::terminate();});
+#endif
 
 BOOST_AUTO_TEST_CASE(async_wait, *boost::unit_test::timeout(5))
 {
