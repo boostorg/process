@@ -35,7 +35,7 @@ env:
         #- CXX_STANDARD=gnu++1y
     exclude:
         - os: linux
-          env: BADGE=osx
+          env: BOOST_TEST_CATCH_SYSTEM_ERRORS=no
         - os: osx
           env: BADGE=linux
 
@@ -94,7 +94,7 @@ before_install:
     - ./bootstrap.sh
     - ./b2 headers
     - cd $BOOST/libs/$PROJECT_TO_TEST/test
-
+    - echo BOOST_TEST_CATCH_SYSTEM_ERRORS $BOOST_TEST_CATCH_SYSTEM_ERRORS
 script:
     # `--coverage` flags required to generate coverage info for Coveralls
     - ../../../b2 with-valgrind address-model=64 architecture=x86 testing.launcher=valgrind valgrind=on toolset=$TOOLSET cxxflags="--coverage -DBOOST_TRAVISCI_BUILD -std=$CXX_STANDARD" linkflags="--coverage" -sBOOST_BUILD_PATH=. 
