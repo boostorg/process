@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE(async_wait, *boost::unit_test::timeout(5))
     BOOST_CHECK_EQUAL(c2.exit_code(), 21);
 }
 
-BOOST_AUTO_TEST_CASE(async_wait_sync_wait, *boost::unit_test::timeout(3))
+BOOST_AUTO_TEST_CASE(async_wait_sync_wait, *boost::unit_test::timeout(5))
 {
     using boost::unit_test::framework::master_test_suite;
     using namespace boost::asio;
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE(async_wait_sync_wait, *boost::unit_test::timeout(3))
     int exit_code = 0;
     std::error_code ec;
 
-    boost::asio::deadline_timer timeout{io_context, boost::posix_time::seconds(5)};
+    boost::asio::deadline_timer timeout{io_context, boost::posix_time::seconds(3)};
     timeout.async_wait([&](boost::system::error_code ec){if (!ec) io_context.stop();});
 
     bp::child c1(
@@ -179,8 +179,11 @@ BOOST_AUTO_TEST_CASE(async_wait_different_contexts, *boost::unit_test::timeout(1
     BOOST_REQUIRE(!ec);
 
     // Regression test for #143: make sure each io_context handles its own children
-    io_context1.run();
-    io_context2.run();
+    std::thread thr1{[&]{io_context1.run();}};
+    std::thread thr2{[&]{io_context2.run();}};
+
+    thr1.join();
+    thr2.join();
     c1.wait(ec);
     BOOST_REQUIRE(!ec);
 
