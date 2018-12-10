@@ -107,13 +107,13 @@ struct io_context_ref : handler_base_ext
     }
 
     template<typename Executor>
-    void on_setup (Executor &) const {ios.notify_fork(boost::asio::io_context::fork_prepare);}
+    void on_setup (Executor &) const {/*ios.notify_fork(boost::asio::io_context::fork_prepare);*/}
 
     template<typename Executor>
-    void on_exec_setup  (Executor &) const {ios.notify_fork(boost::asio::io_context::fork_child);}
+    void on_exec_setup  (Executor &) const {/*ios.notify_fork(boost::asio::io_context::fork_child);*/}
 
     template <class Executor>
-    void on_error(Executor&, const std::error_code &) const {ios.notify_fork(boost::asio::io_context::fork_parent);}
+    void on_error(Executor&, const std::error_code &) const {/*ios.notify_fork(boost::asio::io_context::fork_parent);*/}
 
 private:
     boost::asio::io_context &ios;
