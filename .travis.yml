@@ -10,34 +10,6 @@
 #
 # File revision #6
 
-env:
-
-    global:
-        # Autodetect Boost branch by using the following code: - BRANCH_TO_TEST=$TRAVIS_BRANCH
-        # or just directly specify it
-        - BRANCH_TO_TEST=$TRAVIS_BRANCH
-
-        # Files, which coverage results must be ignored (files from other projects).
-        # Example: - IGNORE_COVERAGE='*/boost/progress.hpp */filesystem/src/*'
-        - IGNORE_COVERAGE=''
-
-        # Explicitly remove the following library from Boost. This may be usefull, if you're for example running Travis
-        # from `Boost.DLL` repo, while Boost already has `dll`.
-        #
-        # By default is eaual to - BOOST_REMOVE=`basename $TRAVIS_BUILD_DIR`
-        # This will force to use local repo content, instead of the Boost's default
-        # not needed because process is not yet in boost.
-        - BOOST_REMOVE=process
-        - BADGE=linux
-        - BADGE=osx
-    matrix:
-        - CXX_STANDARD=gnu++11
-        #- CXX_STANDARD=gnu++1y
-    exclude:
-        - os: linux
-          env: BOOST_TEST_CATCH_SYSTEM_ERRORS=no
-        - os: osx
-          env: BADGE=linux
 
 ###############################################################################################################
 # From this point and below code is same for all the Boost libs
@@ -50,6 +22,37 @@ compiler:
 os:
     - linux
     - osx
+
+env:
+  - BADGE=linux
+  - BADGE=osx
+
+global:
+  # Autodetect Boost branch by using the following code: - BRANCH_TO_TEST=$TRAVIS_BRANCH
+  # or just directly specify it
+  - BRANCH_TO_TEST=$TRAVIS_BRANCH
+
+  # Files, which coverage results must be ignored (files from other projects).
+  # Example: - IGNORE_COVERAGE='*/boost/progress.hpp */filesystem/src/*'
+  - IGNORE_COVERAGE=''
+
+  # Explicitly remove the following library from Boost. This may be usefull, if you're for example running Travis
+  # from `Boost.DLL` repo, while Boost already has `dll`.
+  #
+  # By default is eaual to - BOOST_REMOVE=`basename $TRAVIS_BUILD_DIR`
+  # This will force to use local repo content, instead of the Boost's default
+  # not needed because process is not yet in boost.
+  - BOOST_REMOVE=process
+  - CXX_STANDARD=gnu++11
+
+matrix:
+  exclude:
+    - os: linux
+      env: BADGE=osx
+    - os: osx
+      env: BADGE=linux
+
+
 
 # Installing additional tools
 addons:
@@ -68,11 +71,12 @@ before_install:
     # Set this to the name of the library
     - PROJECT_TO_TEST=`basename $TRAVIS_BUILD_DIR`
     - echo "Testing $PROJECT_TO_TEST"
-    - if [ $TRAVIS_OS_NAME = "osx" ]; then brew install gcc5; brew install valgrind; brew install llvm; TOOLSET=clang; else TOOLSET=gcc-5; fi
+    - if [ $TRAVIS_OS_NAME = "osx" ]; then brew install gcc5; brew install valgrind; brew install llvm; TOOLSET=clang; BOOST_TEST_CATCH_SYSTEM_ERRORS=no; else TOOLSET=gcc-5; fi
     # Cloning Boost libraries (fast nondeep cloning)
     - BOOST=$HOME/boost-local
     - git init $BOOST
     - cd $BOOST
+    - echo Branch to test  $BRANCH_TO_TEST
     - if [ $BRANCH_TO_TEST = "master" ]; then
       BOOST_BRANCH=master; 
       else BOOST_BRANCH=develop; fi
