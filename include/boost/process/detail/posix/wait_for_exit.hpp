@@ -114,7 +114,7 @@ inline bool wait_until(
         auto ts = get_timespec(time_out - Clock::now());
         ::timespec rem;
         ::nanosleep(&ts, &rem);
-        while (rem.tv_sec > 0 || rem.rv_nsec > 0)
+        while (rem.tv_sec > 0 || rem.tv_nsec > 0)
             ::nanosleep(&rem, &rem);
         ::exit(0);
     }
