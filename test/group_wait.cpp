@@ -33,6 +33,7 @@ namespace bp = boost::process;
 
 #if __APPLE__
 auto abort_sig = signal(SIGALRM, +[](int){std::terminate();});
+auto alm = alarm(30);
 #endif
 
 BOOST_AUTO_TEST_CASE(wait_group_test, *boost::unit_test::timeout(5))
