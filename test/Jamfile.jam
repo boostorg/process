@@ -84,7 +84,7 @@ test-suite with-valgrind :
     [ run group.cpp     system thread filesystem              : --log_level=all : sub_launch ]
     [ run group.cpp          system thread filesystem         : --log_level=all : sub_launch : <build>no <target-os>windows:<build>yes <define>BOOST_USE_WINDOWS_H=1 : group-windows-h ]
     [ run group_wait.cpp     system thread filesystem         : --log_level=all : sparring_partner ]
-    [ run run_exe.cpp filesystem                              : --log_level=all : sparring_partner ]
+    [ run run_exe.cpp filesystem                              : : sparring_partner ]
     [ run run_exe_path.cpp filesystem                         : --log_level=all : sparring_partner ]
     [ run search_path.cpp filesystem system                   : --log_level=all : : <target-os>windows:<source>shell32 ]
     [ run shell.cpp filesystem system                         : --log_level=all : sparring_partner ]

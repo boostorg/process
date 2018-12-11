@@ -130,7 +130,7 @@ inline bool wait_until(
         {
             int res;
             ::kill(pid, -15);
-            ::waitpid(pid, &res, 0);
+            ::waitpid(pid, &res, WNOHANG);
         }
     };
     child_cleaner_t child_cleaner{timeout_pid};
