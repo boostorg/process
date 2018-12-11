@@ -92,6 +92,10 @@ class child
     /** Get the Process Identifier. */
     pid_t id()      const;
 
+    /** Get the native, uninterpreted exit code. The return value is without any meaning if the child wasn't waited
+     *  for or if it was terminated. */
+    int native_exit_code() const;
+
     /** Check if the child process is running. */
     bool running();
     /** \overload void running() */
