@@ -22,7 +22,7 @@
 
 namespace bp = boost::process;
 
-BOOST_AUTO_TEST_CASE(terminate_set_on_error)
+BOOST_AUTO_TEST_CASE(terminate_set_on_error, *boost::unit_test::timeout(5))
 {
     using boost::unit_test::framework::master_test_suite;
     std::error_code ec;
@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE(terminate_set_on_error)
     BOOST_CHECK(!ec);
 }
 
-BOOST_AUTO_TEST_CASE(terminate_throw_on_error)
+BOOST_AUTO_TEST_CASE(terminate_throw_on_error, *boost::unit_test::timeout(5))
 {
     using boost::unit_test::framework::master_test_suite;
 
