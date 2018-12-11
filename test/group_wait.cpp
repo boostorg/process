@@ -31,6 +31,10 @@
 
 namespace bp = boost::process;
 
+#if __APPLE__
+auto abort_sig = signal(SIGALRM, +[](int){std::terminate();});
+#endif
+
 BOOST_AUTO_TEST_CASE(wait_group_test, *boost::unit_test::timeout(5))
 {
     using boost::unit_test::framework::master_test_suite;
