@@ -134,10 +134,11 @@ inline bool wait_until(
         errno = 0;
         ret = ::waitpid(p.pid, &status, WNOHANG);
 
-        if ((ret_sig == SIGCHLD) && (old_sig.sa_handler != SIG_DFL) && (old_sig.sa_handler != SIG_IGN))
+        if ((ret_sig == SIGCHLD) &&
+            (old_sig.sa_handler != SIG_DFL) && (old_sig.sa_handler != SIG_IGN))
             old_sig.sa_handler(ret);
 
-        if (ret == 0)
+        if (ret <= 0)
         {
             timed_out = Clock::now() >= time_out;
             if (timed_out)
