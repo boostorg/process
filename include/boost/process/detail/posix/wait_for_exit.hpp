@@ -133,8 +133,12 @@ inline bool wait_until(
 
     do
     {
-        auto ret_sig = ::sigwait(&sigset, nullptr);
+        int ret_sig = 0;
+        if ((::waitpid(timeout_pid, &status, WNOHANG) == 0)
+         && (WIFEXITED(status) || WIFSIGNALED(status)))
+            ret_sig = ::sigwait(&sigset, nullptr);
         errno = 0;
+
         ret = ::waitpid(p.pid, &status, WNOHANG);
 
         if ((ret_sig == SIGCHLD) &&

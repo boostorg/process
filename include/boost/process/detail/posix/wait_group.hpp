@@ -137,7 +137,10 @@ inline bool wait_until(
 
     do
     {
-        ret = ::sigwait(&sigset, nullptr);
+        int ret_sig = 0;
+        if ((::waitpid(timeout_pid, &status, WNOHANG) == 0)
+            && (WIFEXITED(status) || WIFSIGNALED(status)))
+            ret = ::sigwait(&sigset, nullptr);
         errno = 0;
         if ((ret == SIGCHLD) && (old_sig.sa_handler != SIG_DFL) && (old_sig.sa_handler != SIG_IGN))
             old_sig.sa_handler(ret);
