@@ -101,8 +101,8 @@ before_install:
   - echo BOOST_TEST_CATCH_SYSTEM_ERRORS $BOOST_TEST_CATCH_SYSTEM_ERRORS
 script:
   # `--coverage` flags required to generate coverage info for Coveralls
-  - ../../../b2 with-valgrind address-model=64 architecture=x86 $USE_VALGRIND toolset=$TOOLSET cxxflags="--coverage -DBOOST_TRAVISCI_BUILD -std=$CXX_STANDARD" linkflags="--coverage" -sBOOST_BUILD_PATH=.
-  - ../../../b2 without-valgrind address-model=64 architecture=x86 toolset=$TOOLSET cxxflags="--coverage -DBOOST_TRAVISCI_BUILD -std=$CXX_STANDARD" linkflags="--coverage" -sBOOST_BUILD_PATH=.
+  - ../../../b2 -j8 with-valgrind address-model=64 architecture=x86 $USE_VALGRIND toolset=$TOOLSET cxxflags="--coverage -DBOOST_TRAVISCI_BUILD -std=$CXX_STANDARD" linkflags="--coverage" -sBOOST_BUILD_PATH=.
+  - ../../../b2 -j8 without-valgrind address-model=64 architecture=x86 toolset=$TOOLSET cxxflags="--coverage -DBOOST_TRAVISCI_BUILD -std=$CXX_STANDARD" linkflags="--coverage" -sBOOST_BUILD_PATH=.
 after_success:
   # Copying Coveralls data to a separate folder
   - mkdir -p $TRAVIS_BUILD_DIR/coverals
