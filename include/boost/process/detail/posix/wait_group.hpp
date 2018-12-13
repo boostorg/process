@@ -139,7 +139,7 @@ inline bool wait_until(
     {
         int ret_sig = 0;
         int status;
-        if ((::waitpid(timeout_pid, &status, WNOHANG) == 0)
+        if ((::waitpid(timeout_pid, &status, WNOHANG) != 0)
             && (WIFEXITED(status) || WIFSIGNALED(status)))
             ret = ::sigwait(&sigset, nullptr);
         errno = 0;
