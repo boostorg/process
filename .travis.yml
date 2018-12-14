@@ -71,7 +71,7 @@ before_install:
   # Set this to the name of the library
   - PROJECT_TO_TEST=`basename $TRAVIS_BUILD_DIR`
   - echo "Testing $PROJECT_TO_TEST"
-  - if [ $TRAVIS_OS_NAME = "osx" ]; then brew install gcc5; brew install valgrind; brew install llvm; TOOLSET=clang; BOOST_TEST_CATCH_SYSTEM_ERRORS=no; else TOOLSET=gcc-5; USE_VALGRIND="testing.launcher=valgrind valgrind=on"; fi
+  - if [ $TRAVIS_OS_NAME = "osx" ]; then brew install gcc5; brew install valgrind; brew install llvm; TOOLSET=clang; BOOST_TEST_CATCH_SYSTEM_ERRORS=no; MULTITHREAD=-j8; else TOOLSET=gcc-5; USE_VALGRIND="testing.launcher=valgrind valgrind=on"; fi
   # Cloning Boost libraries (fast nondeep cloning)
   - BOOST=$HOME/boost-local
   - git init $BOOST
@@ -101,8 +101,8 @@ before_install:
   - echo BOOST_TEST_CATCH_SYSTEM_ERRORS $BOOST_TEST_CATCH_SYSTEM_ERRORS
 script:
   # `--coverage` flags required to generate coverage info for Coveralls
-  - ../../../b2 -j8 with-valgrind address-model=64 architecture=x86 $USE_VALGRIND toolset=$TOOLSET cxxflags="--coverage -DBOOST_TRAVISCI_BUILD -std=$CXX_STANDARD" linkflags="--coverage" -sBOOST_BUILD_PATH=.
-  - ../../../b2 -j8 without-valgrind address-model=64 architecture=x86 toolset=$TOOLSET cxxflags="--coverage -DBOOST_TRAVISCI_BUILD -std=$CXX_STANDARD" linkflags="--coverage" -sBOOST_BUILD_PATH=.
+  - ../../../b2 $MULTITHREAD with-valgrind address-model=64 architecture=x86 $USE_VALGRIND toolset=$TOOLSET cxxflags="--coverage -DBOOST_TRAVISCI_BUILD -std=$CXX_STANDARD" linkflags="--coverage" -sBOOST_BUILD_PATH=.
+  - ../../../b2 $MULTITHREAD without-valgrind address-model=64 architecture=x86 toolset=$TOOLSET cxxflags="--coverage -DBOOST_TRAVISCI_BUILD -std=$CXX_STANDARD" linkflags="--coverage" -sBOOST_BUILD_PATH=.
 after_success:
   # Copying Coveralls data to a separate folder
   - mkdir -p $TRAVIS_BUILD_DIR/coverals
