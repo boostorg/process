@@ -25,7 +25,7 @@
 [def bp::std_in [globalref boost::process::std_in bp::std_in]]
 [def bp::std_out [globalref boost::process::std_out bp::std_out]]
 [def bp::std_err [globalref boost::process::std_err bp::std_err]]
-[def io_context  [@http://www.boost.org/doc/libs/release/doc/html/boost_asio/reference/io_context.html boost::asio::io_context]]
+[def io_service  [@http://www.boost.org/doc/libs/release/doc/html/boost_asio/reference/io_service.html boost::asio::io_service]]
 [def asio_buffer [@http://www.boost.org/doc/libs/release/doc/html/boost_asio/reference/buffer.html boost::asio::buffer]]
 [def asio_async_read [@http://www.boost.org/doc/libs/release/doc/html/boost_asio/reference/async_read.html boost::asio::async_read]]
 [def bp::environment  [classref boost::process::basic_environment bp::environment]]
@@ -158,7 +158,7 @@ will change the behaviour, so that instead of throwing an exception, the error w
 
 ```
 std::error_code ec;
-bp::system c("g++ main.cpp", ec);
+bp::system("g++ main.cpp", ec);
 ```
 [endsect]
 [section:io Synchronous I/O]
@@ -277,7 +277,7 @@ but the compiler output will just be put into one large buffer.
 With [@http://www.boost.org/doc/libs/release/libs/asio/ boost.asio] this is what it looks like.
 
 ```
-io_context ios;
+io_service ios;
 std::vector<char> buf(4096);
 
 bp::async_pipe ap(ios);
@@ -292,11 +292,11 @@ int result = c.exit_code();
 ```
 
 To make it easier, boost.process provides simpler interface for that, so that the buffer can be passed directly, 
-provided we also pass a reference to an io_context.
+provided we also pass a reference to an io_service. 
 
 ```
-io_context ios;
-std::vector<char> buf;
+io_service ios;
+std::vector<char> buf(4096);
 
 bp::child c(bp::search_path("g++"), "main.cpp", bp::std_out > asio_buffer(buf), ios);
 
@@ -304,16 +304,16 @@ ios.run();
 int result = c.exit_code();
 ```
 
-[note Passing an instance of io_context to the launching function automatically cause it to wait asynchronously for the exit, so no call of
+[note Passing an instance of io_service to the launching function automatically cause it to wait asynchronously for the exit, so no call of 
 [memberref boost::process::child::wait wait] is needed]
  
 To make it even easier, you can use [@http://en.cppreference.com/w/cpp/thread/future std::future] for asynchronous operations
-(you will still need to pass a reference to a io_context) to the launching function, unless you use bp::system or bp::async_system.
+(you will still need to pass a reference to a io_service) to the launching function, unless you use bp::system or bp::async_system.
 
 Now we will revisit our first example and read the compiler output asynchronously:
 
 ```
-io_context ios;
+boost::asio::io_service ios;
 
 std::future<std::string> data;
 
