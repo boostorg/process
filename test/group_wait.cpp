@@ -33,6 +33,16 @@ namespace bp = boost::process;
 
 BOOST_AUTO_TEST_CASE(wait_group_test, *boost::unit_test::timeout(5))
 {
+    std::atomic<bool> done{false};
+    std::thread thr{
+        [&]
+        {
+            for (int i = 0; i < 50 && !done.load(); i++)
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            BOOST_REQUIRE(done.load());
+        }};
+
+
     using boost::unit_test::framework::master_test_suite;
 
     std::error_code ec;
@@ -41,14 +51,14 @@ BOOST_AUTO_TEST_CASE(wait_group_test, *boost::unit_test::timeout(5))
 
     bp::child c1(
             master_test_suite().argv[1],
-            "--wait", "1",
+            "--wait", "2",
             g,
             ec
     );
 
     bp::child c2(
             master_test_suite().argv[1],
-            "--wait", "1",
+            "--wait", "2",
             g,
             ec
     );
@@ -57,19 +67,32 @@ BOOST_AUTO_TEST_CASE(wait_group_test, *boost::unit_test::timeout(5))
     BOOST_CHECK(c2.running());
 
     BOOST_REQUIRE(!ec);
-    BOOST_REQUIRE(c1.in_group());
-    BOOST_REQUIRE(c2.in_group());
-
+    BOOST_REQUIRE(c1.in_group(ec));
+    BOOST_CHECK_MESSAGE(!ec, ec.message());
+    BOOST_REQUIRE(c2.in_group(ec));
+    BOOST_CHECK_MESSAGE(!ec, ec.message());
     g.wait();
 
     BOOST_CHECK(!c1.running());
     BOOST_CHECK(!c2.running());
+
+    done.store(true);
+    thr.join();
 }
 
 
 BOOST_AUTO_TEST_CASE(wait_group_test_timeout, *boost::unit_test::timeout(15))
 {
     using boost::unit_test::framework::master_test_suite;
+
+    std::atomic<bool> done{false};
+    std::thread thr{
+            [&]
+            {
+                for (int i = 0; i < 150 && !done.load(); i++)
+                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                BOOST_REQUIRE(done.load());
+            }};
 
     std::error_code ec;
     bp::group g;
@@ -106,4 +129,7 @@ BOOST_AUTO_TEST_CASE(wait_group_test_timeout, *boost::unit_test::timeout(15))
     BOOST_CHECK_MESSAGE(!ec, std::to_string(ec.value()) + " == " + ec.message());
     BOOST_CHECK(!c1.running());
     BOOST_CHECK(!c2.running());
+
+    done.store(true);
+    thr.join();
 }

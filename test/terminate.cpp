@@ -22,8 +22,17 @@
 
 namespace bp = boost::process;
 
-BOOST_AUTO_TEST_CASE(terminate_set_on_error)
+BOOST_AUTO_TEST_CASE(terminate_set_on_error, *boost::unit_test::timeout(5))
 {
+    std::atomic<bool> done{false};
+    std::thread thr{
+            [&]
+            {
+                for (int i = 0; i < 50 && !done.load(); i++)
+                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                BOOST_REQUIRE(done.load());
+            }};
+
     using boost::unit_test::framework::master_test_suite;
     std::error_code ec;
     bp::child c(
@@ -44,10 +53,22 @@ BOOST_AUTO_TEST_CASE(terminate_set_on_error)
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     BOOST_CHECK(!c.running(ec));
     BOOST_CHECK(!ec);
+
+    done.store(true);
+    thr.join();
 }
 
-BOOST_AUTO_TEST_CASE(terminate_throw_on_error)
+BOOST_AUTO_TEST_CASE(terminate_throw_on_error, *boost::unit_test::timeout(5))
 {
+    std::atomic<bool> done{false};
+    std::thread thr{
+            [&]
+            {
+                for (int i = 0; i < 50 && !done.load(); i++)
+                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                BOOST_REQUIRE(done.load());
+            }};
+
     using boost::unit_test::framework::master_test_suite;
 
     std::error_code ec;
@@ -68,4 +89,7 @@ BOOST_AUTO_TEST_CASE(terminate_throw_on_error)
     c.terminate();
     std::this_thread::sleep_for(std::chrono::milliseconds(5)); 
     BOOST_CHECK(!c.running());
+
+    done.store(true);
+    thr.join();
 }

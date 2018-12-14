@@ -57,8 +57,8 @@ inline bool wait_until(
 
     ::sigset_t  sigset;
 
-    ::sigemptyset(&sigset);
-    ::sigaddset(&sigset, SIGCHLD);
+    sigemptyset(&sigset);
+    sigaddset(&sigset, SIGCHLD);
 
     auto get_timespec = 
             [](const Duration & dur)
@@ -80,7 +80,7 @@ inline bool wait_until(
     }
 
     bool timed_out;
-
+#if defined(BOOST_POSIX_HAS_SIGTIMEDWAIT)
     do
     {
         auto ts = get_timespec(time_out - Clock::now());
@@ -101,6 +101,61 @@ inline bool wait_until(
     while ((ret == 0) ||
           (((ret == -1) && errno == EINTR) ||
            ((ret != -1) && !WIFEXITED(status) && !WIFSIGNALED(status))));
+#else
+    //if we do not have sigtimedwait, we fork off a child process  to get the signal in time
+    pid_t timeout_pid = ::fork();
+    if (timeout_pid  == -1)
+    {
+        ec = boost::process::detail::get_last_error();
+        return true;
+    }
+    else if (timeout_pid == 0)
+    {
+        auto ts = get_timespec(time_out - Clock::now());
+        ::timespec rem;
+        ::nanosleep(&ts, &rem);
+        while (rem.tv_sec > 0 || rem.tv_nsec > 0)
+            ::nanosleep(&rem, &rem);
+        ::exit(0);
+    }
+
+    struct child_cleaner_t
+    {
+        pid_t pid;
+        ~child_cleaner_t()
+        {
+            int res;
+            ::kill(pid, -15);
+            ::waitpid(pid, &res, WNOHANG);
+        }
+    };
+    child_cleaner_t child_cleaner{timeout_pid};
+
+    do
+    {
+        int ret_sig = 0;
+        if ((::waitpid(timeout_pid, &status, WNOHANG) != 0)
+         && (WIFEXITED(status) || WIFSIGNALED(status)))
+            ret_sig = ::sigwait(&sigset, nullptr);
+        errno = 0;
+
+        ret = ::waitpid(p.pid, &status, WNOHANG);
+
+        if ((ret_sig == SIGCHLD) &&
+            (old_sig.sa_handler != SIG_DFL) && (old_sig.sa_handler != SIG_IGN))
+            old_sig.sa_handler(ret);
+
+        if (ret <= 0)
+        {
+            timed_out = Clock::now() >= time_out;
+            if (timed_out)
+                return false;
+        }
+    }
+    while ((ret == 0) ||
+           (((ret == -1) && errno == EINTR) ||
+            ((ret != -1) && !WIFEXITED(status) && !WIFSIGNALED(status))));
+#endif
 
     if (ret == -1)
         ec = boost::process::detail::get_last_error();

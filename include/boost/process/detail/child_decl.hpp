@@ -101,6 +101,8 @@ public:
     int exit_code() const {return ::boost::process::detail::api::eval_exit_status(_exit_status->load());}
     pid_t id()      const {return _child_handle.id(); }
 
+    int native_exit_code() const {return _exit_status->load();}
+
     bool running()
     {
         std::error_code ec;
