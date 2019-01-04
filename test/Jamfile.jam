@@ -19,6 +19,7 @@ if [ os.name ] = NT
 }
 
 project : requirements
+  <define>BOOST_ASIO_NO_DEPRECATED
   <toolset>msvc:<define>_SCL_SECURE_NO_WARNINGS
   <toolset>msvc:<define>_CRT_SECURE_NO_DEPRECATE
   <toolset>msvc:<cxxflags>/bigobj

@@ -7,6 +7,8 @@
 #ifndef BOOST_PROCESS_DETAIL_POSIX_SIGCHLD_SERVICE_HPP_
 #define BOOST_PROCESS_DETAIL_POSIX_SIGCHLD_SERVICE_HPP_
 
+#include <boost/asio/dispatch.hpp>
+#include <boost/asio/post.hpp>
 #include <boost/asio/signal_set.hpp>
 #include <boost/asio/strand.hpp>
 #include <boost/optional.hpp>
@@ -38,7 +40,8 @@ public:
         SignalHandler, void(boost::system::error_code)> init{handler};
 
         auto & h = init.completion_handler;
-        _strand.dispatch(
+        boost::asio::dispatch(
+                _strand,
                 [this, pid, h]
                 {
                     //check if the child actually is running first
@@ -54,7 +57,7 @@ public:
                             _signal_set.async_wait(
                                     [this](const boost::system::error_code &ec, int)
                                     {
-                                        _strand.dispatch([this, ec]{this->_handle_signal(ec);});
+                                        boost::asio::dispatch(_strand, [this, ec]{this->_handle_signal(ec);});
                                     });
                         _receivers.emplace_back(pid, h);
                     }
@@ -115,7 +118,7 @@ void sigchld_service::_handle_signal(const boost::system::error_code & ec)
         _signal_set.async_wait(
             [this](const boost::system::error_code & ec, int)
             {
-                _strand.post([this, ec]{this->_handle_signal(ec);});
+                boost::asio::post(_strand, [this, ec]{this->_handle_signal(ec);});
             });
     }
 }
