@@ -65,7 +65,7 @@ public:
 
         return init.result.get();
     }
-    void shutdown_service() override
+    void shutdown() override
     {
         _receivers.clear();
     }
