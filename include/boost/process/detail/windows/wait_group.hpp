@@ -17,7 +17,7 @@ namespace boost { namespace process { namespace detail { namespace windows {
 struct group_handle;
 
 
-inline bool wait_impl(const group_handle & p, std::error_code & ec, int wait_time)
+inline bool wait_impl(const group_handle & p, std::error_code & ec, std::chrono::system_clock::rep wait_time)
 {
     ::boost::winapi::DWORD_ completion_code;
     ::boost::winapi::ULONG_PTR_ completion_key;
