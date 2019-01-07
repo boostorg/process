@@ -143,8 +143,13 @@ basic_pipe<Char, Traits>::basic_pipe(const std::string & name)
     static constexpr int FILE_FLAG_OVERLAPPED_  = 0x40000000; //temporary
     //static constexpr int FILE_ATTRIBUTE_NORMAL_ = 0x00000080; //temporary
 
+#if BOOST_NO_ANSI_APIS
+    std::wstring name_ = boost::process::detail::convert(name);
+#else
+    auto &name_ = name;
+#endif
     ::boost::winapi::HANDLE_ source = ::boost::winapi::create_named_pipe(
-            name.c_str(),
+            name_.c_str(),
             ::boost::winapi::PIPE_ACCESS_INBOUND_
             | FILE_FLAG_OVERLAPPED_, //write flag
             0, 1, 8192, 8192, 0, nullptr);
