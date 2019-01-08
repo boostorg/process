@@ -22,6 +22,7 @@
 #include <boost/process/child.hpp>
 #include <boost/process/detail/async_handler.hpp>
 #include <boost/process/detail/execute_impl.hpp>
+#include <boost/asio/post.hpp>
 #include <type_traits>
 #include <mutex>
 #include <condition_variable>
@@ -62,7 +63,7 @@ inline int system_impl(
             ::boost::process::on_exit(
                 [&](int, const std::error_code&)
                 {
-                    ios.post([&]{exited.store(true);});
+                    boost::asio::post(ios.get_executor(), [&]{exited.store(true);});
                 }));
     if (!c.valid() || !check.succeeded)
         return -1;
