@@ -25,6 +25,7 @@
 #include <type_traits>
 #include <memory>
 #include <boost/asio/async_result.hpp>
+#include <boost/asio/post.hpp>
 #include <boost/system/error_code.hpp>
 #include <tuple>
 
@@ -64,11 +65,12 @@ struct async_system_handler : ::boost::process::detail::api::async_handler
         errored = true;
 #endif
         auto & h = init.completion_handler;
-        ios.post(
-                [h, ec]() mutable
-                {
-                    h(boost::system::error_code(ec.value(), boost::system::system_category()), -1);
-                });
+        boost::asio::post(
+            ios.get_executor(),
+            [h, ec]() mutable
+            {
+                h(boost::system::error_code(ec.value(), boost::system::system_category()), -1);
+            });
     }
 
     BOOST_ASIO_INITFN_RESULT_TYPE(ExitHandler, void (boost::system::error_code, int))

@@ -28,6 +28,8 @@ BOOST_AUTO_TEST_CASE(wait_for)
     using boost::unit_test::framework::master_test_suite;
 
     std::error_code ec;
+
+    auto launch_time = std::chrono::system_clock::now();
     bp::child c(
         master_test_suite().argv[1],
         bp::args+={"test", "--wait", "1"},
@@ -35,8 +37,13 @@ BOOST_AUTO_TEST_CASE(wait_for)
     );
     BOOST_REQUIRE(!ec);
 
+
     BOOST_CHECK(!c.wait_for(std::chrono::milliseconds(200)));
     BOOST_CHECK( c.wait_for(std::chrono::milliseconds(1000)));
+
+    auto timeout_t = std::chrono::system_clock::now();
+
+    BOOST_CHECK_LE(std::chrono::duration_cast<std::chrono::seconds>(timeout_t - launch_time).count(), 5); //should be less
 }
 
 BOOST_AUTO_TEST_CASE(wait_for_ec)

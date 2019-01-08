@@ -70,17 +70,19 @@ BOOST_AUTO_TEST_CASE(explicit_async_io_running, *boost::unit_test::timeout(10))
     std::future<std::string> fut;
     std::error_code ec;
 
-    ios.post([&]
-              {
-                bp::system(
-                    master_test_suite().argv[1],
-                    "test", "--echo-stdout", "abc",
-                    bp::std_out > fut,
-                    ios,
-                    ec
-                );
-                BOOST_REQUIRE(!ec);
-              });
+    boost::asio::post(
+        ios.get_executor(),
+        [&] {
+            bp::system(
+                master_test_suite().argv[1],
+                "test", "--echo-stdout", "abc",
+                bp::std_out > fut,
+                ios,
+                ec
+            );
+            BOOST_REQUIRE(!ec);
+            }
+        );
 
 
     ios.run();

@@ -250,7 +250,7 @@ template<
 >
 class basic_ipstream : public std::basic_istream<CharT, Traits>
 {
-    basic_pipebuf<CharT, Traits> _buf;
+    mutable basic_pipebuf<CharT, Traits> _buf;
 public:
 
     typedef basic_pipe<CharT, Traits> pipe_type;
@@ -262,7 +262,7 @@ public:
     typedef  typename Traits::off_type off_type   ;
 
     ///Get access to the underlying stream_buf
-    basic_pipebuf<CharT, Traits>* rdbuf() {return &_buf;};
+    basic_pipebuf<CharT, Traits>* rdbuf() const {return &_buf;};
 
     ///Default constructor.
     basic_ipstream() : std::basic_istream<CharT, Traits>(nullptr)
@@ -334,7 +334,7 @@ template<
 >
 class basic_opstream : public std::basic_ostream<CharT, Traits>
 {
-    basic_pipebuf<CharT, Traits> _buf;
+    mutable basic_pipebuf<CharT, Traits> _buf;
 public:
     typedef basic_pipe<CharT, Traits> pipe_type;
 
@@ -346,7 +346,7 @@ public:
 
 
     ///Get access to the underlying stream_buf
-    basic_pipebuf<CharT, Traits>* rdbuf() const {return _buf;};
+    basic_pipebuf<CharT, Traits>* rdbuf() const {return &_buf;};
 
     ///Default constructor.
     basic_opstream() : std::basic_ostream<CharT, Traits>(nullptr)
@@ -417,7 +417,7 @@ template<
 >
 class basic_pstream : public std::basic_iostream<CharT, Traits>
 {
-    basic_pipebuf<CharT, Traits> _buf;
+    mutable basic_pipebuf<CharT, Traits> _buf;
 public:
     typedef basic_pipe<CharT, Traits> pipe_type;
 
@@ -429,7 +429,7 @@ public:
 
 
     ///Get access to the underlying stream_buf
-    basic_pipebuf<CharT, Traits>* rdbuf() const {return _buf;};
+    basic_pipebuf<CharT, Traits>* rdbuf() const {return &_buf;};
 
     ///Default constructor.
     basic_pstream() : std::basic_iostream<CharT, Traits>(nullptr)

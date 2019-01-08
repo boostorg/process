@@ -14,6 +14,7 @@
 #include <boost/winapi/access_rights.hpp>
 #include <boost/winapi/process.hpp>
 #include <boost/process/detail/windows/basic_pipe.hpp>
+#include <boost/asio/post.hpp>
 #include <boost/asio/windows/stream_handle.hpp>
 #include <atomic>
 #include <system_error>
@@ -99,12 +100,12 @@ public:
         if (_sink.is_open())
         {
             _sink.close();
-            _sink = handle_type(_sink.get_io_context());
+            _sink = handle_type(_sink.get_executor().context());
         }
         if (_source.is_open())
         {
             _source.close();
-            _source = handle_type(_source.get_io_context());
+            _source = handle_type(_source.get_executor().context());
         }
     }
     void close(boost::system::error_code & ec)
@@ -112,12 +113,12 @@ public:
         if (_sink.is_open())
         {
             _sink.close(ec);
-            _sink = handle_type(_sink.get_io_context());
+            _sink = handle_type(_sink.get_executor().context());
         }
         if (_source.is_open())
         {
             _source.close(ec);
-            _source = handle_type(_source.get_io_context());
+            _source = handle_type(_source.get_executor().context());
         }
     }
 
@@ -128,9 +129,9 @@ public:
     void async_close()
     {
         if (_sink.is_open())
-            _sink.get_io_context().  post([this]{_sink.close();});
+            boost::asio::post(_sink.get_executor(),   [this]{_sink.close();});
         if (_source.is_open())
-            _source.get_io_context().post([this]{_source.close();});
+            boost::asio::post(_source.get_executor(), [this]{_source.close();});
     }
 
     template<typename MutableBufferSequence>
@@ -237,8 +238,8 @@ public:
 
 
 async_pipe::async_pipe(const async_pipe& p)  :
-    _source(const_cast<handle_type&>(p._source).get_io_context()),
-    _sink  (const_cast<handle_type&>(p._sink).get_io_context())
+    _source(const_cast<handle_type&>(p._source).get_executor().context()),
+    _sink  (const_cast<handle_type&>(p._sink).get_executor().context())
 {
     auto proc = ::boost::winapi::GetCurrentProcess();
 
@@ -337,8 +338,8 @@ async_pipe& async_pipe::operator=(const async_pipe & p)
         throw_last_error("Duplicate Pipe Failed");
 
     //so we also assign the io_context
-    _source = ::boost::asio::windows::stream_handle(source_in.get_io_context(), source);
-    _sink = ::boost::asio::windows::stream_handle(source_in.get_io_context(), sink);
+    _source = ::boost::asio::windows::stream_handle(source_in.get_executor().context(), source);
+    _sink = ::boost::asio::windows::stream_handle(source_in.get_executor().context(), sink);
 
     return *this;
 }
