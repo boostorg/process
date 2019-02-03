@@ -27,7 +27,7 @@ struct on_exit_ : boost::process::detail::posix::async_handler
     {
         return handler;
 
-    };
+    }
 };
 
 
