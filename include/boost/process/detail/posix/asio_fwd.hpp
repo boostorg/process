@@ -22,31 +22,22 @@ class basic_streambuf;
 typedef basic_streambuf<std::allocator<char>> streambuf;
 class io_context;
 
+class executor;
 
-#if defined(BOOST_ASIO_ENABLE_OLD_SERVICES)
-class signal_set_service;
-template <typename SignalSetService>
-
+template<typename Executor>
 class basic_signal_set;
-typedef basic_signal_set<signal_set_service> signal_set;
-#else /* defined(BOOST_ASIO_ENABLE_OLD_SERVICES) */
-class signal_set;
-#endif /* defined(BOOST_ASIO_ENABLE_OLD_SERVICES) */
+
+typedef basic_signal_set<executor> signal_set;
 
 template <typename Handler>
 class basic_yield_context;
 
 namespace posix {
 
-#if defined(BOOST_ASIO_ENABLE_OLD_SERVICES)
-class stream_descriptor_service;
-
-template <typename StreamDesscriptorService>
+template <typename Executor>
 class basic_stream_descriptor;
-typedef basic_stream_descriptor<stream_descriptor_service> stream_descriptor;
-#else /* defined(BOOST_ASIO_ENABLE_OLD_SERVICES) */
-class stream_descriptor;
-#endif /* defined(BOOST_ASIO_ENABLE_OLD_SERVICES) */
+
+typedef basic_stream_descriptor<executor> stream_descriptor;
 
 } //posix
 } //asio
