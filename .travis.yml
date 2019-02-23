@@ -25,8 +25,8 @@ os:
 
 env:
   matrix:
-    - BADGE=linux REPORT_NAME="Linux build"
-    - BADGE=osx   REPORT_NAME="OSX build"
+    - BADGE=linux
+    - BADGE=osx
   global:
     # Autodetect Boost branch by using the following code: - BRANCH_TO_TEST=$TRAVIS_BRANCH
     # or just directly specify it
@@ -131,4 +131,4 @@ after_success:
   - coveralls-lcov coverals/coverage.info
 
 after_script:
-  - curl -s https://report.ci/upload.py | python - --token=$REPORT_CI_TOKEN --name=$REPORT_NAME
+  - curl -s https://report.ci/upload.py | python - --token=$REPORT_CI_TOKEN --name="$BADGE build"

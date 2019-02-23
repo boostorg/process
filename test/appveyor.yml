@@ -17,12 +17,13 @@ init:
 os: Visual Studio 2015
 configuration: Debug
 platform: x64
+build: script
 
 ###############################################################################################################
 # From this point and below code is same for all the Boost libs
 ###############################################################################################################
 
-version: 1.61.{build}-{branch}
+version: 1.69.{build}-{branch}
  
 # branches to build
 branches:
