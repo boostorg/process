@@ -32,9 +32,9 @@ template <typename SignalSetService>
 class basic_signal_set;
 typedef basic_signal_set<signal_set_service> signal_set;
 #else /* defined(BOOST_ASIO_ENABLE_OLD_SERVICES) */
-template <typename Executor = executor>
+template <typename Executor>
 class basic_signal_set;
-typedef basic_signal_set<> signal_set;
+typedef basic_signal_set<executor> signal_set;
 #endif /* defined(BOOST_ASIO_ENABLE_OLD_SERVICES) */
 
 template <typename Handler>
@@ -49,9 +49,9 @@ template <typename StreamDesscriptorService>
 class basic_stream_descriptor;
 typedef basic_stream_descriptor<stream_descriptor_service> stream_descriptor;
 #else /* defined(BOOST_ASIO_ENABLE_OLD_SERVICES) */
-template <typename Executor = executor>
-class basic_stream_descriptor
-typedef basic_stream_descriptor<> stream_descriptor;
+template <typename Executor>
+class basic_stream_descriptor;
+typedef basic_stream_descriptor<executor> stream_descriptor;
 #endif /* defined(BOOST_ASIO_ENABLE_OLD_SERVICES) */
 
 } //posix
