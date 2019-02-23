@@ -25,8 +25,8 @@ os:
 
 env:
   matrix:
-    - BADGE=linux
-    - BADGE=osx
+    - BADGE=linux REPORT_NAME="Linux build"
+    - BADGE=osx   REPORT_NAME="OSX build"
   global:
     # Autodetect Boost branch by using the following code: - BRANCH_TO_TEST=$TRAVIS_BRANCH
     # or just directly specify it
@@ -129,3 +129,6 @@ after_success:
   - cd $TRAVIS_BUILD_DIR
   - gem install coveralls-lcov
   - coveralls-lcov coverals/coverage.info
+
+after_script:
+  - curl -s https://report.ci/upload.py | python - --token=$REPORT_CI_TOKEN --name=$REPORT_NAME
