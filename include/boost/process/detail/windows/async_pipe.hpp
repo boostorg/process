@@ -190,13 +190,13 @@ public:
 
     handle_type source(::boost::asio::io_context& ios) &&
     {
-        ::boost::asio::windows::stream_handle stolen(ios, _source.native_handle());
+        ::boost::asio::windows::stream_handle stolen(ios.get_executor(), _source.native_handle());
         _source.assign(::boost::winapi::INVALID_HANDLE_VALUE_);
         return stolen;
     }
     handle_type sink  (::boost::asio::io_context& ios) &&
     {
-        ::boost::asio::windows::stream_handle stolen(ios, _sink.native_handle());
+        ::boost::asio::windows::stream_handle stolen(ios.get_executor(), _sink.native_handle());
         _sink.assign(::boost::winapi::INVALID_HANDLE_VALUE_);
         return stolen;
     }
