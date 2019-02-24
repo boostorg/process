@@ -23,6 +23,7 @@
 
 #include <vector>
 #include <array>
+BOOST_AUTO_TEST_SUITE( async );
 
 namespace bp = boost::process;
 BOOST_AUTO_TEST_CASE(stackful, *boost::unit_test::timeout(15))
@@ -106,3 +107,5 @@ BOOST_AUTO_TEST_CASE(stackful_error, *boost::unit_test::timeout(15))
 
     BOOST_CHECK(did_something_else);
 }
+
+BOOST_AUTO_TEST_SUITE_END();

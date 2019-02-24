@@ -23,6 +23,9 @@ using namespace std;
 namespace bp = boost::process;
 namespace asio = boost::asio;
 
+BOOST_AUTO_TEST_SUITE( async );
+
+
 BOOST_AUTO_TEST_CASE(plain_async, *boost::unit_test::timeout(5))
 {
     asio::io_context ios;
@@ -83,3 +86,5 @@ BOOST_AUTO_TEST_CASE(multithreaded_async_pipe)
     for (auto &t : threads)
         t.join();
 }
+
+BOOST_AUTO_TEST_SUITE_END();

@@ -31,6 +31,9 @@ namespace bp = boost::process;
 auto abort_sig = signal(SIGALRM, +[](int){std::terminate();});
 #endif
 
+BOOST_AUTO_TEST_SUITE( async );
+
+
 BOOST_AUTO_TEST_CASE(async_wait, *boost::unit_test::timeout(5))
 {
     using boost::unit_test::framework::master_test_suite;
@@ -373,3 +376,4 @@ BOOST_AUTO_TEST_CASE(async_error, *boost::unit_test::timeout(3))
     BOOST_CHECK(!exit_called);
 }
 
+BOOST_AUTO_TEST_SUITE_END();

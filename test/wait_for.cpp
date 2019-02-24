@@ -22,6 +22,7 @@
 #endif
 
 namespace bp = boost::process;
+BOOST_AUTO_TEST_SUITE( wait);
 
 BOOST_AUTO_TEST_CASE(wait_for)
 {
@@ -109,3 +110,5 @@ BOOST_AUTO_TEST_CASE(wait_until_ec)
 
     BOOST_CHECK_MESSAGE(!ec, ec.message());
 }
+
+BOOST_AUTO_TEST_SUITE_END();
