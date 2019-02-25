@@ -22,7 +22,7 @@
 #endif
 
 namespace bp = boost::process;
-BOOST_AUTO_TEST_SUITE( wait);
+BOOST_AUTO_TEST_SUITE( wait_test);
 
 BOOST_AUTO_TEST_CASE(wait_for)
 {
