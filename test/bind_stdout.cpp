@@ -37,6 +37,9 @@ typedef boost::asio::windows::stream_handle pipe_end;
 typedef boost::asio::posix::stream_descriptor pipe_end;
 #endif
 
+BOOST_AUTO_TEST_SUITE( bind_stdout );
+
+
 namespace fs = boost::filesystem;
 namespace bp = boost::process;
 
@@ -164,3 +167,5 @@ BOOST_AUTO_TEST_CASE(file_io, *boost::unit_test::timeout(2))
     boost::filesystem::remove(pth);
 
 }
+
+BOOST_AUTO_TEST_SUITE_END();

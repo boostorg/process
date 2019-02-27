@@ -24,6 +24,8 @@
 
 #include <boost/algorithm/string/predicate.hpp>
 
+BOOST_AUTO_TEST_SUITE( async );
+
 
 using namespace std;
 
@@ -101,3 +103,4 @@ BOOST_AUTO_TEST_CASE(emtpy_out, *boost::unit_test::timeout(2))
     BOOST_CHECK_EQUAL(fut.get(), "");
 }
 
+BOOST_AUTO_TEST_SUITE_END();

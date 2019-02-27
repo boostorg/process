@@ -29,6 +29,7 @@
 
 #include <boost/config.hpp>
 
+BOOST_AUTO_TEST_SUITE( bind_stdin );
 
 #if defined(BOOST_WINDOWS_API)
 #   include <windows.h>
@@ -255,3 +256,5 @@ BOOST_AUTO_TEST_CASE(file_io_C, *boost::unit_test::timeout(2))
     c.wait();
     boost::filesystem::remove(pth);
 }
+
+BOOST_AUTO_TEST_SUITE_END();

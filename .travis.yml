@@ -23,6 +23,8 @@ os:
   - linux
   - osx
 
+secure: "vs7qgXb0lQg8CTyDPSi3RQtOIOtssaCkBIx86UoEvTXwJCTOLPe7ZufQ0lobn0OVWo261AMx9GbumBBzqfsvJc1G6ixGBVwymiGli/R8DZDvvg9UdljsEk65s/XbujE/9qh97zKGGioFyCn1Bmf5+SdDAxsuXTZm/cBny5VxYaaCR7s2cFUmp4up/djqg1GI7uwBh3ceodT3OL1X3dlMV59gOJWWNsB+RO9b9DPhTW7nOlMNRiEFik4rweecQB0JS8LaHDjYwzIRrGYHX+lR9cE/O8GCCHcUOmq9jCozDdxx+HZRu4rb1ST1RiDbvYaoeTif0Df1fVXHWOoO2D4NlXB6tJPXw2mkop00j6zkcydUJYid6T1lwfEpXAhd5A9FvOIXO5hoju1wlqfkU2eFQ9Na8z8bCIX2niZmveZWp4Ag52gEPzJMFx9hHGT8J4FWMvkqTWezux1sPZrjZjc0kXdJrIp84D9MsBc1sKrxOAOb5ekSfIK5n4JDkgUtuwMSTvEdWqNJXFPZq1rEu4GTwX99z3/XF+pM5XaCDQtZ/zUA5SPHhy0dKLH/BvceUqLJt53+lMcpsltJDB+XxQ/CFL7IdgR91OKGus/z4dbVWiSdkoNvcuZqjQLFLOMVNxoqC6PRvDAEhpy21j/5GUPvM5baQS7IEin0NF7bOTtXJdY="
+
 env:
   matrix:
     - BADGE=linux
@@ -129,3 +131,6 @@ after_success:
   - cd $TRAVIS_BUILD_DIR
   - gem install coveralls-lcov
   - coveralls-lcov coverals/coverage.info
+
+after_script:
+  - curl -s https://report.ci/upload.py | python - --token=$REPORT_CI_TOKEN --name="$BADGE test run"

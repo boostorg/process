@@ -219,8 +219,8 @@ async_pipe::async_pipe(boost::asio::io_context & ios_source,
 }
 
 async_pipe::async_pipe(const async_pipe & p) :
-        _source(const_cast<async_pipe&>(p)._source.get_executor().context()),
-        _sink(  const_cast<async_pipe&>(p)._sink.get_executor().context())
+        _source(const_cast<async_pipe&>(p)._source.get_executor()),
+        _sink(  const_cast<async_pipe&>(p)._sink.get_executor())
 {
 
     //cannot get the handle from a const object.
