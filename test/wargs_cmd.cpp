@@ -24,7 +24,7 @@
 namespace bp = boost::process;
 
 
-BOOST_AUTO_TEST_CASE(args, *boost::unit_test::timeout(2))
+BOOST_AUTO_TEST_CASE(wargs, *boost::unit_test::timeout(2))
 {
     using boost::unit_test::framework::master_test_suite;
 
@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(args, *boost::unit_test::timeout(2))
 }
 
 
-BOOST_AUTO_TEST_CASE(cmd, *boost::unit_test::timeout(2))
+BOOST_AUTO_TEST_CASE(wcmd, *boost::unit_test::timeout(2))
 {
     using boost::unit_test::framework::master_test_suite;
 

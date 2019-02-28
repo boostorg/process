@@ -15,6 +15,9 @@
 using namespace std;
 namespace bp = boost::process;
 
+BOOST_AUTO_TEST_SUITE( pipe_tests );
+
+
 BOOST_AUTO_TEST_CASE(plain, *boost::unit_test::timeout(2))
 {
     bp::pipe pipe;
@@ -230,3 +233,4 @@ BOOST_AUTO_TEST_CASE(coverage, *boost::unit_test::timeout(5))
     }
 }
 
+BOOST_AUTO_TEST_SUITE_END();

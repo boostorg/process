@@ -24,6 +24,9 @@
 
 namespace bp = boost::process;
 
+BOOST_AUTO_TEST_SUITE( wait_test );
+
+
 BOOST_AUTO_TEST_CASE(sync_wait, *boost::unit_test::timeout(2))
 {
     using boost::unit_test::framework::master_test_suite;
@@ -68,3 +71,5 @@ BOOST_AUTO_TEST_CASE(async_wait, *boost::unit_test::timeout(4))
     BOOST_CHECK(called);
 
 }
+
+BOOST_AUTO_TEST_SUITE_END();

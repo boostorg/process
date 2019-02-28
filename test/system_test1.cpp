@@ -46,7 +46,7 @@ typedef boost::asio::posix::stream_descriptor pipe_end;
 namespace fs = boost::filesystem;
 namespace bp = boost::process;
 
-BOOST_AUTO_TEST_CASE(exit_code, *boost::unit_test::timeout(5))
+BOOST_AUTO_TEST_CASE(system_exit_code, *boost::unit_test::timeout(5))
 {
     using boost::unit_test::framework::master_test_suite;
 
