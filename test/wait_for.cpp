@@ -111,4 +111,26 @@ BOOST_AUTO_TEST_CASE(wait_until_ec)
     BOOST_CHECK_MESSAGE(!ec, ec.message());
 }
 
+BOOST_AUTO_TEST_CASE(wait_for_exit_before_timeout)
+{
+    using boost::unit_test::framework::master_test_suite;
+
+    std::error_code ec;
+
+    auto launch_time = std::chrono::system_clock::now();
+    bp::child c(
+            master_test_suite().argv[1],
+            bp::args+={"test", "--wait", "1"},
+            ec
+    );
+    BOOST_REQUIRE(!ec);
+
+    BOOST_CHECK(c.wait_for(std::chrono::seconds(20)));
+
+    auto timeout_t = std::chrono::system_clock::now();
+
+    // check that we didn't wait the entire timeout period
+    BOOST_CHECK_LT(std::chrono::duration_cast<std::chrono::seconds>(timeout_t - launch_time).count(), 20);
+}
+
 BOOST_AUTO_TEST_SUITE_END();
