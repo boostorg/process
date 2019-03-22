@@ -282,7 +282,10 @@ class executor
                 set_error(std::error_code(err, std::system_category()), "Error read pipe");
         }
         if (count == 0)
+        {
+            ::close(source);
             return  ;
+        }
 
         std::error_code ec(data[0], std::system_category());
         std::string msg(data[1], ' ');
