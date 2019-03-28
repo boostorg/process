@@ -282,10 +282,7 @@ class executor
                 set_error(std::error_code(err, std::system_category()), "Error read pipe");
         }
         if (count == 0)
-        {
-            ::close(source);
             return  ;
-        }
 
         std::error_code ec(data[0], std::system_category());
         std::string msg(data[1], ' ');
@@ -298,12 +295,8 @@ class executor
                 return;
                 //EAGAIN not yet forked, EINTR interrupted, i.e. try again
             else if ((err != EAGAIN ) && (err != EINTR))
-            {
-                ::close(source);
                 set_error(std::error_code(err, std::system_category()), "Error read pipe");
-            }
         }
-        ::close(source);
         set_error(ec, std::move(msg));
     }
 
@@ -375,18 +368,25 @@ child executor<Sequence>::invoke(boost::mpl::true_, boost::mpl::false_) //ignore
 template<typename Sequence>
 child executor<Sequence>::invoke(boost::mpl::false_, boost::mpl::false_)
 {
-    int p[2];
-    if (::pipe(p)  == -1)
+    struct pipe_guard
+    {
+        int p[2];
+        ~pipe_guard()
+        {
+            ::close(p[0]);
+            ::close(p[1]);
+        }
+    } p{};
+
+    if (::pipe(p.p)  == -1)
     {
         set_error(::boost::process::detail::get_last_error(), "pipe(2) failed");
         return child();
     }
-    if (::fcntl(p[1], F_SETFD, FD_CLOEXEC) == -1)
+    if (::fcntl(p.p[1], F_SETFD, FD_CLOEXEC) == -1)
     {
         auto err = ::boost::process::detail::get_last_error();
-        ::close(p[0]);
-        ::close(p[1]);
-        set_error(err, "fcntl(2) failed");
+        set_error(err, "fcntl(2) failed");//this might throw, so we need to be sure our pipe is safe.
         return child();
     }
     _ec.clear();
@@ -405,13 +405,12 @@ child executor<Sequence>::invoke(boost::mpl::false_, boost::mpl::false_)
         _msg = "fork() failed";
         boost::fusion::for_each(seq, call_on_fork_error(*this, _ec));
         boost::fusion::for_each(seq, call_on_error(*this, _ec));
-
         return child();
     }
     else if (pid == 0)
     {
-        _pipe_sink = p[1];
-        ::close(p[0]);
+        _pipe_sink = p.p[1];
+        ::close(p.p[0]);
 
         boost::fusion::for_each(seq, call_on_exec_setup(*this));
         if (cmd_style)
@@ -423,6 +422,7 @@ child executor<Sequence>::invoke(boost::mpl::false_, boost::mpl::false_)
         boost::fusion::for_each(seq, call_on_exec_error(*this, _ec));
 
         _write_error(p[1]);
+        ::close(p.p[1]);
 
         _exit(EXIT_FAILURE);
         return child();
@@ -430,8 +430,9 @@ child executor<Sequence>::invoke(boost::mpl::false_, boost::mpl::false_)
 
     child c(child_handle(pid), exit_status);
 
-    ::close(p[1]);
+    ::close(p.p[1]);
     _read_error(p[0]);
+    ::close(p.p[0]);
 
     if (_ec)
     {
