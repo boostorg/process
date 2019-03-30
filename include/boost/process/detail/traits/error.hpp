@@ -18,7 +18,7 @@ namespace boost { namespace process { namespace detail {
 struct error_tag;
 
 template<>
-struct initializer_tag<std::error_code>;
+struct initializer_tag<std::error_code, void>;
 
 }}}
 

@@ -22,7 +22,7 @@ struct async_tag {};
 template<>
 struct initializer_builder<async_tag>;
 
-template<> struct initializer_tag<::boost::asio::io_context> { typedef async_tag type;};
+template<> struct initializer_tag<::boost::asio::io_context, void> { typedef async_tag type;};
 
 
 

@@ -13,5 +13,6 @@
 #include <boost/process/detail/traits/env.hpp>
 #include <boost/process/detail/traits/error.hpp>
 #include <boost/process/detail/traits/wchar_t.hpp>
+#include <boost/process/detail/traits/function.hpp>
 
 #endif /* BOOST_PROCESS_TRAITS_HPP_ */

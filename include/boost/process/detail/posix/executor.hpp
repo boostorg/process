@@ -15,6 +15,7 @@
 #include <boost/process/pipe.hpp>
 #include <boost/process/detail/posix/basic_pipe.hpp>
 #include <boost/process/detail/posix/use_vfork.hpp>
+#include <boost/process/detail/posix/function_invoker.hpp>
 #include <boost/fusion/algorithm/iteration/for_each.hpp>
 #include <cstdlib>
 #include <sys/types.h>
@@ -314,17 +315,20 @@ public:
     executor(Sequence & seq) : seq(seq)
     {
     }
-
+    
     child operator()()
     {
         return invoke(has_ignore_error(), shall_use_vfork());
     }
-
-
+    
+    
+    typedef function_invoker_base::function_invoker_ptr function_invoker_ptr;
     Sequence & seq;
+    function_invoker_ptr function_invoker;
     const char * exe      = nullptr;
     char *const* cmd_line = nullptr;
     bool cmd_style = false;
+    bool function_invocation = false;
     char **env      = ::environ;
     pid_t pid = -1;
     std::shared_ptr<std::atomic<int>> exit_status = std::make_shared<std::atomic<int>>(still_active);
@@ -356,7 +360,14 @@ child executor<Sequence>::invoke(boost::mpl::true_, boost::mpl::false_) //ignore
     else if (pid == 0)
     {
         boost::fusion::for_each(seq, call_on_exec_setup(*this));
-        if (cmd_style)
+        if(function_invocation)
+        {
+            try{ function_invoker->invoke(); }
+            catch(...){}
+            _exit(EXIT_SUCCESS);
+            return child();
+        }
+        else if (cmd_style)
             ::boost::process::detail::posix::execvpe(exe, cmd_line, env);
         else
             ::execve(exe, cmd_line, env);
@@ -414,7 +425,14 @@ child executor<Sequence>::invoke(boost::mpl::false_, boost::mpl::false_)
         ::close(p[0]);
 
         boost::fusion::for_each(seq, call_on_exec_setup(*this));
-        if (cmd_style)
+        if(function_invocation)
+        {
+            try{ function_invoker->invoke(); }
+            catch(...){}
+            _exit(EXIT_SUCCESS);
+            return child();
+        }
+        else if (cmd_style)
             ::boost::process::detail::posix::execvpe(exe, cmd_line, env);
         else
             ::execve(exe, cmd_line, env);

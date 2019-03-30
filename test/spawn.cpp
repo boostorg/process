@@ -22,6 +22,7 @@
 #include <boost/process/spawn.hpp>
 #include <boost/process/async_pipe.hpp>
 #include <boost/process/async.hpp>
+#include <boost/process/f_args.hpp>
 #include <system_error>
 
 #include <boost/filesystem.hpp>
@@ -41,7 +42,7 @@ typedef boost::asio::posix::stream_descriptor pipe_end;
 namespace fs = boost::filesystem;
 namespace bp = boost::process;
 
-BOOST_AUTO_TEST_CASE(sync_spawn, *boost::unit_test::timeout(5))
+BOOST_AUTO_TEST_CASE(sync_spawn, *boost::unit_test::timeout(3))
 {
     using boost::unit_test::framework::master_test_suite;
 
@@ -49,22 +50,20 @@ BOOST_AUTO_TEST_CASE(sync_spawn, *boost::unit_test::timeout(5))
     std::error_code ec;
 
     bp::spawn(
-        master_test_suite().argv[1],
-        bp::args+={"test", "--echo-stdout", "hello"},
+        [](const int& val){std::cout <<"seems_to_be_working_"<<val<<std::endl; },
+        bp::f_args(5),
         bp::std_out > is,
         ec
     ); 
 
     BOOST_CHECK(!ec);
 
-
     std::string s;
 
     BOOST_TEST_CHECKPOINT("Starting read");
     is >> s;
     BOOST_TEST_CHECKPOINT("Finished read");
-
-    BOOST_CHECK_EQUAL(s, "hello");
+    BOOST_CHECK_EQUAL(s, "seems_to_be_working_5");
 }
 
 
@@ -83,7 +82,7 @@ struct read_handler
     }
 };
 
-BOOST_AUTO_TEST_CASE(async_spawn, *boost::unit_test::timeout(2))
+/*BOOST_AUTO_TEST_CASE(async_spawn, *boost::unit_test::timeout(2))
 {
     using boost::unit_test::framework::master_test_suite;
 
@@ -104,6 +103,6 @@ BOOST_AUTO_TEST_CASE(async_spawn, *boost::unit_test::timeout(2))
         read_handler(buffer));
 
     io_context.run();
-}
+}*/
 
 

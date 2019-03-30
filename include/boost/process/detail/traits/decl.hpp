@@ -29,21 +29,21 @@ template<typename T>
 struct is_initializer<T&> : std::is_base_of<handler_base, T> {};
 
 
-template<typename T>
+template<typename T, typename Enabled = void>
 struct initializer_tag;// { typedef void type; };
 
 
 //remove const
 template<typename T>
-struct initializer_tag<const T> { typedef typename initializer_tag<T>::type type; };
+struct initializer_tag<const T, void> { typedef typename initializer_tag<T, void>::type type; };
 
 //remove &
 template<typename T>
-struct initializer_tag<T&> { typedef typename initializer_tag<T>::type type; };
+struct initializer_tag<T&, void> { typedef typename initializer_tag<T, void>::type type; };
 
 //remove const &
 template<typename T>
-struct initializer_tag<const T&> { typedef typename initializer_tag<T>::type type; };
+struct initializer_tag<const T&, void> { typedef typename initializer_tag<T, void>::type type; };
 
 template<typename T>
 struct initializer_builder;

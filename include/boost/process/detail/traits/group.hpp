@@ -25,7 +25,7 @@ template<>
 struct make_initializer_t<group_tag>;
 
 
-template<> struct initializer_tag_t<::boost::process::group> { typedef group_tag type;};
+template<> struct initializer_tag_t<::boost::process::group, void> { typedef group_tag type;};
 
 
 
