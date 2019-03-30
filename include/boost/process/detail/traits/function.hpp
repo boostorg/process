@@ -19,12 +19,6 @@ struct function_arg_tag {};
 template<typename... Args>
 struct initializer_tag<f_arg_setter_<Args...>, void> { typedef function_arg_tag<Args...> type; };
 
-template<typename... Args>
-struct initializer_tag<void(Args...), void> { typedef function_arg_tag<typename std::decay<Args>::type...> type; };
-
-template<typename... Args>
-struct initializer_tag<void(Args...)&, void> { typedef function_arg_tag<typename std::decay<Args>::type...> type; };
-
 struct is_callable
 {
     template<typename, typename...>
