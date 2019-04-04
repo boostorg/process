@@ -15,6 +15,7 @@
 
 #include <string>
 #include <boost/asio/io_context.hpp>
+#include <boost/asio/post.hpp>
 #include <boost/asio/spawn.hpp>
 #include <boost/asio/coroutine.hpp>
 #include <boost/asio/use_future.hpp>
@@ -22,6 +23,7 @@
 
 #include <vector>
 #include <array>
+BOOST_AUTO_TEST_SUITE( async );
 
 namespace bp = boost::process;
 BOOST_AUTO_TEST_CASE(stackful, *boost::unit_test::timeout(15))
@@ -45,8 +47,10 @@ BOOST_AUTO_TEST_CASE(stackful, *boost::unit_test::timeout(15))
             };
 
     boost::asio::spawn(ios, stackful);
-    ios.post([&]{did_something_else = true;});
+    boost::asio::post(ios.get_executor(), [&]{did_something_else = true;});
 
     ios.run();
     BOOST_CHECK(did_something_else);
 }
+
+BOOST_AUTO_TEST_SUITE_END();

@@ -3,8 +3,8 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BOOST_PROCESS_WINDOWS_IO_SERVICE_REF_HPP_
-#define BOOST_PROCESS_WINDOWS_IO_SERVICE_REF_HPP_
+#ifndef BOOST_PROCESS_WINDOWS_IO_CONTEXT_REF_HPP_
+#define BOOST_PROCESS_WINDOWS_IO_CONTEXT_REF_HPP_
 
 #include <boost/process/detail/handler_base.hpp>
 #include <boost/process/detail/windows/async_handler.hpp>
@@ -130,7 +130,7 @@ struct io_context_ref : boost::process::detail::handler_base
                      boost::asio::io_context & ios, void * handle,
                      const std::shared_ptr<std::atomic<int>> &exit_status)
                 : funcs(std::move(funcs)),
-                  handle(new boost::asio::windows::object_handle(ios, handle)),
+                  handle(new boost::asio::windows::object_handle(ios.get_executor(), handle)),
                   exit_status(exit_status)
         {
 
@@ -157,4 +157,4 @@ private:
 
 }}}}
 
-#endif /* BOOST_PROCESS_WINDOWS_IO_SERVICE_REF_HPP_ */
+#endif /* BOOST_PROCESS_WINDOWS_IO_CONTEXT_REF_HPP_ */

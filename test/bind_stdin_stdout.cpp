@@ -22,6 +22,7 @@
 #include <iostream>
 
 namespace bp = boost::process;
+BOOST_AUTO_TEST_SUITE( bind_stdin_stdout );
 
 BOOST_AUTO_TEST_CASE(sync_io, *boost::unit_test::timeout(10))
 {
@@ -53,3 +54,5 @@ BOOST_AUTO_TEST_CASE(sync_io, *boost::unit_test::timeout(10))
     
     BOOST_CHECK(c.wait_for(std::chrono::seconds(3)));
 }
+
+BOOST_AUTO_TEST_SUITE_END();

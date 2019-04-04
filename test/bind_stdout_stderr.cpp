@@ -35,6 +35,9 @@ typedef boost::asio::posix::stream_descriptor pipe_end;
 
 namespace bp = boost::process;
 
+BOOST_AUTO_TEST_SUITE( bind_stdout_stderr );
+
+
 BOOST_AUTO_TEST_CASE(sync_io, *boost::unit_test::timeout(2))
 {
     using boost::unit_test::framework::master_test_suite;
@@ -131,3 +134,5 @@ BOOST_AUTO_TEST_CASE(nul, *boost::unit_test::timeout(2))
     BOOST_CHECK_EQUAL(EXIT_SUCCESS, exit_code);
 #endif
 }
+
+BOOST_AUTO_TEST_SUITE_END();

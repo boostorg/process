@@ -5,10 +5,10 @@
 [def __on_success__ [memberref boost::process::extend::handler::on_success on_success]]
 [def __posix_executor__ [classref boost::process::extend::posix_executor ex::posix_executor]]
 [def __windows_executor__ [classref boost::process::extend::windows_executor ex::windows_executor]]
-[def io_service  [@http://www.boost.org/doc/libs/release/doc/html/boost_asio/reference/io_service.html boost::asio::io_service]]
-[def __require_io_service__ [classref boost::process::extend::require_io_service ex::require_io_service]]
+[def __io_context__  [@http://www.boost.org/doc/libs/release/doc/html/boost_asio/reference/io_context.html boost::asio::io_context]]
+[def __require_io_context__ [classref boost::process::extend::require_io_context ex::require_io_context]]
 [def __async_handler__ [classref boost::process::extend::async_handler ex::async_handler]]
-[def __get_io_service__ [funcref boost::process::extend::get_io_service ex::get_io_service]]
+[def __get_io_context__ [funcref boost::process::extend::get_io_context ex::get_io_context]]
 
 [section:extend Extensions]
 To extend the library, the header [headerref boost/process/extend.hpp extend] is provided.
@@ -50,7 +50,7 @@ So let's start with a simple hello-world example, while we use a C++14 generic l
 using namespace boost::process;
 namespace ex = bp::extend;
 
-__child__ c("foo", ex::__on_success__=[](auto & exec) {std::cout << "hello world" << std::endl;});
+__child__ c("foo", __on_success__=[](auto & exec) {std::cout << "hello world" << std::endl;});
 ```
 
 Considering that lambda can also capture values, data can easily be shared between handlers. 
@@ -95,24 +95,24 @@ Every handler not implemented dafaults to [classref boost::process::extend::hand
 [section:async Asynchronous Functionality]
 
 Since `boost.process` provides an interface for [@http://www.boost.org/doc/libs/release/libs/asio/ boost.asio], 
-this functionality is also available for extensions. If the class needs the io_service for some reason, the following code will do that.
+this functionality is also available for extensions. If the class needs the __io_context__ for some reason, the following code will do that.
 
 ```
-struct async_foo : __handler__, __require_io_service__ 
+struct async_foo : __handler__, __require_io_context__
 {
     tempalte<typename Executor>
     void on_setup(Executor & exec)
     {
-        io_service & ios = __get_io_service__(exec.seq); //gives us a reference and a compiler error if not present.
+        __io_context__ & ios = __get_io_context__(exec.seq); //gives us a reference and a compiler error if not present.
         //do something with ios
     }
 };
 ```
-[note Inheriting [globalref boost::process::extend::require_io_service require_io_service] is necessary, so [funcref boost::process::system system] provides one.]
+[note Inheriting [globalref boost::process::extend::require_io_context require_io_context] is necessary, so [funcref boost::process::system system] provides one.]
 
 Additionally the handler can provide a function that is invoked when the child process exits. This is done through __async_handler__.
 
-[note [globalref boost::process::extend::async_handler async_handler] implies [globalref boost::process::extend::require_io_service require_io_service] .]
+[note [globalref boost::process::extend::async_handler async_handler] implies [globalref boost::process::extend::require_io_context require_io_context] .]
 
 ```
 struct async_bar : __handler, __async_handler__
@@ -120,8 +120,8 @@ struct async_bar : __handler, __async_handler__
     template<typename Executor>
     std::function<void(int, const std::error_code&)> on_exit_handler(Executor & exec)
     {
-        auto handler = this->handler;
-        return [handler](int exit_code, const std::error_code & ec)
+        auto handler_ = this->handler;
+        return [handler_](int exit_code, const std::error_code & ec)
                {
                    std::cout << "hello world, I exited with " << exit_code << std::endl; 
                };

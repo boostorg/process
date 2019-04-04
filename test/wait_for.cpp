@@ -8,7 +8,7 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #define BOOST_TEST_MAIN
-#define BOOST_TEST_IGNORE_SIGCHLD
+//#define BOOST_TEST_IGNORE_SIGCHLD
 #include <boost/test/included/unit_test.hpp>
 #include <boost/process/error.hpp>
 #include <boost/process/child.hpp>
@@ -22,12 +22,15 @@
 #endif
 
 namespace bp = boost::process;
+BOOST_AUTO_TEST_SUITE( wait_test);
 
 BOOST_AUTO_TEST_CASE(wait_for)
 {
     using boost::unit_test::framework::master_test_suite;
 
     std::error_code ec;
+
+    auto launch_time = std::chrono::system_clock::now();
     bp::child c(
         master_test_suite().argv[1],
         bp::args+={"test", "--wait", "1"},
@@ -35,8 +38,13 @@ BOOST_AUTO_TEST_CASE(wait_for)
     );
     BOOST_REQUIRE(!ec);
 
+
     BOOST_CHECK(!c.wait_for(std::chrono::milliseconds(200)));
     BOOST_CHECK( c.wait_for(std::chrono::milliseconds(1000)));
+
+    auto timeout_t = std::chrono::system_clock::now();
+
+    BOOST_CHECK_LE(std::chrono::duration_cast<std::chrono::seconds>(timeout_t - launch_time).count(), 5); //should be less
 }
 
 BOOST_AUTO_TEST_CASE(wait_for_ec)
@@ -102,3 +110,5 @@ BOOST_AUTO_TEST_CASE(wait_until_ec)
 
     BOOST_CHECK_MESSAGE(!ec, ec.message());
 }
+
+BOOST_AUTO_TEST_SUITE_END();

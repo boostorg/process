@@ -64,7 +64,7 @@ struct async_handler_collector
     void operator()(T & t) const
     {
         handlers.push_back(t.on_exit_handler(exec));
-    };
+    }
 };
 
 //Also set's up waiting for the exit, so it can close async stuff.
@@ -79,6 +79,7 @@ struct io_context_ref : handler_base_ext
     template <class Executor>
     void on_success(Executor& exec)
     {
+        ios.notify_fork(boost::asio::io_context::fork_parent);
         //must be on the heap so I can move it into the lambda.
         auto asyncs = boost::fusion::filter_if<
                         is_async_handler<
@@ -104,6 +105,15 @@ struct io_context_ref : handler_base_ext
 
         sigchld_service.async_wait(exec.pid, std::move(wh));
     }
+
+    template<typename Executor>
+    void on_setup (Executor &) const {/*ios.notify_fork(boost::asio::io_context::fork_prepare);*/}
+
+    template<typename Executor>
+    void on_exec_setup  (Executor &) const {/*ios.notify_fork(boost::asio::io_context::fork_child);*/}
+
+    template <class Executor>
+    void on_error(Executor&, const std::error_code &) const {/*ios.notify_fork(boost::asio::io_context::fork_parent);*/}
 
 private:
     boost::asio::io_context &ios;

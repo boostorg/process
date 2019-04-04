@@ -34,7 +34,7 @@ struct create_no_window_ : public ::boost::process::detail::handler_base
     template <class Executor>
     void on_setup(Executor &exec) const
     {
-        exec.creation_flags |= ::boost::detail::winapi::CREATE_NO_WINDOW_;
+        exec.creation_flags |= ::boost::winapi::CREATE_NO_WINDOW_;
     }
 };
 

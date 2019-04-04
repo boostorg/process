@@ -48,28 +48,28 @@ struct async_in_buffer : ::boost::process::detail::windows::handler_base_ext,
     template <typename Executor>
     inline void on_success(Executor&)
     {
-        auto pipe = this->pipe;
+        auto pipe_ = this->pipe;
 
         if (this->promise)
         {
-            auto promise = this->promise;
+            auto promise_ = this->promise;
 
-            boost::asio::async_write(*pipe, buf,
-                [promise](const boost::system::error_code & ec, std::size_t)
+            boost::asio::async_write(*pipe_, buf,
+                [promise_](const boost::system::error_code & ec, std::size_t)
                 {
                     if (ec && (ec.value() != ::boost::winapi::ERROR_BROKEN_PIPE_))
                     {
                         std::error_code e(ec.value(), std::system_category());
-                        promise->set_exception(std::make_exception_ptr(process_error(e)));
+                        promise_->set_exception(std::make_exception_ptr(process_error(e)));
                     }
-                    promise->set_value();
+                    promise_->set_value();
                 });
         }
         else
-            boost::asio::async_write(*pipe, buf,
-                [pipe](const boost::system::error_code&, std::size_t){});
+            boost::asio::async_write(*pipe_, buf,
+                [pipe_](const boost::system::error_code&, std::size_t){});
 
-        std::move(*pipe).source().close();
+        std::move(*pipe_).source().close();
 
 
         this->pipe = nullptr;

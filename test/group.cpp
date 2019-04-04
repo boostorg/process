@@ -28,14 +28,6 @@
 #include <istream>
 #include <iostream>
 #include <cstdlib>
-#if defined(BOOST_WINDOWS_API)
-#   include <windows.h>
-typedef boost::asio::windows::stream_handle pipe_end;
-#elif defined(BOOST_POSIX_API)
-#   include <sys/wait.h>
-#   include <unistd.h>
-typedef boost::asio::posix::stream_descriptor pipe_end;
-#endif
 
 namespace bp = boost::process;
 

@@ -25,7 +25,7 @@
 namespace bp = boost::process;
 
 
-BOOST_AUTO_TEST_CASE(closed)
+BOOST_AUTO_TEST_CASE(close_stderr)
 {
     using boost::unit_test::framework::master_test_suite;
 
