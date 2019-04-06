@@ -52,7 +52,7 @@ jobs:
       - run:
           name: Building examples
           command: |
-            cd $BOOST/libs/project/example
+            cd $BOOST_REMOVE/example
             ../../../b2 -j8
       - run:
           name: Running Unit tests
