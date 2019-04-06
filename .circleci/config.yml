@@ -23,7 +23,7 @@ jobs:
           name: install pre dependencies
           command: |
             apt-get update -yqq
-            apt-get install git
+            apt-get install git -y
       - run:
           name: Initializing git repo for boost
           command: |
