@@ -87,4 +87,56 @@ BOOST_AUTO_TEST_CASE(multithreaded_async_pipe)
         t.join();
 }
 
+
+
+BOOST_AUTO_TEST_CASE(move_pipe)
+{
+    asio::io_context ios;
+
+    bp::async_pipe ap{ios};
+    BOOST_TEST_CHECKPOINT("First move");
+    bp::async_pipe ap2{std::move(ap)};
+    BOOST_CHECK_EQUAL(ap.native_source(), ::boost::winapi::INVALID_HANDLE_VALUE_);
+    BOOST_CHECK_EQUAL(ap.native_sink  (), ::boost::winapi::INVALID_HANDLE_VALUE_);
+
+    BOOST_TEST_CHECKPOINT("Second move");
+    ap = std::move(ap2);
+
+    {
+        BOOST_TEST_CHECKPOINT("Third move, from closed");
+        bp::async_pipe ap_inv{ios};
+        ap_inv.close();
+        ap = std::move(ap_inv);
+    }
+
+    {
+        BOOST_TEST_CHECKPOINT("Fourth move, from closed");
+        bp::async_pipe ap_inv{ios};
+        ap_inv.close();
+        const auto ap3 = std::move(ap_inv);
+    }
+
+    {
+        //copy an a closed pipe
+        BOOST_TEST_CHECKPOINT("Copy assign");
+        BOOST_TEST_CHECKPOINT("Fourth move, from closed");
+        bp::async_pipe ap_inv{ios};
+        ap_inv.close();
+        ap = ap_inv; //copy an invalid pipe
+    }
+
+    {
+        //copy an a closed pipe
+        BOOST_TEST_CHECKPOINT("Copy assign");
+        BOOST_TEST_CHECKPOINT("Fourth move, from closed");
+        bp::async_pipe ap_inv{ios};
+        ap_inv.close();
+        BOOST_TEST_CHECKPOINT("Copy construct");
+        bp::async_pipe ap4{ap_inv};
+    }
+
+
+}
+
+
 BOOST_AUTO_TEST_SUITE_END();
