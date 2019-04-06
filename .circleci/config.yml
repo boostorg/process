@@ -19,6 +19,7 @@ jobs:
                 echo 'export BOOST_BRANCH="develop"' >> $BASH_ENV;
             fi
             echo 'export BOOST_REMOVE="$BOOST/libs/$BOOST_LIBRARY"' >> $BASH_ENV
+            echo 'export HOME="$PWD/.."' >> $BASH_ENV
       - run:
           name: install pre dependencies
           command: |
@@ -27,10 +28,8 @@ jobs:
       - run:
           name: Initializing git repo for boost
           command: |
-            pwd
             git init $BOOST
             cd $BOOST
-            pwd
             echo Testing $BRANCH_TO_TEST
             git remote add --no-tags -t $BOOST_BRANCH origin https://github.com/boostorg/boost.git
             git fetch --depth=1
@@ -44,7 +43,7 @@ jobs:
             git reset --hard; git clean -fxd
             git status
             rm -rf $BOOST_REMOVE
-            mv $CIRCLE_WORKING_DIRECTORY $BOOST/libs
+            mv $CIRCLE_WORKING_DIRECTORY $BOOST_REMOVE
       - run:
           name: Bootstrapping boost-build
           command: |
