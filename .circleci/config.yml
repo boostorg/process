@@ -62,10 +62,10 @@ jobs:
           command: |
             cd $BOOST_REMOVE/test
             ../../../b2 -j8 with-valgrind address-model=64 architecture=x86 testing.launcher=valgrind valgrind=on toolset=gcc cxxflags="--coverage -std=$CXX_STANDARD" linkflags="--coverage" -sBOOST_BUILD_PATH=. | tee test.log || RES=$?
-            ../../../b2 -j8 without-valgrind address-model=64 architecture=x86 toolset=gcc cxxflags="--coverage -std=$CXX_STANDARD" linkflags="--coverage" -sBOOST_BUILD_PATH=. | tee valgrind.log || RES=$?
+            ../../../b2 -j8 without-valgrind address-model=64 architecture=x86 toolset=gcc cxxflags="--coverage -std=$CXX_STANDARD" linkflags="--coverage" -sBOOST_BUILD_PATH=. | tee no-valgrind.log || RES=$?
 
             python <(curl -s https://report.ci/annotate.py) --tool gcc --input build.log
-            python <(curl -s https://report.ci/annotate.py) --tool gcc --input valgrind.log
+            python <(curl -s https://report.ci/annotate.py) --tool gcc --input no-valgrind.log
             python <(curl -s https://report.ci/upload.py) --name "Circle CI Gcc Tests"
             bash <(curl -s https://codecov.io/bash) -x gcov
             echo "BUILD_RESULT: $RES_1$RES_2"
