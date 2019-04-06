@@ -6,7 +6,7 @@ jobs:
       - BOOST_LIBRARY=process
       - CXX_STANDARD=gnu+11
     docker:
-      - image: "dliu/ubuntu-gcc-valgrind"
+      - image: gcc:6
     steps:
       - checkout
       - run:
@@ -23,7 +23,7 @@ jobs:
           name: install pre dependencies
           command: |
             apt-get update -yqq
-            apt-get install git -y
+            apt-get install git curl -y
       - run:
           name: Initializing git repo for boost
           command: |
@@ -66,4 +66,5 @@ jobs:
             python <(curl -s https://report.ci/annotate.py) --tool gcc --name "Circle CI Gcc Build"
             python <(curl -s https://report.ci/upload.py) --name "Circle CI Gcc Tests"
             bash <(curl -s https://codecov.io/bash) -x gcov
+            echo "BUILD_RESULT: $RES_1$RES_2"
             exit $RES_1$RES_2
