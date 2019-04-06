@@ -46,6 +46,7 @@ jobs:
       - run:
           name: Bootstrapping boost-build
           command: |
+            cd $BOOST
             ./bootstrap.sh
             ./b2 headers
       - run:
