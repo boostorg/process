@@ -42,7 +42,7 @@ jobs:
             git reset --hard; git clean -fxd
             git status
             rm -rf $BOOST_REMOVE
-            mv $CIRCLE_WORKING_DIRECTORY/../project $BOOST/libs/project
+            mv $CIRCLE_WORKING_DIRECTORY $BOOST/libs
       - run:
           name: Bootstrapping boost-build
           command: |
