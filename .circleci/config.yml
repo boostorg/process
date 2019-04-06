@@ -19,7 +19,6 @@ jobs:
                 echo 'export BOOST_BRANCH="develop"' >> $BASH_ENV;
             fi
             echo 'export BOOST_REMOVE="$BOOST/libs/$BOOST_LIBRARY"' >> $BASH_ENV
-            echo 'export HOME="$PWD/.."' >> $BASH_ENV
       - run:
           name: install pre dependencies
           command: |
@@ -43,7 +42,7 @@ jobs:
             git reset --hard; git clean -fxd
             git status
             rm -rf $BOOST_REMOVE
-            mv $CIRCLE_WORKING_DIRECTORY $BOOST_REMOVE
+            mv $HOME/project $BOOST_REMOVE
       - run:
           name: Bootstrapping boost-build
           command: |
