@@ -20,6 +20,11 @@ jobs:
             fi
             echo 'export BOOST_REMOVE="$BOOST/libs/$BOOST_LIBRARY"' >> $BASH_ENV
       - run:
+          name: install pre dependencies
+          command: |
+            apt-get update -yqq
+            apt-get install git
+      - run:
           name: Initializing git repo for boost
           command: |
             git init $BOOST
