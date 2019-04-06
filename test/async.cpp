@@ -377,7 +377,7 @@ BOOST_AUTO_TEST_CASE(async_error, *boost::unit_test::timeout(3))
 }
 
 
-
+/*
 BOOST_AUTO_TEST_CASE(mixed_async, *boost::unit_test::timeout(5))
 {
     using boost::unit_test::framework::master_test_suite;
@@ -411,6 +411,6 @@ BOOST_AUTO_TEST_CASE(mixed_async, *boost::unit_test::timeout(5))
     BOOST_CHECK_EQUAL(c.exit_code(), 42);
     thr.join();
 
-}
+}*/
 
 BOOST_AUTO_TEST_SUITE_END();
