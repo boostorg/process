@@ -54,7 +54,6 @@ jobs:
           command: |
             cd $BOOST_REMOVE/example
             ../../../b2 -j8 address-model=64 architecture=x86 toolset=gcc cxxflags="-std=gnu++14" -sBOOST_BUILD_PATH=. || RES=$? | tee example.log
-            python <(curl -s https://report.ci/annotate.py) --tool gcc --name "Circle CI Gcc Build (Examples)"
             python <(curl -s https://report.ci/annotate.py) --tool gcc --name "Circle CI Gcc Build" --input example.log
 
             exit $RES
