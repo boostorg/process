@@ -235,7 +235,6 @@ public:
     }
 };
 
-boost::asio::io_context ioc;
 async_pipe::async_pipe(const async_pipe& p)  :
     _source(ioc), //const_cast<handle_type&>(p._source).get_executor()),
     _sink  (ioc)     //const_cast<handle_type&>(p._sink).get_executor())
