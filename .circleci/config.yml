@@ -4,7 +4,7 @@ jobs:
   build:
     environment:
       - BOOST_LIBRARY=process
-      - CXX_STANDARD=gnu+11
+      - CXX_STANDARD=gnu++11
     docker:
       - image: gcc:6
     steps:
