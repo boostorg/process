@@ -55,7 +55,8 @@ exe sub_launch : sub_launcher.cpp program_options iostreams system filesystem : 
 
 rule test-options ( name )
 {
-    return --log_sink=log_$(name).xml --log_format=XML --log_level=error --report_sink=report_$(name).xml --report_format=XML --report_level=detailed -- ;
+    # return --log_sink=log_$(name).xml --log_format=XML --log_level=error --report_sink=report_$(name).xml --report_format=XML --report_level=detailed -- ;
+    return --log_level=error --report_level=detailed -- ;
 }
 
 
@@ -67,8 +68,6 @@ test-suite bare :
     [ compile-fail spawn_fail.cpp        ]
     [ compile-fail async_system_fail.cpp ]
     ;
-
-echo [ test-options foo ] ;
 
 test-suite with-valgrind :
     [ run async.cpp       system thread filesystem            : [ test-options async ] : sparring_partner ]

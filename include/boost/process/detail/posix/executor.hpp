@@ -372,11 +372,14 @@ child executor<Sequence>::invoke(boost::mpl::false_, boost::mpl::false_)
         struct pipe_guard
         {
             int p[2];
+            pipe_guard() : p{-1,-1} {}
 
             ~pipe_guard()
             {
-                ::close(p[0]);
-                ::close(p[1]);
+                if (p[0] != -1)
+                    ::close(p[0]);
+                if (p[1] != -1)
+                    ::close(p[1]);
             }
         } p{};
 
@@ -430,8 +433,10 @@ child executor<Sequence>::invoke(boost::mpl::false_, boost::mpl::false_)
             return child();
         }
 
-
+        ::close(p.p[1]);
+        p.p[1] = -1;
         _read_error(p.p[0]);
+
     }
     if (_ec)
     {
