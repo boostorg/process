@@ -134,3 +134,5 @@ after_success:
 
 after_script:
   - curl -s https://report.ci/upload.py | python - --token=$REPORT_CI_TOKEN --name="$BADGE test run"
+  - bash <(curl -s https://codecov.io/bash)
+
