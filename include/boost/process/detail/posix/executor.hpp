@@ -22,46 +22,11 @@
 #include <errno.h>
 #include <unistd.h>
 
-#if !defined(__GLIBC__)
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
-#endif
 
 namespace boost { namespace process { namespace detail { namespace posix {
-
-inline int execvpe(const char* filename, char * const arg_list[], char* env[])
-{
-#if defined(__GLIBC__)
-    return ::execvpe(filename, arg_list, env);
-#else
-    //use my own implementation
-    std::string fn = filename;
-    if ((fn.find('/') == std::string::npos) && ::access(fn.c_str(), X_OK))
-    {
-        auto e = ::environ;
-        while ((*e != nullptr) && !boost::starts_with(*e, "PATH="))
-            e++;
-
-        if (e != nullptr)
-        {
-            std::vector<std::string> path;
-            boost::split(path, *e, boost::is_any_of(":"));
-
-            for (const std::string & pp : path)
-            {
-                auto p = pp + "/" + filename;
-                if (!::access(p.c_str(), X_OK))
-                {
-                    fn = p;
-                    break;
-                }
-            }
-        }
-    }
-    return ::execve(fn.c_str(), arg_list, env);
-#endif
-}
 
 template<typename Executor>
 struct on_setup_t
@@ -300,6 +265,36 @@ class executor
         set_error(ec, std::move(msg));
     }
 
+    std::string prepare_cmd_style_fn; //buffer
+
+    inline void prepare_cmd_style() //this does what execvpe does - but we execute it in the father process, to avoid allocations.
+    {
+        //use my own implementation
+        prepare_cmd_style_fn = exe;
+        if ((prepare_cmd_style_fn.find('/') == std::string::npos) && ::access(prepare_cmd_style_fn.c_str(), X_OK))
+        {
+            auto e = ::environ;
+            while ((*e != nullptr) && !boost::starts_with(*e, "PATH="))
+                e++;
+
+            if (e != nullptr)
+            {
+                std::vector<std::string> path;
+                boost::split(path, *e, boost::is_any_of(":"));
+
+                for (const std::string & pp : path)
+                {
+                    auto p = pp + "/" + exe;
+                    if (!::access(p.c_str(), X_OK))
+                    {
+                        prepare_cmd_style_fn = p;
+                        break;
+                    }
+                }
+            }
+        }
+        exe = prepare_cmd_style_fn.c_str();
+    }
 
     std::error_code _ec;
     std::string _msg;
@@ -338,6 +333,8 @@ child executor<Sequence>::invoke(boost::mpl::true_, boost::mpl::false_) //ignore
     boost::fusion::for_each(seq, call_on_setup(*this));
     if (_ec)
         return child();
+    if (cmd_style)
+        prepare_cmd_style();
 
     this->pid = ::fork();
     if (pid == -1)
@@ -349,10 +346,7 @@ child executor<Sequence>::invoke(boost::mpl::true_, boost::mpl::false_) //ignore
     else if (pid == 0)
     {
         boost::fusion::for_each(seq, call_on_exec_setup(*this));
-        if (cmd_style)
-            ::boost::process::detail::posix::execvpe(exe, cmd_line, env);
-        else
-            ::execve(exe, cmd_line, env);
+        ::execve(exe, cmd_line, env);
         auto ec = boost::process::detail::get_last_error();
         boost::fusion::for_each(seq, call_on_exec_error(*this, ec));
         _exit(EXIT_FAILURE);
@@ -372,11 +366,14 @@ child executor<Sequence>::invoke(boost::mpl::false_, boost::mpl::false_)
         struct pipe_guard
         {
             int p[2];
+            pipe_guard() : p{-1,-1} {}
 
             ~pipe_guard()
             {
-                ::close(p[0]);
-                ::close(p[1]);
+                if (p[0] != -1)
+                    ::close(p[0]);
+                if (p[1] != -1)
+                    ::close(p[1]);
             }
         } p{};
 
@@ -400,6 +397,9 @@ child executor<Sequence>::invoke(boost::mpl::false_, boost::mpl::false_)
             return child();
         }
 
+        if (cmd_style)
+            prepare_cmd_style();
+
         this->pid = ::fork();
         if (pid == -1)
         {
@@ -415,10 +415,7 @@ child executor<Sequence>::invoke(boost::mpl::false_, boost::mpl::false_)
             ::close(p.p[0]);
 
             boost::fusion::for_each(seq, call_on_exec_setup(*this));
-            if (cmd_style)
-                ::boost::process::detail::posix::execvpe(exe, cmd_line, env);
-            else
-                ::execve(exe, cmd_line, env);
+            ::execve(exe, cmd_line, env);
             _ec = boost::process::detail::get_last_error();
             _msg = "execve failed";
             boost::fusion::for_each(seq, call_on_exec_error(*this, _ec));
@@ -430,8 +427,10 @@ child executor<Sequence>::invoke(boost::mpl::false_, boost::mpl::false_)
             return child();
         }
 
-
+        ::close(p.p[1]);
+        p.p[1] = -1;
         _read_error(p.p[0]);
+
     }
     if (_ec)
     {
@@ -494,6 +493,8 @@ child executor<Sequence>::invoke(boost::mpl::false_, boost::mpl::true_)
         return child();
     }
     _ec.clear();
+    if (cmd_style)
+        this->prepare_cmd_style();
 
     this->pid = ::vfork();
     if (pid == -1)
@@ -509,10 +510,7 @@ child executor<Sequence>::invoke(boost::mpl::false_, boost::mpl::true_)
     {
         boost::fusion::for_each(seq, call_on_exec_setup(*this));
 
-        if (cmd_style)
-            ::boost::process::detail::posix::execvpe(exe, cmd_line, env);
-        else
-            ::execve(exe, cmd_line, env);
+        ::execve(exe, cmd_line, env);
 
         _ec = boost::process::detail::get_last_error();
         _msg = "execve failed";
