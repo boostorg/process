@@ -55,7 +55,7 @@ jobs:
           name: Building examples
           command: |
             cd $BOOST_REMOVE/example
-            ../../../b2 -j8 address-model=64 architecture=x86 toolset=gcc cxxflags="-std=gnu++14" -sBOOST_BUILD_PATH=. | tee example.log || FAILED=1
+            ../../../b2 -j2 address-model=64 architecture=x86 toolset=gcc cxxflags="-std=gnu++14" -sBOOST_BUILD_PATH=. | tee example.log || FAILED=1
             sed -i -e "s/^..\/..\/..\/boost\/process\//\/root\/project\/include\/process\//gm" example.log
             python <(curl -s https://report.ci/annotate.py) --tool gcc --name "Circle CI Gcc Build" --input example.log
             exit $FAILED
@@ -63,8 +63,8 @@ jobs:
           name: Running Unit tests
           command: |
             cd $BOOST_REMOVE/test
-            ../../../b2 -j8 with-valgrind address-model=64 architecture=x86 testing.launcher=valgrind valgrind=on toolset=gcc cxxflags="--coverage -std=$CXX_STANDARD" linkflags="--coverage" -sBOOST_BUILD_PATH=. | tee test.log || FAILED=1
-            ../../../b2 -j8 without-valgrind address-model=64 architecture=x86 toolset=gcc cxxflags="--coverage -std=$CXX_STANDARD" linkflags="--coverage" -sBOOST_BUILD_PATH=. | tee no-valgrind.log || FAILED=1
+            ../../../b2 -j2 with-valgrind address-model=64 architecture=x86 testing.launcher=valgrind valgrind=on toolset=gcc cxxflags="--coverage -std=$CXX_STANDARD" linkflags="--coverage" -sBOOST_BUILD_PATH=. | tee test.log || FAILED=1
+            ../../../b2 -j2 without-valgrind address-model=64 architecture=x86 toolset=gcc cxxflags="--coverage -std=$CXX_STANDARD" linkflags="--coverage" -sBOOST_BUILD_PATH=. | tee no-valgrind.log || FAILED=1
             sed -i -e "s/^..\/..\/..\/boost\/process\//\/root\/project\/include\/process\//gm" test.log
             sed -i -e "s/^..\/..\/..\/boost\/process\//\/root\/project\/include\/process\//gm" no-valgrind.log
 
