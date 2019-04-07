@@ -19,6 +19,7 @@ jobs:
                 echo 'export BOOST_BRANCH="develop"' >> $BASH_ENV;
             fi
             echo 'export BOOST_REMOVE="$BOOST/libs/$BOOST_LIBRARY"' >> $BASH_ENV
+            export HOME_SED=$(echo $HOME | sed -e 's/\//\\\//g') >> $BACH_ENV
       - run:
           name: install pre dependencies
           command: |
@@ -54,8 +55,8 @@ jobs:
           command: |
             cd $BOOST_REMOVE/example
             ../../../b2 -j8 address-model=64 architecture=x86 toolset=gcc cxxflags="-std=gnu++14" -sBOOST_BUILD_PATH=. | tee example.log || RES=$?
+            sed -i -e "s/^..\/..\/..\/boost\/process\//$HOME_SED\/project\/include\/process\//gm" example.log
             python <(curl -s https://report.ci/annotate.py) --tool gcc --name "Circle CI Gcc Build" --input example.log
-
             exit $RES
       - run:
           name: Running Unit tests
@@ -63,10 +64,12 @@ jobs:
             cd $BOOST_REMOVE/test
             ../../../b2 -j8 with-valgrind address-model=64 architecture=x86 testing.launcher=valgrind valgrind=on toolset=gcc cxxflags="--coverage -std=$CXX_STANDARD" linkflags="--coverage" -sBOOST_BUILD_PATH=. | tee test.log || RES=$?
             ../../../b2 -j8 without-valgrind address-model=64 architecture=x86 toolset=gcc cxxflags="--coverage -std=$CXX_STANDARD" linkflags="--coverage" -sBOOST_BUILD_PATH=. | tee no-valgrind.log || RES=$?
+            sed -i -e "s/^..\/..\/..\/boost\/process\//$HOME_SED\/project\/include\/process\//gm" test.log
+            sed -i -e "s/^..\/..\/..\/boost\/process\//$HOME_SED\/project\/include\/process\//gm" no-valgrind.log
 
             python <(curl -s https://report.ci/annotate.py) --tool gcc --input test.log
             python <(curl -s https://report.ci/annotate.py) --tool gcc --input no-valgrind.log
-            python <(curl -s https://report.ci/upload.py) --name "Circle CI Gcc Tests"
-            bash <(curl -s https://codecov.io/bash) -x gcov
+            python <(curl -s https://report.ci/upload.py) --name "Circle CI Gcc Tests" --framework boost
+            bash <(curl -s https://codecov.io/bash) -x gcov || true
             echo "BUILD_RESULT: $RES_1$RES_2"
             exit $RES_1$RES_2
