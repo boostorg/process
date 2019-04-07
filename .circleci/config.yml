@@ -19,7 +19,8 @@ jobs:
                 echo 'export BOOST_BRANCH="develop"' >> $BASH_ENV;
             fi
             echo 'export BOOST_REMOVE="$BOOST/libs/$BOOST_LIBRARY"' >> $BASH_ENV
-            export HOME_SED=$(echo $HOME | sed -e 's/\//\\\//g') >> $BACH_ENV
+            HOME_SED_=$(echo $HOME | sed -e 's/\//\\\//g')
+            echo 'export HOME_SED=$HOME_SED_' >> $BASH_ENV
       - run:
           name: install pre dependencies
           command: |
