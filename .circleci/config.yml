@@ -58,7 +58,7 @@ jobs:
             ../../../b2 -j8 address-model=64 architecture=x86 toolset=gcc cxxflags="-std=gnu++14" -sBOOST_BUILD_PATH=. | tee example.log || FAILED=1
             sed -i -e "s/^..\/..\/..\/boost\/process\//\/root\/project\/include\/process\//gm" example.log
             python <(curl -s https://report.ci/annotate.py) --tool gcc --name "Circle CI Gcc Build" --input example.log
-            exit FAILED
+            exit $FAILED
       - run:
           name: Running Unit tests
           command: |
