@@ -150,8 +150,8 @@ BOOST_AUTO_TEST_CASE(iterate_handles, *boost::unit_test::timeout(5))
                    bp::extend::on_setup(on_setup_t(res)));
 
     BOOST_CHECK_EQUAL(ret, 42);
-    BOOST_CHECK_EQUAL(std::count(res.begin(), res.end(), source), 1);
-    BOOST_CHECK_EQUAL(std::count(res.begin(), res.end(), sink  ), 1);
+    BOOST_CHECK_GE(std::count(res.begin(), res.end(), source), 1);
+    BOOST_CHECK_GE(std::count(res.begin(), res.end(), sink  ), 1);
 }
 
 BOOST_AUTO_TEST_CASE(limit_fd, *boost::unit_test::timeout(5))
@@ -164,8 +164,10 @@ BOOST_AUTO_TEST_CASE(limit_fd, *boost::unit_test::timeout(5))
 
     using boost::unit_test::framework::master_test_suite;
     BOOST_CHECK_EQUAL(bp::system(master_test_suite().argv[1], "--has-handle",  get_handle(stdout), bp::std_err > stderr), EXIT_SUCCESS);
+    BOOST_CHECK_EQUAL(bp::system(master_test_suite().argv[1], "--has-handle",  get_handle(stderr), bp::std_err > stderr), EXIT_SUCCESS);
 
 
     BOOST_CHECK_EQUAL(bp::system(master_test_suite().argv[1], "--has-handle", get_handle(stdout), bp::std_err > stderr, bp::limit_handles), EXIT_FAILURE);
+    BOOST_CHECK_EQUAL(bp::system(master_test_suite().argv[1], "--has-handle", get_handle(stderr), bp::std_err > stderr, bp::limit_handles), EXIT_SUCCESS);
 
 }

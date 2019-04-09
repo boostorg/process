@@ -227,7 +227,11 @@ int main(int argc, char *argv[])
 #endif
     else if (vm.count("has-handle"))
     {
+#if defined(BOOST_WINDOWS_API)
         const auto handle = reinterpret_cast<boost::this_process::native_handle_type>(vm["has-handle"].as<std::uintptr_t>());
+#else
+        const auto handle = static_cast<boost::this_process::native_handle_type>(vm["has-handle"].as<std::uintptr_t>());
+#endif
         auto all_handles = boost::this_process::get_handles();
         return (std::find(all_handles.begin(), all_handles.end(), handle) != all_handles.end()) ? EXIT_SUCCESS : EXIT_FAILURE;
     }

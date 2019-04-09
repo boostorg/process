@@ -13,16 +13,22 @@
 #include <boost/process/pipe.hpp>
 #include <boost/process/detail/posix/handler.hpp>
 #include <unistd.h>
-
+#include <boost/process/detail/used_handles.hpp>
+#include <array>
 
 namespace boost { namespace process { namespace detail { namespace posix {
 
-struct pipe_in : handler_base_ext
+struct pipe_in : handler_base_ext, ::boost::process::detail::uses_handles
 {
     int source;
     int sink; //opposite end
 
     pipe_in(int sink, int source) : source(source), sink(sink) {}
+
+    std::array<int, 3> get_used_handles()
+    {
+        return {STDIN_FILENO, source, sink};
+    }
 
 
     template<typename T>

@@ -9,7 +9,9 @@
 #include <vector>
 #include <system_error>
 #include <dirent.h>
-
+#include <sys/stat.h>
+#include <algorithm>
+#include <boost/process/detail/posix/handler.hpp>
 
 namespace boost { namespace process { namespace detail { namespace posix {
 
@@ -45,7 +47,7 @@ inline std::vector<native_handle_type> get_handles(std::error_code & ec)
 
         res.push_back(conv);
     }
-
+    ::closedir(dir);
     return res;
 }
 
@@ -92,12 +94,51 @@ inline bool is_stream_handle(native_handle_type handle)
 
 struct limit_handles_ : handler_base_ext
 {
+    limit_handles_() {}
+    ~limit_handles_() {}
+    mutable std::vector<int> used_handles;
+
     template<typename Executor>
-    void on_exec_setup  (Executor &) const {}
+    void on_setup(Executor & exec) const
+    {
+        used_handles = get_used_handles(exec);
+    }
+
+    template<typename Executor>
+    void on_exec_setup(Executor & exec) const
+    {
+        auto dir = ::opendir("/dev/fd");
+        if (!dir)
+        {
+            exec.set_error(::boost::process::detail::get_last_error(), "opendir(\"/dev/fd\")");
+            return;
+        }
+
+        auto my_fd = ::dirfd(dir);
+        struct ::dirent * ent_p;
+
+        while ((ent_p = readdir(dir)) != nullptr)
+        {
+            if (ent_p->d_name[0] == '.')
+                continue;
+
+            const auto conv = std::atoi(ent_p->d_name);
+
+            if ((conv == my_fd) || (conv == -1))
+                continue;
+
+            if (std::find(used_handles.begin(), used_handles.end(), conv) != used_handles.end())
+                continue;
+
+            if (::close(conv) != 0)
+            {
+                exec.set_error(::boost::process::detail::get_last_error(), "close() failed");
+                return;
+            }
+        }
+        ::closedir(dir);
+    }
 };
-
-
-
 
 }}}}
 
