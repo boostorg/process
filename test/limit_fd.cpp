@@ -143,11 +143,16 @@ BOOST_AUTO_TEST_CASE(iterate_handles, *boost::unit_test::timeout(5))
 
     auto source = p.native_source();
     auto   sink = p.native_sink();
+    std::error_code ec;
+
+    BOOST_WARN_NE(source, sink); //Sanity check
 
     const auto ret = bp::system(master_test_suite().argv[1], "--exit-code" , "42",
                    bp::std_in < p,
                    bp::std_out > p,
-                   bp::extend::on_setup(on_setup_t(res)));
+                   bp::extend::on_setup(on_setup_t(res)), ec);
+
+    BOOST_CHECK_MESSAGE(!ec, ec.message());
 
     BOOST_CHECK_EQUAL(ret, 42);
     BOOST_CHECK_GE(std::count(res.begin(), res.end(), source), 1);
