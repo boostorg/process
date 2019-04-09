@@ -14,7 +14,11 @@
 #include <boost/process/detail/windows/handles.hpp>
 #endif
 
-namespace boost { namespace this_process {
+#include <boost/process/detail/used_handles.hpp>
+
+
+namespace boost { namespace this_process
+{
 
 ///The native type for handles
 using native_handle_type = ::boost::process::detail::api::native_handle_type;
@@ -37,7 +41,7 @@ inline std::vector<native_handle_type> get_handles()
 
 
 /** \overload std::vector<native_handle_type> get_handles() */
-inline std::vector<native_handle_type> get_handles(std::error_code & ec)
+inline std::vector<native_handle_type> get_handles(std::error_code &ec)
 {
     return ::boost::process::detail::api::get_handles(ec);
 }
@@ -54,10 +58,33 @@ inline bool is_stream_handle(native_handle_type handle)
 
 
 /** \overload bool is_stream_handle(native_handle_type handle) */
-inline bool is_stream_handle(native_handle_type handle, std::error_code & ec)
+inline bool is_stream_handle(native_handle_type handle, std::error_code &ec)
 {
     return ::boost::process::detail::api::is_stream_handle(handle, ec);
 }
+
+}
+namespace process
+{
+
+namespace detail
+{
+
+using limit_handles_ = ::boost::process::detail::api::limit_handles_;
+
+
+}
+
+/**
+ * The limit_handles property sets all properties to be inherited only expcitly. It closes all unused file-descriptors on posix after the fork and
+ * removes the inherit flags on windows.
+ *
+ * \code{.cpp}
+ * system("gcc", limit_handles);
+ * \endcode
+ *
+*/
+constexpr static ::boost::process::detail::api::limit_handles_ limit_handles;
 
 
 }

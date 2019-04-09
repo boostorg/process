@@ -16,6 +16,7 @@ if [ os.name ] = NT
   lib ws2_32 ;
   lib shell32 ;
   lib Advapi32 ;
+  lib Ntdll ;
 }
 
 project : requirements
@@ -44,7 +45,7 @@ alias coroutine        : /boost//coroutine       : <link>static ;
 lib multi_ref : multi_ref1.cpp multi_ref2.cpp system : <target-os>windows:<source>shell32 ;
 
 exe sparring_partner : sparring_partner.cpp program_options system filesystem iostreams :
-    <warnings>off <target-os>windows:<source>shell32
+    <warnings>off <target-os>windows:<source>shell32 <target-os>windows:<source>Ntdll
     ;
 
 exe exit_argc : exit_argc.cpp :

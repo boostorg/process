@@ -10,6 +10,7 @@
 #include <system_error>
 #include <dirent.h>
 
+
 namespace boost { namespace process { namespace detail { namespace posix {
 
 
@@ -88,6 +89,15 @@ inline bool is_stream_handle(native_handle_type handle)
 
     return res;
 }
+
+struct limit_handles_ : handler_base_ext
+{
+    template<typename Executor>
+    void on_exec_setup  (Executor &) const {}
+};
+
+
+
 
 }}}}
 

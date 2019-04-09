@@ -12,7 +12,9 @@
 #include <boost/process.hpp>
 #include <boost/process/handles.hpp>
 #include <boost/process/pipe.hpp>
+#include <boost/process/io.hpp>
 #include <boost/process/async_pipe.hpp>
+#include <boost/process/extend.hpp>
 
 #include <boost/filesystem.hpp>
 
@@ -103,11 +105,7 @@ BOOST_AUTO_TEST_CASE(leak_test, *boost::unit_test::timeout(5))
 
     boost::asio::io_context ioc;
     boost::asio::ip::tcp::socket tcp_socket(ioc);
-    //tcp_socket.open();
     boost::asio::ip::udp::socket udp_socket(ioc);
-    //udp_socket.open();
-
-
     bp::async_pipe ap(ioc);
 
     tcp_socket.open(boost::asio::ip::tcp::v4());
@@ -117,4 +115,57 @@ BOOST_AUTO_TEST_CASE(leak_test, *boost::unit_test::timeout(5))
     BOOST_CHECK(bt::is_stream_handle(socket_to_handle(udp_socket.native_handle()), ec)); BOOST_CHECK_MESSAGE(!ec, ec.message());
     BOOST_CHECK(bt::is_stream_handle(std::move(ap).sink().  native_handle(), ec)); BOOST_CHECK_MESSAGE(!ec, ec.message());
     BOOST_CHECK(bt::is_stream_handle(std::move(ap).source().native_handle(), ec)); BOOST_CHECK_MESSAGE(!ec, ec.message());
+}
+
+struct on_setup_t
+{
+    std::vector<bt::native_handle_type> &res;
+
+    on_setup_t(std::vector<bt::native_handle_type> & res) : res(res) {}
+    template<typename Executor>
+    void operator()(Executor & e)
+    {
+        bp::extend::foreach_used_handle(e, [this](bt::native_handle_type handle)
+        {
+            res.push_back(handle);
+            std::cout << "Pushing " << handle << std::endl;
+        });
+    }
+};
+
+BOOST_AUTO_TEST_CASE(iterate_handles, *boost::unit_test::timeout(5))
+{
+    using boost::unit_test::framework::master_test_suite;
+
+    std::vector<bt::native_handle_type> res;
+
+    bp::pipe p;
+
+    auto source = p.native_source();
+    auto   sink = p.native_sink();
+
+    const auto ret = bp::system(master_test_suite().argv[1], "--exit-code" , "42",
+                   bp::std_in < p,
+                   bp::std_out > p,
+                   bp::extend::on_setup(on_setup_t(res)));
+
+    BOOST_CHECK_EQUAL(ret, 42);
+    BOOST_CHECK_EQUAL(std::count(res.begin(), res.end(), source), 1);
+    BOOST_CHECK_EQUAL(std::count(res.begin(), res.end(), sink  ), 1);
+}
+
+BOOST_AUTO_TEST_CASE(limit_fd, *boost::unit_test::timeout(5))
+{
+#if defined(BOOST_WINDOWS_API)
+    const auto get_handle = [](FILE * f){return std::to_string(_get_osfhandle(_fileno(f)));};
+#else
+    const auto get_handle = [](FILE * f){return std::to_string(fileno(f));};
+#endif
+
+    using boost::unit_test::framework::master_test_suite;
+    BOOST_CHECK_EQUAL(bp::system(master_test_suite().argv[1], "--has-handle",  get_handle(stdout), bp::std_err > stderr), EXIT_SUCCESS);
+
+
+    BOOST_CHECK_EQUAL(bp::system(master_test_suite().argv[1], "--has-handle", get_handle(stdout), bp::std_err > stderr, bp::limit_handles), EXIT_FAILURE);
+
 }

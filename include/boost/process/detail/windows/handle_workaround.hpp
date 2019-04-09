@@ -8,6 +8,7 @@
 
 #include <boost/winapi/basic_types.hpp>
 #include <boost/winapi/dll.hpp>
+#include <boost/winapi/access_rights.hpp>
 //#define BOOST_USE_WINDOWS_H 1
 
 #if defined( BOOST_USE_WINDOWS_H )
@@ -35,6 +36,41 @@ typedef struct _SYSTEM_HANDLE_INFORMATION_
     SYSTEM_HANDLE_ENTRY_ Handle[1];
 } SYSTEM_HANDLE_INFORMATION_, *PSYSTEM_HANDLE_INFORMATION_;
 
+#if defined( BOOST_USE_WINDOWS_H )
+
+using UNICODE_STRING_  = ::UNICODE_STRING;
+using GENERIC_MAPPING_ = ::GENERIC_MAPPING;
+using OBJECT_INFORMATION_CLASS_ = ::OBJECT_INFORMATION_CLASS;
+
+constexpr static OBJECT_INFORMATION_CLASS_  ObjectTypeInformation = ::OBJECT_INFORMATION_CLASS::ObjectTypeInformation;
+
+typedef struct _OBJECT_TYPE_INFORMATION_ {
+    UNICODE_STRING TypeName;
+    ULONG TotalNumberOfObjects;
+    ULONG TotalNumberOfHandles;
+    ULONG TotalPagedPoolUsage;
+    ULONG TotalNonPagedPoolUsage;
+    ULONG TotalNamePoolUsage;
+    ULONG TotalHandleTableUsage;
+    ULONG HighWaterNumberOfObjects;
+    ULONG HighWaterNumberOfHandles;
+    ULONG HighWaterPagedPoolUsage;
+    ULONG HighWaterNonPagedPoolUsage;
+    ULONG HighWaterNamePoolUsage;
+    ULONG HighWaterHandleTableUsage;
+    ULONG InvalidAttributes;
+    GENERIC_MAPPING GenericMapping;
+    ULONG ValidAccessMask;
+    BOOLEAN SecurityRequired;
+    BOOLEAN MaintainHandleCount;
+    UCHAR   TypeIndex;
+    CHAR    ReservedByte;
+    ULONG PoolType;
+    ULONG DefaultPagedPoolCharge;
+    ULONG DefaultNonPagedPoolCharge;
+} OBJECT_TYPE_INFORMATION_, *POBJECT_TYPE_INFORMATION_;
+
+#else
 
 typedef enum _OBJECT_INFORMATION_CLASS_
 {
@@ -44,14 +80,6 @@ typedef enum _OBJECT_INFORMATION_CLASS_
     ObjectAllInformation,
     ObjectDataInformation
 } OBJECT_INFORMATION_CLASS_, *POBJECT_INFORMATION_CLASS_;
-
-#if defined( BOOST_USE_WINDOWS_H )
-
-using UNICODE_STRING_  = ::UNICODE_STRING;
-using GENERIC_MAPPING_ = ::GENERIC_MAPPING;
-
-
-#else
 
 typedef struct _UNICODE_STRING_ {
     ::boost::winapi::USHORT_ Length;
@@ -104,9 +132,9 @@ inline ::boost::winapi::NTSTATUS_ nt_system_query_information(
     return ::NtQuerySystemInformation(SystemInformationClass, SystemInformation, SystemInformationLength, ReturnLength);
 }
 
-inline ::boost::winapi::NTSTATUS_ nq_query_object(
+inline ::boost::winapi::NTSTATUS_ nt_query_object(
         ::boost::winapi::HANDLE_ Handle,
-        OBJECT_INFORMATION_CLASS ObjectInformationClass,
+        OBJECT_INFORMATION_CLASS_ ObjectInformationClass,
         ::boost::winapi::PVOID_  ObjectInformation,
         ::boost::winapi::ULONG_  ObjectInformationLength,
         ::boost::winapi::PULONG_ ReturnLength

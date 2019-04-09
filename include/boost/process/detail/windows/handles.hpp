@@ -9,9 +9,17 @@
 #include <vector>
 #include <system_error>
 #include <boost/process/detail/windows/handle_workaround.hpp>
+#include <boost/process/detail/windows/handler.hpp>
 #include <boost/winapi/get_current_process_id.hpp>
 
-namespace boost { namespace process { namespace detail { namespace windows {
+namespace boost { namespace process { namespace detail {
+
+
+template<typename Executor, typename Function>
+void foreach_used_handle(Executor &exec, Function &&func);
+
+
+namespace windows {
 
 
 using native_handle_type = ::boost::winapi::HANDLE_ ;
@@ -96,9 +104,6 @@ inline bool is_stream_handle(native_handle_type handle, std::error_code & ec)
         ec.clear();
 
     auto &nm = type_info_p->TypeName.Buffer;
-
-    std::wcerr << "Foobar: " << handle << std::endl;
-    std::wcerr << "Socket: " << type_info_p->TypeName.Buffer << std::endl;
     return type_info_p->TypeName.Length >= 5 &&
             nm[0] == L'F' &&
             nm[1] == L'i' &&
@@ -117,6 +122,31 @@ inline bool is_stream_handle(native_handle_type handle)
 
     return res;
 }
+
+struct limit_handles_ : handler_base_ext
+{
+    template<typename Executor>
+    void on_setup(Executor & exec) const
+    {
+        auto all_handles = get_handles();
+        foreach_used_handle(exec,
+                [&](::boost::winapi::HANDLE_ handle)
+                {
+                    auto itr = std::find(all_handles.begin(), all_handles.end(), handle);
+                    if (itr != all_handles.end())
+                        *itr = ::boost::winapi::INVALID_HANDLE_VALUE_;
+                });
+
+        for (auto handle : all_handles)
+        {
+            if (handle == ::boost::winapi::INVALID_HANDLE_VALUE_)
+                continue;
+
+            ::boost::winapi::SetHandleInformation(handle, ::boost::winapi::HANDLE_FLAG_INHERIT_, FALSE);
+        }
+    }
+};
+
 
 }}}}
 
