@@ -164,14 +164,24 @@ struct std_in_
     api::async_pipe_in operator<(async_pipe & p) const {return p;}
 
     template<typename T>
-    auto  operator=(const T & buf) const -> typename std::enable_if<asio::is_const_buffer_sequence<T>::value, api::async_in_buffer<const T> >::type {return buf;}
+    auto  operator=(const T & buf) const -> typename std::enable_if<asio::is_const_buffer_sequence<T>::value, api::async_in_buffer<const T>>::type {return buf;}
     template<typename T>
-    auto  operator<(const T & buf) const -> typename std::enable_if<asio::is_const_buffer_sequence<T>::value, api::async_in_buffer<const T> >::type {return buf;}
+    auto  operator<(const T & buf) const -> typename std::enable_if<asio::is_const_buffer_sequence<T>::value, api::async_in_buffer<const T>>::type {return buf;}
 
     template<typename T>
-    auto  operator=(T & buf) const -> typename std::enable_if<asio::is_const_buffer_sequence<T>::value, api::async_in_buffer<T>>::type {return buf;}
+    auto operator=(T & buf) const -> typename std::enable_if<asio::is_const_buffer_sequence<T>::value, api::async_in_buffer<T>>::type {return buf;}
     template<typename T>
     auto operator<(T & buf) const -> typename std::enable_if<asio::is_const_buffer_sequence<T>::value, api::async_in_buffer<T>>::type {return buf;}
+
+    template<typename Allocator>
+    api::async_in_buffer<asio::basic_streambuf<Allocator>> operator<(boost::asio::basic_streambuf<Allocator> & p) const {return p;}
+    template<typename Allocator>
+    api::async_in_buffer<asio::basic_streambuf<Allocator>> operator=(boost::asio::basic_streambuf<Allocator> & p) const {return p;}
+
+    template<typename Allocator>
+    api::async_in_buffer<asio::basic_streambuf<Allocator>> operator<(const boost::asio::basic_streambuf<Allocator> & p) const {return p;}
+    template<typename Allocator>
+    api::async_in_buffer<asio::basic_streambuf<Allocator>> operator=(const boost::asio::basic_streambuf<Allocator> & p) const {return p;}
 
 };
 
@@ -216,8 +226,10 @@ struct std_out_
     api::async_pipe_out<p1, p2> operator=(async_pipe & p) const {return p;}
     api::async_pipe_out<p1, p2> operator>(async_pipe & p) const {return p;}
 
-    api::async_out_buffer<p1, p2, asio::streambuf> operator=(boost::asio::streambuf & p) const {return p;}
-    api::async_out_buffer<p1, p2, asio::streambuf> operator>(boost::asio::streambuf & p) const {return p;}
+    template<typename Allocator>
+    api::async_out_buffer<p1, p2, asio::basic_streambuf<Allocator>> operator=(boost::asio::basic_streambuf<Allocator> & p) const {return p;}
+    template<typename Allocator>
+    api::async_out_buffer<p1, p2, asio::basic_streambuf<Allocator>> operator>(boost::asio::basic_streambuf<Allocator> & p) const {return p;}
 
     template<typename Buffer>
     auto operator=(const Buffer & buf) const
