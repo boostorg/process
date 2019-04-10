@@ -122,20 +122,6 @@ system("b2", std_out > null);
 
 namespace boost { namespace process { namespace detail {
 
-
-template<typename T> using is_streambuf    = typename std::is_same<T, boost::asio::streambuf>::type;
-template<typename T> using is_const_buffer =
-        std::integral_constant<bool,
-            std::is_same<   boost::asio::const_buffer, T>::value |
-            std::is_base_of<boost::asio::const_buffer, T>::value
-        >;
-template<typename T> using is_mutable_buffer =
-        std::integral_constant<bool,
-            std::is_same<   boost::asio::mutable_buffer, T>::value |
-            std::is_base_of<boost::asio::mutable_buffer, T>::value
-        >;
-
-
 struct null_t  {constexpr null_t() {}};
 struct close_t;
 
@@ -177,19 +163,15 @@ struct std_in_
     api::async_pipe_in operator=(async_pipe & p) const {return p;}
     api::async_pipe_in operator<(async_pipe & p) const {return p;}
 
-    template<typename T, typename = typename std::enable_if<
-            is_const_buffer<T>::value || is_mutable_buffer<T>::value
-            >::type>
-    api::async_in_buffer<const T> operator=(const T & buf) const {return buf;}
-    template<typename T, typename = typename std::enable_if<is_streambuf<T>::value>::type >
-    api::async_in_buffer<T>       operator=(T       & buf) const {return buf;}
+    template<typename T>
+    auto  operator=(const T & buf) const -> typename std::enable_if<asio::is_const_buffer_sequence<T>::value, api::async_in_buffer<const T> >::type {return buf;}
+    template<typename T>
+    auto  operator<(const T & buf) const -> typename std::enable_if<asio::is_const_buffer_sequence<T>::value, api::async_in_buffer<const T> >::type {return buf;}
 
-    template<typename T, typename = typename std::enable_if<
-            is_const_buffer<T>::value || is_mutable_buffer<T>::value
-            >::type>
-    api::async_in_buffer<const T> operator<(const T & buf) const {return buf;}
-    template<typename T, typename = typename std::enable_if<is_streambuf<T>::value>::type >
-    api::async_in_buffer<T>       operator<(T       & buf) const {return buf;}
+    template<typename T>
+    auto  operator=(T & buf) const -> typename std::enable_if<asio::is_const_buffer_sequence<T>::value, api::async_in_buffer<T>>::type {return buf;}
+    template<typename T>
+    auto operator<(T & buf) const -> typename std::enable_if<asio::is_const_buffer_sequence<T>::value, api::async_in_buffer<T>>::type {return buf;}
 
 };
 
@@ -234,13 +216,22 @@ struct std_out_
     api::async_pipe_out<p1, p2> operator=(async_pipe & p) const {return p;}
     api::async_pipe_out<p1, p2> operator>(async_pipe & p) const {return p;}
 
-    api::async_out_buffer<p1, p2, const asio::mutable_buffer>     operator=(const asio::mutable_buffer & buf)     const {return buf;}
-    api::async_out_buffer<p1, p2, const asio::mutable_buffers_1> operator=(const asio::mutable_buffers_1 & buf) const {return buf;}
-    api::async_out_buffer<p1, p2, asio::streambuf>               operator=(asio::streambuf & os)                   const {return os ;}
+    api::async_out_buffer<p1, p2, asio::streambuf> operator=(boost::asio::streambuf & p) const {return p;}
+    api::async_out_buffer<p1, p2, asio::streambuf> operator>(boost::asio::streambuf & p) const {return p;}
 
-    api::async_out_buffer<p1, p2, const asio::mutable_buffer>     operator>(const asio::mutable_buffer & buf)     const {return buf;}
-    api::async_out_buffer<p1, p2, const asio::mutable_buffers_1> operator>(const asio::mutable_buffers_1 & buf) const {return buf;}
-    api::async_out_buffer<p1, p2, asio::streambuf>               operator>(asio::streambuf & os)                   const {return os ;}
+    template<typename Buffer>
+    auto operator=(const Buffer & buf) const
+            -> typename std::enable_if<asio::is_mutable_buffer_sequence<Buffer>::value, api::async_out_buffer<p1, p2, Buffer>>::type
+    {
+        return buf;
+    }
+
+    template<typename Buffer>
+    auto operator>(const Buffer & buf) const
+            -> typename std::enable_if<asio::is_mutable_buffer_sequence<Buffer>::value, api::async_out_buffer<p1, p2, Buffer>>::type
+    {
+        return buf;
+    }
 
     api::async_out_future<p1,p2, std::string>       operator=(std::future<std::string> & fut)       const { return fut;}
     api::async_out_future<p1,p2, std::string>       operator>(std::future<std::string> & fut)       const { return fut;}
