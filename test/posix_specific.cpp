@@ -14,6 +14,8 @@
 #include <boost/process.hpp>
 #include <boost/process/posix.hpp>
 
+#include <boost/filesystem.hpp>
+
 #include <system_error>
 
 
@@ -21,6 +23,7 @@
 #include <sys/wait.h>
 #include <errno.h>
 
+namespace fs = boost::filesystem;
 namespace bp = boost::process;
 
 BOOST_AUTO_TEST_CASE(bind_fd, *boost::unit_test::timeout(2))
@@ -98,4 +101,68 @@ BOOST_AUTO_TEST_CASE(execve_throw_on_error, *boost::unit_test::timeout(2))
         BOOST_CHECK(e.code());
         BOOST_CHECK_EQUAL(e.code().value(), ENOENT);
     }
+}
+
+BOOST_AUTO_TEST_CASE(leak_test, *boost::unit_test::timeout(5))
+{
+    using boost::unit_test::framework::master_test_suite;
+
+    std::error_code ec;
+
+    const auto pid = boost::this_process::get_id();
+    const auto  fd_path = fs::path("/proc") / std::to_string(pid) / "fd";
+
+    auto get_fds = [&]{
+        std::vector<int> fds;
+        for (auto && fd : fs::directory_iterator(fd_path))
+            fds.push_back(std::stoi(fd.path().filename().string()));
+        return fds;
+    };
+
+    std::vector<int> fd_list = get_fds();
+    if (fd_list.empty()) //then there's no /proc in the current linux distribution.
+        return;
+
+
+    BOOST_CHECK(std::find(fd_list.begin(), fd_list.end(), STDOUT_FILENO) != fd_list.end());
+    BOOST_CHECK(std::find(fd_list.begin(), fd_list.end(),  STDIN_FILENO) != fd_list.end());
+    BOOST_CHECK(std::find(fd_list.begin(), fd_list.end(), STDERR_FILENO) != fd_list.end());
+
+    bp::pipe p; //should add two descriptors.
+
+    auto fd_list_new = get_fds();
+
+    BOOST_CHECK_EQUAL(fd_list_new.size(), fd_list.size() + 2);
+    fd_list.push_back(p.native_source());
+    fd_list.push_back(p.native_sink());
+
+
+    BOOST_CHECK_EQUAL(
+            bp::system(
+                    master_test_suite().argv[1],
+                    "test", "--exit-code", "123",  ec), 123);
+
+    fd_list_new = get_fds();
+    BOOST_CHECK_EQUAL(fd_list.size(), fd_list_new.size());
+
+
+    const int native_source = p.native_source();
+    BOOST_CHECK_EQUAL(
+            bp::system(
+                    master_test_suite().argv[1],
+                    bp::std_in < p,
+                    "test", "--exit-code", "123",  ec), 123);
+
+    BOOST_CHECK(!ec);
+
+   ////now, p.source should be closed, so we remove it from fd_list
+
+   const auto itr = std::find(fd_list.begin(), fd_list.end(), native_source);
+   if (itr != fd_list.end())
+       fd_list.erase(itr);
+
+    fd_list_new = get_fds();
+
+    BOOST_CHECK_EQUAL(fd_list.size(), fd_list_new.size());
+
 }

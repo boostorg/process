@@ -51,6 +51,8 @@ BOOST_AUTO_TEST_CASE(sync_io, *boost::unit_test::timeout(5))
     );
     BOOST_REQUIRE(!ec);
 
+    BOOST_TEST_INFO("Launching child 2");
+
     bp::child c2(
         master_test_suite().argv[1],
         bp::args={"test", "--prefix-once", "hello "},

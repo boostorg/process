@@ -55,8 +55,6 @@ public:
     inline async_pipe(const async_pipe& rhs);
     async_pipe(async_pipe&& rhs)  : _source(std::move(rhs._source)), _sink(std::move(rhs._sink))
     {
-        rhs._source.assign (::boost::winapi::INVALID_HANDLE_VALUE_);
-        rhs._sink  .assign (::boost::winapi::INVALID_HANDLE_VALUE_);
     }
     template<class CharT, class Traits = std::char_traits<CharT>>
     explicit async_pipe(::boost::asio::io_context & ios_source,
@@ -191,13 +189,15 @@ public:
     handle_type source(::boost::asio::io_context& ios) &&
     {
         ::boost::asio::windows::stream_handle stolen(ios.get_executor(), _source.native_handle());
-        _source.assign(::boost::winapi::INVALID_HANDLE_VALUE_);
+        boost::system::error_code ec;
+        _source.assign(::boost::winapi::INVALID_HANDLE_VALUE_, ec);
         return stolen;
     }
     handle_type sink  (::boost::asio::io_context& ios) &&
     {
         ::boost::asio::windows::stream_handle stolen(ios.get_executor(), _sink.native_handle());
-        _sink.assign(::boost::winapi::INVALID_HANDLE_VALUE_);
+        boost::system::error_code ec;
+        _sink.assign(::boost::winapi::INVALID_HANDLE_VALUE_, ec);
         return stolen;
     }
 
@@ -235,12 +235,11 @@ public:
     }
 };
 
-
-
 async_pipe::async_pipe(const async_pipe& p)  :
     _source(const_cast<handle_type&>(p._source).get_executor()),
     _sink  (const_cast<handle_type&>(p._sink).get_executor())
 {
+
     auto proc = ::boost::winapi::GetCurrentProcess();
 
     ::boost::winapi::HANDLE_ source;
@@ -266,8 +265,10 @@ async_pipe::async_pipe(const async_pipe& p)  :
              ::boost::winapi::DUPLICATE_SAME_ACCESS_))
         throw_last_error("Duplicate Pipe Failed");
 
-    _source.assign(source);
-    _sink.  assign(sink);
+    if (source != ::boost::winapi::INVALID_HANDLE_VALUE_)
+        _source.assign(source);
+    if (sink != ::boost::winapi::INVALID_HANDLE_VALUE_)
+        _sink.  assign(sink);
 }
 
 
@@ -310,6 +311,44 @@ async_pipe::async_pipe(boost::asio::io_context & ios_source,
     _sink.assign(sink);
 }
 
+template<class CharT, class Traits>
+async_pipe& async_pipe::operator=(const basic_pipe<CharT, Traits> & p)
+{
+    auto proc = ::boost::winapi::GetCurrentProcess();
+
+    ::boost::winapi::HANDLE_ source;
+    ::boost::winapi::HANDLE_ sink;
+
+    //cannot get the handle from a const object.
+    auto source_in = p.native_source();
+    auto sink_in   = p.native_sink();
+
+    if (source_in == ::boost::winapi::INVALID_HANDLE_VALUE_)
+        source = ::boost::winapi::INVALID_HANDLE_VALUE_;
+    else if (!::boost::winapi::DuplicateHandle(
+            proc, source_in.native_handle(), proc, &source, 0,
+            static_cast<::boost::winapi::BOOL_>(true),
+            ::boost::winapi::DUPLICATE_SAME_ACCESS_))
+        throw_last_error("Duplicate Pipe Failed");
+
+    if (sink_in   == ::boost::winapi::INVALID_HANDLE_VALUE_)
+        sink = ::boost::winapi::INVALID_HANDLE_VALUE_;
+    else if (!::boost::winapi::DuplicateHandle(
+            proc, sink_in.native_handle(), proc, &sink, 0,
+            static_cast<::boost::winapi::BOOL_>(true),
+            ::boost::winapi::DUPLICATE_SAME_ACCESS_))
+        throw_last_error("Duplicate Pipe Failed");
+
+    //so we also assign the io_context
+    if (source != ::boost::winapi::INVALID_HANDLE_VALUE_)
+        _source.assign(source);
+
+    if (sink != ::boost::winapi::INVALID_HANDLE_VALUE_)
+        _sink.assign(sink);
+
+    return *this;
+}
+
 async_pipe& async_pipe::operator=(const async_pipe & p)
 {
     auto proc = ::boost::winapi::GetCurrentProcess();
@@ -320,6 +359,8 @@ async_pipe& async_pipe::operator=(const async_pipe & p)
     //cannot get the handle from a const object.
     auto &source_in = const_cast<::boost::asio::windows::stream_handle &>(p._source);
     auto &sink_in   = const_cast<::boost::asio::windows::stream_handle &>(p._sink);
+
+    source_in.get_executor();
 
     if (source_in.native_handle() == ::boost::winapi::INVALID_HANDLE_VALUE_)
         source = ::boost::winapi::INVALID_HANDLE_VALUE_;
@@ -338,24 +379,23 @@ async_pipe& async_pipe::operator=(const async_pipe & p)
         throw_last_error("Duplicate Pipe Failed");
 
     //so we also assign the io_context
-    _source = ::boost::asio::windows::stream_handle(source_in.get_executor(), source);
-    _sink   = ::boost::asio::windows::stream_handle(source_in.get_executor(), sink);
+    if (source != ::boost::winapi::INVALID_HANDLE_VALUE_)
+        _source = ::boost::asio::windows::stream_handle(source_in.get_executor(), source);
+    else
+        _source = ::boost::asio::windows::stream_handle(source_in.get_executor());
+
+    if (sink != ::boost::winapi::INVALID_HANDLE_VALUE_)
+        _sink   = ::boost::asio::windows::stream_handle(source_in.get_executor(), sink);
+    else
+        _sink   = ::boost::asio::windows::stream_handle(source_in.get_executor());
 
     return *this;
 }
 
 async_pipe& async_pipe::operator=(async_pipe && rhs)
 {
-    if (_source.native_handle() != ::boost::winapi::INVALID_HANDLE_VALUE_)
-        ::boost::winapi::CloseHandle(_source.native_handle());
-
-    if (_sink.native_handle()   != ::boost::winapi::INVALID_HANDLE_VALUE_)
-        ::boost::winapi::CloseHandle(_sink.native_handle());
-
-    _source.assign(rhs._source.native_handle());
-    _sink  .assign(rhs._sink  .native_handle());
-    rhs._source.assign(::boost::winapi::INVALID_HANDLE_VALUE_);
-    rhs._sink  .assign(::boost::winapi::INVALID_HANDLE_VALUE_);
+    _source = std::move(rhs._source);
+    _sink = std::move(rhs._sink);
     return *this;
 }
 

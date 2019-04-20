@@ -376,4 +376,41 @@ BOOST_AUTO_TEST_CASE(async_error, *boost::unit_test::timeout(3))
     BOOST_CHECK(!exit_called);
 }
 
+
+/*
+BOOST_AUTO_TEST_CASE(mixed_async, *boost::unit_test::timeout(5))
+{
+    using boost::unit_test::framework::master_test_suite;
+    using namespace boost::asio;
+
+    boost::asio::io_context io_context;
+
+    boost::asio::deadline_timer timeout{io_context, boost::posix_time::seconds(2)};
+    timeout.async_wait([&](boost::system::error_code ec){if (!ec) io_context.stop();});
+
+    bool exit_called = false;
+    std::error_code ec;
+
+    bp::child c(master_test_suite().argv[1],
+            "--wait", "1", "--exit-code", "42",
+            ec,
+            io_context,
+            bp::on_exit([&](int exit, const std::error_code& ec_in)
+                        {
+                            timeout.cancel();
+                            exit_called=true;
+                            BOOST_CHECK_EQUAL(exit, 42);
+                        })
+    );
+
+    BOOST_REQUIRE(!ec);
+    std::thread thr([&]{c.wait();});
+    io_context.run();
+
+    BOOST_CHECK(exit_called);
+    BOOST_CHECK_EQUAL(c.exit_code(), 42);
+    thr.join();
+
+}*/
+
 BOOST_AUTO_TEST_SUITE_END();

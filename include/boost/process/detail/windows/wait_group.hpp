@@ -48,11 +48,11 @@ inline bool wait_impl(const group_handle & p, std::error_code & ec, std::chrono:
                 return false; //correct, nothing left.
         }
         //reduce the remaining wait time -> in case interrupted by something else
-        if (wait_time != ::boost::winapi::infinite)
+        if (wait_time != static_cast<int>(::boost::winapi::infinite))
         {
             auto now = std::chrono::system_clock::now();
             auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time);
-            wait_time -= diff.count();
+            wait_time -= static_cast<std::chrono::system_clock::rep>(diff.count());
             start_time = now;
             if (wait_time <= 0)
                 return true; //timeout with other source
