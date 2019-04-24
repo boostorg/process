@@ -120,6 +120,13 @@ struct basic_pipebuf : std::basic_streambuf<CharT, Traits>
     ///Move Constructor
     basic_pipebuf(basic_pipebuf && ) = default;
 
+    ///Destructor -> writes the frest of the data
+    ~basic_pipebuf()
+    {
+        if (is_open())
+            overflow(Traits::eof());
+    }
+
     ///Move construct from a pipe.
     basic_pipebuf(pipe_type && p) : _pipe(std::move(p)),
                                     _write(default_buffer_size),
@@ -212,6 +219,36 @@ struct basic_pipebuf : std::basic_streambuf<CharT, Traits>
     const pipe_type &pipe() const & {return _pipe;}
     ///Get a rvalue reference to the pipe. Qualified as rvalue.
     pipe_type &&     pipe()  &&     {return std::move(_pipe);}
+
+    ///Check if the pipe is open
+    bool is_open() const {return _pipe.is_open(); }
+
+    ///Open a new pipe
+    basic_pipebuf<CharT, Traits>* open()
+    {
+        if (is_open())
+            return nullptr;
+        _pipe = pipe();
+        return this;
+    }
+
+    ///Open a new named pipe
+    basic_pipebuf<CharT, Traits>* open(const std::string & name)
+    {
+        if (is_open())
+            return nullptr;
+        _pipe = pipe(name);
+        return this;
+    }
+
+    ///Flush the buffer & close the pipe
+    std::basic_filebuf<CharT, Traits>* close()
+    {
+        if (!is_open())
+            return nullptr;
+        overflow(Traits::eof());
+        return this;
+    }
 private:
     pipe_type _pipe;
     std::vector<char_type> _write;
@@ -320,6 +357,33 @@ public:
     const pipe_type &pipe() const & {return _buf.pipe();}
     ///Get a rvalue reference to the pipe. Qualified as rvalue.
     pipe_type &&     pipe()  &&     {return std::move(_buf).pipe();}
+    ///Check if the pipe is open
+    bool is_open() const {return _buf->is_open();}
+
+    ///Open a new pipe
+    void open()
+    {
+        if (_buf.open() == nullptr)
+            setstate(failbit)
+        else
+            clear();
+    }
+
+    ///Open a new named pipe
+    void open(const std::string & name)
+    {
+        if (_buf.open() == nullptr)
+            setstate(failbit)
+        else
+            clear();
+    }
+
+    ///Flush the buffer & close the pipe
+    void close()
+    {
+        if (_buf.open() == nullptr)
+            setstate(failbit);
+    }
 };
 
 typedef basic_ipstream<char>     ipstream;
@@ -402,6 +466,31 @@ public:
     const pipe_type &pipe() const & {return _buf.pipe();}
     ///Get a rvalue reference to the pipe. Qualified as rvalue.
     pipe_type &&     pipe()  &&     {return std::move(_buf).pipe();}
+
+    ///Open a new pipe
+    void open()
+    {
+        if (_buf.open() == nullptr)
+            setstate(failbit)
+        else
+            clear();
+    }
+
+    ///Open a new named pipe
+    void open(const std::string & name)
+    {
+        if (_buf.open() == nullptr)
+            setstate(failbit)
+        else
+            clear();
+    }
+
+    ///Flush the buffer & close the pipe
+    void close()
+    {
+        if (_buf.open() == nullptr)
+            setstate(failbit);
+    }
 };
 
 typedef basic_opstream<char>     opstream;
@@ -484,6 +573,31 @@ public:
     const pipe_type &pipe() const & {return _buf.pipe();}
     ///Get a rvalue reference to the pipe. Qualified as rvalue.
     pipe_type &&     pipe()  &&     {return std::move(_buf).pipe();}
+
+    ///Open a new pipe
+    void open()
+    {
+        if (_buf.open() == nullptr)
+            setstate(failbit)
+        else
+            clear();
+    }
+
+    ///Open a new named pipe
+    void open(const std::string & name)
+    {
+        if (_buf.open() == nullptr)
+            setstate(failbit)
+        else
+            clear();
+    }
+
+    ///Flush the buffer & close the pipe
+    void close()
+    {
+        if (_buf.open() == nullptr)
+            setstate(failbit);
+    }
 };
 
 typedef basic_pstream<char>     pstream;
