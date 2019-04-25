@@ -364,7 +364,7 @@ public:
     void open()
     {
         if (_buf.open() == nullptr)
-            setstate(failbit)
+            this->setstate(std::ios_base::failbit)
         else
             clear();
     }
@@ -373,7 +373,7 @@ public:
     void open(const std::string & name)
     {
         if (_buf.open() == nullptr)
-            setstate(failbit)
+            this->setstate(std::ios_base::failbit)
         else
             clear();
     }
@@ -382,7 +382,7 @@ public:
     void close()
     {
         if (_buf.open() == nullptr)
-            setstate(failbit);
+            this->setstate(std::ios_base::failbit);
     }
 };
 
@@ -471,7 +471,7 @@ public:
     void open()
     {
         if (_buf.open() == nullptr)
-            setstate(failbit)
+            this->setstate(std::ios_base::failbit)
         else
             clear();
     }
@@ -480,7 +480,7 @@ public:
     void open(const std::string & name)
     {
         if (_buf.open() == nullptr)
-            setstate(failbit)
+            this->setstate(std::ios_base::failbit)
         else
             clear();
     }
@@ -489,7 +489,7 @@ public:
     void close()
     {
         if (_buf.open() == nullptr)
-            setstate(failbit);
+            this->setstate(std::ios_base::failbit);
     }
 };
 
@@ -578,7 +578,7 @@ public:
     void open()
     {
         if (_buf.open() == nullptr)
-            setstate(failbit)
+            this->setstate(std::ios_base::failbit)
         else
             clear();
     }
@@ -587,7 +587,7 @@ public:
     void open(const std::string & name)
     {
         if (_buf.open() == nullptr)
-            setstate(failbit)
+            this->setstate(std::ios_base::failbit)
         else
             clear();
     }
@@ -596,7 +596,7 @@ public:
     void close()
     {
         if (_buf.open() == nullptr)
-            setstate(failbit);
+            this->setstate(std::ios_base::failbit);
     }
 };
 
