@@ -126,6 +126,8 @@ inline bool is_stream_handle(native_handle_type handle)
 
 struct limit_handles_ : handler_base_ext
 {
+    mutable std::vector<::boost::winapi::HANDLE_> handles_with_inherit_flag;
+
     template<typename Executor>
     void on_setup(Executor & exec) const
     {
@@ -133,19 +135,39 @@ struct limit_handles_ : handler_base_ext
         foreach_used_handle(exec,
                 [&](::boost::winapi::HANDLE_ handle)
                 {
-                    auto itr = std::find(all_handles.begin(), all_handles.end(), handle);
+                    auto itr = std::find(all_handles.begin(), all_handles .end(), handle);
+                    DWORD flags = 0u;
                     if (itr != all_handles.end())
+                        *itr = ::boost::winapi::INVALID_HANDLE_VALUE_;
+                    else if ((::boost::winapi::GetHandleInformation(*itr, &flags) != 0)
+                            &&((flags & ::boost::winapi::HANDLE_FLAG_INHERIT_) == 0)) //it is NOT inherited anyhow, so ignore too
                         *itr = ::boost::winapi::INVALID_HANDLE_VALUE_;
                 });
 
-        for (auto handle : all_handles)
-        {
-            if (handle == ::boost::winapi::INVALID_HANDLE_VALUE_)
-                continue;
+        auto part_itr = std::partition(all_handles.begin(), all_handles.end(),
+                                       [](::boost::winapi::HANDLE_ handle) {return handle != ::boost::winapi::INVALID_HANDLE_VALUE_;});
 
-            ::boost::winapi::SetHandleInformation(handle, ::boost::winapi::HANDLE_FLAG_INHERIT_, FALSE);
-        }
+        all_handles.erase(part_itr, all_handles.end()); //remove invalid handles
+        handles_with_inherit_flag = std::move(all_handles);
+
+        for (auto handle : handles_with_inherit_flag)
+            ::boost::winapi::SetHandleInformation(handle, ::boost::winapi::HANDLE_FLAG_INHERIT_, 0);
     }
+
+    template<typename Executor>
+    void on_error(Executor & exec, const std::error_code & ec) const
+    {
+        for (auto handle : handles_with_inherit_flag)
+            ::boost::winapi::SetHandleInformation(handle, ::boost::winapi::HANDLE_FLAG_INHERIT_, 1);
+    }
+
+    template<typename Executor>
+    void on_sucess(Executor & exec) const
+    {
+        for (auto handle : handles_with_inherit_flag)
+            ::boost::winapi::SetHandleInformation(handle, ::boost::winapi::HANDLE_FLAG_INHERIT_, 1);
+    }
+
 };
 
 

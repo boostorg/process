@@ -22,18 +22,22 @@ inline std::vector<native_handle_type> get_handles(std::error_code & ec)
 {
     std::vector<native_handle_type> res;
 
-    auto dir = ::opendir("/dev/fd");
-    auto my_fd = ::dirfd(dir);
+    std::unique_ptr<DIR, decltype(&::closedir)> dir{
+            ::opendir("/dev/fd"),
+            &::closedir};
     if (!dir)
     {
         ec = ::boost::process::detail::get_last_error();
+        return {};
     }
     else
         ec.clear();
 
+    auto my_fd = ::dirfd(dir.get());
+
     struct ::dirent * ent_p;
 
-    while ((ent_p = readdir(dir)) != nullptr)
+    while ((ent_p = readdir(dir.get())) != nullptr)
     {
         if (ent_p->d_name[0] == '.')
             continue;
@@ -47,7 +51,6 @@ inline std::vector<native_handle_type> get_handles(std::error_code & ec)
 
         res.push_back(conv);
     }
-    ::closedir(dir);
     return res;
 }
 
