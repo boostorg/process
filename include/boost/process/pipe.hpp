@@ -366,7 +366,7 @@ public:
         if (_buf.open() == nullptr)
             this->setstate(std::ios_base::failbit);
         else
-            this->clear()
+            this->clear();
     }
 
     ///Open a new named pipe
@@ -375,7 +375,7 @@ public:
         if (_buf.open() == nullptr)
             this->setstate(std::ios_base::failbit);
         else
-            this->clear()
+            this->clear();
     }
 
     ///Flush the buffer & close the pipe
@@ -473,7 +473,7 @@ public:
         if (_buf.open() == nullptr)
             this->setstate(std::ios_base::failbit);
         else
-            this->clear()
+            this->clear();
     }
 
     ///Open a new named pipe
@@ -482,7 +482,7 @@ public:
         if (_buf.open() == nullptr)
             this->setstate(std::ios_base::failbit);
         else
-            this->clear()
+            this->clear();
     }
 
     ///Flush the buffer & close the pipe
@@ -580,7 +580,7 @@ public:
         if (_buf.open() == nullptr)
             this->setstate(std::ios_base::failbit);
         else
-            this->clear()
+            this->clear();
     }
 
     ///Open a new named pipe
@@ -589,7 +589,7 @@ public:
         if (_buf.open() == nullptr)
             this->setstate(std::ios_base::failbit);
         else
-            this->clear()
+            this->clear();
     }
 
     ///Flush the buffer & close the pipe
