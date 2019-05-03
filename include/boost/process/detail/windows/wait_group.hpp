@@ -27,7 +27,7 @@ inline bool wait_impl(const group_handle & p, std::error_code & ec, std::chrono:
 
     while (workaround::get_queued_completion_status(
                                        p._io_port, &completion_code,
-                                       &completion_key, &overlapped, wait_time))
+                                       &completion_key, &overlapped, static_cast<::boost::winapi::DWORD_>(wait_time)))
     {
         if (reinterpret_cast<::boost::winapi::HANDLE_>(completion_key) == p._job_object &&
              completion_code == workaround::JOB_OBJECT_MSG_ACTIVE_PROCESS_ZERO_)
