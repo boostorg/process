@@ -286,7 +286,9 @@ async_pipe::async_pipe(boost::asio::io_context & ios_source,
 #endif
             ::boost::winapi::PIPE_ACCESS_INBOUND_
             | FILE_FLAG_OVERLAPPED_, //write flag
-            0, 1, 8192, 8192, 0, nullptr);
+            0,
+	    ::boost::winapi::PIPE_UNLIMITED_INSTANCES_, // make unlimited instances to allow multiple connections
+	    8192, 8192, 0, nullptr);
 
 
     if (source == boost::winapi::INVALID_HANDLE_VALUE_)
