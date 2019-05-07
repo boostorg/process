@@ -158,14 +158,14 @@ struct limit_handles_ : handler_base_ext
     void on_error(Executor & exec, const std::error_code & ec) const
     {
         for (auto handle : handles_with_inherit_flag)
-            ::boost::winapi::SetHandleInformation(handle, ::boost::winapi::HANDLE_FLAG_INHERIT_, 1);
+            ::boost::winapi::SetHandleInformation(handle, ::boost::winapi::HANDLE_FLAG_INHERIT_, ::boost::winapi::HANDLE_FLAG_INHERIT_);
     }
 
     template<typename Executor>
     void on_sucess(Executor & exec) const
     {
         for (auto handle : handles_with_inherit_flag)
-            ::boost::winapi::SetHandleInformation(handle, ::boost::winapi::HANDLE_FLAG_INHERIT_, 1);
+            ::boost::winapi::SetHandleInformation(handle, ::boost::winapi::HANDLE_FLAG_INHERIT_, ::boost::winapi::HANDLE_FLAG_INHERIT_);
     }
 
 };
