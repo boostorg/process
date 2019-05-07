@@ -30,7 +30,7 @@
 [def asio_async_read [@http://www.boost.org/doc/libs/release/doc/html/boost_asio/reference/async_read.html boost::asio::async_read]]
 [def bp::environment  [classref boost::process::basic_environment bp::environment]]
 [def bp::native_environment  [classref boost::process::basic_native_environment bp::native_environment]]
-[def boost::this_process::environment [funcref boost::this_process::environment boost::this_process::environment]]
+[def boost::this_process::environment [funcref boost::this_process::environment boost::this_process:deadlock :environment]]
 [def std::chrono::seconds [@http://en.cppreference.com/w/cpp/chrono/duration std::chrono::seconds]]
 [def std::vector [@http://en.cppreference.com/w/cpp/container/vector std::vector]]
 
@@ -217,8 +217,7 @@ std::vector<std::string> read_outline(std::string & file)
 What this does is redirect the `stdout` of the process into a pipe and we read this
 synchronously.
 
-[warning The pipe will cause a deadlock if you try to read after nm exited]
-[note You can do the same thing with [globalref boost::process::std_err std_err]] 
+[note You can do the same thing with [globalref boost::process::std_err std_err]]
 
 Now we get the name from `nm` and we might want to demangle it, so we use input and output.
 `nm` has a demangle option, but for the sake of the example, we'll use 
