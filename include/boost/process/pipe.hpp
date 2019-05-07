@@ -162,7 +162,7 @@ struct basic_pipebuf : std::basic_streambuf<CharT, Traits>
     ///Writes characters to the associated output sequence from the put area
     int_type overflow(int_type ch = traits_type::eof()) override
     {
-        if ((ch != traits_type::eof()) && _pipe.is_open())
+        if (_pipe.is_open())
         {
             if (this->pptr() == this->epptr())
             {
@@ -180,6 +180,9 @@ struct basic_pipebuf : std::basic_streambuf<CharT, Traits>
                     return ch;
             }
         }
+//        else if (ch == traits_type::eof())
+//            this->sync();
+
         return traits_type::eof();
     }
     ///Synchronizes the buffers with the associated character sequence
@@ -242,7 +245,7 @@ struct basic_pipebuf : std::basic_streambuf<CharT, Traits>
     }
 
     ///Flush the buffer & close the pipe
-    std::basic_filebuf<CharT, Traits>* close()
+    basic_pipebuf<CharT, Traits>* close()
     {
         if (!is_open())
             return nullptr;
@@ -381,8 +384,8 @@ public:
     ///Flush the buffer & close the pipe
     void close()
     {
-        if (_buf.open() == nullptr)
-            this->setstate(std::ios_base::failbit);;
+        if (_buf.close() == nullptr)
+            this->setstate(std::ios_base::failbit);
     }
 };
 
@@ -488,8 +491,8 @@ public:
     ///Flush the buffer & close the pipe
     void close()
     {
-        if (_buf.open() == nullptr)
-            this->setstate(std::ios_base::failbit);;
+        if (_buf.close() == nullptr)
+            this->setstate(std::ios_base::failbit);
     }
 };
 
@@ -595,8 +598,8 @@ public:
     ///Flush the buffer & close the pipe
     void close()
     {
-        if (_buf.open() == nullptr)
-            this->setstate(std::ios_base::failbit);;
+        if (_buf.close() == nullptr)
+            this->setstate(std::ios_base::failbit);
     }
 };
 
