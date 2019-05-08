@@ -129,7 +129,7 @@ inline bool wait_until(
         ~child_cleaner_t()
         {
             int res;
-            ::kill(pid, SIGTERM);
+            ::kill(pid, SIGKILL);
             ::waitpid(pid, &res, WNOHANG);
         }
     };
