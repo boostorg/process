@@ -135,6 +135,6 @@ after_success:
   - coveralls-lcov coverals/coverage.info
 
 after_script:
-  - curl -s https://report.ci/upload.py | python - --token=$REPORT_CI_TOKEN --name="$BADGE test run"
+  - curl -s https://report.ci/upload.py | python - --name="$BADGE test run"
   - bash <(curl -s https://codecov.io/bash)
 

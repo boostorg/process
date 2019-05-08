@@ -117,9 +117,13 @@ inline bool wait_until(
     }
     else if (timeout_pid == 0)
     {
-        auto ts = get_timespec(time_out - Clock::now());
-        ::setpgid(0, p.grp);
-        ::nanosleep(&ts, nullptr);
+        do
+        {
+            auto ts = get_timespec(time_out - Clock::now());
+            ::timespec rem;
+            ::nanosleep(&ts, &rem);
+        }
+        while (rem.tv_sec > 0 || rem.tv_nsec > 0);
         ::exit(0);
     }
 
@@ -129,7 +133,7 @@ inline bool wait_until(
         ~child_cleaner_t()
         {
             int res;
-            ::kill(pid, SIGTERM);
+            ::kill(pid, SIGKILL);
             ::waitpid(pid, &res, WNOHANG);
         }
     };
