@@ -162,7 +162,7 @@ struct basic_pipebuf : std::basic_streambuf<CharT, Traits>
     ///Writes characters to the associated output sequence from the put area
     int_type overflow(int_type ch = traits_type::eof()) override
     {
-        if (_pipe.is_open())
+        if (_pipe.is_open() && (ch != traits_type::eof()))
         {
             if (this->pptr() == this->epptr())
             {
@@ -180,8 +180,8 @@ struct basic_pipebuf : std::basic_streambuf<CharT, Traits>
                     return ch;
             }
         }
-//        else if (ch == traits_type::eof())
-//            this->sync();
+        else if (ch == traits_type::eof())
+           this->sync();
 
         return traits_type::eof();
     }
@@ -263,8 +263,13 @@ private:
             return false;
 
         auto base = this->pbase();
+
+        if (base == this->pptr())
+            return true;
+
         std::ptrdiff_t wrt = _pipe.write(base,
                 static_cast<typename pipe_type::int_type>(this->pptr() - base));
+
         std::ptrdiff_t diff = this->pptr() - base;
 
         if (wrt < diff)
