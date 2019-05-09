@@ -58,10 +58,15 @@ BOOST_AUTO_TEST_CASE(group_test, *boost::unit_test::timeout(5))
     BOOST_CHECK(!c.running());
     if (c.running())
         c.terminate();
+
+    std::cout << "group_test out" << std::endl;
+
 }
 
 BOOST_AUTO_TEST_CASE(attached, *boost::unit_test::timeout(5))
 {
+    std::cout << "attached" << std::endl;
+
     using boost::unit_test::framework::master_test_suite;
 
     bp::ipstream is;
@@ -117,6 +122,8 @@ BOOST_AUTO_TEST_CASE(attached, *boost::unit_test::timeout(5))
     BOOST_CHECK(!c.running());
     if (c.running())
         c.terminate();
+
+    std::cout << "attached out" << std::endl;
 
 }
 
@@ -176,4 +183,7 @@ BOOST_AUTO_TEST_CASE(detached, *boost::unit_test::timeout(5))
     BOOST_CHECK(!c.running());
     if (c.running())
         c.terminate();
+
+    std::cerr << "detached out" << std::endl;
+
 }

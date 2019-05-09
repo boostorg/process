@@ -54,12 +54,18 @@ inline bool wait_until(
         const std::chrono::time_point<Clock, Duration>& time_out,
         std::error_code & ec) noexcept
 {
-
     ::sigset_t  sigset;
 
-    sigfillset(&sigset);
-    sigemptyset(&sigset);
-    sigaddset(&sigset, SIGCHLD);
+    if (sigemptyset(&sigset) != 0)
+    {
+        ec = get_last_error();
+        return false;
+    }
+    if (sigaddset(&sigset, SIGCHLD) != 0)
+    {
+        ec = get_last_error();
+        return false;
+    }
 
     auto get_timespec = 
             [](const Duration & dur)
