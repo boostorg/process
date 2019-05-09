@@ -185,5 +185,4 @@ BOOST_AUTO_TEST_CASE(detached, *boost::unit_test::timeout(5))
         c.terminate();
 
     std::cerr << "detached out" << std::endl;
-
 }
