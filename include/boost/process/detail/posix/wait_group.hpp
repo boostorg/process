@@ -86,7 +86,7 @@ inline bool wait_until(
         ec = get_last_error();
         return false;
     }
-#if defined(BOOST_POSIX_HAS_SIGTIMEDWAIT) && false
+#if defined(BOOST_POSIX_HAS_SIGTIMEDWAIT)
     do
     {
         auto ts = get_timespec(time_out - Clock::now());
