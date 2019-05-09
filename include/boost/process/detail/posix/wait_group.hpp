@@ -62,6 +62,7 @@ inline bool wait_until(
     ::sigset_t  sigset;
     ::siginfo_t siginfo;
 
+    sigfillset(&sigset);
     sigemptyset(&sigset);
     sigaddset(&sigset, SIGCHLD);
 
@@ -85,8 +86,7 @@ inline bool wait_until(
         ec = get_last_error();
         return false;
     }
-
-#if defined(BOOST_POSIX_HAS_SIGTIMEDWAIT)
+#if defined(BOOST_POSIX_HAS_SIGTIMEDWAIT) && false
     do
     {
         auto ts = get_timespec(time_out - Clock::now());
@@ -117,9 +117,17 @@ inline bool wait_until(
     else if (timeout_pid == 0)
     {
         auto ts = get_timespec(time_out - Clock::now());
-        ::timespec rem = ts;
-        while ((rem.tv_sec > 0 || rem.tv_nsec > 0)  && (::nanosleep(&rem, &rem) != EINTR));
-
+        ::timespec rem;
+        while (ts.tv_sec > 0 || ts.tv_nsec > 0)
+        {
+            if (::nanosleep(&ts, &rem) != 0)
+            {
+                auto err = errno;
+                if ((err == EINVAL) || (err == EFAULT))
+                    break;
+            }
+            ts = rem;
+        }
         ::exit(0);
     }
 
@@ -137,24 +145,19 @@ inline bool wait_until(
 
     do
     {
-        int status;
-        if ((::waitpid(timeout_pid, &status, WNOHANG) != 0)
+        int status{0};
+        int sig_;
+        if ((::waitpid(timeout_pid, &status, WNOHANG) != 0) //return timeout in case the timeout-process exited
             && (WIFEXITED(status) || WIFSIGNALED(status)))
-            ret = ::sigwait(&sigset, nullptr);
+            return false;
+
+        ret = ::sigwait(&sigset, &sig_);
         errno = 0;
         if ((ret == SIGCHLD) && (old_sig.sa_handler != SIG_DFL) && (old_sig.sa_handler != SIG_IGN))
             old_sig.sa_handler(ret);
 
-        ret = ::waitpid(-p.grp, &siginfo.si_status, 0); //so in case it exited, we wanna reap it first
-        if (ret == -1)
-        {
-            ec = get_last_error();
-            return false;
-        }
-
         //check if we're done
         ret = ::waitid(P_PGID, p.grp, &siginfo, WEXITED | WNOHANG);
-
     }
     while (((ret != -1) || (errno != ECHILD)) && !(timed_out = (Clock::now() > time_out)));
 
