@@ -102,10 +102,9 @@ inline bool wait_until(
             return false; 
         }
 
-        //check if we're done
+        //check if we're done ->
         ret = ::waitid(P_PGID, p.grp, &siginfo, WEXITED | WNOHANG);
-
-    } 
+    }
     while (((ret != -1) || (errno != ECHILD)) && !(timed_out = (Clock::now() > time_out)));
 #else
     //if we do not have sigtimedwait, we fork off a child process  to get the signal in time
@@ -118,8 +117,9 @@ inline bool wait_until(
     else if (timeout_pid == 0)
     {
         auto ts = get_timespec(time_out - Clock::now());
-        ::setpgid(0, p.grp);
-        ::nanosleep(&ts, nullptr);
+        ::timespec rem = ts;
+        while ((rem.tv_sec > 0 || rem.tv_nsec > 0)  && (::nanosleep(&rem, &rem) != EINTR));
+
         ::exit(0);
     }
 
@@ -130,7 +130,7 @@ inline bool wait_until(
         {
             int res;
             ::kill(pid, SIGKILL);
-            ::waitpid(pid, &res, WNOHANG);
+            ::waitpid(pid, &res, 0);
         }
     };
     child_cleaner_t child_cleaner{timeout_pid};
