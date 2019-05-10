@@ -94,10 +94,11 @@ BOOST_AUTO_TEST_CASE(attached, *boost::unit_test::timeout(5))
 
 
     BOOST_REQUIRE(sub_c);
-    std::this_thread::sleep_for(std::chrono::milliseconds(50)); //just to be sure.
+            std::this_thread::sleep_for(std::chrono::milliseconds(100)); //just to be sure.
     
 
 #if defined( BOOST_POSIX_API )
+    ::waitpid(sub_c.id(), nullptr, WNOHANG);
     BOOST_CHECK(kill(sub_c.id(), 0) == 0);
 #else
     BOOST_CHECK(sub_c.running());
@@ -106,11 +107,12 @@ BOOST_AUTO_TEST_CASE(attached, *boost::unit_test::timeout(5))
     BOOST_REQUIRE_NO_THROW(g.terminate()); 
     
     BOOST_CHECK(sub_c);
-    std::this_thread::sleep_for(std::chrono::milliseconds(50)); //just to be sure.
+    std::this_thread::sleep_for(std::chrono::milliseconds(100)); //just to be sure.
 
     BOOST_CHECK(!c.running());
 
 #if defined( BOOST_POSIX_API )
+    ::waitpid(sub_c.id(), nullptr, WNOHANG);
     bool still_runs = kill(sub_c.id(), 0) == 0;
 #else 
     bool still_runs = sub_c.running();
