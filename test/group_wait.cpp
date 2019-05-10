@@ -10,7 +10,7 @@
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_IGNORE_SIGCHLD
 #include <boost/test/included/unit_test.hpp>
-
+#include <fstream>
 #include <boost/system/error_code.hpp>
 
 #include <boost/asio.hpp>
@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE(wait_group_test_timeout, *boost::unit_test::timeout(15))
 
     bp::child c2(
             master_test_suite().argv[1],
-            "--wait", "3",
+            "--wait", "4",
             g,
             ec
     );
