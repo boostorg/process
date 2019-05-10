@@ -113,12 +113,11 @@ BOOST_AUTO_TEST_CASE(attached, *boost::unit_test::timeout(5))
 
 #if defined( BOOST_POSIX_API )
     ::waitpid(sub_c.id(), nullptr, WNOHANG);
-    bool still_runs = kill(sub_c.id(), 0) == 0;
-    BOOST_CHECK_MESSAGE(!still_runs, boost::process::detail::get_last_error().message());
+    bool still_runs = (kill(sub_c.id(), 0) == 0) || (errno != ECHILD);
 #else
     bool still_runs = sub_c.running();
-    BOOST_CHECK(!still_runs);
 #endif
+    BOOST_CHECK_MESSAGE(!still_runs, boost::process::detail::get_last_error().message());
 
     if (still_runs)
         sub_c.terminate();

@@ -129,7 +129,7 @@ inline bool wait_until(
                 if ((err == EINVAL) || (err == EFAULT))
                     break;
             }
-            ts = rem;
+            ts = get_timespec(time_out - Clock::now());
         }
         ::exit(0);
     }

@@ -59,8 +59,25 @@ inline bool wait_until(
         std::error_code & ec) noexcept
 {
 
-    ::sigset_t  sigset;
     ::siginfo_t siginfo;
+
+
+    auto get_timespec = 
+            +[](const Duration & dur)
+            {
+                ::timespec ts;
+                ts.tv_sec  = std::chrono::duration_cast<std::chrono::seconds>(dur).count();
+                ts.tv_nsec = std::chrono::duration_cast<std::chrono::nanoseconds>(dur).count() % 1000000000;
+                return ts;
+            };
+
+
+    bool timed_out = false;
+    int ret;
+
+#if defined(BOOST_POSIX_HAS_SIGTIMEDWAIT)
+
+    ::sigset_t  sigset;
 
     if (sigemptyset(&sigset) != 0)
     {
@@ -73,27 +90,13 @@ inline bool wait_until(
         return false;
     }
 
-
-    auto get_timespec = 
-            [](const Duration & dur)
-            {
-                ::timespec ts;
-                ts.tv_sec  = std::chrono::duration_cast<std::chrono::seconds>(dur).count();
-                ts.tv_nsec = std::chrono::duration_cast<std::chrono::nanoseconds>(dur).count() % 1000000000;
-                return ts;
-            };
-
-
-    bool timed_out = false;
-    int ret;
-
     struct ::sigaction old_sig;
     if (-1 == ::sigaction(SIGCHLD, nullptr, &old_sig))
     {
         ec = get_last_error();
         return false;
     }
-#if defined(BOOST_POSIX_HAS_SIGTIMEDWAIT)
+
     do
     {
         auto ts = get_timespec(time_out - Clock::now());
@@ -112,17 +115,49 @@ inline bool wait_until(
         //check if we're done ->
         ret = ::waitid(P_PGID, p.grp, &siginfo, WEXITED | WNOHANG);
     }
-    while (((ret != -1) || (errno != ECHILD)) && !(timed_out = (Clock::now() > time_out)));
+    while (((ret != -1) || ((errno != ECHILD) && (errno != ESRCH))) && !(timed_out = (Clock::now() > time_out)));
+
+    if (errno != ECHILD)
+    {
+        ec = boost::process::detail::get_last_error();
+        return !timed_out;
+    }
+    else
+    {
+        ec.clear();
+        return true; //even if timed out, there are no child proccessess left
+    }
+
 #else
     //if we do not have sigtimedwait, we fork off a child process  to get the signal in time
+
+    static ::gid_t gid = 0;
+    gid = p.grp;
+    static auto sig_handler  =
+            +[](int sig)
+            {
+                errno = 0;
+                if (sig == SIGUSR1)
+                    ::setpgid(0, 0);
+                else if (sig == SIGUSR2)
+                    ::setpgid(0, gid);
+
+            };
+    auto sigusr1 = ::signal(SIGUSR1, sig_handler);
+    auto sigusr2 = ::signal(SIGUSR2, sig_handler);
+
     pid_t timeout_pid = ::fork();
+
     if (timeout_pid == -1)
     {
         ec = boost::process::detail::get_last_error();
+        ::signal(SIGUSR1, sigusr1);
+        ::signal(SIGUSR2, sigusr2);
         return true;
     }
     else if (timeout_pid == 0)
     {
+        ::setpgid(0, p.grp);
         auto ts = get_timespec(time_out - Clock::now());
         ::timespec rem;
         while (ts.tv_sec > 0 || ts.tv_nsec > 0)
@@ -133,10 +168,13 @@ inline bool wait_until(
                 if ((err == EINVAL) || (err == EFAULT))
                     break;
             }
-            ts = rem;
+            ts = get_timespec(time_out - Clock::now());
         }
         ::exit(0);
     }
+
+    ::signal(SIGUSR1, sigusr1);
+    ::signal(SIGUSR2, sigusr2);
 
     struct child_cleaner_t
     {
@@ -150,37 +188,43 @@ inline bool wait_until(
     };
     child_cleaner_t child_cleaner{timeout_pid};
 
-    do
+    while (!(timed_out = (Clock::now() > time_out)))
     {
-        int status{0};
-        int sig_;
-        if ((::waitpid(timeout_pid, &status, WNOHANG) != 0) //return timeout in case the timeout-process exited
-            && (WIFEXITED(status) || WIFSIGNALED(status)))
+        ret = ::waitid(P_PGID, p.grp, &siginfo, WEXITED | WSTOPPED);
+        if (ret == -1)
+        {
+            if (errno == ECHILD)
+            {
+                ec.clear();
+                return true;
+            }
+            ec = boost::process::detail::get_last_error();
             return false;
+        }
 
-        ret = ::sigwait(&sigset, &sig_);
-        errno = 0;
-        if ((ret == SIGCHLD) && (old_sig.sa_handler != SIG_DFL) && (old_sig.sa_handler != SIG_IGN))
-            old_sig.sa_handler(ret);
+        ::kill(timeout_pid, SIGUSR1);
+        //if it is not, we gotta check who the signal came from, so let's remove the process from the group
+        //check if the group is empty -> will give an error of ECHILD
+        ret = ::waitid(P_PGID, p.grp, &siginfo, WEXITED | WCONTINUED | WNOWAIT | WNOHANG);
 
-        //check if we're done
-        ret = ::waitid(P_PGID, p.grp, &siginfo, WEXITED | WNOHANG);
+        if (ret == -1)
+        {
+            if ((errno == ECHILD) && (errno == ESRCH))
+            {
+                ec.clear();
+                return true;
+            }
+            else
+            {
+                ec = boost::process::detail::get_last_error();
+                return false;
+            }
+        }
+        else
+            ::kill(timeout_pid, SIGUSR2);
     }
-    while (((ret != -1) || (errno != ECHILD)) && !(timed_out = (Clock::now() > time_out)));
-
+    return !timed_out;
 #endif
-
-    if (errno != ECHILD)
-    {
-        ec = boost::process::detail::get_last_error();
-        return !timed_out;
-    }
-    else
-    {
-        ec.clear();
-        return true; //even if timed out, there are no child proccessess left
-    }
-
 }
 
 template< class Clock, class Duration >
