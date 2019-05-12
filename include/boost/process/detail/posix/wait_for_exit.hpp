@@ -56,6 +56,28 @@ inline bool wait_until(
 {
     ::sigset_t  sigset;
 
+    //I need to set the signal, because it might be ignore / default, in which case sigwait might not work.
+
+
+    struct signal_interceptor_t
+    {
+        static ::sighandler_t &sigchld_handler()
+        {
+            static thread_local ::sighandler_t sigchld_handler = SIG_DFL;
+            return sigchld_handler;
+        }
+
+
+        static void handler_func(int val)
+        {
+            if ((sigchld_handler() != SIG_DFL) && (sigchld_handler() != SIG_IGN))
+                sigchld_handler()(val);
+        }
+        signal_interceptor_t()  { sigchld_handler() = ::signal(SIGCHLD, &handler_func); }
+        ~signal_interceptor_t() { ::signal(SIGCHLD, sigchld_handler()); sigchld_handler() = SIG_DFL;}
+
+    } signal_interceptor{};
+
     if (sigemptyset(&sigset) != 0)
     {
         ec = get_last_error();
@@ -87,6 +109,7 @@ inline bool wait_until(
     }
 
     bool timed_out;
+
 #if defined(BOOST_POSIX_HAS_SIGTIMEDWAIT)
     do
     {
@@ -120,7 +143,6 @@ inline bool wait_until(
     {
         auto ts = get_timespec(time_out - Clock::now());
         ::timespec rem;
-
         while (ts.tv_sec > 0 || ts.tv_nsec > 0)
         {
             if (::nanosleep(&ts, &rem) != 0)
@@ -141,22 +163,23 @@ inline bool wait_until(
         {
             int res;
             ::kill(pid, SIGKILL);
-            ::waitpid(pid, &res, 0);
+            ::waitpid(pid, &res, WNOHANG);
         }
     };
     child_cleaner_t child_cleaner{timeout_pid};
 
     do
     {
-        int sig_;
+        int sig_{0};
         if ((::waitpid(timeout_pid, &status, WNOHANG) != 0)
             && (WIFEXITED(status) || WIFSIGNALED(status)))
-                 return false;
+
+            return false;
 
         ret = ::sigwait(&sigset, &sig_);
         errno = 0;
 
-        if ((ret == SIGCHLD) &&
+        if ((sig_ == SIGCHLD) &&
             (old_sig.sa_handler != SIG_DFL) && (old_sig.sa_handler != SIG_IGN))
             old_sig.sa_handler(ret);
 
