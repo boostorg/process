@@ -58,10 +58,15 @@ BOOST_AUTO_TEST_CASE(group_test, *boost::unit_test::timeout(5))
     BOOST_CHECK(!c.running());
     if (c.running())
         c.terminate();
+
+    std::cout << "group_test out" << std::endl;
+
 }
 
 BOOST_AUTO_TEST_CASE(attached, *boost::unit_test::timeout(5))
 {
+    std::cout << "attached" << std::endl;
+
     using boost::unit_test::framework::master_test_suite;
 
     bp::ipstream is;
@@ -89,10 +94,11 @@ BOOST_AUTO_TEST_CASE(attached, *boost::unit_test::timeout(5))
 
 
     BOOST_REQUIRE(sub_c);
-    std::this_thread::sleep_for(std::chrono::milliseconds(50)); //just to be sure.
+            std::this_thread::sleep_for(std::chrono::milliseconds(100)); //just to be sure.
     
 
 #if defined( BOOST_POSIX_API )
+    ::waitpid(sub_c.id(), nullptr, WNOHANG);
     BOOST_CHECK(kill(sub_c.id(), 0) == 0);
 #else
     BOOST_CHECK(sub_c.running());
@@ -101,22 +107,26 @@ BOOST_AUTO_TEST_CASE(attached, *boost::unit_test::timeout(5))
     BOOST_REQUIRE_NO_THROW(g.terminate()); 
     
     BOOST_CHECK(sub_c);
-    std::this_thread::sleep_for(std::chrono::milliseconds(50)); //just to be sure.
+    std::this_thread::sleep_for(std::chrono::milliseconds(100)); //just to be sure.
 
     BOOST_CHECK(!c.running());
 
 #if defined( BOOST_POSIX_API )
-    bool still_runs = kill(sub_c.id(), 0) == 0;
-#else 
+    errno = 0;
+    ::waitpid(sub_c.id(), nullptr, WNOHANG);
+    bool still_runs = (kill(sub_c.id(), 0) == 0) && (errno != ECHILD) && (errno != ESRCH);
+#else
     bool still_runs = sub_c.running();
 #endif
+    BOOST_CHECK_MESSAGE(!still_runs, boost::process::detail::get_last_error().message());
 
-    BOOST_CHECK(!still_runs);
     if (still_runs)
         sub_c.terminate();
     BOOST_CHECK(!c.running());
     if (c.running())
         c.terminate();
+
+    std::cout << "attached out" << std::endl;
 
 }
 
@@ -176,4 +186,6 @@ BOOST_AUTO_TEST_CASE(detached, *boost::unit_test::timeout(5))
     BOOST_CHECK(!c.running());
     if (c.running())
         c.terminate();
+
+    std::cerr << "detached out" << std::endl;
 }
