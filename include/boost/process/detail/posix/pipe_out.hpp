@@ -14,24 +14,14 @@
 #include <boost/process/pipe.hpp>
 #include <boost/process/detail/posix/handler.hpp>
 #include <unistd.h>
-#include <array>
-#include <boost/process/detail/used_handles.hpp>
 
 namespace boost { namespace process { namespace detail { namespace posix {
 
 template<int p1, int p2>
-struct pipe_out : handler_base_ext, ::boost::process::detail::uses_handles
+struct pipe_out : handler_base_ext
 {
     int sink;
     int source; //opposite end
-
-    std::array<int, 4> get_used_handles()
-    {
-        const auto pp1 = p1 != -1 ? p1 : p2;
-        const auto pp2 = p2 != -1 ? p2 : p1;
-
-        return {source, sink, pp1, pp2};
-    }
 
     pipe_out(int sink, int source) : sink(sink), source(source) {}
 
@@ -63,7 +53,9 @@ void pipe_out<1,-1>::on_exec_setup(Executor &e) const
 {
     if (::dup2(sink, STDOUT_FILENO) == -1)
          e.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
-    ::close(sink);
+
+    if (sink != STDOUT_FILENO)
+        ::close(sink);
     ::close(source);
 }
 
@@ -73,7 +65,9 @@ void pipe_out<2,-1>::on_exec_setup(Executor &e) const
 {
     if (::dup2(sink, STDERR_FILENO) == -1)
          e.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
-    ::close(sink);
+
+    if (sink != STDOUT_FILENO)
+        ::close(sink);
     ::close(source);
 }
 
@@ -85,8 +79,8 @@ void pipe_out<1,2>::on_exec_setup(Executor &e) const
          e.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
     if (::dup2(sink, STDERR_FILENO) == -1)
          e.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
-    ::close(sink);
-    ::close(source);
+    if ((sink != STDOUT_FILENO) && (sink != STDERR_FILENO))
+        ::close(sink);
 }
 
 class async_pipe;

@@ -16,7 +16,6 @@ if [ os.name ] = NT
   lib ws2_32 ;
   lib shell32 ;
   lib Advapi32 ;
-  lib Ntdll ;
 }
 
 project : requirements
@@ -45,7 +44,7 @@ alias coroutine        : /boost//coroutine       : <link>static ;
 lib multi_ref : multi_ref1.cpp multi_ref2.cpp system : <target-os>windows:<source>shell32 ;
 
 exe sparring_partner : sparring_partner.cpp program_options system filesystem iostreams :
-    <warnings>off <target-os>windows:<source>shell32 <target-os>windows:<source>Ntdll
+    <warnings>off <target-os>windows:<source>shell32
     ;
 
 exe exit_argc : exit_argc.cpp :
@@ -56,8 +55,15 @@ exe sub_launch : sub_launcher.cpp program_options iostreams system filesystem : 
 
 rule test-options ( name )
 {
-    #return --log_sink=log_$(name).xml --log_format=XML --log_level=error --report_sink=report_$(name).xml --report_format=XML --report_level=detailed -- ;
-    return --log_level=error --report_level=detailed -- ;
+    if "--boost-process-report-ci" in [ modules.peek : ARGV ]
+    {
+        return --log_sink=log_$(name).xml --log_format=XML --log_level=error --report_sink=report_$(name).xml --report_format=XML --report_level=detailed -- ;
+    }
+    else
+    {
+        return --log_level=error --report_level=detailed -- ;
+    }
+
 }
 
 
@@ -91,7 +97,6 @@ test-suite with-valgrind :
     [ run exit_code.cpp program_options system filesystem     : [ test-options exit_code ] : sparring_partner ]
     [ run extensions.cpp system filesystem                    : [ test-options extensions ] : sparring_partner ]
     [ run env.cpp     program_options system filesystem       : [ test-options env ] : sparring_partner ]
-    [ run limit_fd.cpp     program_options system filesystem  : [ test-options limit_fd ] : sparring_partner ]
     [ run group.cpp     system thread filesystem              : [ test-options group ] : sub_launch ]
     [ run group.cpp          system thread filesystem         : [ test-options group ] : sub_launch : <build>no <target-os>windows:<build>yes <define>BOOST_USE_WINDOWS_H=1 : group-windows-h ]
     [ run group_wait.cpp     system thread filesystem         : [ test-options group_wait ] : sparring_partner ]

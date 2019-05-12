@@ -70,7 +70,6 @@ jobs:
 
             python <(curl -s https://report.ci/annotate.py) --tool gcc --input test.log
             python <(curl -s https://report.ci/annotate.py) --tool gcc --input no-valgrind.log
-            python <(curl -s https://report.ci/upload.py) --name "Circle CI Gcc Tests" --framework boost
-            bash <(curl -s https://codecov.io/bash) -x gcov || true
+            bash <(curl -s https://codecov.io/bash) -x gcov > /dev/null || true
             echo "BUILD_RESULT: $FAILED"
             exit $FAILED
