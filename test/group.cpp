@@ -114,8 +114,7 @@ BOOST_AUTO_TEST_CASE(attached, *boost::unit_test::timeout(5))
 #if defined( BOOST_POSIX_API )
     errno = 0;
     ::waitpid(sub_c.id(), nullptr, WNOHANG);
-    //bool still_runs = (kill(sub_c.id(), 0) == 0) && (errno != ECHILD);
-    bool still_runs = sub_c.running();
+    bool still_runs = (kill(sub_c.id(), 0) == 0) && (errno != ECHILD) && (errno != ESRCH);
 #else
     bool still_runs = sub_c.running();
 #endif
