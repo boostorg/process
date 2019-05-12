@@ -193,7 +193,7 @@ inline bool wait_until(
         ret = ::waitid(P_PGID, p.grp, &siginfo, WEXITED | WSTOPPED);
         if (ret == -1)
         {
-            if (errno == ECHILD)
+            if ((errno == ECHILD) || (errno == ESRCH))
             {
                 ec.clear();
                 return true;
@@ -209,7 +209,7 @@ inline bool wait_until(
 
         if (ret == -1)
         {
-            if ((errno == ECHILD) && (errno == ESRCH))
+            if ((errno == ECHILD) || (errno == ESRCH))
             {
                 ec.clear();
                 return true;
