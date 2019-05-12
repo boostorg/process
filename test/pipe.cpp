@@ -244,8 +244,9 @@ BOOST_AUTO_TEST_CASE(stream_close, *boost::unit_test::timeout(5))
     bp::ipstream ip{p};
     p.close();
 
-    op << i;
+    op << i << " ";
     op.close();
+
     ip >> j;
 
     BOOST_CHECK_EQUAL(i, j);
@@ -261,6 +262,7 @@ BOOST_AUTO_TEST_CASE(stream_close_scope, *boost::unit_test::timeout(5))
         bp::opstream op{ip.pipe()};
         op << i;
     }
+    ip.pipe().close_sink();
     ip >> j;
 
     BOOST_CHECK_EQUAL(i, j);
