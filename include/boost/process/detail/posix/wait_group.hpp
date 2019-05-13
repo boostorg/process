@@ -151,7 +151,7 @@ inline bool wait_until(
 		::signal(SIGUSR2, +[](int){::setpgid(0, gid);});
 
 		::close(p_[0]);
-		::write(p_[1], &p[0], 1u);
+		::write(p_[1], &p_[0], sizeof(int));
 		::close(p_[1]);
 		
         auto ts = get_timespec(time_out - Clock::now());
@@ -182,7 +182,7 @@ inline bool wait_until(
     child_cleaner_t child_cleaner{timeout_pid};
 
 	::close(p_[1]);
-	::read (p_[0], &p_[1], 1u);
+	::read (p_[0], &p_[1], sizeof(int));
 	::close(p_[0]);
 
     while (!(timed_out = (Clock::now() > time_out)))
