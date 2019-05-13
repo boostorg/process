@@ -142,15 +142,16 @@ inline bool wait_until(
     }
     else if (timeout_pid == 0)
     {
-		
+		::setpgid(0, p.grp);
 		static ::gid_t gid = 0;
 		gid = p.grp;
-        ::setpgid(0, p.grp);
+
 		
 		::signal(SIGUSR1, +[](int){::setpgid(0, 0);});
 		::signal(SIGUSR2, +[](int){::setpgid(0, gid);});
 
 		::close(p_[0]);
+		::write(p_[1], &p[0], 1u);
 		::close(p_[1]);
 		
         auto ts = get_timespec(time_out - Clock::now());
