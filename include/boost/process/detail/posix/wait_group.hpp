@@ -105,8 +105,16 @@ inline bool wait_until(
         ret = ::waitpid(-p.grp, &siginfo.si_status, 0); //so in case it exited, we wanna reap it first
         if (ret == -1)
         {
-            ec = get_last_error();
-            return false; 
+			if ((errno == ECHILD) || (errno == ESRCH))
+			{
+				ec.clear();
+				return true;
+			}
+			else
+			{
+				ec = get_last_error();
+				return false; 
+			}
         }
 
         //check if we're done ->
