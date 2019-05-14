@@ -54,7 +54,9 @@ struct pipe_in : handler_base_ext, ::boost::process::detail::uses_handles
     {
         if (::dup2(source, STDIN_FILENO) == -1)
              e.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
-        ::close(source);
+        if (source != STDIN_FILENO)
+            ::close(source);
+
         ::close(sink);
     }
 

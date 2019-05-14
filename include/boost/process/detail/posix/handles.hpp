@@ -22,9 +22,7 @@ inline std::vector<native_handle_type> get_handles(std::error_code & ec)
 {
     std::vector<native_handle_type> res;
 
-    std::unique_ptr<DIR, decltype(&::closedir)> dir{
-            ::opendir("/dev/fd"),
-            &::closedir};
+    std::unique_ptr<DIR, void(*)(DIR*)> dir{::opendir("/dev/fd"), +[](DIR* p){::closedir(p);}};
     if (!dir)
     {
         ec = ::boost::process::detail::get_last_error();
