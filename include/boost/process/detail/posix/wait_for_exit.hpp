@@ -58,23 +58,18 @@ inline bool wait_until(
 
     //I need to set the signal, because it might be ignore / default, in which case sigwait might not work.
 
+    using _signal_t = void(*)(int);
+    static thread_local _signal_t sigchld_handler = SIG_DFL;
 
     struct signal_interceptor_t
     {
-        static ::sighandler_t &sigchld_handler()
-        {
-            static thread_local ::sighandler_t sigchld_handler = SIG_DFL;
-            return sigchld_handler;
-        }
-
-
         static void handler_func(int val)
         {
-            if ((sigchld_handler() != SIG_DFL) && (sigchld_handler() != SIG_IGN))
-                sigchld_handler()(val);
+            if ((sigchld_handler != SIG_DFL) && (sigchld_handler != SIG_IGN))
+                sigchld_handler(val);
         }
-        signal_interceptor_t()  { sigchld_handler() = ::signal(SIGCHLD, &handler_func); }
-        ~signal_interceptor_t() { ::signal(SIGCHLD, sigchld_handler()); sigchld_handler() = SIG_DFL;}
+        signal_interceptor_t()  { sigchld_handler = ::signal(SIGCHLD, &handler_func); }
+        ~signal_interceptor_t() { ::signal(SIGCHLD, sigchld_handler); sigchld_handler = SIG_DFL;}
 
     } signal_interceptor{};
 
