@@ -61,8 +61,11 @@ inline bool wait_until(
 
     ::siginfo_t siginfo;
 
+    bool timed_out = false;
+    int ret;
 
-    auto get_timespec = 
+#if defined(BOOST_POSIX_HAS_SIGTIMEDWAIT)
+    auto get_timespec =
             +[](const Duration & dur)
             {
                 ::timespec ts;
@@ -70,12 +73,6 @@ inline bool wait_until(
                 ts.tv_nsec = std::chrono::duration_cast<std::chrono::nanoseconds>(dur).count() % 1000000000;
                 return ts;
             };
-
-
-    bool timed_out = false;
-    int ret;
-
-#if defined(BOOST_POSIX_HAS_SIGTIMEDWAIT)
 
     ::sigset_t  sigset;
 
@@ -108,8 +105,16 @@ inline bool wait_until(
         ret = ::waitpid(-p.grp, &siginfo.si_status, 0); //so in case it exited, we wanna reap it first
         if (ret == -1)
         {
-            ec = get_last_error();
-            return false; 
+			if ((errno == ECHILD) || (errno == ESRCH))
+			{
+				ec.clear();
+				return true;
+			}
+			else
+			{
+				ec = get_last_error();
+				return false; 
+			}
         }
 
         //check if we're done ->
@@ -129,68 +134,14 @@ inline bool wait_until(
     }
 
 #else
-    //if we do not have sigtimedwait, we fork off a child process  to get the signal in time
+    ::timespec sleep_interval;
+    sleep_interval.tv_sec = 0;
+    sleep_interval.tv_nsec = 1000000;
 
-    static ::gid_t gid = 0;
-    gid = p.grp;
-    static auto sig_handler  =
-            +[](int sig)
-            {
-                errno = 0;
-                if (sig == SIGUSR1)
-                    ::setpgid(0, 0);
-                else if (sig == SIGUSR2)
-                    ::setpgid(0, gid);
-
-            };
-    auto sigusr1 = ::signal(SIGUSR1, sig_handler);
-    auto sigusr2 = ::signal(SIGUSR2, sig_handler);
-
-    pid_t timeout_pid = ::fork();
-
-    if (timeout_pid == -1)
-    {
-        ec = boost::process::detail::get_last_error();
-        ::signal(SIGUSR1, sigusr1);
-        ::signal(SIGUSR2, sigusr2);
-        return true;
-    }
-    else if (timeout_pid == 0)
-    {
-        ::setpgid(0, p.grp);
-        auto ts = get_timespec(time_out - Clock::now());
-        ::timespec rem;
-        while (ts.tv_sec > 0 || ts.tv_nsec > 0)
-        {
-            if (::nanosleep(&ts, &rem) != 0)
-            {
-                auto err = errno;
-                if ((err == EINVAL) || (err == EFAULT))
-                    break;
-            }
-            ts = get_timespec(time_out - Clock::now());
-        }
-        ::exit(0);
-    }
-
-    ::signal(SIGUSR1, sigusr1);
-    ::signal(SIGUSR2, sigusr2);
-
-    struct child_cleaner_t
-    {
-        pid_t pid;
-        ~child_cleaner_t()
-        {
-            int res;
-            ::kill(pid, SIGKILL);
-            ::waitpid(pid, &res, 0);
-        }
-    };
-    child_cleaner_t child_cleaner{timeout_pid};
 
     while (!(timed_out = (Clock::now() > time_out)))
     {
-        ret = ::waitid(P_PGID, p.grp, &siginfo, WEXITED | WSTOPPED);
+        ret = ::waitid(P_PGID, p.grp, &siginfo, WEXITED | WSTOPPED | WNOHANG);
         if (ret == -1)
         {
             if ((errno == ECHILD) || (errno == ESRCH))
@@ -201,27 +152,8 @@ inline bool wait_until(
             ec = boost::process::detail::get_last_error();
             return false;
         }
-
-        ::kill(timeout_pid, SIGUSR1);
-        //if it is not, we gotta check who the signal came from, so let's remove the process from the group
-        //check if the group is empty -> will give an error of ECHILD
-        ret = ::waitid(P_PGID, p.grp, &siginfo, WEXITED | WCONTINUED | WNOWAIT | WNOHANG);
-
-        if (ret == -1)
-        {
-            if ((errno == ECHILD) || (errno == ESRCH))
-            {
-                ec.clear();
-                return true;
-            }
-            else
-            {
-                ec = boost::process::detail::get_last_error();
-                return false;
-            }
-        }
-        else
-            ::kill(timeout_pid, SIGUSR2);
+        //we can wait, because unlike in the wait_for_exit, we have no race condition regarding eh exit code.
+        ::nanosleep(&sleep_interval, nullptr);
     }
     return !timed_out;
 #endif
