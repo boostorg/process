@@ -235,4 +235,37 @@ BOOST_AUTO_TEST_CASE(coverage, *boost::unit_test::timeout(5))
     }
 }
 
+
+BOOST_AUTO_TEST_CASE(stream_close, *boost::unit_test::timeout(5))
+{
+    bp::pipe p;
+    int i = 1234, j = 0;
+    bp::opstream op{p};
+    bp::ipstream ip{p};
+    p.close();
+
+    op << i << " ";
+    op.close();
+
+    ip >> j;
+
+    BOOST_CHECK_EQUAL(i, j);
+}
+
+BOOST_AUTO_TEST_CASE(stream_close_scope, *boost::unit_test::timeout(5))
+{
+    bp::pipe p;
+    int i = 1234, j = 0;
+    bp::ipstream ip;
+
+    {
+        bp::opstream op{ip.pipe()};
+        op << i << " ";
+    }
+    ip >> j;
+
+    BOOST_CHECK_EQUAL(i, j);
+}
+
+
 BOOST_AUTO_TEST_SUITE_END();

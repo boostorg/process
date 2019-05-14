@@ -98,7 +98,7 @@ public:
         return static_cast<int_type>(read_len);
     }
 
-    bool is_open()
+    bool is_open() const
     {
         return (_source != ::boost::winapi::INVALID_HANDLE_VALUE_) ||
                (_sink   != ::boost::winapi::INVALID_HANDLE_VALUE_);
