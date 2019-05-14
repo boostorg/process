@@ -152,7 +152,7 @@ basic_pipe<Char, Traits>::basic_pipe(const std::string & name)
             name_.c_str(),
             ::boost::winapi::PIPE_ACCESS_INBOUND_
             | FILE_FLAG_OVERLAPPED_, //write flag
-            0, 1, 8192, 8192, 0, nullptr);
+            0, ::boost::winapi::PIPE_UNLIMITED_INSTANCES_, 8192, 8192, 0, nullptr);
 
     if (source == boost::winapi::INVALID_HANDLE_VALUE_)
         ::boost::process::detail::throw_last_error("create_named_pipe() failed");
