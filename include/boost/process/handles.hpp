@@ -6,6 +6,12 @@
 #ifndef BOOST_PROCESS_HANDLES_HPP_
 #define BOOST_PROCESS_HANDLES_HPP_
 
+/**
+ * \file boost/process/handles.hpp
+ *
+ * Defines functions to obtain handles of the current process and limit the amount for inherited ones.
+ */
+
 #include <boost/process/detail/config.hpp>
 
 #if defined(BOOST_POSIX_API)
