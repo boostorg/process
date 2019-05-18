@@ -420,7 +420,7 @@ child executor<Sequence>::invoke(boost::mpl::false_, boost::mpl::false_)
             _msg = "execve failed";
             boost::fusion::for_each(seq, call_on_exec_error(*this, _ec));
 
-            _write_error(p.p[1]);
+            _write_error(_pipe_sink);
             ::close(p.p[1]);
 
             _exit(EXIT_FAILURE);
