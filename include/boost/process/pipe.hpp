@@ -340,8 +340,9 @@ public:
     basic_ipstream& operator=(basic_ipstream && lhs)
     {
         std::basic_istream<CharT, Traits>::operator=(std::move(lhs));
-        _buf = std::move(lhs);
+        _buf = std::move(lhs._buf);
         std::basic_istream<CharT, Traits>::rdbuf(&_buf);
+        return *this;
     };
     ///Move assignment of a pipe.
     basic_ipstream& operator=(pipe_type && p)
@@ -448,8 +449,9 @@ public:
     basic_opstream& operator=(basic_opstream && lhs)
     {
         std::basic_ostream<CharT, Traits>::operator=(std::move(lhs));
-        _buf = std::move(lhs);
+        _buf = std::move(lhs._buf);
         std::basic_ostream<CharT, Traits>::rdbuf(&_buf);
+        return *this;
     };
 
     ///Move assignment of a pipe.
@@ -556,8 +558,9 @@ public:
     basic_pstream& operator=(basic_pstream && lhs)
     {
         std::basic_istream<CharT, Traits>::operator=(std::move(lhs));
-        _buf = std::move(lhs);
+        _buf = std::move(lhs._buf);
         std::basic_iostream<CharT, Traits>::rdbuf(&_buf);
+        return *this;
     };
     ///Move assignment of a pipe.
     basic_pstream& operator=(pipe_type && p)
