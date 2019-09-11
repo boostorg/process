@@ -118,6 +118,29 @@ BOOST_AUTO_TEST_CASE(compare,  *boost::unit_test::timeout(5))
     BOOST_TEST_PASSPOINT();
 }
 
+BOOST_AUTO_TEST_CASE(wcompare,  *boost::unit_test::timeout(5))
+{
+    auto nat = boost::this_process::wenvironment();
+    bp::wenvironment env = nat;
+
+    {
+        BOOST_CHECK_EQUAL(nat.size(), env.size());
+        auto ni = nat.begin();
+        auto ei = env.begin();
+
+        while ((ni != nat.end()) &&(ei != env.end()))
+        {
+            BOOST_CHECK_EQUAL(ni->get_name(),  ei->get_name());
+            BOOST_CHECK_EQUAL(ni->to_string(), ei->to_string());
+            ni++; ei++;
+        }
+    }
+
+    BOOST_TEST_PASSPOINT();
+    env.clear();
+    BOOST_TEST_PASSPOINT();
+}
+
 BOOST_AUTO_TEST_CASE(insert_remove,  *boost::unit_test::timeout(5))
 {
     bp::environment env(boost::this_process::environment());
