@@ -94,7 +94,7 @@ public:
     native_environment_impl & operator=(native_environment_impl && ) = default;
     native_handle_type _env_impl = _impl.data();
 
-    native_handle_type native_handle() const {return environ;}
+    native_handle_type native_handle() const {return _env_impl;}
 };
 
 template<>
