@@ -98,6 +98,11 @@ inline bool wait_until(
     {
         auto ts = get_timespec(time_out - Clock::now());
         ret = ::sigtimedwait(&sigset, nullptr, &ts);
+        if ((ret == -1) && (errno == EAGAIN))
+        {
+            ec.clear();
+            return false;
+        }
         errno = 0;
         if ((ret == SIGCHLD) && (old_sig.sa_handler != SIG_DFL) && (old_sig.sa_handler != SIG_IGN))
             old_sig.sa_handler(ret);
