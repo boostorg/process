@@ -34,7 +34,7 @@ inline std::vector<native_handle_type> get_handles(std::error_code & ec)
 
     ::boost::winapi::NTSTATUS_ nt_status = STATUS_INFO_LENGTH_MISMATCH_;
 
-    for (int cnt = 0;
+    for (;
            nt_status == STATUS_INFO_LENGTH_MISMATCH_;
            nt_status = workaround::nt_system_query_information(
                             workaround::SystemHandleInformation_,
