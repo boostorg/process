@@ -367,7 +367,7 @@ public:
     ///Get a rvalue reference to the pipe. Qualified as rvalue.
     pipe_type &&     pipe()  &&     {return std::move(_buf).pipe();}
     ///Check if the pipe is open
-    bool is_open() const {return _buf->is_open();}
+    bool is_open() const {return _buf.is_open();}
 
     ///Open a new pipe
     void open()
