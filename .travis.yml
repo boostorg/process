@@ -85,7 +85,7 @@ before_install:
   - git checkout $BOOST_BRANCH
   - git submodule update --init --merge
   - git remote set-branches --add origin $BOOST_BRANCH
-  - git pull --recurse-submodules
+  - git pull --recurse-submodules || true
   - git submodule update --init
   - git checkout $BOOST_BRANCH
   - git submodule foreach "git reset --quiet --hard; git clean -fxd"
@@ -131,6 +131,7 @@ after_success:
   - coveralls-lcov coverals/coverage.info
 
 after_script:
-  - curl -s https://report.ci/upload.py | python - --name="$BADGE test run"
   - bash <(curl -s https://codecov.io/bash)
+  - cd $BOOST/libs/$PROJECT_TO_TEST/test
+  - curl -s https://report.ci/upload.py | python - --name="$BADGE test run" --root_dir $BOOST
 

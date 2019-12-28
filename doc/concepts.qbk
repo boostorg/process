@@ -20,7 +20,7 @@ Though please note, that if the the same thread reads and write to a pipe, it wi
 
 [section:anonymous Anonymous Pipes]
 
-The usual type of pipes, are the anonymous ones. Since the have no name, 
+The most common pipes are anonymous. Since the have no name,
 a handle to them can only be obtained from duplicating either handle.
 
 In this library the following functions are used for the creation of unnamed pipes:
