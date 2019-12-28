@@ -83,9 +83,9 @@ before_install:
   - git remote add --no-tags -t $BOOST_BRANCH origin https://github.com/boostorg/boost.git
   - git fetch --depth=1
   - git checkout $BOOST_BRANCH
-  - git submodule update --init --merge
+  - git submodule update --init --merge*
   - git remote set-branches --add origin $BOOST_BRANCH
-  - git pull --recurse-submodules
+  - git pull --recurse-submodules || true 
   - git submodule update --init
   - git checkout $BOOST_BRANCH
   - git submodule foreach "git reset --quiet --hard; git clean -fxd"
