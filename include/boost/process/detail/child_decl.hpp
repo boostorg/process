@@ -73,7 +73,7 @@ public:
 
     template<typename ...Args>
     explicit child(Args&&...args);
-    child() {}
+    child() = default;
     child& operator=(const child&) = delete;
     child& operator=(child && lhs)
     {
