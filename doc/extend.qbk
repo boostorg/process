@@ -15,14 +15,14 @@ To extend the library, the header [headerref boost/process/extend.hpp extend] is
 
 It only provides the explicit style for custom properties, but no implicit style.
 
-What this means is, that a custom initializer can be implemented, a reference to which can be passed to one of the launching functions.
-If a class inherits [classref boost::process::extend::handler] it will be regarded as a initializer and thus directly put into the sequence 
+What this means is, that a custom initializer can be implemented, a reference which can be passed to one of the launching functions.
+If a class inherits [classref boost::process::extend::handler] it will be regarded as an initializer and thus directly put into the sequence 
 the executor gets passed.
 
 [section:structure Structure]
 
 The executor calls different handlers of the initializers during the process launch. 
-The basic structure is consists of three functions, as given below:
+The basic structure consists of three functions, as given below:
 
 * [globalref boost::process::extend::on_setup on_setup]
 * [globalref boost::process::extend::on_error on_error]
@@ -53,7 +53,7 @@ namespace ex = bp::extend;
 __child__ c("foo", __on_success__=[](auto & exec) {std::cout << "hello world" << std::endl;});
 ```
 
-Considering that lambda can also capture values, data can easily be shared between handlers. 
+Considering that lambdas can also capture values, data can easily be shared between handlers. 
 
 To see which members the executor has, refer to [classref boost::process::extend::windows_executor windows_executor]
 and [classref boost::process::extend::posix_executor posix_executor].
@@ -86,7 +86,7 @@ __child__ c("foo", hello_world());
 
 [note The implementation is done via overloading, not overriding.]
 
-Every handler not implemented dafaults to [classref boost::process::extend::handler handler], where an empty handler is defined for each event.
+Every handler not implemented defaults to [classref boost::process::extend::handler handler], where an empty handler is defined for each event.
 
 [endsect]
 
@@ -100,7 +100,7 @@ this functionality is also available for extensions. If the class needs the __io
 ```
 struct async_foo : __handler__, __require_io_context__
 {
-    tempalte<typename Executor>
+    template<typename Executor>
     void on_setup(Executor & exec)
     {
         __io_context__ & ios = __get_io_context__(exec.seq); //gives us a reference and a compiler error if not present.
@@ -139,10 +139,10 @@ struct async_bar : __handler, __async_handler__
 
 [section:error Error handling]
 
-If an error occurs in the initializers it shall be told to the executor and not handles directly. This is because
-the behaviour can be changed through arguments passed to the launching function. Hence the the executor
+If an error occurs in the initializers it shall be told to the executor and not handled directly. This is because
+the behaviour can be changed through arguments passed to the launching function. Hence the executor
 has the function `set_error`, which takes an [@http://en.cppreference.com/w/cpp/error/error_code std::error_code] and a string.
-Depending on the cofiguration of the executor, this may either throw, set an internal `error_code`, or do nothing.
+Depending on the configuration of the executor, this may either throw, set an internal `error_code`, or do nothing.
 
 So let's take a simple example, where we set a randomly chosen `error_code`.
 
@@ -202,8 +202,8 @@ struct hello_exe : __handler__
 };
 ```
 
-So given our example, the definitions with the non-native exectur are still a template so that they will not be evaluated if not used. Hence this provides a
-way to implement systems-specific code without using the preprocessor.
+So given our example, the definitions with the non-native executor are still a template so that they will not be evaluated if not used. Hence this provides a
+way to implement system-specific code without using the preprocessor.
 
 [note If you only write a partial implementation, e.g. only for __posix_executor__, the other variants will default to __handler__].
 

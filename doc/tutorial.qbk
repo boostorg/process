@@ -30,7 +30,7 @@
 [def asio_async_read [@http://www.boost.org/doc/libs/release/doc/html/boost_asio/reference/async_read.html boost::asio::async_read]]
 [def bp::environment  [classref boost::process::basic_environment bp::environment]]
 [def bp::native_environment  [classref boost::process::basic_native_environment bp::native_environment]]
-[def boost::this_process::environment [funcref boost::this_process::environment boost::this_process:deadlock :environment]]
+[def boost::this_process::environment [funcref boost::this_process::environment boost::this_process::environment]]
 [def std::chrono::seconds [@http://en.cppreference.com/w/cpp/chrono/duration std::chrono::seconds]]
 [def std::vector [@http://en.cppreference.com/w/cpp/container/vector std::vector]]
 
@@ -68,12 +68,12 @@ namespace bp = boost::process; //we will assume this for all further examples
 int result = bp::system("g++ main.cpp");
 ```
 
-If a single string (or the explicit form bp::cmd), it will be interpreted as a command line. 
+If a single string is given (or the explicit form bp::cmd), it will be interpreted as a command line. 
 That will cause the execution function to search the `PATH` variable to find the executable. 
 The alternative is the `exe-args` style, where the first string will be interpreted as a filename (including the path),
 and the rest as arguments passed to said function.   
 
-[note For more details on the `cmd`/`exe-args` style look [link boost_process.design.arg_cmd_style here]]
+[note For more details on the `cmd`/`exe-args` style look [link boost_process.design.arg_cmd_style here].]
 
 So as a first step, we'll use the `exe-args` style.
 
@@ -141,7 +141,7 @@ things while the process is running and afterwards get the exit code. The call
 to child_wait is necessary, to obtain it and tell the operating system, that no
 one is waiting for the process anymore.
 
-[note You can also wait for a time span or a until a time point with __wait_for__ and __wait_until__]
+[note You can also wait for a time span or until a time point with __wait_for__ and __wait_until__.]
 
 [warning If you don't call wait on a child object, it will be terminated on destruction.
 This can be avoided by calling __detach__ beforehand]  
@@ -217,7 +217,7 @@ std::vector<std::string> read_outline(std::string & file)
 What this does is redirect the `stdout` of the process into a pipe and we read this
 synchronously.
 
-[note You can do the same thing with [globalref boost::process::std_err std_err]]
+[note You can do the same thing with [globalref boost::process::std_err std_err].]
 
 Now we get the name from `nm` and we might want to demangle it, so we use input and output.
 `nm` has a demangle option, but for the sake of the example, we'll use 
@@ -246,7 +246,7 @@ std::vector<std::string> read_demangled_outline(const std::string & file)
     
     std::vector<std::string> outline;
     
-    //we just use the same pipe, so the 
+    //we just use the same pipe, so the output of nm is directly passed as input to c++filt
     bp::child nm(bp::search_path("nm"), file,  bp::std_out > p); 
     bp::child filt(bp::search_path("c++filt"), bp::std_in < p, bp::std_out > is);
     
@@ -270,7 +270,7 @@ If you are familiar with [@http://www.boost.org/doc/libs/release/libs/asio/ boos
 you can use [classref boost::process::async_pipe async_pipe] which is implemented 
 as an I/O-Object and can be used like [classref boost::process::pipe pipe] as shown above.
 
-Now we get back to our compiling example. `nm` we might analyze it line by line,
+Now we get back to our compiling example. For `nm` we might analyze the output line by line,
 but the compiler output will just be put into one large buffer.
 
 With [@http://www.boost.org/doc/libs/release/libs/asio/ boost.asio] this is what it looks like.
@@ -290,7 +290,7 @@ ios.run();
 int result = c.exit_code();
 ```
 
-To make it easier, boost.process provides simpler interface for that, so that the buffer can be passed directly, 
+To make it easier, boost.process provides a simpler interface for that, so that the buffer can be passed directly, 
 provided we also pass a reference to an io_service. 
 
 ```
@@ -304,7 +304,7 @@ int result = c.exit_code();
 ```
 
 [note Passing an instance of io_service to the launching function automatically cause it to wait asynchronously for the exit, so no call of 
-[memberref boost::process::child::wait wait] is needed]
+[memberref boost::process::child::wait wait] is needed.]
  
 To make it even easier, you can use [@http://en.cppreference.com/w/cpp/thread/future std::future] for asynchronous operations
 (you will still need to pass a reference to a io_service) to the launching function, unless you use bp::system or bp::async_system.
@@ -331,7 +331,7 @@ auto err =  data.get();
 [endsect]
 [section:group Groups]
 
-When launching several processes, processes can be grouped together. 
+When launching several processes, they can be grouped together. 
 This will also apply for a child process, that launches other processes, 
 if they do not modify the group membership. E.g. if you call `make` which 
 launches other processes and call terminate on it, 
@@ -342,7 +342,7 @@ The two main reasons to use groups are:
 # Being able to terminate child processes of the child process
 # Grouping several processes into one, just so they can be terminated at once
 
-If we have program like `make`, which does launch its own child processes, 
+If we have a program like `make`, which does launch its own child processes, 
 a call of child_terminate might not suffice. I.e. if we have a makefile launching `gcc` 
 and use the following code, the `gcc` process will still run afterwards:
 
@@ -412,14 +412,14 @@ bp::system("stuff", env_);
 ```
 
 A more convenient way to modify the environment for the child is the 
-[globalref boost::process::env env] property, which the example as following:
+[globalref boost::process::env env] property, which can be used in the example as following:
 
 ```
 bp::system("stuff", bp::env["VALUE_1"]="foo", bp::env["VALUE_2"]+={"bar1", "bar2"});
 
 ```
 
-Please see to the [headerref boost/process/environment.hpp reference] for more information.
+Please see the [headerref boost/process/environment.hpp reference] for more information.
 
 [endsect]
 [endsect]

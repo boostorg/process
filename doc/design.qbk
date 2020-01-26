@@ -1,12 +1,12 @@
 [section:design Design Rationale]
 [section Scope]
-This library is meant to give an wrapper around the different OS-specific methods
+This library is meant to give a wrapper around the different OS-specific methods
 to launch processes. Its aim is to provide all functionality that is available on 
 those systems and allow the user to do all related things, which require using the OS APIs.
 
-[*This library does not try to provide a full library for everything process related] 
+[*This library does not try to provide a full library for everything process related.] 
 In many discussions the proposal was made to build boost.process into a DSEL [footnote Domain Specific Embedded Language] of some sort. 
-This is not the goal, it rather provides the facilities to build such a DSEL-Library on top of it. 
+This is not the goal, it rather provides the facilities to build such a DSEL-library on top of it. 
 Therefore the library also does [*not] force any particular use (such as only asynchronous communication) on its user. 
 It rather could be integrated with such a library.  
 
@@ -33,7 +33,7 @@ Both styles can also be mixed in some cases.
 system("gcc", "-c", args+={"main.cpp"});
 ```
 
-In the following section the avaible styles will be described. Note that the
+In the following section the available styles will be described. Note that the
 overload style is implemented via type traits, so the types will be listed. 
 
 [caution There is no guarantee in which order the arguments will be applied! 
@@ -54,7 +54,7 @@ interpret each string as an argument.
 ] 
 
 When using the overloading variant, a single string will result in a cmd interpretation, 
-several strings will yield a exe-args interpretation. Both version can be set explicitly:
+several strings will yield a exe-args interpretation. Both versions can be set explicitly:
 
 ```
 system("grep -c false /etc/passwd"); //cmd style
@@ -65,7 +65,7 @@ system(exe="grep", args={"-c", "false", "/etc/passwd"}); //exe-/args-
 ```
 
 [note If a '"' sign is used in the argument style, it will be passed as part of the argument.
-If the same effect it wanted with the cmd syntax, it ought to be escaped, i.e. '\\\"'. ]
+If the same effect is wanted with the cmd syntax, it ought to be escaped, i.e. '\\\"'. ]
 [note The `PATH` variable will automatically be searched in the command style, 
 but the one of the launching process, not the one passed to the child process.]
 [endsect]
