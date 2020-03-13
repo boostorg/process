@@ -31,16 +31,15 @@ namespace boost { namespace process { namespace detail {
 template<typename Char>
 struct exe_setter_
 {
-    typedef Char value_type;
-    typedef std::basic_string<Char> string_type;
+    using value_type = Char;
+    using string_type = std::basic_string<Char>;
 
     string_type exe_;
-    exe_setter_(string_type && str)      : exe_(std::move(str)) {}
-    exe_setter_(const string_type & str) : exe_(str) {}
+
+    exe_setter_(string_type str) : exe_(std::move(str)) {}
 };
 
 template<> struct is_wchar_t<exe_setter_<wchar_t>> : std::true_type {};
-
 
 template<>
 struct char_converter<char, exe_setter_<wchar_t>>
@@ -60,8 +59,6 @@ struct char_converter<wchar_t, exe_setter_<char>>
     }
 };
 
-
-
 template <typename Char, bool Append >
 struct arg_setter_
 {
@@ -69,12 +66,23 @@ struct arg_setter_
     using string_type = std::basic_string<value_type>;
     std::vector<string_type> _args;
 
-    typedef typename std::vector<string_type>::iterator       iterator;
-    typedef typename std::vector<string_type>::const_iterator const_iterator;
+    using iterator       = typename std::vector<string_type>::iterator;
+    using const_iterator = typename std::vector<string_type>::const_iterator;
+
+    arg_setter_(string_type str) : _args({std::move(str)}) {}
+
+    // Disambiguates between character pointers and the single-argument template constructor.
+    arg_setter_(const value_type* s)   : _args({std::move(s)}) {}
+
+    // Disambiguates between character arrays and the single-argument template constructor.
+    template<std::size_t Size>
+    arg_setter_(const value_type (&s) [Size]) : _args({s}) {}
 
     template<typename Iterator>
-    arg_setter_(Iterator && begin, Iterator && end) : _args(begin, end) {}
+    arg_setter_(Iterator && begin, Iterator && end) :
+            _args(std::forward<Iterator>(begin), std::forward<Iterator>(end)) {}
 
+    // TODO: Doesn't distinguish whether the provided parameter can be moved from, such as with std::make_move_iterator.
     template<typename Range>
     arg_setter_(Range && str) :
             _args(std::begin(str),
@@ -84,13 +92,6 @@ struct arg_setter_
     iterator end()   {return _args.end();}
     const_iterator begin() const {return _args.begin();}
     const_iterator end()   const {return _args.end();}
-    arg_setter_(string_type & str)     : _args{{str}} {}
-    arg_setter_(string_type && s)      : _args({std::move(s)}) {}
-    arg_setter_(const string_type & s) : _args({s}) {}
-    arg_setter_(const value_type* s)   : _args({std::move(s)}) {}
-
-    template<std::size_t Size>
-    arg_setter_(const value_type (&s) [Size]) : _args({s}) {}
 };
 
 template<> struct is_wchar_t<arg_setter_<wchar_t, true >> : std::true_type {};
@@ -168,31 +169,28 @@ struct exe_builder
     string_type exe;
     std::vector<string_type> args;
 
+    void operator()(string_type data)
+    {
+        if (exe.empty())
+            exe = std::move(data);
+        else
+            args.push_back(std::move(data));
+    }
+
+    void operator()(const Char *data)
+    {
+        exe_builder::operator()(string_type{data});
+    }
+
     void operator()(const boost::filesystem::path & data)
     {
         not_cmd = true;
-        if (exe.empty())
-            exe = data.native();
-        else
-            args.push_back(data.native());
+        exe_builder::operator()(data.native());
     }
 
-    void operator()(const string_type & data)
-    {
-        if (exe.empty())
-            exe = data;
-        else
-            args.push_back(data);
-    }
-    void operator()(const Char* data)
-    {
-        if (exe.empty())
-            exe = data;
-        else
-            args.push_back(data);
-    }
     void operator()(shell_) {shell = true;}
-    void operator()(std::vector<string_type> && data)
+
+    void operator()(std::vector<string_type> data)
     {
         if (data.empty())
             return;
@@ -208,50 +206,22 @@ struct exe_builder
         args.insert(args.end(), itr, end);
     }
 
-    void operator()(const std::vector<string_type> & data)
-    {
-        if (data.empty())
-            return;
-
-        auto itr = data.begin();
-        auto end = data.end();
-
-        if (exe.empty())
-        {
-            exe = *itr;
-            itr++;
-        }
-        args.insert(args.end(), itr, end);
-    }
-    void operator()(exe_setter_<Char> && data)
+    void operator()(exe_setter_<Char> data)
     {
         not_cmd = true;
         exe = std::move(data.exe_);
     }
-    void operator()(const exe_setter_<Char> & data)
+
+    void operator()(arg_setter_<Char, false> data)
     {
-        not_cmd = true;
-        exe = data.exe_;
+        args = std::move(data._args);
     }
-    void operator()(arg_setter_<Char, false> && data)
-    {
-        args.assign(
-                std::make_move_iterator(data._args.begin()),
-                std::make_move_iterator(data._args.end()));
-    }
-    void operator()(arg_setter_<Char, true> && data)
+
+    void operator()(arg_setter_<Char, true> data)
     {
         args.insert(args.end(),
                 std::make_move_iterator(data._args.begin()),
                 std::make_move_iterator(data._args.end()));
-    }
-    void operator()(const arg_setter_<Char, false> & data)
-    {
-        args.assign(data._args.begin(), data._args.end());
-    }
-    void operator()(const arg_setter_<Char, true> & data)
-    {
-        args.insert(args.end(), data._args.begin(), data._args.end());
     }
 
     api::exe_cmd_init<Char> get_initializer()
@@ -270,23 +240,21 @@ struct exe_builder
                 return api::exe_cmd_init<Char>::cmd(std::move(exe));
 
     }
-    typedef api::exe_cmd_init<Char> result_type;
+    using result_type = api::exe_cmd_init<Char>;
 };
 
 template<>
 struct initializer_builder<cmd_or_exe_tag<char>>
 {
-    typedef exe_builder<char> type;
+    using type = exe_builder<char>;
 };
 
 template<>
 struct initializer_builder<cmd_or_exe_tag<wchar_t>>
 {
-    typedef exe_builder<wchar_t> type;
+    using type = exe_builder<wchar_t>;
 };
 
 }}}
-
-
 
 #endif /* BOOST_PROCESS_DETAIL_EXE_BUILDER_HPP_ */
