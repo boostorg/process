@@ -10,6 +10,9 @@
 //[intro
 #include <boost/process.hpp>
 
+#include <string>
+#include <iostream>
+
 using namespace boost::process;
 
 int main()
