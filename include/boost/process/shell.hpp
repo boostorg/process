@@ -42,7 +42,7 @@ namespace boost { namespace process { namespace detail {
 
 struct shell_
 {
-    constexpr shell_() {}
+    constexpr shell_() = default;
 
     boost::filesystem::path operator()() const
     {
