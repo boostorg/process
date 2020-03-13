@@ -29,7 +29,6 @@ struct run_exe
     {
         e.exe = exe.c_str();
     }
-
 };
 
 struct  set_on_error
@@ -74,13 +73,11 @@ struct overload_handler : ex::handler
     void on_setup(ex::windows_executor<Char, Sequence>& exec) const
     {
         st = "windows";
-        const char* env = exec.env;
     }
     template <class Sequence>
     void on_setup(ex::posix_executor<Sequence>& exec) const
     {
         st = "posix";
-        char** env = exec.env;
     }
 };
 
