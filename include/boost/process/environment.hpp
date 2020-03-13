@@ -26,11 +26,11 @@ namespace detail {
 template<typename Char, typename Environment>
 struct const_entry
 {
-    using value_type    = Char ;
-    using pointer       = const value_type * ;
-    using string_type   = std::basic_string<value_type> ;
-    using range         = boost::iterator_range<pointer> ;
-    using environment_t = Environment ;
+    using value_type    = Char;
+    using pointer       = const value_type *;
+    using string_type   = std::basic_string<value_type>;
+    using range         = boost::iterator_range<pointer>;
+    using environment_t = Environment;
 
     std::vector<string_type> to_vector() const
     {
@@ -46,7 +46,8 @@ struct const_entry
         boost::split(data, _data, s);
         return data;
     }
-    string_type to_string()              const
+
+    string_type to_string() const
     {
         if (_data != nullptr)
             return string_type(_data);
@@ -72,10 +73,12 @@ struct const_entry
         this->_env->reload();
 
     }
+
     bool empty() const
     {
         return _data == nullptr;
     }
+
 protected:
     string_type _name;
     pointer _data;
@@ -105,6 +108,7 @@ struct entry : const_entry<Char, Environment>
         this->_env->set(this->_name, value);
         this->reload();
     }
+
     void assign(const std::vector<string_type> &value)
     {
         string_type data;
@@ -171,10 +175,7 @@ struct entry : const_entry<Char, Environment>
         append(value);
         return *this;
     }
-
 };
-
-
 
 template<typename Char, typename Environment>
 struct make_entry
@@ -200,7 +201,6 @@ struct make_entry
 template<typename Char, typename Environment>
 struct make_const_entry
 {
-
     make_const_entry(const make_const_entry&) = default;
     make_const_entry& operator=(const make_const_entry&) = default;
 
@@ -233,14 +233,15 @@ class basic_environment_impl : public Implementation<Char>
 
         return p;
     }
+
 public:
-    using string_type = std::basic_string<Char>;
+    using string_type         = std::basic_string<Char>;
     using implementation_type = Implementation<Char>;
-    using base_type = basic_environment_impl<Char, Implementation>;
-    using       entry_maker = detail::make_entry<Char, base_type>;
-    using entry_type        = detail::entry     <Char, base_type>;
-    using const_entry_type  = detail::const_entry     <Char, const base_type>;
-    using const_entry_maker = detail::make_const_entry<Char, const base_type>;
+    using base_type           = basic_environment_impl<Char, Implementation>;
+    using entry_maker         = detail::make_entry<Char, base_type>;
+    using entry_type          = detail::entry     <Char, base_type>;
+    using const_entry_type    = detail::const_entry     <Char, const base_type>;
+    using const_entry_maker   = detail::make_const_entry<Char, const base_type>;
 
     friend       entry_type;
     friend const_entry_type;
@@ -263,19 +264,20 @@ public:
         auto st1 = key + ::boost::process::detail::equal_sign<Char>();
         while (*p != nullptr)
         {
-            if (std::equal(st1.begin(), st1.end(), *p))
+            if (st1 == *p)
                 break;
             p++;
         }
         return iterator(p, entry_maker(*this));
     }
+
     const_iterator  find( const string_type& key ) const
     {
         auto p = this->_env_impl;
         auto st1 = key + ::boost::process::detail::equal_sign<Char>();
         while (*p != nullptr)
         {
-            if (std::equal(st1.begin(), st1.end(), *p))
+            if (st1 == *p)
                 break;
             p++;
         }
@@ -288,7 +290,7 @@ public:
         auto st1 = st + ::boost::process::detail::equal_sign<Char>();
         while (*p != nullptr)
         {
-            if (std::equal(st1.begin(), st1.end(), *p))
+            if (st1 == *p)
                 return 1u;
             p++;
         }
