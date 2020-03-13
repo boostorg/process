@@ -35,39 +35,35 @@ namespace detail {
 
 struct exe_
 {
-    template<typename = void>
-    inline exe_setter_<typename boost::filesystem::path::value_type> operator()(const boost::filesystem::path & pth) const
+    exe_setter_<typename boost::filesystem::path::value_type> operator()(const boost::filesystem::path & pth) const
+    {
+        return exe_setter_<typename boost::filesystem::path::value_type>(pth.native());
+    }
+    exe_setter_<typename boost::filesystem::path::value_type> operator= (const boost::filesystem::path & pth) const
     {
         return exe_setter_<typename boost::filesystem::path::value_type>(pth.native());
     }
 
-    template<typename = void>
-    inline exe_setter_<typename boost::filesystem::path::value_type> operator=(const boost::filesystem::path & pth) const
-    {
-        return exe_setter_<typename boost::filesystem::path::value_type>(pth.native());
-    }
-
-
     template<typename Char>
-    inline exe_setter_<Char> operator()(const Char *s) const
+    exe_setter_<Char> operator()(const Char *s) const
     {
         return exe_setter_<Char>(s);
     }
     template<typename Char>
-    inline exe_setter_<Char> operator= (const Char *s) const
+    exe_setter_<Char> operator= (const Char *s) const
     {
         return exe_setter_<Char>(s);
     }
 
     template<typename Char>
-    inline exe_setter_<Char> operator()(const std::basic_string<Char> &s) const
+    inline exe_setter_<Char> operator()(std::basic_string<Char> s) const
     {
-        return exe_setter_<Char>(s);
+        return exe_setter_<Char>(std::move(s));
     }
     template<typename Char>
-    inline exe_setter_<Char> operator= (const std::basic_string<Char> &s) const
+    inline exe_setter_<Char> operator= (std::basic_string<Char> s) const
     {
-        return exe_setter_<Char>(s);
+        return exe_setter_<Char>(std::move(s));
     }
 };
 
