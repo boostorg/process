@@ -41,40 +41,41 @@ public:
      * \note This is the handle on the system, not the boost.asio class.
      *
      */
-    typedef platform_specific native_handle_type;
+    using native_handle_type = platform_specific;
+
     /** Typedef for the handle representation of boost.asio.
      *
      */
-    typedef platform_specific handle_type;
+    using handle_type = platform_specific;
 
-    typedef typename handle_type::executor_type executor_type;
+    using executor_type = typename handle_type::executor_type;
 
-    /** Construct a new async_pipe, does automatically open the pipe.
+    /** Construct a new async_pipe, automatically opens the pipe.
      * Initializes source and sink with the same io_context.
      * @note Windows creates a named pipe here, where the name is automatically generated.
      */
-    inline async_pipe(boost::asio::io_context & ios);
+    async_pipe(boost::asio::io_context & ios);
 
-    /** Construct a new async_pipe, does automatically open the pipe.
+    /** Construct a new async_pipe, automatically opens the pipe.
      * @note Windows creates a named pipe here, where the name is automatically generated.
      */
-    inline async_pipe(boost::asio::io_context & ios_source,
-                      boost::asio::io_context & ios_sink);
+    async_pipe(boost::asio::io_context & ios_source,
+               boost::asio::io_context & ios_sink);
 
-    /** Construct a new async_pipe, does automatically open.
+    /** Construct a new async_pipe, automatically opens the pipe.
      * Initializes source and sink with the same io_context.
      *
      * @note Windows restricts possible names.
      */
-    inline async_pipe(boost::asio::io_context & ios, const std::string & name);
-
+    async_pipe(boost::asio::io_context & ios, const std::string & name);
 
     /** Construct a new async_pipe, does automatically open.
      *
      * @note Windows restricts possible names.
      */
-    inline async_pipe(boost::asio::io_context & ios_source,
-                      boost::asio::io_context & ios_sink, const std::string & name);
+    async_pipe(boost::asio::io_context & ios_source,
+               boost::asio::io_context & ios_sink,
+               const std::string & name);
 
     /** Copy-Constructor of the async pipe.
      * @note Windows requires a named pipe for this, if a the wrong type is used an exception is thrown.
@@ -91,29 +92,29 @@ public:
      *
      */
     template<class CharT, class Traits = std::char_traits<CharT>>
-    explicit async_pipe(boost::asio::io_context & ios, const basic_pipe<CharT, Traits> & p);
+    async_pipe(boost::asio::io_context & ios, const basic_pipe<CharT, Traits> & p);
 
     /** Construct the async-pipe from a pipe, with two different io_context objects.
      * @note Windows requires a named pipe for this, if a the wrong type is used an exception is thrown.
      *
      */
     template<class CharT, class Traits = std::char_traits<CharT>>
-    explicit async_pipe(boost::asio::io_context & ios_source,
-                        boost::asio::io_context & ios_sink,
-                        const basic_pipe<CharT, Traits> & p);
-
+    async_pipe(boost::asio::io_context & ios_source,
+               boost::asio::io_context & ios_sink,
+               const basic_pipe<CharT, Traits> & p);
 
     /** Assign a basic_pipe.
      * @note Windows requires a named pipe for this, if a the wrong type is used an exception is thrown.
      *
      */
     template<class CharT, class Traits = std::char_traits<CharT>>
-    inline async_pipe& operator=(const basic_pipe<CharT, Traits>& p);
+    async_pipe& operator=(const basic_pipe<CharT, Traits>& p);
 
     /** Copy Assign a pipe.
      * @note Duplicates the handles.
      */
     async_pipe& operator=(const async_pipe& lhs);
+
     /** Move assign a pipe */
     async_pipe& operator=(async_pipe&& lhs);
 
@@ -122,12 +123,14 @@ public:
 
     /** Explicit cast to basic_pipe.  */
     template<class CharT, class Traits = std::char_traits<CharT>>
-    inline explicit operator basic_pipe<CharT, Traits>() const;
+    explicit operator basic_pipe<CharT, Traits>() const;
 
     /** Cancel the current asynchronous operations. */
     void cancel();
+
     /** Close the pipe handles. */
     void close();
+
     /** Close the pipe handles. While passing an error_code
      *
      */
@@ -143,14 +146,12 @@ public:
     void async_close();
 
     /** Read some data from the handle.
-
      * See the boost.asio documentation for more details.
      */
     template<typename MutableBufferSequence>
     std::size_t read_some(const MutableBufferSequence & buffers);
 
     /** Write some data to the handle.
-
      * See the boost.asio documentation for more details.
      */
     template<typename MutableBufferSequence>
@@ -158,6 +159,7 @@ public:
 
     /** Get the native handle of the source. */
     native_handle native_source() const {return const_cast<boost::asio::windows::stream_handle&>(_source).native();}
+
     /** Get the native handle of the sink. */
     native_handle native_sink  () const {return const_cast<boost::asio::windows::stream_handle&>(_sink  ).native();}
 
@@ -172,7 +174,6 @@ public:
               ReadHandler &&handler);
 
     /** Start an asynchronous write.
-
      * See the [boost.asio documentation](http://www.boost.org/doc/libs/1_60_0/doc/html/boost_asio/reference/AsyncWriteStream.html) for more details.
      */
     template<typename ConstBufferSequence,
@@ -183,35 +184,33 @@ public:
 
     ///Get the asio handle of the pipe sink.
     const handle_type & sink  () const &;
+
     ///Get the asio handle of the pipe source.
     const handle_type & source() const &;
 
     ///Get the asio handle of the pipe sink. Qualified as rvalue
     handle_type && sink  () &&;
+
     ///Get the asio handle of the pipe source. Qualified as rvalue
     handle_type && source() &&;
 
     /// Move the source out of this class and change the io_context. Qualified as rvalue. \attention Will always move.
     handle_type source(::boost::asio::io_context& ios) &&;
+
     /// Move the sink out of this class and change the io_context. Qualified as rvalue. \attention Will always move
     handle_type sink  (::boost::asio::io_context& ios) &&;
 
     /// Copy the source out of this class and change the io_context. \attention Will always copy.
     handle_type source(::boost::asio::io_context& ios) const &;
+
     /// Copy the sink out of this class and change the io_context. \attention Will always copy
     handle_type sink  (::boost::asio::io_context& ios) const &;
-
-
-
 };
 
 #else
 using ::boost::process::detail::api::async_pipe;
 #endif
 
-
 }}
-
-
 
 #endif

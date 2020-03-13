@@ -41,16 +41,17 @@ class async_pipe
     ::boost::asio::windows::stream_handle _source;
     ::boost::asio::windows::stream_handle _sink  ;
 
-    inline async_pipe(boost::asio::io_context & ios_source,
-                      boost::asio::io_context & ios_sink,
-                      const std::string & name, bool private_);
+    async_pipe(boost::asio::io_context & ios_source,
+               boost::asio::io_context & ios_sink,
+               const std::string & name, bool private_);
 
 public:
-    typedef ::boost::winapi::HANDLE_ native_handle_type;
-    typedef ::boost::asio::windows::stream_handle   handle_type;
-    typedef typename handle_type::executor_type executor_type;
+    using native_handle_type = ::boost::winapi::HANDLE_;
+    using handle_type        = ::boost::asio::windows::stream_handle;
+    using executor_type      = handle_type::executor_type;
 
     async_pipe(boost::asio::io_context & ios) : async_pipe(ios, ios, make_pipe_name(), true) {}
+
     async_pipe(boost::asio::io_context & ios_source, boost::asio::io_context & ios_sink)
                 : async_pipe(ios_source, ios_sink, make_pipe_name(), true) {}
 
@@ -60,16 +61,15 @@ public:
     async_pipe(boost::asio::io_context & ios_source, boost::asio::io_context & ios_sink, const std::string & name)
             : async_pipe(ios_source, ios_sink, name, false) {}
 
-
-
-    inline async_pipe(const async_pipe& rhs);
+    async_pipe(const async_pipe& rhs);
     async_pipe(async_pipe&& rhs)  : _source(std::move(rhs._source)), _sink(std::move(rhs._sink))
     {
     }
+
     template<class CharT, class Traits = std::char_traits<CharT>>
-    explicit async_pipe(::boost::asio::io_context & ios_source,
-                        ::boost::asio::io_context & ios_sink,
-                         const basic_pipe<CharT, Traits> & p)
+    async_pipe(::boost::asio::io_context & ios_source,
+               ::boost::asio::io_context & ios_sink,
+               const basic_pipe<CharT, Traits> & p)
             : _source(ios_source, p.native_source()), _sink(ios_sink, p.native_sink())
     {
     }
@@ -81,10 +81,11 @@ public:
     }
 
     template<class CharT, class Traits = std::char_traits<CharT>>
-    inline async_pipe& operator=(const basic_pipe<CharT, Traits>& p);
-    inline async_pipe& operator=(const async_pipe& rhs);
+    async_pipe& operator=(const basic_pipe<CharT, Traits>& p);
 
-    inline async_pipe& operator=(async_pipe&& rhs);
+    async_pipe& operator=(const async_pipe& rhs);
+
+    async_pipe& operator=(async_pipe&& rhs);
 
     ~async_pipe()
     {
@@ -93,7 +94,7 @@ public:
     }
 
     template<class CharT, class Traits = std::char_traits<CharT>>
-    inline explicit operator basic_pipe<CharT, Traits>() const;
+    explicit operator basic_pipe<CharT, Traits>() const;
 
     void cancel()
     {
@@ -116,6 +117,7 @@ public:
             _source = handle_type(_source.get_executor());
         }
     }
+
     void close(boost::system::error_code & ec)
     {
         if (_sink.is_open())
@@ -134,6 +136,7 @@ public:
     {
         return  _sink.is_open() || _source.is_open();
     }
+
     void async_close()
     {
         if (_sink.is_open())
@@ -147,18 +150,19 @@ public:
     {
         return _source.read_some(buffers);
     }
+
     template<typename MutableBufferSequence>
     std::size_t write_some(const MutableBufferSequence & buffers)
     {
         return _sink.write_some(buffers);
     }
 
-
     template<typename MutableBufferSequence>
     std::size_t read_some(const MutableBufferSequence & buffers, boost::system::error_code & ec) noexcept
     {
         return _source.read_some(buffers, ec);
     }
+
     template<typename MutableBufferSequence>
     std::size_t write_some(const MutableBufferSequence & buffers, boost::system::error_code & ec) noexcept
     {
@@ -203,6 +207,7 @@ public:
         _source.assign(::boost::winapi::INVALID_HANDLE_VALUE_, ec);
         return stolen;
     }
+
     handle_type sink  (::boost::asio::io_context& ios) &&
     {
         ::boost::asio::windows::stream_handle stolen(ios.get_executor(), _sink.native_handle());
@@ -227,6 +232,7 @@ public:
 
         return ::boost::asio::windows::stream_handle(ios.get_executor(), source);
     }
+
     handle_type sink  (::boost::asio::io_context& ios) const &
     {
         auto proc = ::boost::winapi::GetCurrentProcess();
@@ -245,9 +251,9 @@ public:
     }
 };
 
-async_pipe::async_pipe(const async_pipe& p)  :
-    _source(const_cast<handle_type&>(p._source).get_executor()),
-    _sink  (const_cast<handle_type&>(p._sink).get_executor())
+inline async_pipe::async_pipe(const async_pipe& p)  :
+          _source(const_cast<handle_type&>(p._source).get_executor()),
+          _sink  (const_cast<handle_type&>(p._sink).get_executor())
 {
 
     auto proc = ::boost::winapi::GetCurrentProcess();
@@ -282,9 +288,9 @@ async_pipe::async_pipe(const async_pipe& p)  :
 }
 
 
-async_pipe::async_pipe(boost::asio::io_context & ios_source,
-                       boost::asio::io_context & ios_sink,
-                       const std::string & name, bool private_) : _source(ios_source), _sink(ios_sink)
+inline async_pipe::async_pipe(boost::asio::io_context & ios_source,
+                              boost::asio::io_context & ios_sink,
+                              const std::string & name, bool private_) : _source(ios_source), _sink(ios_sink)
 {
     static constexpr int FILE_FLAG_OVERLAPPED_  = 0x40000000; //temporary
 
@@ -322,7 +328,7 @@ async_pipe::async_pipe(boost::asio::io_context & ios_source,
 }
 
 template<class CharT, class Traits>
-async_pipe& async_pipe::operator=(const basic_pipe<CharT, Traits> & p)
+inline async_pipe& async_pipe::operator=(const basic_pipe<CharT, Traits> & p)
 {
     auto proc = ::boost::winapi::GetCurrentProcess();
 
@@ -359,7 +365,7 @@ async_pipe& async_pipe::operator=(const basic_pipe<CharT, Traits> & p)
     return *this;
 }
 
-async_pipe& async_pipe::operator=(const async_pipe & p)
+inline async_pipe& async_pipe::operator=(const async_pipe & p)
 {
     auto proc = ::boost::winapi::GetCurrentProcess();
 
@@ -402,7 +408,7 @@ async_pipe& async_pipe::operator=(const async_pipe & p)
     return *this;
 }
 
-async_pipe& async_pipe::operator=(async_pipe && rhs)
+inline async_pipe& async_pipe::operator=(async_pipe && rhs)
 {
     _source = std::move(rhs._source);
     _sink = std::move(rhs._sink);
@@ -410,7 +416,7 @@ async_pipe& async_pipe::operator=(async_pipe && rhs)
 }
 
 template<class CharT, class Traits>
-async_pipe::operator basic_pipe<CharT, Traits>() const
+inline async_pipe::operator basic_pipe<CharT, Traits>() const
 {
     auto proc = ::boost::winapi::GetCurrentProcess();
 
