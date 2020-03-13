@@ -52,7 +52,6 @@ namespace boost {
 \endxmlonly
  *     For error there are two aliases: error_ref and error_code
  */
-
 namespace boost { namespace process {
 
 namespace detail {
@@ -62,7 +61,7 @@ struct throw_on_error_ : ::boost::process::detail::api::handler_base_ext
     constexpr throw_on_error_() = default;
 
     template <class Executor>
-    void on_error(Executor&, const std::error_code & ec) const
+    void on_error(Executor&, const std::error_code & ec) const noexcept(false)
     {
         throw process_error(ec, "process creation failed");
     }
@@ -81,7 +80,7 @@ struct set_on_error : ::boost::process::detail::api::handler_base_ext
     explicit set_on_error(std::error_code &ec) : ec_(ec) {}
 
     template <class Executor>
-    void on_error(Executor&, const std::error_code & ec) const
+    void on_error(Executor&, const std::error_code & ec) const noexcept
     {
         ec_ = ec;
     }
@@ -95,9 +94,7 @@ struct error_
     constexpr error_() = default;
     set_on_error operator()(std::error_code &ec) const {return set_on_error(ec);}
     set_on_error operator= (std::error_code &ec) const {return set_on_error(ec);}
-
 };
-
 
 template<typename T>
 struct is_error_handler : std::false_type {};
@@ -106,54 +103,50 @@ template<> struct is_error_handler<set_on_error>    : std::true_type {};
 template<> struct is_error_handler<throw_on_error_> : std::true_type {};
 template<> struct is_error_handler<ignore_error_>   : std::true_type {};
 
-
-
 template<typename Iterator, typename End>
 struct has_error_handler_impl
 {
-    typedef typename boost::fusion::result_of::deref<Iterator>::type ref_type;
-    typedef typename std::remove_reference<ref_type>::type res_type_;
-    typedef typename std::remove_cv<res_type_>::type res_type;
-    typedef typename is_error_handler<res_type>::type cond;
-
-    typedef typename boost::fusion::result_of::next<Iterator>::type next_itr;
-    typedef typename has_error_handler_impl<next_itr, End>::type next;
-
-    typedef typename boost::mpl::or_<cond, next>::type type;
+    using ref_type  = typename boost::fusion::result_of::deref<Iterator>::type;
+    using res_type_ = typename std::remove_reference<ref_type>::type;
+    using res_type  = typename std::remove_cv<res_type_>::type;
+    using cond      = typename is_error_handler<res_type>::type;
+    using next_itr  = typename boost::fusion::result_of::next<Iterator>::type;
+    using next      = typename has_error_handler_impl<next_itr, End>::type;
+    using type      = typename boost::mpl::or_<cond, next>::type;
 };
 
 template<typename Iterator>
 struct has_error_handler_impl<Iterator, Iterator>
 {
-    typedef boost::mpl::false_ type;
+    using type = boost::mpl::false_;
 };
 
 
 template<typename Sequence>
 struct has_error_handler
 {
-    typedef typename boost::fusion::result_of::as_vector<Sequence>::type vector_type;
+    using vector_type = typename boost::fusion::result_of::as_vector<Sequence>::type;
 
-    typedef typename has_error_handler_impl<
-            typename boost::fusion::result_of::begin<vector_type>::type,
-            typename boost::fusion::result_of::end<  vector_type>::type
-            >::type type;
+    using type = typename has_error_handler_impl<
+                     typename boost::fusion::result_of::begin<vector_type>::type,
+                     typename boost::fusion::result_of::end<  vector_type>::type
+                 >::type ;
 };
 
 template<typename Sequence>
 struct has_ignore_error
 {
-    typedef typename boost::fusion::result_of::as_set<Sequence>::type set_type;
-    typedef typename boost::fusion::result_of::has_key<set_type, ignore_error_>::type  type1;
-    typedef typename boost::fusion::result_of::has_key<set_type, ignore_error_&>::type type2;
-    typedef typename boost::fusion::result_of::has_key<set_type, const ignore_error_&>::type type3;
-    typedef typename boost::mpl::or_<type1,type2, type3>::type type;
+    using set_type = typename boost::fusion::result_of::as_set<Sequence>::type;
+    using type1    = typename boost::fusion::result_of::has_key<set_type, ignore_error_>::type;
+    using type2    = typename boost::fusion::result_of::has_key<set_type, ignore_error_&>::type;
+    using type3    = typename boost::fusion::result_of::has_key<set_type, const ignore_error_&>::type;
+    using type     = typename boost::mpl::or_<type1,type2, type3>::type;
 };
 
 struct error_builder
 {
     std::error_code *err;
-    typedef set_on_error result_type;
+    using result_type = set_on_error;
     set_on_error get_initializer() {return set_on_error(*err);};
     void operator()(std::error_code & ec) {err = &ec;};
 };
@@ -161,23 +154,26 @@ struct error_builder
 template<>
 struct initializer_tag<std::error_code>
 {
-    typedef error_tag type;
+    using type = error_tag;
 };
 
 
 template<>
 struct initializer_builder<error_tag>
 {
-    typedef error_builder type;
+    using type = error_builder;
 };
 
 }
+
 /**The ignore_error property will disable any error handling. This can be useful
 on linux, where error handling will require a pipe.*/
 constexpr boost::process::detail::ignore_error_ ignore_error;
+  
 /**The throw_on_error property will enable the exception when launching a process.
 It is unnecessary by default, but may be used, when an additional error_code is provided.*/
 constexpr boost::process::detail::throw_on_error_ throw_on_error;
+
 /**
 The error property will set the executor to handle any errors by setting an
 [std::error_code](http://en.cppreference.com/w/cpp/error/error_code).
