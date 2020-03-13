@@ -273,17 +273,24 @@ class executor
         prepare_cmd_style_fn = exe;
         if ((prepare_cmd_style_fn.find('/') == std::string::npos) && ::access(prepare_cmd_style_fn.c_str(), X_OK))
         {
-            auto e = ::environ;
-            while ((*e != nullptr) && !boost::starts_with(*e, "PATH="))
+            // defined by posix as extern char **environ;
+            char ** e = ::environ;
+            BOOST_ASSERT(e != nullptr);
+
+            // Find the first variable that starts with "PATH="
+            while ((e != nullptr) && (*e != nullptr) && !boost::starts_with(*e, "PATH="))
                 e++;
 
-            if (e != nullptr)
+            // Might be nullptr if there is no PATH= variable.
+            if ((e != nullptr) && (*e != nullptr))
             {
+                // TODO: This causes an allocation and copy. We can do this faster.
                 std::vector<std::string> path;
                 boost::split(path, *e, boost::is_any_of(":"));
 
                 for (const std::string & pp : path)
                 {
+                    // TODO: Switch to using std::filesystem::directory_iterator.
                     auto p = pp + "/" + exe;
                     if (!::access(p.c_str(), X_OK))
                     {
