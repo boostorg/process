@@ -108,26 +108,48 @@ struct entry : const_entry<Char, Environment>
     void assign(const std::vector<string_type> &value)
     {
         string_type data;
+        data.reserve(
+            std::accumulate(value.begin(),
+                            value.end(),
+                            0u,
+                            [&value](string_type const& val, size_t acc)
+                            {
+                                if(&val == &value.front())
+                                    return acc + val.size();
+                                else
+                                    return acc + val.size() + 1u;
+                            }));
         for (auto &v : value)
         {
             if (&v != &value.front())
                 data += api::env_seperator<value_type>();
             data += v;
         }
-        this->_env->set(this->_name, data);
+        this->_env->set(this->_name, std::move(data));
         this->reload();
 
     }
     void assign(const std::initializer_list<string_type> &value)
     {
         string_type data;
+        data.reserve(
+            std::accumulate(value.begin(),
+                            value.end(),
+                            0u,
+                            [&value](string_type const& val, size_t acc)
+                            {
+                                if(&val == &value.front())
+                                    return acc + val.size();
+                                else
+                                    return acc + val.size() + 1u;
+                            }));
         for (auto &v : value)
         {
-            if (&v != &*value.begin())
+            if (&v != &value.front())
                 data += api::env_seperator<value_type>();
             data += v;
         }
-        this->_env->set(this->_name, data);
+        this->_env->set(this->_name, std::move(data));
         this->reload();
 
     }
@@ -140,10 +162,7 @@ struct entry : const_entry<Char, Environment>
             string_type st = this->_data;
             this->_env->set(this->_name, st + api::env_seperator<value_type>() + value);
         }
-
-
         this->reload();
-
     }
     void clear()
     {
@@ -171,15 +190,11 @@ struct entry : const_entry<Char, Environment>
         append(value);
         return *this;
     }
-
 };
-
-
 
 template<typename Char, typename Environment>
 struct make_entry
 {
-
     make_entry(const make_entry&) = default;
     make_entry& operator=(const make_entry&) = default;
 
