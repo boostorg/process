@@ -43,6 +43,7 @@ inline std::vector<std::basic_string<Char>> build_cmd(const std::basic_string<Ch
             }
         }
     }
+
     if (beg != value.end())
         ret.emplace_back(beg, value.end());
 
@@ -57,13 +58,15 @@ struct cmd_setter_ : handler_base_ext
 
     cmd_setter_(string_type && cmd_line)      : _cmd_line(api::build_cmd(std::move(cmd_line))) {}
     cmd_setter_(const string_type & cmd_line) : _cmd_line(api::build_cmd(cmd_line)) {}
+
     template <class Executor>
-    void on_setup(Executor& exec) 
+    void on_setup(Executor& exec)
     {
         exec.exe = _cmd_impl.front();
         exec.cmd_line = &_cmd_impl.front();
         exec.cmd_style = true;
     }
+
     string_type str() const
     {
         string_type ret;
@@ -80,16 +83,18 @@ struct cmd_setter_ : handler_base_ext
         }
         return ret;
     }
+
 private:
-    static inline std::vector<Char*> make_cmd(std::vector<string_type> & args);
+    static std::vector<Char*> make_cmd(std::vector<string_type> & args);
     std::vector<string_type> _cmd_line;
     std::vector<Char*> _cmd_impl  = make_cmd(_cmd_line);
 };
 
 template<typename Char>
-std::vector<Char*> cmd_setter_<Char>::make_cmd(std::vector<std::basic_string<Char>> & args)
+inline std::vector<Char*> cmd_setter_<Char>::make_cmd(std::vector<std::basic_string<Char>> & args)
 {
     std::vector<Char*> vec;
+    vec.reserve(args.size()+1);
 
     for (auto & v : args)
         vec.push_back(&v.front());

@@ -40,37 +40,24 @@ namespace boost {
 
 namespace boost { namespace process { namespace detail {
 
-
 struct cmd_
 {
     constexpr cmd_() = default;
 
     template<typename Char>
-    inline api::cmd_setter_<Char> operator()(const Char *s) const
+    api::cmd_setter_<Char> operator()(std::basic_string<Char> s) const
     {
-        return api::cmd_setter_<Char>(s);
-    }
-    template<typename Char>
-    inline api::cmd_setter_<Char> operator= (const Char *s) const
-    {
-        return api::cmd_setter_<Char>(s);
+        return api::cmd_setter_<Char>(std::move(s));
     }
 
     template<typename Char>
-    inline api::cmd_setter_<Char> operator()(const std::basic_string<Char> &s) const
+    api::cmd_setter_<Char> operator= (std::basic_string<Char> s) const
     {
-        return api::cmd_setter_<Char>(s);
-    }
-    template<typename Char>
-    inline api::cmd_setter_<Char> operator= (const std::basic_string<Char> &s) const
-    {
-        return api::cmd_setter_<Char>(s);
+        return api::cmd_setter_<Char>(std::move(s));
     }
 };
 
 template<> struct is_wchar_t<api::cmd_setter_<wchar_t>> : std::true_type {};
-
-
 
 template<>
 struct char_converter<char, api::cmd_setter_<wchar_t>>
@@ -90,11 +77,6 @@ struct char_converter<wchar_t, api::cmd_setter_<char>>
     }
 };
 
-
-
-
-
-
 }
 
 
@@ -112,7 +94,6 @@ cmd(value);
 \endcode
 
 The property can only be used for assignments.
-
 
  */
 constexpr static ::boost::process::detail::cmd_ cmd;
