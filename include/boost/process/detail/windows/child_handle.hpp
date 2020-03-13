@@ -17,7 +17,7 @@
 
 namespace boost { namespace process { namespace detail { namespace windows {
 
-typedef int pid_t;
+using pid_t = decltype(::boost::winapi::PROCESS_INFORMATION_::dwProcessId);
 
 struct child_handle
 {
@@ -31,12 +31,13 @@ struct child_handle
                                   proc_info{nullptr, nullptr, 0,0}
     {
         auto h = ::boost::winapi::OpenProcess(
-                ::boost::winapi::PROCESS_ALL_ACCESS_,
-                static_cast<::boost::winapi::BOOL_>(0),
-                 pid);
+                     ::boost::winapi::PROCESS_ALL_ACCESS_,
+                     static_cast<::boost::winapi::BOOL_>(0),
+                     pid);
 
         if (h == nullptr)
             throw_last_error("OpenProcess() failed");
+
         proc_info.hProcess = h;
         proc_info.dwProcessId = pid;
     }
@@ -66,10 +67,10 @@ struct child_handle
 
     pid_t id() const
     {
-        return static_cast<int>(proc_info.dwProcessId);
+        return proc_info.dwProcessId;
     }
 
-    typedef ::boost::winapi::HANDLE_ process_handle_t;
+    using process_handle_t = ::boost::winapi::HANDLE_;
     process_handle_t process_handle() const { return proc_info.hProcess; }
 
     bool valid() const
