@@ -28,7 +28,7 @@ namespace detail
 class codecvt_category_t : public std::error_category
 {
 public:
-    codecvt_category_t() = default;
+    constexpr codecvt_category_t() = default;
     const char* name() const noexcept override {return "codecvt";}
     std::string message(int ev) const override
     {
@@ -91,7 +91,7 @@ inline std::locale& process_locale()
 }
 
 ///The internally used type for code conversion.
-typedef std::codecvt<wchar_t, char, std::mbstate_t> codecvt_type;
+using codecvt_type = std::codecvt<wchar_t, char, std::mbstate_t>;
 
 ///Get a reference to the currently used code converter.
 inline const codecvt_type& codecvt()
@@ -230,17 +230,9 @@ inline std::string convert(const wchar_t  * begin, const wchar_t *end,
     return out;
 }
 
-
-
-
 }
-
-
 
 }
 }
-
-
-
 
 #endif /* BOOST_PROCESS_LOCALE_HPP_ */
