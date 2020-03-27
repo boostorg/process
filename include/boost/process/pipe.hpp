@@ -160,7 +160,7 @@ struct basic_pipebuf : std::basic_streambuf<CharT, Traits>
         return *this;
     }
     ///Writes characters to the associated output sequence from the put area
-    int_type overflow(int_type ch = traits_type::eof()) override
+    int_type overflow(int_type ch = traits_type::eof()) final override
     {
         if (_pipe.is_open() && (ch != traits_type::eof()))
         {
@@ -188,7 +188,7 @@ struct basic_pipebuf : std::basic_streambuf<CharT, Traits>
         return traits_type::eof();
     }
     ///Synchronizes the buffers with the associated character sequence
-    int sync() override { return this->_write_impl() ? 0 : -1; }
+    int sync() final override { return this->_write_impl() ? 0 : -1; }
 
     ///Reads characters from the associated input sequence to the get area
     int_type underflow() override
