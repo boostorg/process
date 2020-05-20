@@ -81,7 +81,7 @@ struct set_on_error : ::boost::process::detail::api::handler_base_ext
     explicit set_on_error(std::error_code &ec) : ec_(ec) {}
 
     template <class Executor>
-    void on_error(Executor&, const std::error_code & ec) const
+    void on_error(Executor&, const std::error_code & ec) const noexcept
     {
         ec_ = ec;
     }
