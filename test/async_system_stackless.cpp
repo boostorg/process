@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(stackless, *boost::unit_test::timeout(15))
                         master_test_suite().argv[1],
                         "test", "--exit-code", "42");
 
-                BOOST_CHECK_EQUAL(exit_code, 42);
+                BOOST_CHECK_EQUAL(exit_code, 42u);
                 BOOST_CHECK(did_something_else);
             }
         }
