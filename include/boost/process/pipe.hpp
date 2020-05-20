@@ -123,8 +123,8 @@ struct basic_pipebuf : std::basic_streambuf<CharT, Traits>
     ///Destructor -> writes the frest of the data
     ~basic_pipebuf()
     {
-        if (is_open())
-            overflow(Traits::eof());
+        if (basic_pipebuf::is_open())
+            basic_pipebuf::overflow(Traits::eof());
     }
 
     ///Move construct from a pipe.
