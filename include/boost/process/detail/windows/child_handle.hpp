@@ -17,7 +17,7 @@
 
 namespace boost { namespace process { namespace detail { namespace windows {
 
-typedef DWORD pid_t;
+typedef ::boost::winapi::DWORD_ pid_t;
 
 struct child_handle
 {
