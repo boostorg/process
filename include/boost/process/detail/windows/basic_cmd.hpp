@@ -31,7 +31,7 @@ inline std::string build_args(const std::string & exe, std::vector<std::string> 
     std::string st = exe;
 
     //put in quotes if it has spaces or double quotes
-    if(!exe.empty() && exe.front() != '"')
+    if(!exe.empty())
     {
         auto it = st.find_first_of(" \"");
 
@@ -48,7 +48,7 @@ inline std::string build_args(const std::string & exe, std::vector<std::string> 
 
     for (auto & arg : data)
     {
-        if(!arg.empty() && arg.front() != '"')
+        if(!arg.empty())
         {
             auto it = arg.find_first_of(" \"");//contains space or double quotes?
             if(it != arg.npos)//yes
@@ -75,7 +75,7 @@ inline std::wstring build_args(const std::wstring & exe, std::vector<std::wstrin
     std::wstring st = exe;
 
     //put in quotes if it has spaces or double quotes
-    if(!exe.empty() && exe.front() != L'"')
+    if(!exe.empty())
     {
         auto it = st.find_first_of(L" \"");
 
@@ -92,7 +92,7 @@ inline std::wstring build_args(const std::wstring & exe, std::vector<std::wstrin
 
     for(auto & arg : data)
     {
-        if(!arg.empty() && arg.front() != L'"')
+        if(!arg.empty())
         {
             auto it = arg.find_first_of(L" \"");//contains space or double quotes?
             if(it != arg.npos)//yes
