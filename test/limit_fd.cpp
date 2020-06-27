@@ -128,7 +128,6 @@ struct on_setup_t
         bp::extend::foreach_used_handle(e, [this](bt::native_handle_type handle)
         {
             res.push_back(handle);
-            std::cout << "Pushing " << handle << std::endl;
         });
     }
 };
@@ -169,11 +168,15 @@ BOOST_AUTO_TEST_CASE(limit_fd, *boost::unit_test::timeout(5))
 #endif
 
     using boost::unit_test::framework::master_test_suite;
-    BOOST_CHECK_EQUAL(bp::system(master_test_suite().argv[1], "--has-handle",  get_handle(stdout), bp::std_err > stderr), EXIT_SUCCESS);
+    bp::pipe p;
+    auto p_handle = std::to_string(reinterpret_cast<std::uintptr_t>(p.native_sink()));
+
+
+
+    BOOST_CHECK_EQUAL(bp::system(master_test_suite().argv[1], "--has-handle",  p_handle, bp::std_err > stderr, bp::std_err > p), EXIT_SUCCESS);
     BOOST_CHECK_EQUAL(bp::system(master_test_suite().argv[1], "--has-handle",  get_handle(stderr), bp::std_err > stderr), EXIT_SUCCESS);
 
-
-    BOOST_CHECK_EQUAL(bp::system(master_test_suite().argv[1], "--has-handle", get_handle(stdout), bp::std_err > stderr, bp::limit_handles), EXIT_FAILURE);
+    BOOST_CHECK_EQUAL(bp::system(master_test_suite().argv[1], "--has-handle", p_handle, bp::std_err > stderr, bp::limit_handles), EXIT_FAILURE);
     BOOST_CHECK_EQUAL(bp::system(master_test_suite().argv[1], "--has-handle", get_handle(stderr), bp::std_err > stderr, bp::limit_handles), EXIT_SUCCESS);
 
 }
