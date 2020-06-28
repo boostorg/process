@@ -169,8 +169,11 @@ BOOST_AUTO_TEST_CASE(limit_fd, *boost::unit_test::timeout(5))
 
     using boost::unit_test::framework::master_test_suite;
     bp::pipe p;
+#if defined(BOOST_WINDOWS_API)
     auto p_handle = std::to_string(reinterpret_cast<std::uintptr_t>(p.native_sink()));
-
+#else
+    auto p_handle = std::to_string(p.native_sink());
+#endif
 
 
     BOOST_CHECK_EQUAL(bp::system(master_test_suite().argv[1], "--has-handle",  p_handle, bp::std_err > stderr, bp::std_err > p), EXIT_SUCCESS);
