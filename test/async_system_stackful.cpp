@@ -41,9 +41,9 @@ BOOST_AUTO_TEST_CASE(stackful, *boost::unit_test::timeout(15))
                     bp::async_system(
                         ios, yield_,
                         master_test_suite().argv[1],
-                        "test", "--exit-code", "123");
+                        "test", "--wait", "1");
 
-                BOOST_CHECK_EQUAL(ret, 123);
+                BOOST_CHECK_EQUAL(ret, 0);
                 BOOST_CHECK(did_something_else);
             };
 
