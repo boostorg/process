@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(leak_test, *boost::unit_test::timeout(5))
     BOOST_CHECK(bt::is_stream_handle(get_handle(stderr), ec));      BOOST_CHECK_MESSAGE(!ec, ec.message());
 
 
-    BOOST_CHECK_GE(fd_list.size(), 3);
+    BOOST_CHECK_GE(fd_list.size(), 3u);
     BOOST_CHECK_GE(bt::get_handles(ec).size(), fd_list.size());
 
     bp::pipe p;
@@ -66,14 +66,14 @@ BOOST_AUTO_TEST_CASE(leak_test, *boost::unit_test::timeout(5))
 
         auto fd_list_new = bt::get_handles(ec);
         BOOST_CHECK_MESSAGE(!ec, ec);
-        BOOST_CHECK_LE(fd_list.size() + 2, fd_list_new.size());
+        BOOST_CHECK_LE(fd_list.size() + 2u, fd_list_new.size());
         fd_list = std::move(fd_list_new);
     }
 
 
 
-    BOOST_CHECK_EQUAL(std::count(fd_list.begin(), fd_list.end(), p.native_source()), 1);
-    BOOST_CHECK_EQUAL(std::count(fd_list.begin(), fd_list.end(), p.native_sink()),   1);
+    BOOST_CHECK_EQUAL(std::count(fd_list.begin(), fd_list.end(), p.native_source()), 1u);
+    BOOST_CHECK_EQUAL(std::count(fd_list.begin(), fd_list.end(), p.native_sink()),   1u);
 
     BOOST_CHECK(bt::is_stream_handle(p.native_source(), ec)); BOOST_CHECK_MESSAGE(!ec, ec.message());
     BOOST_CHECK(bt::is_stream_handle(p.native_sink(),   ec)); BOOST_CHECK_MESSAGE(!ec, ec.message());
@@ -82,8 +82,8 @@ BOOST_AUTO_TEST_CASE(leak_test, *boost::unit_test::timeout(5))
     p.close();
     fd_list = bt::get_handles(ec);
 
-    BOOST_CHECK_EQUAL(std::count(fd_list.begin(), fd_list.end(), p.native_source()), 0);
-    BOOST_CHECK_EQUAL(std::count(fd_list.begin(), fd_list.end(), p.native_sink()),   0);
+    BOOST_CHECK_EQUAL(std::count(fd_list.begin(), fd_list.end(), p.native_source()), 0u);
+    BOOST_CHECK_EQUAL(std::count(fd_list.begin(), fd_list.end(), p.native_sink()),   0u);
 
 #if defined( BOOST_WINDOWS_API )
     std::thread thr([]{});
@@ -128,7 +128,6 @@ struct on_setup_t
         bp::extend::foreach_used_handle(e, [this](bt::native_handle_type handle)
         {
             res.push_back(handle);
-            std::cout << "Pushing " << handle << std::endl;
         });
     }
 };
@@ -155,9 +154,9 @@ BOOST_AUTO_TEST_CASE(iterate_handles, *boost::unit_test::timeout(5))
 
     BOOST_CHECK_MESSAGE(!ec, ec.message());
 
-    BOOST_CHECK_EQUAL(ret, 42);
-    BOOST_CHECK_EQUAL(std::count(res.begin(), res.end(), p_in. native_sink()), 0);
-    BOOST_CHECK_EQUAL(std::count(res.begin(), res.end(), p_out.native_source()), 0);
+    BOOST_CHECK_EQUAL(ret, 42u);
+    BOOST_CHECK_EQUAL(std::count(res.begin(), res.end(), p_in. native_sink()), 0u);
+    BOOST_CHECK_EQUAL(std::count(res.begin(), res.end(), p_out.native_source()), 0u);
 }
 
 BOOST_AUTO_TEST_CASE(limit_fd, *boost::unit_test::timeout(5))
@@ -169,11 +168,13 @@ BOOST_AUTO_TEST_CASE(limit_fd, *boost::unit_test::timeout(5))
 #endif
 
     using boost::unit_test::framework::master_test_suite;
-    BOOST_CHECK_EQUAL(bp::system(master_test_suite().argv[1], "--has-handle",  get_handle(stdout), bp::std_err > stderr), EXIT_SUCCESS);
+    
+    BOOST_CHECK_EQUAL(bp::system(master_test_suite().argv[1], "--has-handle",  get_handle(stdin), bp::std_err > stderr), EXIT_SUCCESS);
     BOOST_CHECK_EQUAL(bp::system(master_test_suite().argv[1], "--has-handle",  get_handle(stderr), bp::std_err > stderr), EXIT_SUCCESS);
 
 
-    BOOST_CHECK_EQUAL(bp::system(master_test_suite().argv[1], "--has-handle", get_handle(stdout), bp::std_err > stderr, bp::limit_handles), EXIT_FAILURE);
+    BOOST_CHECK_EQUAL(bp::system(master_test_suite().argv[1], "--has-handle", get_handle(stdin), bp::std_err > stderr, bp::limit_handles), EXIT_FAILURE);
     BOOST_CHECK_EQUAL(bp::system(master_test_suite().argv[1], "--has-handle", get_handle(stderr), bp::std_err > stderr, bp::limit_handles), EXIT_SUCCESS);
+
 
 }

@@ -47,7 +47,7 @@ while (is >> file)
 This will also deadlock, because the pipe does not close when the subprocess exits.
 So the `ipstream` will still look for data even though the process has ended.
 
-[note It is not possible to use automatically pipe-closing in this library, because 
+[note It is not possible to use automatic pipe-closing in this library, because 
 a pipe might be a file-handle (as for async pipes on windows).]
 
 But, since pipes are buffered, you might get incomplete data if you do this:
@@ -64,7 +64,7 @@ while (c.running())
 }
 ```
 
-It is therefore highly recommended that you use the asynchronous api if you are
+It is therefore highly recommended that you use the asynchronous API if you are
 not absolutely sure how the output will look.
 
 [endsect]

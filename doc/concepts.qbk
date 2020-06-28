@@ -16,11 +16,11 @@ In that it is different than other facilities (like sockets) and provides anothe
 Pipes are typically used for interprocess communication. The main reason is, that pipes can be directly assigned to the process stdio, i.e. stderr, stdin and stdout.
 Additionally, half of the pipe can be inherited to the child process and closed in the father process. This will cause the pipe to be broken when the child process exits.
 
-Though please note, that if the the same thread reads and write to a pipe, it will only talk to itself.
+Though please note, that if the same thread reads and writes to a pipe, it will only talk to itself.
 
 [section:anonymous Anonymous Pipes]
 
-The most common pipes are anonymous. Since the have no name,
+The most common pipes are anonymous. Since they have no name,
 a handle to them can only be obtained from duplicating either handle.
 
 In this library the following functions are used for the creation of unnamed pipes:
@@ -57,12 +57,12 @@ Every process is identified by a unique number[footnote it is unique as long as 
 
 [section:exit_code Exit code]
 A process will return an integer value indicating whether it was successful. On posix
-there are more codes associated with that, but not so on windows. Therefore there is not such encoding currently in the library.
+there are more codes associated with that, but not so on windows. Therefore there is no such encoding currently in the library.
 However an exit code of zero means the process was successful, while one different than zero indicates an error. 
 [endsect]
 
 [section:termination Termination]
-Processes can also be forced to exit. There are two ways to do this, signal the process to so and wait, and just terminate the process without conditions.
+Processes can also be forced to exit. There are two ways to do this, signal the process to do so and wait, and just terminate the process without conditions.
 
 Usually the first approach is to signal an exit request, but windows - unlike posix - does not provide a consistent way to do this. Hence this is not part of the
 library and only the hard terminate is. 

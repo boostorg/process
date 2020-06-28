@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(wargs, *boost::unit_test::timeout(2))
     std::error_code ec;
     bp::child c(
         master_test_suite().argv[1],
-        L"test", "--echo-argv", L"hello thingy", "\"stuff\"", static_cast<const wchar_t*>(L"  spa ce  "),
+        L"test", "--echo-argv", L"hello thingy", "\"stuff\"", static_cast<const wchar_t*>(L"  spa\" ce  "),
         bp::std_out>is,
         ec
     );
@@ -62,9 +62,9 @@ BOOST_AUTO_TEST_CASE(wargs, *boost::unit_test::timeout(2))
     BOOST_CHECK_EQUAL(s, "\"stuff\"");
 
     std::getline(is, s);
-    s.resize(10);
+    s.resize(11);
 
-    BOOST_CHECK_EQUAL(s, "  spa ce  ");
+    BOOST_CHECK_EQUAL(s, "  spa\" ce  ");
 
 }
 

@@ -293,7 +293,7 @@ BOOST_AUTO_TEST_CASE(async_out_stream, *boost::unit_test::timeout(5))
 
     std::string line;
     std::getline(istr, line);
-    BOOST_REQUIRE_GE(line.size(), 3);
+    BOOST_REQUIRE_GE(line.size(), 3u);
     BOOST_CHECK(boost::algorithm::starts_with(line, "abc"));
     c.wait();
 }
