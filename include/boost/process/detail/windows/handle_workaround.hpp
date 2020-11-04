@@ -12,7 +12,7 @@
 //#define BOOST_USE_WINDOWS_H 1
 
 #if defined( BOOST_USE_WINDOWS_H )
-#include <Winternl.h>
+#include <winternl.h>
 #endif
 
 
