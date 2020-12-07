@@ -45,8 +45,6 @@ public:
     inline async_pipe(const async_pipe& lhs);
     async_pipe(async_pipe&& lhs)  : _source(std::move(lhs._source)), _sink(std::move(lhs._sink))
     {
-        lhs._source.assign (-1);
-        lhs._sink  .assign (-1);
     }
 
     template<class CharT, class Traits = std::char_traits<CharT>>
@@ -182,13 +180,11 @@ public:
 
     handle_type source(::boost::asio::io_context& ios) const &
     {
-        auto source_in = const_cast<::boost::asio::posix::stream_descriptor &>(_source).native_handle();
-        return ::boost::asio::posix::stream_descriptor(ios, ::dup(source_in));
+        return ::boost::asio::posix::stream_descriptor(ios, ::dup(native_source()));
     }
     handle_type sink  (::boost::asio::io_context& ios) const &
     {
-        auto sink_in = const_cast<::boost::asio::posix::stream_descriptor &>(_sink).native_handle();
-        return ::boost::asio::posix::stream_descriptor(ios, ::dup(sink_in));
+        return ::boost::asio::posix::stream_descriptor(ios, ::dup(native_sink()));
     }
 };
 
@@ -198,79 +194,46 @@ async_pipe::async_pipe(boost::asio::io_context & ios_source,
                        const std::string & name) : _source(ios_source), _sink(ios_sink)
 {
     auto fifo = mkfifo(name.c_str(), 0666 );
-
     if (fifo != 0)
         boost::process::detail::throw_last_error("mkfifo() failed");
 
-
-    int  read_fd = open(name.c_str(), O_RDWR);
-
+    int  read_fd = ::open(name.c_str(), O_RDWR);
     if (read_fd == -1)
         boost::process::detail::throw_last_error();
+    _source.assign(read_fd);
 
-    int write_fd = dup(read_fd);
-
+    int write_fd = ::dup(_source.native_handle());
     if (write_fd == -1)
         boost::process::detail::throw_last_error();
-
-    _source.assign(read_fd);
-    _sink  .assign(write_fd);
+    _sink.assign(write_fd);
 }
 
 async_pipe::async_pipe(const async_pipe & p) :
         _source(const_cast<async_pipe&>(p)._source.get_executor()),
         _sink(  const_cast<async_pipe&>(p)._sink.get_executor())
 {
-
-    //cannot get the handle from a const object.
-    auto source_in = const_cast<::boost::asio::posix::stream_descriptor &>(_source).native_handle();
-    auto sink_in   = const_cast<::boost::asio::posix::stream_descriptor &>(_sink).native_handle();
-    if (source_in == -1)
-        _source.assign(-1);
-    else
-    {
-        _source.assign(::dup(source_in));
-        if (_source.native_handle()== -1)
-            ::boost::process::detail::throw_last_error("dup()");
-    }
-
-    if (sink_in   == -1)
-        _sink.assign(-1);
-    else
-    {
-        _sink.assign(::dup(sink_in));
-        if (_sink.native_handle() == -1)
-            ::boost::process::detail::throw_last_error("dup()");
-    }
+    *this = p;
 }
 
 async_pipe& async_pipe::operator=(const async_pipe & p)
 {
-    int source;
-    int sink;
-
-    //cannot get the handle from a const object.
-    auto source_in = const_cast<::boost::asio::posix::stream_descriptor &>(p._source).native_handle();
-    auto sink_in   = const_cast<::boost::asio::posix::stream_descriptor &>(p._sink).native_handle();
-    if (source_in == -1)
-        source = -1;
-    else
-    {
-        source = ::dup(source_in);
-        if (source == -1)
+    if (p._source.is_open()) {
+        int fd = ::dup(p.native_source());
+        if (fd == -1)
             ::boost::process::detail::throw_last_error("dup()");
+        _source.assign(fd);
+    } else {
+        _source.close();
     }
 
-    if (sink_in   == -1)
-        sink = -1;
-    else
-    {
-        sink  = ::dup(sink_in);
-        if (sink == -1)
+    if (p._sink.is_open()) {
+        int fd = ::dup(p.native_sink());
+        if (fd == -1)
             ::boost::process::detail::throw_last_error("dup()");
+        _sink.assign(fd);
+    } else {
+        _sink.close();
     }
-    _source.assign(source);
-    _sink.  assign(sink);
 
     return *this;
 }
@@ -285,33 +248,23 @@ async_pipe& async_pipe::operator=(async_pipe && lhs)
 template<class CharT, class Traits>
 async_pipe::operator basic_pipe<CharT, Traits>() const
 {
-    int source;
-    int sink;
+    basic_pipe<CharT, Traits> pipe{-1, -1};
 
-    //cannot get the handle from a const object.
-    auto source_in = const_cast<::boost::asio::posix::stream_descriptor &>(_source).native_handle();
-    auto sink_in   = const_cast<::boost::asio::posix::stream_descriptor &>(_sink).native_handle();
-
-
-    if (source_in == -1)
-        source = -1;
-    else
-    {
-        source = ::dup(source_in);
-        if (source == -1)
+    if (_source.is_open()) {
+        int fd = ::dup(native_source());
+        if (fd == -1)
             ::boost::process::detail::throw_last_error("dup()");
+        pipe.assign_source(fd);
     }
 
-    if (sink_in   == -1)
-        sink = -1;
-    else
-    {
-        sink = ::dup(sink_in);
-        if (sink == -1)
+    if (_sink.is_open()) {
+        int fd = ::dup(native_sink());
+        if (fd == -1)
             ::boost::process::detail::throw_last_error("dup()");
+        pipe.assign_sink(fd);
     }
 
-    return basic_pipe<CharT, Traits>{source, sink};
+    return pipe;
 }
 
 

@@ -94,8 +94,11 @@ BOOST_AUTO_TEST_CASE(move_pipe)
     asio::io_context ios;
 
     bp::async_pipe ap{ios};
+    BOOST_CHECK(ap.is_open());
     BOOST_TEST_CHECKPOINT("First move");
     bp::async_pipe ap2{std::move(ap)};
+    BOOST_CHECK(!ap.is_open());
+    BOOST_CHECK(ap2.is_open());
 #if defined(BOOST_WINDOWS_API)
     BOOST_CHECK_EQUAL(ap.native_source(), ::boost::winapi::INVALID_HANDLE_VALUE_);
     BOOST_CHECK_EQUAL(ap.native_sink  (), ::boost::winapi::INVALID_HANDLE_VALUE_);
