@@ -23,6 +23,7 @@
 #include <boost/process/group.hpp>
 #include <system_error>
 
+#include <future>
 #include <string>
 #include <thread>
 #include <istream>
@@ -34,13 +35,14 @@ namespace bp = boost::process;
 BOOST_AUTO_TEST_CASE(wait_group_test, *boost::unit_test::timeout(5))
 {
     std::atomic<bool> done{false};
-    std::thread thr{
+    std::future<void> thread = std::async(std::launch::async,
         [&]
         {
             for (int i = 0; i < 50 && !done.load(); i++)
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
             BOOST_REQUIRE(done.load());
-        }};
+        }
+    );
 
 
     using boost::unit_test::framework::master_test_suite;
@@ -77,7 +79,7 @@ BOOST_AUTO_TEST_CASE(wait_group_test, *boost::unit_test::timeout(5))
     BOOST_CHECK(!c2.running());
 
     done.store(true);
-    thr.join();
+    thread.get();
 }
 
 
@@ -86,13 +88,14 @@ BOOST_AUTO_TEST_CASE(wait_group_test_timeout, *boost::unit_test::timeout(15))
     using boost::unit_test::framework::master_test_suite;
 
     std::atomic<bool> done{false};
-    std::thread thr{
+    std::future<void> thread = std::async(std::launch::async,
             [&]
             {
                 for (int i = 0; i < 150 && !done.load(); i++)
                     std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 BOOST_REQUIRE(done.load());
-            }};
+            }
+    );
 
     std::error_code ec;
     bp::group g;
@@ -131,5 +134,5 @@ BOOST_AUTO_TEST_CASE(wait_group_test_timeout, *boost::unit_test::timeout(15))
     BOOST_CHECK(!c2.running());
 
     done.store(true);
-    thr.join();
+    thread.get();
 }

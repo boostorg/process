@@ -16,7 +16,6 @@
 #include <boost/process/io.hpp>
 #include <boost/process/child.hpp>
 
-#include <boost/thread.hpp>
 #include <future>
 
 #include <boost/system/error_code.hpp>
@@ -182,11 +181,11 @@ BOOST_AUTO_TEST_CASE(async_wait_different_contexts, *boost::unit_test::timeout(1
     BOOST_REQUIRE(!ec);
 
     // Regression test for #143: make sure each io_context handles its own children
-    std::thread thr1{[&]{io_context1.run();}};
-    std::thread thr2{[&]{io_context2.run();}};
+    std::future<void> thread1 = std::async(std::launch::async, [&]{io_context1.run();});
+    std::future<void> thread2 = std::async(std::launch::async, [&]{io_context2.run();});
 
-    thr1.join();
-    thr2.join();
+    thread1.get();
+    thread2.get();
     c1.wait(ec);
     BOOST_REQUIRE(!ec);
 
@@ -404,12 +403,12 @@ BOOST_AUTO_TEST_CASE(mixed_async, *boost::unit_test::timeout(5))
     );
 
     BOOST_REQUIRE(!ec);
-    std::thread thr([&]{c.wait();});
+    std::future<void> thread = std::async(std::launch::async, [&]{c.wait();});
     io_context.run();
 
     BOOST_CHECK(exit_called);
     BOOST_CHECK_EQUAL(c.exit_code(), 42);
-    thr.join();
+    thread.get();
 
 }*/
 

@@ -17,6 +17,7 @@
 #include <boost/process/exe.hpp>
 #include <boost/process/child.hpp>
 #include <boost/process/args.hpp>
+#include <future>
 #include <system_error>
 #include <thread>
 
@@ -25,13 +26,14 @@ namespace bp = boost::process;
 BOOST_AUTO_TEST_CASE(terminate_set_on_error, *boost::unit_test::timeout(5))
 {
     std::atomic<bool> done{false};
-    std::thread thr{
+    std::future<void> thread = std::async(std::launch::async,
             [&]
             {
                 for (int i = 0; i < 50 && !done.load(); i++)
                     std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 BOOST_REQUIRE(done.load());
-            }};
+            }
+    );
 
     using boost::unit_test::framework::master_test_suite;
     std::error_code ec;
@@ -55,19 +57,20 @@ BOOST_AUTO_TEST_CASE(terminate_set_on_error, *boost::unit_test::timeout(5))
     BOOST_CHECK(!ec);
 
     done.store(true);
-    thr.join();
+    thread.get();
 }
 
 BOOST_AUTO_TEST_CASE(terminate_throw_on_error, *boost::unit_test::timeout(5))
 {
     std::atomic<bool> done{false};
-    std::thread thr{
+    std::future<void> thread = std::async(std::launch::async,
             [&]
             {
                 for (int i = 0; i < 50 && !done.load(); i++)
                     std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 BOOST_REQUIRE(done.load());
-            }};
+            }
+    );
 
     using boost::unit_test::framework::master_test_suite;
 
@@ -91,5 +94,5 @@ BOOST_AUTO_TEST_CASE(terminate_throw_on_error, *boost::unit_test::timeout(5))
     BOOST_CHECK(!c.running());
 
     done.store(true);
-    thr.join();
+    thread.get();
 }
