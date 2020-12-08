@@ -273,15 +273,11 @@ class executor
         prepare_cmd_style_fn = exe;
         if ((prepare_cmd_style_fn.find('/') == std::string::npos) && ::access(prepare_cmd_style_fn.c_str(), X_OK))
         {
-            auto e = ::environ;
-            while ((e != nullptr) && (*e != nullptr) && !boost::starts_with(*e, "PATH="))
-                e++;
-
-            if ((e != nullptr) && (*e != nullptr))
+            const char *const path_value = ::getenv("PATH");
+            if (path_value)
             {
                 std::vector<std::string> path;
-                // Parse PATH value, skipping the "PATH=" in the front
-                boost::split(path, *e + 5, boost::is_any_of(":"));
+                boost::split(path, path_value, boost::is_any_of(":"));
 
                 for (const std::string & pp : path)
                 {
