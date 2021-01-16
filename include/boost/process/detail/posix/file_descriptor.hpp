@@ -9,6 +9,7 @@
 #include <fcntl.h>
 #include <string>
 #include <boost/filesystem/path.hpp>
+#include <boost/core/exchange.hpp>
 
 namespace boost { namespace process { namespace detail { namespace posix {
 
@@ -39,10 +40,22 @@ struct file_descriptor
     }
 
     file_descriptor(const file_descriptor & ) = delete;
-    file_descriptor(file_descriptor && ) = default;
+    file_descriptor(file_descriptor &&other)
+        : _handle(boost::exchange(other._handle, -1))
+    {
+    }
 
     file_descriptor& operator=(const file_descriptor & ) = delete;
-    file_descriptor& operator=(file_descriptor && ) = default;
+    file_descriptor& operator=(file_descriptor &&other)
+    {
+        if (this != &other)
+        {
+            if (_handle != -1)
+                ::close(_handle);
+            _handle = boost::exchange(other._handle, -1);
+        }
+        return *this;
+    }
 
     ~file_descriptor()
     {
