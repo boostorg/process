@@ -18,6 +18,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <memory>
+#include <utility>
 
 namespace boost { namespace process { namespace detail { namespace posix {
 
@@ -121,25 +122,23 @@ public:
 template<class CharT, class Traits>
 basic_pipe<CharT, Traits>::basic_pipe(const basic_pipe & rhs)
 {
-    *this = rhs;
+    if (rhs._source != -1) {
+        _source = ::dup(rhs._source);
+        if (_source == -1)
+            ::boost::process::detail::throw_last_error("dup() failed");
+    }
+    if (rhs._sink != -1) {
+        _sink = ::dup(rhs._sink);
+        if (_sink == -1)
+            ::boost::process::detail::throw_last_error("dup() failed");
+    }
 }
 
 template<class CharT, class Traits>
 basic_pipe<CharT, Traits> &basic_pipe<CharT, Traits>::operator=(const basic_pipe & rhs)
 {
-       if (rhs._source != -1)
-       {
-           _source = ::dup(rhs._source);
-           if (_source == -1)
-               ::boost::process::detail::throw_last_error("dup() failed");
-       }
-    if (rhs._sink != -1)
-    {
-        _sink = ::dup(rhs._sink);
-        if (_sink == -1)
-            ::boost::process::detail::throw_last_error("dup() failed");
-
-    }
+    basic_pipe<CharT, Traits> copy{rhs};
+    std::swap(*this, copy);
     return *this;
 }
 

@@ -212,18 +212,11 @@ async_pipe::async_pipe(const async_pipe & p) :
         _source(const_cast<async_pipe&>(p)._source.get_executor()),
         _sink(  const_cast<async_pipe&>(p)._sink.get_executor())
 {
-    *this = p;
-}
-
-async_pipe& async_pipe::operator=(const async_pipe & p)
-{
     if (p._source.is_open()) {
         int fd = ::dup(p.native_source());
         if (fd == -1)
             ::boost::process::detail::throw_last_error("dup()");
         _source.assign(fd);
-    } else {
-        _source.close();
     }
 
     if (p._sink.is_open()) {
@@ -231,10 +224,13 @@ async_pipe& async_pipe::operator=(const async_pipe & p)
         if (fd == -1)
             ::boost::process::detail::throw_last_error("dup()");
         _sink.assign(fd);
-    } else {
-        _sink.close();
     }
+}
 
+async_pipe& async_pipe::operator=(const async_pipe & p)
+{
+    async_pipe copy{p};
+    std::swap(*this, copy);
     return *this;
 }
 
