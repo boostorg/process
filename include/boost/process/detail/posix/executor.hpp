@@ -151,13 +151,7 @@ class executor
 
     void write_error(const std::error_code & ec, const char * msg)
     {
-        //I am the child
-        int len = ec.value();
-        ::write(_pipe_sink, &len, sizeof(int));
-
-        len = std::strlen(msg) + 1;
-        ::write(_pipe_sink, &len, sizeof(int));
-        ::write(_pipe_sink, msg, len);
+        write_error(_pipe_sink, ec, msg, msg ? std::strlen(msg) : 0);
     }
 
     void internal_error_handle(const std::error_code &ec, const char* msg, boost::mpl::true_ , boost::mpl::false_, boost::mpl::false_)
@@ -210,59 +204,106 @@ class executor
     inline child invoke(boost::mpl::false_, boost::mpl::true_ );
     inline child invoke(boost::mpl::true_ , boost::mpl::false_ );
     inline child invoke(boost::mpl::false_, boost::mpl::false_ );
-    void _write_error(int sink)
+
+    static ssize_t write_all(int fd, const char *data, size_t size)
     {
-        int data[2] = {_ec.value(),static_cast<int>(_msg.size())};
-        while (::write(sink, &data[0], sizeof(int) *2) == -1)
-        {
-            auto err = errno;
-
-            if (err == EBADF)
-                return;
-            else if ((err != EINTR) && (err != EAGAIN))
-                break;
+        size_t total_written = 0;
+        while (size > 0) {
+            ssize_t count = ::write(fd, data, size);
+            if (count < 0) {
+                if (errno != EINTR && errno != EAGAIN) {
+                    return -1;
+                }
+            } else {
+                data += count;
+                size -= count;
+                total_written += count;
+            }
         }
-        while (::write(sink, &_msg.front(), _msg.size()) == -1)
-        {
-            auto err = errno;
+        return total_written;
+    }
 
-            if (err == EBADF)
-                return;
-            else if ((err != EINTR) && (err != EAGAIN))
+    static ssize_t read_all(int fd, char *data, size_t size)
+    {
+        size_t total_read = 0;
+        while (size > 0) {
+            ssize_t count = ::read(fd, data, size);
+            if (count < 0) {
+                if (errno != EINTR && errno != EAGAIN) {
+                    return -1;
+                }
+            } else if (count == 0) {
+                // End-of-file, other end of the pipe was closed.
+                // Cannot read all of the requested amount of bytes.
                 break;
+            } else {
+                data += count;
+                size -= count;
+                total_read += count;
+            }
         }
+        return total_read;
+    }
+
+    static void write_error(int sink, const std::error_code &ec, const char *msg, size_t msg_size)
+    {
+        const int data[2] = {ec.value(), static_cast<int>(msg_size)};
+        if (write_all(sink, reinterpret_cast<const char *>(data), sizeof(int) * 2) < 0) {
+            return;
+        }
+        write_all(sink, msg, msg_size);
+    }
+
+    void _write_error()
+    {
+        write_error(_pipe_sink, _ec, _msg.data(), _msg.size());
     }
 
     void _read_error(int source)
     {
-        int data[2];
-
         _ec.clear();
-        int count = 0;
-        while ((count = ::read(source, &data[0], sizeof(int) *2 ) ) == -1)
-        {
-            //actually, this should block until it's read.
+
+        int data[2] = {0, 0};
+        ssize_t count;
+        count = read_all(source, reinterpret_cast<char *>(data), sizeof(data));
+        if (count < 0) {
             auto err = errno;
-            if ((err != EAGAIN ) && (err != EINTR))
-                set_error(std::error_code(err, std::system_category()), "Error read pipe");
+            set_error(std::error_code(err, std::system_category()), "Failed to read error details from child process pipe");
+            return;
         }
-        if (count == 0)
-            return  ;
+        if (count == 0) {
+            // nothing received at all, no error?!
+            return;
+        }
+        if (static_cast<size_t>(count) != sizeof(data)) {
+            // Received less than expected
+            set_error(std::error_code(EIO, std::system_category()),
+                      "Child process execution failed"
+                      " (Failed to read error details from child process pipe,"
+                      " got " + std::to_string(count) + " bytes, expected at least " + std::to_string(sizeof(data)) + ")");
+            return;
+        }
 
         std::error_code ec(data[0], std::system_category());
         std::string msg(data[1], ' ');
 
-        while (::read(source, &msg.front(), msg.size() ) == -1)
-        {
-            //actually, this should block until it's read.
+        count = read_all(source, &msg.front(), msg.size());
+        if (count < 0) {
             auto err = errno;
-            if ((err == EBADF) || (err == EPERM))//that should occur on success, therefore return.
-                return;
-                //EAGAIN not yet forked, EINTR interrupted, i.e. try again
-            else if ((err != EAGAIN ) && (err != EINTR))
-                set_error(std::error_code(err, std::system_category()), "Error read pipe");
+            set_error(ec, "Child process execution failed"
+                          " (Failed to read error details from child process pipe, " +
+                           std::error_code(err, std::system_category()).message() + ")");
+            return;
         }
-        set_error(ec, std::move(msg));
+        if (static_cast<size_t>(count) != msg.size()) {
+            // Received less than expected
+            set_error(ec, "Child process execution failed"
+                          " (Failed to read error message from child process pipe,"
+                          " got " + std::to_string(count) + " bytes, expected " + std::to_string(msg.size()) + ")");
+            return;
+        }
+
+        set_error(ec, "Child process execution failed, " + msg);
     }
 
     std::string prepare_cmd_style_fn; //buffer
@@ -324,7 +365,10 @@ public:
     {
         internal_error_handle(ec, msg, has_error_handler(), has_ignore_error(), shall_use_vfork());
     }
-    void set_error(const std::error_code &ec, const std::string &msg) {set_error(ec, msg.c_str());};
+    void set_error(const std::error_code &ec, const std::string &msg)
+    {
+        set_error(ec, msg.c_str());
+    };
 
 };
 
@@ -414,6 +458,7 @@ child executor<Sequence>::invoke(boost::mpl::false_, boost::mpl::false_)
         {
             _pipe_sink = p.p[1];
             ::close(p.p[0]);
+            p.p[0] = -1;
 
             boost::fusion::for_each(seq, call_on_exec_setup(*this));
             ::execve(exe, cmd_line, env);
@@ -421,8 +466,10 @@ child executor<Sequence>::invoke(boost::mpl::false_, boost::mpl::false_)
             _msg = "execve failed";
             boost::fusion::for_each(seq, call_on_exec_error(*this, _ec));
 
-            _write_error(_pipe_sink);
+            _write_error();
             ::close(p.p[1]);
+            p.p[1] = -1;
+            _pipe_sink = -1;
 
             _exit(EXIT_FAILURE);
             return child();
