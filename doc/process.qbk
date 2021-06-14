@@ -9,6 +9,8 @@
         (See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt)
     ]
+[ Process is a C++ 11 library used for managing System processes and it requires a C++ 11 support or beyond.
+  The process library requires a compiler at the C++11 standard level or beyond, else it can not be compiled without errors. ]
 ]
 
 [include introduction.qbk]
