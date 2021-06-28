@@ -8,7 +8,7 @@
 
 #include <boost/test/included/unit_test.hpp>
 #include <iostream>
-#include <thread>
+#include <future>
 
 #include <boost/process/pipe.hpp>
 #include <boost/process/environment.hpp>
@@ -246,11 +246,11 @@ BOOST_AUTO_TEST_CASE(large_data, *boost::unit_test::timeout(20))
     for (auto & c: in)
         c = (cnt++ % 26) + 'A';
 
-    std::thread th([&]{os << in << std::endl;});
+    std::future<void> thread = std::async(std::launch::async, [&]{os << in << std::endl;});
 
     is >> out;
     BOOST_REQUIRE_EQUAL_COLLECTIONS(out.begin(), out.end(), in.begin(), in.end());
-    th.join();
+    thread.get();
 }
 
 BOOST_AUTO_TEST_CASE(closed, *boost::unit_test::timeout(2))

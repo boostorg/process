@@ -11,6 +11,7 @@
 #include <thread>
 #include <vector>
 #include <boost/algorithm/string/predicate.hpp>
+#include <future>
 
 #include <boost/process/async_pipe.hpp>
 #include <boost/process/pipe.hpp>
@@ -70,21 +71,19 @@ BOOST_AUTO_TEST_CASE(closed_transform)
 BOOST_AUTO_TEST_CASE(multithreaded_async_pipe)
 {
     asio::io_context ioc;
-
-    std::vector<std::thread> threads;
+    std::vector<std::future<void>> threads;
     for (int i = 0; i < std::thread::hardware_concurrency(); i++)
     {
-        threads.emplace_back([&ioc]
+        threads.emplace_back(std::async(std::launch::async, [&ioc]
         {
-            std::vector<bp::async_pipe*> pipes;
+            std::vector<std::unique_ptr<bp::async_pipe>> pipes;
             for (size_t i = 0; i < 100; i++)
-                pipes.push_back(new bp::async_pipe(ioc));
-            for (auto &p : pipes)
-                delete p;
-        });
+                pipes.emplace_back(std::make_unique<bp::async_pipe>(ioc));
+        }));
     }
-    for (auto &t : threads)
-        t.join();
+    for (auto &future : threads) {
+        future.get();
+    }
 }
 
 
