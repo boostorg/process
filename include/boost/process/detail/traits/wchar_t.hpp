@@ -12,6 +12,8 @@
 #include <boost/process/detail/traits/env.hpp>
 #include <boost/process/locale.hpp>
 
+#include <algorithm>
+
 namespace boost { namespace process { namespace detail {
 
 //template
