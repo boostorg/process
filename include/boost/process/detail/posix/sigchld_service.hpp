@@ -51,15 +51,15 @@ public:
                     {
                         auto ec = get_last_error();
                         boost::asio::post(
-                                _signal_set.get_executor(),
-                                [ec, h]
+                                _strand,
+                                [pid_res, ec, h]
                                 {
-                                    h(-1, ec);
+                                    h(pid_res, ec);
                                 });
                     }
                     else if ((pid_res == pid) && (WIFEXITED(status) || WIFSIGNALED(status)))
                         boost::asio::post(
-                                _signal_set.get_executor(),
+                                _strand,
                                 [status, h]
                                 {
                                     h(status, {}); //successfully exited already
