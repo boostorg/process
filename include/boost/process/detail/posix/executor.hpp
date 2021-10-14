@@ -279,6 +279,7 @@ class executor
 
             if ((e != nullptr) && (*e != nullptr))
             {
+                *e += 5; //the beginnig of the string contains "PATH="
                 std::vector<std::string> path;
                 boost::split(path, *e, boost::is_any_of(":"));
 
