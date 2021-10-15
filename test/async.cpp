@@ -182,8 +182,8 @@ BOOST_AUTO_TEST_CASE(async_wait_different_contexts, *boost::unit_test::timeout(1
     BOOST_REQUIRE(!ec);
 
     // Regression test for #143: make sure each io_context handles its own children
-    std::thread thr1{[&]{io_context1.run();}};
-    std::thread thr2{[&]{io_context2.run();}};
+    std::thread thr1{[&]() noexcept {io_context1.run();}};
+    std::thread thr2{[&]() noexcept {io_context2.run();}};
 
     thr1.join();
     thr2.join();
