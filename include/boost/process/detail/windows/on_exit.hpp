@@ -34,7 +34,7 @@ struct on_exit_ : boost::process::detail::windows::async_handler
         auto v = boost::asio::prefer(boost::process::detail::get_io_context(exec.seq).get_executor(),
                                      boost::asio::execution::outstanding_work.tracked);
         auto handler_ = this->handler;
-        return [handler_](int exit_code, const std::error_code & ec)
+        return [v, handler_](int exit_code, const std::error_code & ec)
                {
                     handler_(static_cast<int>(exit_code), ec);
                };
