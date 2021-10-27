@@ -167,14 +167,14 @@ BOOST_AUTO_TEST_CASE(limit_fd, *boost::unit_test::timeout(5))
     const auto get_handle = [](FILE * f){return std::to_string(fileno(f));};
 #endif
 
+    auto p = fopen("./test-file", "w");
+
     using boost::unit_test::framework::master_test_suite;
-    
-    BOOST_CHECK_EQUAL(bp::system(master_test_suite().argv[1], "--has-handle",  get_handle(stdin), bp::std_err > stderr), EXIT_SUCCESS);
-    BOOST_CHECK_EQUAL(bp::system(master_test_suite().argv[1], "--has-handle",  get_handle(stderr), bp::std_err > stderr), EXIT_SUCCESS);
 
+    BOOST_CHECK_EQUAL(bp::system(master_test_suite().argv[1], "--has-handle", bp::limit_handles, get_handle(p),  bp::std_in  < p), EXIT_SUCCESS);
+    BOOST_CHECK_EQUAL(bp::system(master_test_suite().argv[1], "--has-handle", bp::limit_handles, get_handle(p),  bp::std_err > p), EXIT_SUCCESS);
+    BOOST_CHECK_EQUAL(bp::system(master_test_suite().argv[1], "--has-handle", bp::limit_handles, get_handle(p),  bp::std_out > p), EXIT_SUCCESS);
+    BOOST_CHECK_EQUAL(bp::system(master_test_suite().argv[1], "--has-handle", bp::limit_handles, get_handle(p)), EXIT_FAILURE);
 
-    BOOST_CHECK_EQUAL(bp::system(master_test_suite().argv[1], "--has-handle", get_handle(stdin), bp::std_err > stderr, bp::limit_handles), EXIT_FAILURE);
-    BOOST_CHECK_EQUAL(bp::system(master_test_suite().argv[1], "--has-handle", get_handle(stderr), bp::std_err > stderr, bp::limit_handles), EXIT_SUCCESS);
-
-
+    fclose(p);
 }

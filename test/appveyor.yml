@@ -13,6 +13,7 @@
 init:
     - set BRANCH_TO_TEST=%APPVEYOR_REPO_BRANCH%
     - set BOOST_REMOVE=process
+    - set BOOST_TEST_LOG_LEVEL=success
 
 os: Visual Studio 2015
 configuration: Debug
