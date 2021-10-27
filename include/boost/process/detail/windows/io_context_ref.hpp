@@ -140,7 +140,8 @@ struct io_context_ref : boost::process::detail::handler_base
                      boost::asio::io_context & ios, void * handle,
                      const std::shared_ptr<std::atomic<int>> &exit_status)
                 : funcs(std::move(funcs)),
-                  handle(new boost::asio::windows::object_handle(ios.get_executor(), handle)),
+                  handle(new boost::asio::windows::object_handle(
+                          asio::prefer(ios.get_executor(), asio::execution::outstanding_work.tracked), handle)),
                   exit_status(exit_status)
         {
 
