@@ -214,7 +214,7 @@ BOOST_AUTO_TEST_CASE(async_wait_abort, *boost::unit_test::timeout(5))
     int exit_code = 0;
     bp::child c(
         master_test_suite().argv[1],
-        "test", "--abort",
+        "test", "exit-code", "42",
         ec,
         io_context,
         bp::on_exit([&](int exit, const std::error_code& ec_in)
@@ -232,7 +232,7 @@ BOOST_AUTO_TEST_CASE(async_wait_abort, *boost::unit_test::timeout(5))
     io_context.run();
 
     BOOST_CHECK(exit_called);
-    BOOST_CHECK_NE(exit_code,  0);
+    BOOST_CHECK_NE(exit_code,  42);
     BOOST_CHECK_EQUAL(c.exit_code(), exit_code);
 }
 
@@ -412,5 +412,6 @@ BOOST_AUTO_TEST_CASE(mixed_async, *boost::unit_test::timeout(5))
     thr.join();
 
 }*/
+
 
 BOOST_AUTO_TEST_SUITE_END();
