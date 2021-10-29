@@ -10,6 +10,7 @@
 #include <boost/process/detail/config.hpp>
 #include <boost/process/detail/handler_base.hpp>
 #include <boost/process/detail/windows/async_handler.hpp>
+#include <boost/asio/execution.hpp>
 #include <system_error>
 #include <functional>
 
