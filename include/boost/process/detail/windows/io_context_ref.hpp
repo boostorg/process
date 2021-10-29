@@ -10,6 +10,7 @@
 #include <boost/process/detail/windows/async_handler.hpp>
 #include <boost/process/detail/windows/is_running.hpp>
 #include <boost/asio/io_context.hpp>
+#include <boost/asio/post.hpp>
 #include <boost/asio/windows/object_handle.hpp>
 #include <boost/winapi/process.hpp>
 #include <boost/winapi/handles.hpp>
