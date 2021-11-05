@@ -1,6 +1,6 @@
 {
   "key": "process",
-  "name": "process",
+  "name": "Process",
   "authors": [
     "Merino Vidal", "Ilya Sokolov", "Felipe Tanus", 
     "Jeff Flinn", "Thomas Jarosch", "Boris Schaeling", "Klemens D. Morgenstern"
