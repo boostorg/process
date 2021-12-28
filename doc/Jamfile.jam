@@ -24,11 +24,12 @@ generators.register-standard common.copy : XML : XMLPROCESSWORKAROUND ;
 xmlprocessworkaround posix_pseudocode   : posix_pseudocode.xml   ; 
 xmlprocessworkaround windows_pseudocode : windows_pseudocode.xml ;
 
+path-constant INCLUDES : ../../.. ;
 
 doxygen autodoc
 :
-  ../../../boost/process.hpp
-  [ glob ../../../boost/process/*.hpp ]
+  $(INCLUDES)/boost/process.hpp
+  [ glob $(INCLUDES)/boost/process/*.hpp ]
 :
   <doxygen:param>EXCLUDE_SYMBOLS=BOOST_ASIO_INITFN_RESULT_TYPE
   <doxygen:param>PREDEFINED=BOOST_PROCESS_DOXYGEN
@@ -39,7 +40,6 @@ doxygen autodoc
   <dependency>windows_pseudocode
   <xsl:path>.
 ;
-
 
 
 boostbook standalone
