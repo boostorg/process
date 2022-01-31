@@ -90,12 +90,12 @@ inline auto native_environment_impl<Char>::get(const pointer_type id) -> string_
                 ::boost::process::detail::throw_last_error("GetEnvironmentVariable() failed");
             else
                 return std::basic_string<Char>(
-                        buf.data(), buf.data()+ size + 1);
+                        buf.data(), buf.data()+ size);
 
         }
 
     }
-    return std::basic_string<Char>(buf, buf+size+1);
+    return std::basic_string<Char>(buf, buf+size);
 }
 
 template<typename Char>
