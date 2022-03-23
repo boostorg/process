@@ -152,7 +152,7 @@ class executor
     void write_error(const std::error_code & ec, const char * msg)
     {
         //I am the child
-        const auto len = std::strlen(msg);
+        const int len = std::strlen(msg);
         int data[2] = {ec.value(), len + 1};
 
         ::write(_pipe_sink, &data[0], sizeof(int) * 2);
