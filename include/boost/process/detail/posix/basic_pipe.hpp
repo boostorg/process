@@ -11,7 +11,7 @@
 #define BOOST_PROCESS_POSIX_PIPE_HPP
 
 
-#include <boost/filesystem.hpp>
+#include <boost/process/filesystem.hpp>
 #include <boost/process/detail/posix/compare_handles.hpp>
 #include <system_error>
 #include <array>

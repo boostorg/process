@@ -11,7 +11,7 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/iterator/transform_iterator.hpp>
-#include <boost/filesystem/path.hpp>
+#include <boost/process/filesystem.hpp>
 
 #if defined(BOOST_POSIX_API)
 #include <boost/process/detail/posix/environment.hpp>

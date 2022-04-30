@@ -16,7 +16,7 @@
 #include <boost/process/async_pipe.hpp>
 #include <boost/process/extend.hpp>
 
-#include <boost/filesystem.hpp>
+#include <boost/process/filesystem.hpp>
 
 #include <system_error>
 #include <string>
@@ -29,7 +29,7 @@
 #include <boost/winapi/get_current_process.hpp>
 #endif
 
-namespace fs = boost::filesystem;
+namespace fs = boost::process::filesystem;
 namespace bp = boost::process;
 namespace bt = boost::this_process;
 
