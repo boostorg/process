@@ -263,8 +263,9 @@ public:
         auto st1 = key + ::boost::process::detail::equal_sign<Char>();
         while (*p != nullptr)
         {
-            const auto len = std::char_traits<Char>::length(*p);
-            if (std::equal(st1.begin(), st1.end(), *p, *p + len))
+            const int len = std::char_traits<Char>::length(*p);
+            if ((std::distance(st1.begin(), st1.end()) < len)
+                 && std::equal(st1.begin(), st1.end(), *p))
                 break;
             p++;
         }
@@ -276,8 +277,9 @@ public:
         auto st1 = key + ::boost::process::detail::equal_sign<Char>();
         while (*p != nullptr)
         {
-            const auto len = std::char_traits<Char>::length(*p);
-            if (std::equal(st1.begin(), st1.end(), *p, *p + len))
+            const int len = std::char_traits<Char>::length(*p);
+            if ((std::distance(st1.begin(), st1.end()) < len)
+                && std::equal(st1.begin(), st1.end(), *p))
                 break;
             p++;
         }
@@ -290,8 +292,9 @@ public:
         auto st1 = st + ::boost::process::detail::equal_sign<Char>();
         while (*p != nullptr)
         {
-            const auto len = std::char_traits<Char>::length(*p);
-            if (std::equal(st1.begin(), st1.end(), *p, *p + len))
+            const int len = std::char_traits<Char>::length(*p);
+            if ((std::distance(st1.begin(), st1.end()) < len)
+                && std::equal(st1.begin(), st1.end(), *p))
                 return 1u;
             p++;
         }
