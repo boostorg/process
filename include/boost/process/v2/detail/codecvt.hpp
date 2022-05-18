@@ -71,10 +71,12 @@ inline std::basic_string<char,Traits,Alloc> convert_chars(
         const Alloc & alloc = Alloc(),
         const std::locale &loc = std::locale())
 {
+    if (begin == end)
+        return {};
+
     const auto & f = loc == std::locale()
                      ? default_codecvt()
-                     : std::use_facet<std::codecvt< wchar_t, char, std::mbstate_t > >(loc)
-    ;
+                     : std::use_facet<std::codecvt< wchar_t, char, std::mbstate_t > >(loc);
 
     std::mbstate_t mb = std::mbstate_t();
     const std::size_t len = (end - begin) * 2;
@@ -98,6 +100,9 @@ inline std::basic_string<wchar_t,Traits,Alloc> convert_chars(
         const Alloc & alloc = Alloc(),
         const std::locale &loc = std::locale())
 {
+    if (begin == end)
+        return {};
+
     const auto & f = loc == std::locale()
                      ? default_codecvt()
                      : std::use_facet<std::codecvt< wchar_t, char, std::mbstate_t > >(loc);
@@ -166,6 +171,9 @@ inline std::basic_string<char8_t,Traits,Alloc> convert_chars(
         const Alloc & alloc = Alloc(),
         const std::locale &loc = std::locale())
 {
+  if (begin == end)
+    return {};
+
   const auto & f = loc == std::locale()
                    ? default_codecvt()
                    : std::use_facet<std::codecvt< wchar_t, char, std::mbstate_t > >(loc)
@@ -196,6 +204,9 @@ inline std::basic_string<char,Traits,Alloc> convert_chars(
         const Alloc & alloc = Alloc(),
         const std::locale &loc = std::locale())
 {
+  if (begin == end)
+    return {};
+
   const auto & f = std::use_facet<std::codecvt< char16_t, char8_t, std::mbstate_t > >(loc);
 
   std::mbstate_t mb = std::mbstate_t();
@@ -224,6 +235,9 @@ inline std::basic_string<char,Traits,Alloc> convert_chars(
         const Alloc & alloc = Alloc(),
         const std::locale &loc = std::locale())
 {
+  if (begin == end)
+    return {};
+
   const auto & f = std::use_facet<std::codecvt<char32_t, char8_t, std::mbstate_t > >(loc);
 
   std::mbstate_t mb = std::mbstate_t();
@@ -253,6 +267,9 @@ inline std::basic_string<char16_t,Traits,Alloc> convert_chars(
         const Alloc & alloc = Alloc(),
         const std::locale &loc = std::locale())
 {
+  if (begin == end)
+    return {};
+
   const auto & f = std::use_facet<std::codecvt< char16_t, char8_t, std::mbstate_t > >(loc);
 
   std::mbstate_t mb = std::mbstate_t();
@@ -283,8 +300,10 @@ inline std::basic_string<char32_t,Traits,Alloc> convert_chars(
         const Alloc & alloc = Alloc(),
         const std::locale &loc = std::locale())
 {
-  const auto & f = std::use_facet<std::codecvt< char32_t, char8_t, std::mbstate_t > >(loc)
-  ;
+  if (begin == end)
+    return {};
+
+  const auto & f = std::use_facet<std::codecvt< char32_t, char8_t, std::mbstate_t > >(loc);
 
   std::mbstate_t mb = std::mbstate_t();
   const std::size_t len = f.length(mb,
@@ -318,6 +337,9 @@ inline std::basic_string<char,Traits,Alloc> convert_chars(
         const Alloc & alloc = Alloc(),
         const std::locale &loc = std::locale())
 {
+    if (begin == end)
+        return {};
+
     const auto & f = std::use_facet<std::codecvt< char16_t, char, std::mbstate_t > >(loc);
 
     std::mbstate_t mb = std::mbstate_t();
@@ -343,6 +365,9 @@ inline std::basic_string<char,Traits,Alloc> convert_chars(
         const Alloc & alloc = Alloc(),
         const std::locale &loc = std::locale())
 {
+    if (begin == end)
+        return {};
+
     const auto & f = std::use_facet<std::codecvt<char32_t, char, std::mbstate_t > >(loc);
 
     std::mbstate_t mb = std::mbstate_t();
@@ -369,6 +394,9 @@ inline std::basic_string<char16_t,Traits,Alloc> convert_chars(
         const Alloc & alloc = Alloc(),
         const std::locale &loc = std::locale())
 {
+    if (begin == end)
+        return {};
+
     const auto & f = std::use_facet<std::codecvt< char16_t, char, std::mbstate_t > >(loc);
 
     std::mbstate_t mb = std::mbstate_t();
@@ -393,8 +421,10 @@ inline std::basic_string<char32_t,Traits,Alloc> convert_chars(
         const Alloc & alloc = Alloc(),
         const std::locale &loc = std::locale())
 {
-    const auto & f = std::use_facet<std::codecvt< char32_t, char, std::mbstate_t > >(loc)
-    ;
+    if (begin == end)
+        return {};
+
+    const auto & f = std::use_facet<std::codecvt< char32_t, char, std::mbstate_t > >(loc);
 
     std::mbstate_t mb = std::mbstate_t();
     const std::size_t len = f.length(mb, begin, end, std::numeric_limits<std::size_t>::max());
@@ -420,6 +450,9 @@ inline std::basic_string<char16_t,Traits,Alloc> convert_chars(
         const Alloc & alloc = Alloc(),
         const std::locale &loc = std::locale())
 {
+    if (begin == end)
+        return {};
+
     using rebind_alloc = typename std::allocator_traits<Alloc>::template rebind_alloc<char>;
     auto tmp = convert_chars<std::char_traits<char>>(ec, begin, end, ' ', rebind_alloc(alloc), loc);
 
@@ -439,6 +472,9 @@ inline std::basic_string<char32_t,Traits,Alloc> convert_chars(
         const Alloc & alloc = Alloc(),
         const std::locale &loc = std::locale())
 {
+    if (begin == end)
+        return {};
+
     using rebind_alloc = typename std::allocator_traits<Alloc>::template rebind_alloc<char>;
     auto tmp = convert_chars<std::char_traits<char>>(ec, begin, end, ' ', rebind_alloc(alloc), loc);
     if (ec)
@@ -456,6 +492,9 @@ inline std::basic_string<wchar_t,Traits,Alloc> convert_chars(
         const Alloc & alloc = Alloc(),
         const std::locale &loc = std::locale())
 {
+    if (begin == end)
+        return {};
+
     using rebind_alloc = typename std::allocator_traits<Alloc>::template rebind_alloc<char>;
     auto tmp = convert_chars<std::char_traits<char>>(ec, begin, end, ' ', rebind_alloc(alloc), loc);
     if (ec)
