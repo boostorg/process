@@ -20,6 +20,7 @@
 #include <system_error>
 #include <boost/system/error_code.hpp>
 #include <boost/process/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 #include <boost/asio.hpp>
 #include <string>

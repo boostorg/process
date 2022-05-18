@@ -10,6 +10,7 @@
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_IGNORE_SIGCHLD
 #include <boost/test/included/unit_test.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 #include <boost/system/error_code.hpp>
 

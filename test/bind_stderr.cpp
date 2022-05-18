@@ -23,6 +23,7 @@
 #include <boost/process/async_pipe.hpp>
 
 #include <boost/process/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 #include <string>
 #include <istream>
