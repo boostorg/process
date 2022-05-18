@@ -1,0 +1,14 @@
+
+add_library(boost_process_v2_test_impl test_impl.cpp)
+target_link_libraries(boost_process_v2_test_impl Boost::unit_test_framework Boost::process)
+target_compile_definitions(boost_process_v2_test_impl PUBLIC -DBOOST_PROCESS_V2_SEPARATE_COMPILATION=1)
+target_include_directories(boost_process_v2_test_impl PUBLIC ../../include)
+enable_testing()
+
+add_executable(boost_process_v2_codecvt codecvt.cpp)
+target_link_libraries(boost_process_v2_codecvt boost_process_v2_test_impl)
+add_test(NAME boost_process_v2_codecvt COMMAND $<TARGET_FILE:boost_process_v2_codecvt>)
+
+add_executable(boost_process_v2_cstring_ref cstring_ref.cpp)
+target_link_libraries(boost_process_v2_cstring_ref boost_process_v2_test_impl)
+add_test(NAME boost_process_v2_cstring_ref COMMAND $<TARGET_FILE:boost_process_v2_cstring_ref>)
