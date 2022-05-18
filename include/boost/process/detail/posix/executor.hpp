@@ -26,6 +26,8 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
 
+#include <boost/core/ignore_unused.hpp>
+
 namespace boost { namespace process { namespace detail { namespace posix {
 
 template<typename Executor>

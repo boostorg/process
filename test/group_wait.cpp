@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(wait_group_test, *boost::unit_test::timeout(5))
     std::thread thr{
         [&]
         {
-            for (int i = 0; i < 50 && !done.load(); i++)
+            for (int i = 0; i < 100 && !done.load(); i++)
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
             BOOST_REQUIRE(done.load());
         }};

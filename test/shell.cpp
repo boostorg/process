@@ -48,6 +48,8 @@ BOOST_AUTO_TEST_CASE(shell_simple, *boost::unit_test::timeout(5))
     BOOST_TEST_CHECKPOINT("Finished read");
 
     BOOST_CHECK_EQUAL(s, "hello");
+    c.wait();
+    BOOST_CHECK_EQUAL(c.exit_code(), 0);
 }
 
 BOOST_AUTO_TEST_CASE(shell_error, *boost::unit_test::timeout(5))

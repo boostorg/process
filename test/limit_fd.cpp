@@ -98,7 +98,8 @@ BOOST_AUTO_TEST_CASE(leak_test, *boost::unit_test::timeout(5))
     int event_fd =::eventfd(0, EFD_CLOEXEC | EFD_NONBLOCK);
     BOOST_CHECK(!bt::is_stream_handle(event_fd , ec)); BOOST_CHECK_MESSAGE(!ec, ec.message());
 #endif
-    int dir_fd = ::dirfd(::opendir("."));
+    auto od = ::opendir(".");
+    int dir_fd = ::dirfd(od);
     BOOST_CHECK(!bt::is_stream_handle(dir_fd , ec)); BOOST_CHECK_MESSAGE(!ec, ec.message());
 #endif
 
@@ -115,6 +116,7 @@ BOOST_AUTO_TEST_CASE(leak_test, *boost::unit_test::timeout(5))
     BOOST_CHECK(bt::is_stream_handle(socket_to_handle(udp_socket.native_handle()), ec)); BOOST_CHECK_MESSAGE(!ec, ec.message());
     BOOST_CHECK(bt::is_stream_handle(std::move(ap).sink().  native_handle(), ec)); BOOST_CHECK_MESSAGE(!ec, ec.message());
     BOOST_CHECK(bt::is_stream_handle(std::move(ap).source().native_handle(), ec)); BOOST_CHECK_MESSAGE(!ec, ec.message());
+    ::closedir(od);
 }
 
 struct on_setup_t
