@@ -12,3 +12,7 @@ add_test(NAME boost_process_v2_codecvt COMMAND $<TARGET_FILE:boost_process_v2_co
 add_executable(boost_process_v2_cstring_ref cstring_ref.cpp)
 target_link_libraries(boost_process_v2_cstring_ref boost_process_v2_test_impl)
 add_test(NAME boost_process_v2_cstring_ref COMMAND $<TARGET_FILE:boost_process_v2_cstring_ref>)
+
+add_executable(boost_process_v2_pid pid.cpp)
+target_link_libraries(boost_process_v2_pid boost_process_v2_test_impl)
+add_test(NAME boost_process_v2_pid COMMAND $<TARGET_FILE:boost_process_v2_pid>)

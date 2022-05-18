@@ -14,6 +14,7 @@
 #endif
 
 #include <boost/process/v2/impl/error.ipp>
+#include <boost/process/v2/impl/pid.ipp>
 #include <boost/process/v2/detail/impl/last_error.ipp>
 #include <boost/process/v2/detail/impl/throw_error.ipp>
 #include <boost/process/v2/detail/impl/codecvt.ipp>
