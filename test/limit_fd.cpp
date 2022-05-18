@@ -27,6 +27,9 @@
 #if defined(BOOST_WINDOWS_API)
 #include <boost/winapi/get_current_thread.hpp>
 #include <boost/winapi/get_current_process.hpp>
+
+#elif defined(__APPLE__)
+#include <dirent.h>
 #endif
 
 namespace fs = boost::process::filesystem;
@@ -116,7 +119,9 @@ BOOST_AUTO_TEST_CASE(leak_test, *boost::unit_test::timeout(5))
     BOOST_CHECK(bt::is_stream_handle(socket_to_handle(udp_socket.native_handle()), ec)); BOOST_CHECK_MESSAGE(!ec, ec.message());
     BOOST_CHECK(bt::is_stream_handle(std::move(ap).sink().  native_handle(), ec)); BOOST_CHECK_MESSAGE(!ec, ec.message());
     BOOST_CHECK(bt::is_stream_handle(std::move(ap).source().native_handle(), ec)); BOOST_CHECK_MESSAGE(!ec, ec.message());
+#if !defined( BOOST_WINDOWS_API )
     ::closedir(od);
+#endif
 }
 
 struct on_setup_t

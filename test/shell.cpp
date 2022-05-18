@@ -23,6 +23,8 @@
 
 namespace bp = boost::process;
 
+#if !defined(__APPLE__)
+
 BOOST_AUTO_TEST_CASE(shell_simple, *boost::unit_test::timeout(5))
 {
     using boost::unit_test::framework::master_test_suite;
@@ -63,3 +65,5 @@ BOOST_AUTO_TEST_CASE(shell_error, *boost::unit_test::timeout(5))
     c2.wait();
     BOOST_CHECK(c2.exit_code() != 0);
 }
+
+#endif

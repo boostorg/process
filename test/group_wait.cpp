@@ -31,6 +31,9 @@
 
 namespace bp = boost::process;
 
+#if !defined(__APPLE__)
+
+
 BOOST_AUTO_TEST_CASE(wait_group_test, *boost::unit_test::timeout(5))
 {
     std::atomic<bool> done{false};
@@ -133,3 +136,5 @@ BOOST_AUTO_TEST_CASE(wait_group_test_timeout, *boost::unit_test::timeout(15))
     done.store(true);
     thr.join();
 }
+
+#endif
