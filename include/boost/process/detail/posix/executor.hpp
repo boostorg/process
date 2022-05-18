@@ -155,8 +155,8 @@ class executor
         const auto len = std::strlen(msg);
         int data[2] = {ec.value(), static_cast<int>(len + 1)};
 
-        ::write(_pipe_sink, &data[0], sizeof(int) * 2);
-        ::write(_pipe_sink, msg, len);
+        boost::ignore_unused(::write(_pipe_sink, &data[0], sizeof(int) * 2));
+        boost::ignore_unused(::write(_pipe_sink, msg, len));
     }
 
     void internal_error_handle(const std::error_code &ec, const char* msg, boost::mpl::true_ , boost::mpl::false_, boost::mpl::false_)
