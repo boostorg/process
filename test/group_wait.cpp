@@ -7,6 +7,7 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
+
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_IGNORE_SIGCHLD
 #include <boost/test/included/unit_test.hpp>
@@ -31,13 +32,15 @@
 
 namespace bp = boost::process;
 
+
+
 BOOST_AUTO_TEST_CASE(wait_group_test, *boost::unit_test::timeout(5))
 {
     std::atomic<bool> done{false};
     std::thread thr{
         [&]
         {
-            for (int i = 0; i < 50 && !done.load(); i++)
+            for (int i = 0; i < 100 && !done.load(); i++)
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
             BOOST_REQUIRE(done.load());
         }};
@@ -133,3 +136,6 @@ BOOST_AUTO_TEST_CASE(wait_group_test_timeout, *boost::unit_test::timeout(15))
     done.store(true);
     thr.join();
 }
+
+
+

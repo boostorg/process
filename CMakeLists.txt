@@ -6,12 +6,13 @@
 cmake_minimum_required(VERSION 3.5...3.16)
 
 project(boost_process VERSION "${BOOST_SUPERPROJECT_VERSION}" LANGUAGES CXX)
+find_package(Boost REQUIRED iostreams program_options filesystem system thread)
 
 add_library(boost_process INTERFACE)
 add_library(Boost::process ALIAS boost_process)
 
 target_include_directories(boost_process INTERFACE include)
-
+include_directories(include)
 target_link_libraries(boost_process
   INTERFACE
     Boost::algorithm

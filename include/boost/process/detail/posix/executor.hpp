@@ -26,6 +26,8 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
 
+#include <boost/core/ignore_unused.hpp>
+
 namespace boost { namespace process { namespace detail { namespace posix {
 
 template<typename Executor>
@@ -155,8 +157,8 @@ class executor
         const auto len = std::strlen(msg);
         int data[2] = {ec.value(), static_cast<int>(len + 1)};
 
-        ::write(_pipe_sink, &data[0], sizeof(int) * 2);
-        ::write(_pipe_sink, msg, len);
+        boost::ignore_unused(::write(_pipe_sink, &data[0], sizeof(int) * 2));
+        boost::ignore_unused(::write(_pipe_sink, msg, len));
     }
 
     void internal_error_handle(const std::error_code &ec, const char* msg, boost::mpl::true_ , boost::mpl::false_, boost::mpl::false_)
