@@ -1,18 +1,18 @@
 enable_testing()
 
 
-add_executable(sparring_partner sparring_partner.cpp )
-target_link_libraries(sparring_partner Boost::program_options Boost::filesystem Boost::iostreams)
+add_executable(boost_process_sparring_partner sparring_partner.cpp )
+target_link_libraries(boost_process_sparring_partner Boost::program_options Boost::filesystem Boost::iostreams)
 
-add_executable(exit_argc exit_argc.cpp)
+add_executable(boost_process_exit_argc exit_argc.cpp)
 
-add_executable(sub_launch sub_launcher.cpp)
-target_link_libraries(sparring_partner Boost::program_options Boost::filesystem Boost::iostreams Boost::system)
+add_executable(boost_process_sub_launch sub_launcher.cpp)
+target_link_libraries(boost_process_sub_launch Boost::program_options Boost::filesystem Boost::iostreams Boost::system)
 
 function(process_standalone_test name )
-    add_executable(${name} ${name}.cpp)
-    target_link_libraries(${name} Boost::system Boost::filesystem)
-    add_test(NAME ${name} COMMAND $<TARGET_FILE:${name}> )
+    add_executable(boost_process_${name} ${name}.cpp)
+    target_link_libraries(boost_process_${name} Boost::system Boost::filesystem)
+    add_test(NAME boost_process_${name} COMMAND $<TARGET_FILE:boost_process_${name}> )
 endfunction()
 
 process_standalone_test(environment)
@@ -20,18 +20,18 @@ process_standalone_test(async_pipe)
 process_standalone_test(pipe)
 
 function(process_sub_launch_test name )
-    add_executable(${name} ${name}.cpp)
-    target_link_libraries(${name} Boost::system Boost::filesystem Boost::thread)
-    add_test(NAME ${name} COMMAND $<TARGET_FILE:${name}> $<TARGET_FILE:sub_launch> )
+    add_executable(boost_process_${name} ${name}.cpp)
+    target_link_libraries(boost_process_${name} Boost::system Boost::filesystem Boost::thread)
+    add_test(NAME boost_process_${name} COMMAND $<TARGET_FILE:boost_process_${name}> $<TARGET_FILE:boost_process_sub_launch> )
 endfunction()
 
 process_sub_launch_test(group)
 process_sub_launch_test(group_wait)
 
 function(process_sparring_partner_launch name )
-    add_executable(${name} ${name}.cpp)
-    target_link_libraries(${name} Boost::system Boost::filesystem Boost::thread)
-    add_test(NAME ${name} COMMAND $<TARGET_FILE:${name}> $<TARGET_FILE:sparring_partner> )
+    add_executable(boost_process_${name} ${name}.cpp)
+    target_link_libraries(boost_process_${name} Boost::system Boost::filesystem Boost::thread)
+    add_test(NAME boost_process_${name} COMMAND $<TARGET_FILE:boost_process_${name}> $<TARGET_FILE:boost_process_sparring_partner> )
 endfunction()
 
 process_sparring_partner_launch(async)
