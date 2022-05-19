@@ -7,7 +7,6 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#if !defined(__APPLE__)
 
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_IGNORE_SIGCHLD
@@ -24,8 +23,6 @@
 #include <boost/process/shell.hpp>
 
 namespace bp = boost::process;
-
-#if !defined(__APPLE__)
 
 
 BOOST_AUTO_TEST_CASE(shell_simple, *boost::unit_test::timeout(5))
@@ -69,14 +66,3 @@ BOOST_AUTO_TEST_CASE(shell_error, *boost::unit_test::timeout(5))
     BOOST_CHECK(c2.exit_code() != 0);
 }
 
-
-#else
-
-int main(int argc, char * argv[])
-{
-    return 0;
-}
-
-#endif
-
-#endif
