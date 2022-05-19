@@ -72,3 +72,5 @@ process_sparring_partner_launch(on_exit2)
 process_sparring_partner_launch(on_exit3)
 process_sparring_partner_launch(posix_specific)
 process_sparring_partner_launch(windows_specific)
+
+add_subdirectory(v2)

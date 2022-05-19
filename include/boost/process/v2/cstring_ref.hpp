@@ -119,9 +119,10 @@ struct basic_cstring_ref
     {
         return basic_cstring_ref(view_ + pos);
     }
-    BOOST_CXX14_CONSTEXPR string_view_type substr(size_type pos , size_type n) const
+
+    BOOST_CONSTEXPR string_view_type substr(size_type pos, size_type length) const
     {
-        return string_view_type(view_ + pos, std::min(n, length() - pos));
+        return string_view_type(view_).substr(pos, length);
     }
 
     BOOST_CXX14_CONSTEXPR int compare(basic_cstring_ref x) const BOOST_NOEXCEPT
@@ -151,6 +152,15 @@ struct basic_cstring_ref
     {
         return traits_type::eq(view_[0], x);
     }
+
+    BOOST_CONSTEXPR size_type find( CharT ch, size_type pos = 0 ) const BOOST_NOEXCEPT
+    {
+        for (auto p = view_ + pos; *p != *null_char_(); p++)
+            if (traits_type::eq(*p, ch))
+                return p - view_;
+        return npos;
+    }
+
 
     friend BOOST_CXX14_CONSTEXPR bool operator==(basic_cstring_ref x, basic_cstring_ref y) BOOST_NOEXCEPT
     {

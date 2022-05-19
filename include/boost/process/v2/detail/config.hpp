@@ -9,6 +9,8 @@
 
 #include <asio/detail/config.hpp>
 #include <system_error>
+#include <filesystem>
+#include <iomanip>
 
 #if defined(ASIO_WINDOWS)
 #define BOOST_PROCESS_V2_WINDOWS 1
@@ -22,17 +24,27 @@
 #define BOOST_PROCESS_V2_END_NAMESPACE   }
 
 #else
-#include <boost/asio/detail/config.hpp>
+#include <boost/config.hpp>
+#include <boost/io/quoted.hpp>
 #include <boost/system/error_code.hpp>
 #include <boost/system/system_category.hpp>
 #include <boost/system/system_error.hpp>
 
-#if defined(BOOST_ASIO_WINDOWS)
+#if defined(BOOST_WINDOWS_API)
 #define BOOST_PROCESS_V2_WINDOWS 1
 #endif
 
-#if defined(BOOST_ASIO_HAS_UNISTD_H)
+#if defined(BOOST_POSIX_API)
 #define BOOST_PROCESS_V2_POSIX 1
+#endif
+
+#if defined(BOOST_PROCESS_USE_STD_FS)
+#include <filesystem>
+#include <optional>
+#else
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/operations.hpp>
+#include <boost/optional.hpp>
 #endif
 
 #define BOOST_PROCESS_V2_BEGIN_NAMESPACE \
@@ -57,6 +69,9 @@ using std::error_code ;
 using std::error_category ;
 using std::system_category ;
 using std::system_error ;
+namespace filesystem = std::filesystem;
+using std::quoted;
+using std::optional;
 
 #else
 
@@ -64,6 +79,14 @@ using boost::system::error_code ;
 using boost::system::error_category ;
 using boost::system::system_category ;
 using boost::system::system_error ;
+using boost::io::quoted;
+using boost::optional;
+
+#ifdef BOOST_PROCESS_USE_STD_FS
+namespace filesystem = std::filesystem;
+#else
+namespace filesystem = boost::filesystem;
+#endif
 
 #endif
 
