@@ -16,7 +16,7 @@
 
 namespace bp2 = boost::process::v2;
 
-template class bp2::basic_cstring_ref<char, std::char_traits<char>>;
+template struct bp2::basic_cstring_ref<char, std::char_traits<char>>;
 
 using char_type = bp2::basic_cstring_ref<wchar_t, std::char_traits<wchar_t>>::const_pointer;
 

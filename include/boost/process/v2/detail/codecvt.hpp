@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Klemens D. Morgenstern
+// Copyright (c) 2022 Klemens D. Morgenstern
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -19,7 +19,7 @@ namespace detail
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 
-BOOST_PROCESS_V2_DECL const std::codecvt< wchar_t, char, std::mbstate_t > & default_locale();
+BOOST_PROCESS_V2_DECL const std::codecvt< wchar_t, char, std::mbstate_t > & default_codecvt();
 
 #else
 
@@ -83,10 +83,10 @@ inline std::basic_string<char,Traits,Alloc> convert_chars(
     std::basic_string<char, Traits, Alloc> tmp(len, ' ', alloc);
 
     auto itr = begin;
-    auto out_itr = tmp.data();
-    auto e = f.out(mb, begin, end, itr, tmp.data(), tmp.data() + tmp.size(), out_itr);
+    auto out_itr = &tmp.front();
+    auto e = f.out(mb, begin, end, itr, &tmp.front(), &tmp.back() + 1, out_itr);
     ec.assign(e, error::get_codecvt_category());
-    tmp.resize(out_itr - tmp.data());
+    tmp.resize(out_itr - &tmp.front());
     return tmp;
 }
 
@@ -108,14 +108,14 @@ inline std::basic_string<wchar_t,Traits,Alloc> convert_chars(
                      : std::use_facet<std::codecvt< wchar_t, char, std::mbstate_t > >(loc);
 
     std::mbstate_t mb = std::mbstate_t();
-    const std::size_t len = f.length(mb, begin, end, std::numeric_limits<std::size_t>::max());
+    const std::size_t len = f.length(mb, begin, end, (std::numeric_limits<std::size_t>::max)());
 
     std::basic_string<wchar_t,Traits,Alloc> res(len, L' ', alloc);
     auto itr = begin;
-    auto out_itr = res.data();
-    auto e = f.in(mb, begin, end, itr, res.data(), res.data() + res.size(), out_itr);
+    auto out_itr = &res.front();
+    auto e = f.in(mb, begin, end, itr, &res.front(), &res.back() + 1, out_itr);
     ec.assign(e, error::get_codecvt_category());
-    res.resize(out_itr - res.data());
+    res.resize(out_itr - &res.front());
     return res;
 }
 
@@ -184,13 +184,13 @@ inline std::basic_string<char8_t,Traits,Alloc> convert_chars(
   std::basic_string<char8_t, Traits, Alloc> tmp(len, ' ', alloc);
 
   auto itr = begin;
-  auto out_itr = tmp.data();
+  auto out_itr = &tmp.front();
   auto e = f.out(mb, begin, end, itr,
-            reinterpret_cast<char*>(tmp.data()),
-            reinterpret_cast<char*>(tmp.data() + tmp.size()),
+            reinterpret_cast<char*>(&tmp.front()),
+            reinterpret_cast<char*>(&tmp.back()),
             reinterpret_cast<char*&>(out_itr));
   ec.assign(e, error::get_codecvt_category());
-  tmp.resize(out_itr - tmp.data());
+  tmp.resize(out_itr - &tmp.front());
 
   return tmp;
 }
@@ -214,14 +214,14 @@ inline std::basic_string<char,Traits,Alloc> convert_chars(
   std::basic_string<char, Traits, Alloc> tmp(len, ' ', alloc);
 
   auto itr = begin;
-  auto out_itr = tmp.data();
+  auto out_itr = &tmp.front();
   auto e = f.out(mb, begin, end, itr,
-                 reinterpret_cast<char8_t*>(tmp.data()),
-                 reinterpret_cast<char8_t*>(tmp.data() + tmp.size()),
+                 reinterpret_cast<char8_t*>(&tmp.front()),
+                 reinterpret_cast<char8_t*>(&tmp.back()),
                  reinterpret_cast<char8_t *&>(out_itr));
 
   ec.assign(e, error::get_codecvt_category());
-  tmp.resize(out_itr - tmp.data());
+  tmp.resize(out_itr - &tmp.front());
 
   return tmp;
 }
@@ -245,14 +245,14 @@ inline std::basic_string<char,Traits,Alloc> convert_chars(
   std::basic_string<char, Traits, Alloc> tmp(len, ' ', alloc);
 
   auto itr = begin;
-  auto out_itr = tmp.data();
+  auto out_itr = &tmp.front();
   auto e = f.out(mb, begin, end, itr,
-                 reinterpret_cast<char8_t*>(tmp.data()),
-                 reinterpret_cast<char8_t*>(tmp.data() + tmp.size()),
+                 reinterpret_cast<char8_t*>(&tmp.front()),
+                 reinterpret_cast<char8_t*>(&tmp.back()),
                  reinterpret_cast<char8_t *&>(out_itr));
   ec.assign(e, error::get_codecvt_category());
 
-  tmp.resize(out_itr - tmp.data());
+  tmp.resize(out_itr - &tmp.front());
 
   return tmp;
 }
@@ -279,14 +279,14 @@ inline std::basic_string<char16_t,Traits,Alloc> convert_chars(
 
   std::basic_string<char16_t,Traits,Alloc> res(len, u' ', alloc);
   auto itr = begin;
-  auto out_itr = res.data();
+  auto out_itr = &res.front();
   auto e = f.in(mb,
                 reinterpret_cast<const char8_t*>(begin),
                 reinterpret_cast<const char8_t*>(end),
                 reinterpret_cast<const char8_t*&>(itr),
-                res.data(), res.data() + res.size(), out_itr);
+                &res.front(), &res.back() + 1, out_itr);
   ec.assign(e, error::get_codecvt_category());
-  res.resize(out_itr - res.data());
+  res.resize(out_itr - &res.front());
   return res;
 }
 
@@ -313,15 +313,15 @@ inline std::basic_string<char32_t,Traits,Alloc> convert_chars(
 
   std::basic_string<char32_t,Traits,Alloc> res(len, U' ', alloc);
   auto itr = begin;
-  auto out_itr = res.data();
+  auto out_itr = &res.front();
   auto e = f.in(mb,
                 reinterpret_cast<const char8_t*>(begin),
                 reinterpret_cast<const char8_t*>(end),
                 reinterpret_cast<const char8_t*&>(itr),
-                res.data(), res.data() + res.size(), out_itr);
+                &res.front(), &res.back() + 1, out_itr);
   ec.assign(e, error::get_codecvt_category());
 
-  res.resize(out_itr - res.data());
+  res.resize(out_itr - &res.front());
   return res;
 }
 
@@ -347,11 +347,11 @@ inline std::basic_string<char,Traits,Alloc> convert_chars(
     std::basic_string<char, Traits, Alloc> tmp(len, ' ', alloc);
 
     auto itr = begin;
-    auto out_itr = tmp.data();
-    auto e = f.out(mb, begin, end, itr, tmp.data(), tmp.data() + tmp.size(), out_itr);
+    auto out_itr = &tmp.front();
+    auto e = f.out(mb, begin, end, itr, &tmp.front(), &tmp.back() + 1, out_itr);
 
     ec.assign(e, error::get_codecvt_category());
-    tmp.resize(out_itr - tmp.data());
+    tmp.resize(out_itr - &tmp.front());
 
     return tmp;
 }
@@ -375,11 +375,11 @@ inline std::basic_string<char,Traits,Alloc> convert_chars(
     std::basic_string<char, Traits, Alloc> tmp(len, ' ', alloc);
 
     auto itr = begin;
-    auto out_itr = tmp.data();
-    auto e = f.out(mb, begin, end, itr, tmp.data(), tmp.data() + tmp.size(), out_itr);
+    auto out_itr = &tmp.front();
+    auto e = f.out(mb, begin, end, itr, &tmp.front(), &tmp.back() + 1, out_itr);
     ec.assign(e, error::get_codecvt_category());
 
-    tmp.resize(out_itr - tmp.data());
+    tmp.resize(out_itr - &tmp.front());
 
     return tmp;
 }
@@ -400,14 +400,13 @@ inline std::basic_string<char16_t,Traits,Alloc> convert_chars(
     const auto & f = std::use_facet<std::codecvt< char16_t, char, std::mbstate_t > >(loc);
 
     std::mbstate_t mb = std::mbstate_t();
-    const std::size_t len = f.length(mb, begin, end, std::numeric_limits<std::size_t>::max());
-
+    const std::size_t len = f.length(mb, begin, end, (std::numeric_limits<std::size_t>::max)());
     std::basic_string<char16_t,Traits,Alloc> res(len, u' ', alloc);
     auto itr = begin;
-    auto out_itr = res.data();
-    auto e = f.in(mb, begin, end, itr, res.data(), res.data() + res.size(), out_itr);
+    auto out_itr = &res.front();
+    auto e = f.in(mb, begin, end, itr, &res.front(), &res.back() + 1, out_itr);
     ec.assign(e, error::get_codecvt_category());
-    res.resize(out_itr - res.data());
+    res.resize(out_itr - &res.front());
     return res;
 }
 
@@ -427,15 +426,15 @@ inline std::basic_string<char32_t,Traits,Alloc> convert_chars(
     const auto & f = std::use_facet<std::codecvt< char32_t, char, std::mbstate_t > >(loc);
 
     std::mbstate_t mb = std::mbstate_t();
-    const std::size_t len = f.length(mb, begin, end, std::numeric_limits<std::size_t>::max());
+    const std::size_t len = f.length(mb, begin, end, (std::numeric_limits<std::size_t>::max)());
 
     std::basic_string<char32_t,Traits,Alloc> res(len, U' ', alloc);
     auto itr = begin;
-    auto out_itr = res.data();
-    auto e = f.in(mb, begin, end, itr, res.data(), res.data() + res.size(), out_itr);
+    auto out_itr = &res.front();
+    auto e = f.in(mb, begin, end, itr, &res.front(), &res.back() + 1, out_itr);
     ec.assign(e, error::get_codecvt_category());
 
-    res.resize(out_itr - res.data());
+    res.resize(out_itr - &res.front());
     return res;
 }
 
@@ -459,7 +458,7 @@ inline std::basic_string<char16_t,Traits,Alloc> convert_chars(
     if (ec)
         return u"";
 
-    return convert_chars<Traits>(ec, tmp.data(), tmp.data() + tmp.size(), u' ', alloc, loc);
+    return convert_chars<Traits>(ec, &tmp.front(), &tmp.back() + 1, u' ', alloc, loc);
 }
 
 
@@ -479,7 +478,7 @@ inline std::basic_string<char32_t,Traits,Alloc> convert_chars(
     auto tmp = convert_chars<std::char_traits<char>>(ec, begin, end, ' ', rebind_alloc(alloc), loc);
     if (ec)
         return U"";
-    return convert_chars<Traits>(ec, tmp.data(), tmp.data() + tmp.size(), U' ', alloc, loc);
+    return convert_chars<Traits>(ec, &tmp.front(), &tmp.back() + 1, U' ', alloc, loc);
 }
 
 
@@ -499,7 +498,7 @@ inline std::basic_string<wchar_t,Traits,Alloc> convert_chars(
     auto tmp = convert_chars<std::char_traits<char>>(ec, begin, end, ' ', rebind_alloc(alloc), loc);
     if (ec)
         return L"";
-    return convert_chars<Traits>(ec, tmp.data(), tmp.data() + tmp.size(), L' ', alloc, loc);
+    return convert_chars<Traits>(ec, &tmp.front(), &tmp.back() + 1, L' ', alloc, loc);
 }
 
 
@@ -516,7 +515,7 @@ inline std::basic_string<wchar_t,Traits,Alloc> convert_chars(
     auto tmp = convert_chars<std::char_traits<char>>(ec, begin, end, ' ', rebind_alloc(alloc), loc);
     if (ec)
         return L"";
-    return convert_chars<Traits>(ec, tmp.data(), tmp.data() + tmp.size(), L' ', alloc, loc);
+    return convert_chars<Traits>(ec, &tmp.front(), &tmp.back() + 1, L' ', alloc, loc);
 }
 
 

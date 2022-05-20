@@ -127,9 +127,18 @@ class windows_codecvt
        char* /*from*/, char* /*to*/, char* & /*next*/) const override { return ok; }
 
   int do_length(std::mbstate_t&,
-               const char* from, const char* from_end, std::size_t /*max*/) const override
+               const char* from, const char* from_end, std::size_t max) const override
   {
-    return std::distance(from, from_end);
+    auto codepage =
+#if !defined(BOOST_NO_ANSI_APIS)
+                   ::AreFileApisANSI() ? CP_ACP :
+#endif
+                     CP_OEMCP;
+    const auto res = ::MultiByteToWideChar(codepage, MB_PRECOMPOSED,
+                                           from, static_cast<int>(from_end - from),
+                                           nullptr, 0);
+
+    return static_cast<int>((std::min)(static_cast<std::size_t>(res), max));
   }
 
    int do_max_length() const noexcept override { return 0; }
@@ -137,7 +146,7 @@ class windows_codecvt
 
 BOOST_PROCESS_V2_DECL const std::codecvt< wchar_t, char, std::mbstate_t > & default_codecvt()
 {
-  const static const windows_codecvt cvt{1};
+  const static windows_codecvt cvt{1};
   return cvt;
 }
 

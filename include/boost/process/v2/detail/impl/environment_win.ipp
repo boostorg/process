@@ -8,36 +8,33 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#ifndef BOOST_PROCESS_V2_DETAIL_ENVIRONMENT_WIN_HPP
-#define BOOST_PROCESS_V2_DETAIL_ENVIRONMENT_WIN_HPP
+#ifndef BOOST_PROCESS_V2_DETAIL_IMPL_ENVIRONMENT_WIN_IPP
+#define BOOST_PROCESS_V2_DETAIL_IMPL_ENVIRONMENT_WIN_IPP
 
 
-#if defined(_MSC_VER) && (_MSC_VER >= 1200)
-# pragma once
-#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
-
-#include "asio/detail/config.hpp"
+#include <boost/process/v2/detail/config.hpp>
+#include <boost/process/v2/detail/environment_win.hpp>
+#include <boost/process/v2/detail/impl/environment.ipp>
+#include <boost/process/v2/detail/last_error.hpp>
 
 #include <algorithm>
 #include <cwctype>
 #include <cstring>
+
 #include <shellapi.h>
 
-#include "asio/cstring_view.hpp"
-#include "asio/error.hpp"
+#include <boost/process/v2/cstring_ref.hpp>
+#include <boost/process/v2/error.hpp>
 
-#include "asio/detail/push_options.hpp"
+BOOST_PROCESS_V2_BEGIN_NAMESPACE
 
-
-namespace asio
-{
 namespace environment
 {
 namespace detail
 {
 
 std::basic_string<char_type, value_char_traits<char_type>> get(
-        ASIO_BASIC_CSTRING_VIEW_PARAM(char_type, key_char_traits<char_type>) key,
+        basic_cstring_ref<char_type, key_char_traits<char_type>> key,
         error_code & ec)
 {
   std::basic_string<char_type, value_char_traits<char_type>> buf;
@@ -46,36 +43,36 @@ std::basic_string<char_type, value_char_traits<char_type>> get(
   do
   {
     buf.resize(buf.size() + 4096);
-    size = ::GetEnvironmentVariableW(key.c_str(), buf.data(), buf.size());
+    size = ::GetEnvironmentVariableW(key.c_str(), &buf.front(), static_cast<DWORD>(buf.size()));
   }
   while (size == buf.size());
 
   buf.resize(size);
 
   if (buf.size() == 0)
-    ec.assign(::GetLastError(), asio::error::get_system_category());
+    ec = ::BOOST_PROCESS_V2_NAMESPACE::detail::get_last_error();
 
   return buf;
 }
 
-void set(ASIO_BASIC_CSTRING_VIEW_PARAM(char_type,   key_char_traits<char_type>)   key,
-         ASIO_BASIC_CSTRING_VIEW_PARAM(char_type, value_char_traits<char_type>) value,
+void set(basic_cstring_ref<char_type,   key_char_traits<char_type>>   key,
+         basic_cstring_ref<char_type, value_char_traits<char_type>> value,
          error_code & ec)
 {
   if (!::SetEnvironmentVariableW(key.c_str(), value.c_str()))
-    ec.assign(errno, asio::error::get_system_category());
+    ec = ::BOOST_PROCESS_V2_NAMESPACE::detail::get_last_error();
 }
 
-void unset(ASIO_BASIC_CSTRING_VIEW_PARAM(char_type, key_char_traits<char_type>) key,
+void unset(basic_cstring_ref<char_type, key_char_traits<char_type>> key,
            error_code & ec)
 {
   if (!::SetEnvironmentVariableW(key.c_str(), nullptr))
-    ec.assign(errno, asio::error::get_system_category());
+    ec = ::BOOST_PROCESS_V2_NAMESPACE::detail::get_last_error();
 }
 
 
 std::basic_string<char, value_char_traits<char>> get(
-        ASIO_BASIC_CSTRING_VIEW_PARAM(char, key_char_traits<char>) key,
+        basic_cstring_ref<char, key_char_traits<char>> key,
         error_code & ec)
 {
   std::basic_string<char, value_char_traits<char>> buf;
@@ -84,31 +81,31 @@ std::basic_string<char, value_char_traits<char>> get(
   do
   {
     buf.resize(buf.size() + 4096);
-    size = ::GetEnvironmentVariableA(key.c_str(), buf.data(), buf.size());
+    size = ::GetEnvironmentVariableA(key.c_str(), &buf.front(), static_cast<DWORD>(buf.size()));
   }
   while (size == buf.size());
 
   buf.resize(size);
 
   if (buf.size() == 0)
-    ec.assign(::GetLastError(), asio::error::get_system_category());
+    ec = ::BOOST_PROCESS_V2_NAMESPACE::detail::get_last_error();
 
   return buf;
 }
 
-void set(ASIO_BASIC_CSTRING_VIEW_PARAM(char,   key_char_traits<char>)   key,
-         ASIO_BASIC_CSTRING_VIEW_PARAM(char, value_char_traits<char>) value,
+void set(basic_cstring_ref<char,   key_char_traits<char>>   key,
+         basic_cstring_ref<char, value_char_traits<char>> value,
          error_code & ec)
 {
   if (!::SetEnvironmentVariableA(key.c_str(), value.c_str()))
-    ec.assign(errno, asio::error::get_system_category());
+    ec = ::BOOST_PROCESS_V2_NAMESPACE::detail::get_last_error();
 }
 
-void unset(ASIO_BASIC_CSTRING_VIEW_PARAM(char, key_char_traits<char>) key,
+void unset(basic_cstring_ref<char, key_char_traits<char>> key,
            error_code & ec)
 {
   if (!::SetEnvironmentVariableA(key.c_str(), nullptr))
-    ec.assign(errno, asio::error::get_system_category());
+    ec = ::BOOST_PROCESS_V2_NAMESPACE::detail::get_last_error();
 }
 
 
@@ -133,15 +130,13 @@ native_iterator find_end(native_handle_type nh)
   return ++ ++nh;
 }
 
-#if ASIO_HAS_FILESYSTEM
-ASIO_DECL bool is_executable(const asio::filesystem::path & pth, error_code & ec)
+bool is_executable(const filesystem::path & pth, error_code & ec)
 {
-    return asio::filesystem::is_regular_file(pth, ec) && SHGetFileInfoW(pth.native().c_str(), 0,0,0, SHGFI_EXETYPE);
-}
-#endif
-
-}
-}
+    return filesystem::is_regular_file(pth, ec) && SHGetFileInfoW(pth.native().c_str(), 0,0,0, SHGFI_EXETYPE);
 }
 
-#endif //BOOST_PROCESS_V2_DETAIL_ENVIRONMENT_WIN_HPP
+}
+}
+BOOST_PROCESS_V2_END_NAMESPACE
+
+#endif //BOOST_PROCESS_V2_DETAIL_IMPL_ENVIRONMENT_WIN_IPP

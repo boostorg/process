@@ -2,8 +2,8 @@
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-#ifndef BOOST_PROCESS_V2_DETAIL_IMPL_ENVIRONMENT_HPP
-#define BOOST_PROCESS_V2_DETAIL_IMPL_ENVIRONMENT_HPP
+#ifndef BOOST_PROCESS_V2_DETAIL_IMPL_ENVIRONMENT_IPP
+#define BOOST_PROCESS_V2_DETAIL_IMPL_ENVIRONMENT_IPP
 
 #include <boost/process/v2/detail/config.hpp>
 
@@ -15,4 +15,4 @@
 #error Operating System not supported.
 #endif
 
-#endif //BOOST_PROCESS_V2_DETAIL_IMPL_ENVIRONMENT_HPP
+#endif //BOOST_PROCESS_V2_DETAIL_IMPL_ENVIRONMENT_IPP

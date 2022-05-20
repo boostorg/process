@@ -20,6 +20,7 @@ namespace environment
 {
 
 using char_type = wchar_t;
+
 template<typename Char>
 struct key_char_traits
 {
@@ -148,7 +149,7 @@ namespace detail
 {
 
 BOOST_PROCESS_V2_DECL
-basic_cstring_ref<wchar_t, value_char_traits<wchar_t>> get(
+std::basic_string<wchar_t, value_char_traits<wchar_t>> get(
         basic_cstring_ref<wchar_t, key_char_traits<wchar_t>> key,
         error_code & ec);
 
@@ -163,7 +164,7 @@ void unset(basic_cstring_ref<wchar_t, key_char_traits<wchar_t>> key,
 
 
 BOOST_PROCESS_V2_DECL
-basic_cstring_ref<char, value_char_traits<char>> get(
+std::basic_string<char, value_char_traits<char>> get(
         basic_cstring_ref<char, key_char_traits<char>> key,
         error_code & ec);
 
@@ -176,7 +177,7 @@ BOOST_PROCESS_V2_DECL
 void unset(basic_cstring_ref<char, key_char_traits<char>> key,
            error_code & ec);
 
-inline native_handle_type load_native_handle();
+BOOST_PROCESS_V2_DECL native_handle_type load_native_handle();
 struct native_handle_deleter
 {
   BOOST_PROCESS_V2_DECL void operator()(native_handle_type nh) const;
@@ -187,6 +188,7 @@ inline const char_type * dereference(native_iterator iterator) {return iterator;
 BOOST_PROCESS_V2_DECL native_iterator next(native_handle_type nh);
 BOOST_PROCESS_V2_DECL native_iterator find_end(native_handle_type nh);
 BOOST_PROCESS_V2_DECL bool is_executable(const filesystem::path & pth, error_code & ec);
+}
 
 }
 BOOST_PROCESS_V2_END_NAMESPACE

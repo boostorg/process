@@ -63,7 +63,7 @@ struct basic_cstring_ref
                     >::value>::type>
     BOOST_CONSTEXPR basic_cstring_ref(Source && src) : view_(src.c_str()) {}
 
-    BOOST_CONSTEXPR typename std::basic_string_view<value_type, Traits>::const_pointer c_str() const BOOST_NOEXCEPT
+    BOOST_CONSTEXPR typename basic_string_view<value_type, Traits>::const_pointer c_str() const BOOST_NOEXCEPT
     {
         return this->data();
     }
@@ -95,7 +95,7 @@ struct basic_cstring_ref
 
     BOOST_CONSTEXPR size_type size() const BOOST_NOEXCEPT {return length(); }
     BOOST_CONSTEXPR size_type length() const BOOST_NOEXCEPT {return traits_type::length(view_); }
-    BOOST_CONSTEXPR size_type max_size() const BOOST_NOEXCEPT {return std::numeric_limits<int64_t>::max() / sizeof(CharT); }
+    BOOST_CONSTEXPR size_type max_size() const BOOST_NOEXCEPT {return (std::numeric_limits<std::size_t>::max)() / sizeof(CharT); }
     BOOST_ATTRIBUTE_NODISCARD BOOST_CONSTEXPR bool empty() const BOOST_NOEXCEPT {return *view_ == *detail::null_char_(CharT{}); }
 
     BOOST_CONSTEXPR const_reference operator[](size_type pos) const  {return view_[pos] ;}

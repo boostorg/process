@@ -34,7 +34,7 @@ basic_cstring_ref<char_type, value_char_traits<char>> get(
     auto res = ::getenv(key.c_str());
     if (res == nullptr)
     {
-        ec = process::v2::detail::get_last_error();
+        ec = ::BOOST_PROCESS_V2_NAMESPACE::detail::get_last_error();
         return {};
     }
     return res;
@@ -45,13 +45,13 @@ void set(basic_cstring_ref<char_type,   key_char_traits<char_type>>   key,
                 error_code & ec)
 {
     if (::setenv(key.c_str(), value.c_str(), true))
-        ec = process::v2::detail::get_last_error();
+        ec = ::BOOST_PROCESS_V2_NAMESPACE::detail::get_last_error();
 }
 
 void unset(basic_cstring_ref<char_type, key_char_traits<char_type>> key, error_code & ec)
 {
     if (::unsetenv(key.c_str()))
-        ec = process::v2::detail::get_last_error();
+        ec = ::BOOST_PROCESS_V2_NAMESPACE::detail::get_last_error();
 }
 
 

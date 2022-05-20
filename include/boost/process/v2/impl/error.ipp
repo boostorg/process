@@ -42,7 +42,7 @@ struct codecvt_category : public error_category
 
 } // namespace detail
 
-const error_category& get_codecvt_category()
+BOOST_PROCESS_V2_DECL const error_category& get_codecvt_category()
 {
     static detail::codecvt_category instance;
     return instance;

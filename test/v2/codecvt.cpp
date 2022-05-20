@@ -62,8 +62,8 @@ BOOST_AUTO_TEST_CASE(test_codecvt)
     BOOST_CHECK(boost::process::v2::detail::convert_chars(in8_t, end(in8_t),   ' ') == in);
     BOOST_CHECK(boost::process::v2::detail::convert_chars(in,    end(in),    u8' ') == in8_t);
 
-    BOOST_CHECK_EQUAL(boost::process::v2::detail::convert_chars(in8_t, end(in8_t),  L' ') == win_t);
-    BOOST_CHECK_EQUAL(boost::process::v2::detail::convert_chars(win_t, end(win_t), u8' ') ==  in8_t);
+    BOOST_CHECK(boost::process::v2::detail::convert_chars(in8_t, end(in8_t),  L' ') == win_t);
+    BOOST_CHECK(boost::process::v2::detail::convert_chars(win_t, end(win_t), u8' ') ==  in8_t);
 #endif
 
 }

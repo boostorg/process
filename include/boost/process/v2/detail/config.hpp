@@ -14,6 +14,11 @@
 
 #if defined(ASIO_WINDOWS)
 #define BOOST_PROCESS_V2_WINDOWS 1
+
+// Windows: suppress definition of "min" and "max" macros.
+#if !defined(NOMINMAX)
+# define NOMINMAX 1
+#endif
 #endif
 
 #if defined(ASIO_HAS_UNISTD_H)
@@ -22,6 +27,7 @@
 
 #define BOOST_PROCESS_V2_BEGIN_NAMESPACE namespace process_v2 {
 #define BOOST_PROCESS_V2_END_NAMESPACE   }
+#define BOOST_PROCESS_V2_NAMESPACE process_v2
 
 #else
 #include <boost/config.hpp>
@@ -32,6 +38,12 @@
 
 #if defined(BOOST_WINDOWS_API)
 #define BOOST_PROCESS_V2_WINDOWS 1
+
+// Windows: suppress definition of "min" and "max" macros.
+#if !defined(NOMINMAX)
+# define NOMINMAX 1
+#endif
+
 #endif
 
 #if defined(BOOST_POSIX_API)
@@ -47,10 +59,9 @@
 #include <boost/optional.hpp>
 #endif
 
-#define BOOST_PROCESS_V2_BEGIN_NAMESPACE \
-namespace boost { namespace process { namespace v2 {
-
+#define BOOST_PROCESS_V2_BEGIN_NAMESPACE namespace boost { namespace process { namespace v2 {
 #define BOOST_PROCESS_V2_END_NAMESPACE  } } }
+#define BOOST_PROCESS_V2_NAMESPACE boost::process::v2
 
 #endif
 

@@ -8,6 +8,7 @@
 #include <boost/process/v2/detail/config.hpp>
 
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
+
 namespace detail {
 
 BOOST_PROCESS_V2_DECL error_code get_last_error();
