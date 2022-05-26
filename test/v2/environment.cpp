@@ -116,7 +116,6 @@ BOOST_AUTO_TEST_CASE(wenvironment)
     for (const auto ke : bpe::current())
         BOOST_CHECK_EQUAL(bpe::get(ke.get<0>()), ke.get<1>());
 
-    BOOST_CHECK(BOOST_PROCESS_V2_WINDOWS);
 #if defined(BOOST_PROCESS_V2_WINDOWS)
     BOOST_CHECK_EQUAL(bpe::key(L"FOO"), bpe::key_view(L"Foo"));
     BOOST_CHECK(bpe::key(L"FOO") == std::wstring(L"Foo"));

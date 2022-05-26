@@ -677,7 +677,7 @@ struct value
            decltype(source.data()) = nullptr,
     decltype(source.size()) = 0u)
     : value_(boost::process::v2::detail::conv_string<char_type, traits_type>(
-        source.data(), source.data() + source.size()))
+        source.data(), source.size()))
     {
     }
 
@@ -719,7 +719,7 @@ struct value
     value& assign( const Source& source )
     {
       value_ = boost::process::v2::detail::conv_string<char_type, traits_type>(
-          source.data(), source.data() + source.size());
+          source.data(), source.size());
       return *this;
     }
 
@@ -1231,7 +1231,7 @@ struct current_view
 inline current_view current() {return current_view();}
 
 template<typename Environment = current_view>
-inline boost::process::v2::filesystem::path home(Environment && env = view())
+inline boost::process::v2::filesystem::path home(Environment && env = current())
 {
   auto find_key = [&](key_view ky) -> value
   {
@@ -1259,7 +1259,7 @@ inline boost::process::v2::filesystem::path home(Environment && env = view())
 template<typename Environment = current_view>
 inline boost::process::v2::filesystem::path find_executable(
                                              boost::process::v2::filesystem::path name,
-                                             Environment && env = view())
+                                             Environment && env = current())
 {
     auto find_key = [&](key_view ky) -> value_view
                     {
