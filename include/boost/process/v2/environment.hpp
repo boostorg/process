@@ -465,13 +465,6 @@ struct key
 
     explicit key(key_view kv) : value_(kv.native_string()) {}
 
-    template< class Source >
-    key( const Source& source, const std::locale& loc,
-         decltype(source.data()) = nullptr)
-        : value_(
-            boost::process::v2::detail::conv_string<char_type, traits_type>(source.data(), source.size()))
-    {
-    }
 
     template< class Source >
     key( const Source& source,
@@ -491,7 +484,7 @@ struct key
 
     template< class InputIt >
     key( InputIt first, InputIt last)
-        : key(std::basic_string(first, last))
+        : key(std::basic_string<typename std::iterator_traits<std::decay_t<InputIt>>::value_type>(first, last))
     {
     }
 
@@ -526,7 +519,8 @@ struct key
     template< class InputIt >
     key& assign( InputIt first, InputIt last )
     {
-        return assign(std::string(first, last));
+
+        return assign(std::basic_string<typename std::iterator_traits<std::decay_t<InputIt>>::value_type>(first, last));
     }
 
     void clear() {value_.clear();}
@@ -695,7 +689,7 @@ struct value
 
     template< class InputIt >
     value( InputIt first, InputIt last)
-            : value(std::basic_string(first, last))
+            : value(std::basic_string<typename std::iterator_traits<std::decay_t<InputIt>>::value_type>(first, last))
     {
     }
 
@@ -732,7 +726,7 @@ struct value
     template< class InputIt >
     value& assign( InputIt first, InputIt last )
     {
-        return assign(std::string(first, last));
+        return assign(std::basic_string<typename std::iterator_traits<std::decay_t<InputIt>>::value_type>(first, last));
     }
 
     void push_back(const value & sv)
@@ -940,7 +934,7 @@ struct key_value_pair
 
     template< class InputIt , typename std::iterator_traits<InputIt>::iterator_category>
     key_value_pair( InputIt first, InputIt last )
-            : key_value_pair(std::basic_string(first, last))
+            : key_value_pair(std::basic_string<typename std::iterator_traits<std::decay_t<InputIt>>::value_type>(first, last))
     {
     }
 
@@ -978,13 +972,7 @@ struct key_value_pair
     template< class InputIt >
     key_value_pair& assign( InputIt first, InputIt last )
     {
-        return assign(std::string(first, last));
-    }
-
-    template< class InputIt >
-    key_value_pair& assign( InputIt first, InputIt last, const std::locale & loc  )
-    {
-        return assign(std::string(first, last), loc);
+        return assign(std::basic_string<typename std::iterator_traits<std::decay_t<InputIt>>::value_type>(first, last));
     }
 
     void clear() {value_.clear();}
