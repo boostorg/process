@@ -14,6 +14,8 @@
 #include <boost/process/v2/detail/config.hpp>
 #include <boost/process/v2/cstring_ref.hpp>
 
+#include <cwctype>
+
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
 
 namespace environment
@@ -30,11 +32,11 @@ struct key_char_traits
   typedef typename std::char_traits<char_type>::pos_type   pos_type;
   typedef typename std::char_traits<char_type>::state_type state_type;
 
-  BOOST_CONSTEXPR static char    to_upper(char c)    {return std::toupper(to_int_type(c));}
-  BOOST_CONSTEXPR static wchar_t to_upper(wchar_t c) {return std::towupper(to_int_type(c));}
+  BOOST_CONSTEXPR static char    to_lower(char c)    {return std::tolower(to_int_type(c));}
+  BOOST_CONSTEXPR static wchar_t to_lower(wchar_t c) {return std::towlower(to_int_type(c));}
 
-  BOOST_CONSTEXPR static int_type to_upper(int_type i, char )   {return std::toupper(i);}
-  BOOST_CONSTEXPR static int_type to_upper(int_type i, wchar_t) {return std::towupper(i);}
+  BOOST_CONSTEXPR static int_type to_lower(int_type i, char )   {return std::tolower(i);}
+  BOOST_CONSTEXPR static int_type to_lower(int_type i, wchar_t) {return std::towlower(i);}
 
 
   BOOST_CONSTEXPR static
@@ -46,13 +48,13 @@ struct key_char_traits
   BOOST_CONSTEXPR static
   bool eq(char_type c1, char_type c2) BOOST_NOEXCEPT
   {
-    return to_upper(c1) == to_upper(c2);
+    return to_lower(c1) == to_lower(c2);
   }
 
   BOOST_CONSTEXPR static
   bool lt(char_type c1, char_type c2) BOOST_NOEXCEPT
   {
-    return to_upper(c1) < to_upper(c2);
+    return to_lower(c1) < to_lower(c2);
   }
 
   BOOST_CONSTEXPR static
@@ -61,8 +63,8 @@ struct key_char_traits
     auto itrs = std::mismatch(s1, s1 + n, s2, &eq);
     if (itrs.first == (s1 + n))
       return 0;
-    auto c1 = to_upper(*itrs.first);
-    auto c2 = to_upper(*itrs.second);
+    auto c1 = to_lower(*itrs.first);
+    auto c2 = to_lower(*itrs.second);
 
     return (c1 < c2 ) ? -1 : 1;
   }
@@ -73,8 +75,8 @@ struct key_char_traits
   BOOST_CONSTEXPR static
   const char_type* find(const char_type* s, size_t n, const char_type& a) BOOST_NOEXCEPT
   {
-    const char_type u = to_upper(a);
-    return std::find_if(s, s + n, [u](char_type c){return to_upper(c) == u;});
+    const char_type u = to_lower(a);
+    return std::find_if(s, s + n, [u](char_type c){return to_lower(c) == u;});
   }
 
   BOOST_CONSTEXPR static
@@ -126,7 +128,7 @@ struct key_char_traits
   BOOST_CONSTEXPR static
   bool eq_int_type(int_type c1, int_type c2) BOOST_NOEXCEPT
   {
-    return to_upper(c1, char_type()) == to_upper(c2, char_type());
+    return to_lower(c1, char_type()) == to_lower(c2, char_type());
   }
 
   BOOST_CONSTEXPR static inline int_type eof() BOOST_NOEXCEPT
@@ -180,12 +182,14 @@ void unset(basic_cstring_ref<char, key_char_traits<char>> key,
 BOOST_PROCESS_V2_DECL native_handle_type load_native_handle();
 struct native_handle_deleter
 {
+  native_handle_deleter() = default;
+  native_handle_deleter(const native_handle_deleter& ) = default;
   BOOST_PROCESS_V2_DECL void operator()(native_handle_type nh) const;
 
 };
 
 inline const char_type * dereference(native_iterator iterator) {return iterator;}
-BOOST_PROCESS_V2_DECL native_iterator next(native_handle_type nh);
+BOOST_PROCESS_V2_DECL native_iterator next(native_iterator nh);
 BOOST_PROCESS_V2_DECL native_iterator find_end(native_handle_type nh);
 BOOST_PROCESS_V2_DECL bool is_executable(const filesystem::path & pth, error_code & ec);
 }

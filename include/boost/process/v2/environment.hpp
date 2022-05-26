@@ -12,7 +12,7 @@
 
 #include <boost/process/v2/detail/config.hpp>
 #include <boost/process/v2/cstring_ref.hpp>
-#include <boost/process/v2/detail/codecvt.hpp>
+#include <boost/process/v2/detail/utf8.hpp>
 #include <memory>
 #include <numeric>
 
@@ -128,7 +128,8 @@ struct key_view
     key_view() noexcept = default;
     key_view( const key_view& p ) = default;
     key_view( key_view&& p ) noexcept = default;
-    template<typename Source, typename = typename std::enable_if<is_constructible<string_view_type, Source>::value>::type>
+    template<typename Source, 
+             typename = typename std::enable_if<is_constructible<string_view_type, Source>::value>::type>
     key_view( const Source& source ) : value_(source) {}
     key_view( const char_type * p) : value_(p) {}
     key_view(       char_type * p) : value_(p) {}
@@ -159,24 +160,19 @@ struct key_view
     template< class CharT, class Traits = std::char_traits<CharT>,
             class Alloc = std::allocator<CharT> >
     std::basic_string<CharT,Traits,Alloc>
-    string( const Alloc& alloc = Alloc(), const std::locale & loc = std::locale()) const
+    basic_string( const Alloc& alloc = Alloc()) const
     {
-        return boost::process::v2::detail::convert_chars<Traits>(value_.data(), value_.data() + value_.size(), CharT(), alloc, loc);
+        return boost::process::v2::detail::conv_string<CharT, Traits>(
+            value_.data(), value_.size(), alloc);
     }
 
-    std::string       string() const {return string<char>();}
-    std::wstring     wstring() const {return string<wchar_t>();}
-    std::u16string u16string() const {return string<char16_t>();}
-    std::u32string u32string() const {return string<char32_t>();}
+    std::string       string() const {return basic_string<char>();}
+    std::wstring     wstring() const {return basic_string<wchar_t>();}
 
     string_type native_string() const
     {
-        return string<char_type, key_char_traits<char_type>>();
+        return basic_string<char_type, key_char_traits<char_type>>();
     }
-
-#if BOOST_PROCESS_HAS_CHAR8_T
-    std::u8string   u8string() const {return string<char8_t>();}
-#endif
 
     friend bool operator==(key_view l, key_view r) { return l.value_ == r.value_; }
     friend bool operator!=(key_view l, key_view r) { return l.value_ != r.value_; }
@@ -191,7 +187,7 @@ struct key_view
     friend std::basic_ostream<CharT,Traits>&
     operator<<( std::basic_ostream<CharT,Traits>& os, const key_view& p )
     {
-        os << boost::process::v2::quoted(p.string<CharT,Traits>());
+        os << boost::process::v2::quoted(p.basic_string<CharT,Traits>());
         return os;
     }
 
@@ -252,24 +248,19 @@ struct value_view
     template< class CharT, class Traits = std::char_traits<CharT>,
             class Alloc = std::allocator<CharT> >
     std::basic_string<CharT,Traits,Alloc>
-    string( const Alloc& alloc = Alloc(), const std::locale & loc = std::locale() ) const
+    basic_string( const Alloc& alloc = Alloc() ) const
     {
-        return boost::process::v2::detail::convert_chars<Traits>(value_.begin(), value_.end(), CharT(), alloc, loc);
+        return boost::process::v2::detail::conv_string<CharT, Traits>(
+                value_.data(), value_.size(),  alloc);
     }
 
-    std::string string() const       {return string<char>();}
-    std::wstring wstring() const     {return string<wchar_t>();}
-    std::u16string u16string() const {return string<char16_t>();}
-    std::u32string u32string() const {return string<char32_t>();}
+    std::string string() const       {return basic_string<char>();}
+    std::wstring wstring() const     {return basic_string<wchar_t>();}
 
     string_type native_string() const
     {
-        return string<char_type, value_char_traits<char_type>>();
+        return basic_string<char_type, value_char_traits<char_type>>();
     }
-
-#if BOOST_PROCESS_HAS_CHAR8_T
-    std::u8string u8string() const   {return string<char8_t>();}
-#endif
 
     bool empty() const {return value_.empty(); }
 
@@ -285,7 +276,7 @@ struct value_view
     friend std::basic_ostream<CharT,Traits>&
     operator<<( std::basic_ostream<CharT,Traits>& os, const value_view& p )
     {
-        os << boost::process::v2::quoted(p.string<CharT,Traits>());
+        os << boost::process::v2::quoted(p.basic_string<CharT,Traits>());
         return os;
     }
 
@@ -319,7 +310,8 @@ struct key_value_pair_view
   key_value_pair_view() noexcept = default;
   key_value_pair_view( const key_value_pair_view& p ) = default;
   key_value_pair_view( key_value_pair_view&& p ) noexcept = default;
-  template<typename Source, typename = typename std::enable_if<is_constructible<string_view_type, Source>::value>::type>
+  template<typename Source,
+           typename = typename std::enable_if<is_constructible<string_view_type, Source>::value>::type>
   key_value_pair_view( const Source& source ) : value_(source) {}
 
   key_value_pair_view( const char_type * p) : value_(p) {}
@@ -341,58 +333,81 @@ struct key_value_pair_view
   operator string_view_type() const {return native();}
   operator typename string_view_type::string_view_type() const {return value_; }
 
-  int compare( const key_value_pair_view& p ) const noexcept {return value_.compare(p.value_);}
-  int compare( const string_type& str ) const {return value_.compare(str);}
-  int compare( string_view_type str ) const {return value_.compare(str);}
-  int compare( const value_type* s ) const {return value_.compare(s);}
+  int compare( key_value_pair_view p ) const noexcept 
+  {
+      const auto c = key().compare(p.key());
+      if (c != 0)
+            return c;
+      return value().compare(p.value());
+  }
+  int compare( const string_type& str ) const
+  {
+      return compare(key_value_pair_view(str));
+  }
+  int compare( string_view_type str ) const 
+  {
+      string_type st(str.data(), str.size());
+      return compare(st);
+  }
+  int compare( const value_type* s ) const
+  {
+      return compare(key_value_pair_view(s));
+  }
 
   template< class CharT, class Traits = std::char_traits<CharT>, class Alloc = std::allocator<CharT> >
   std::basic_string<CharT,Traits,Alloc>
-  string( const Alloc& alloc = Alloc(), const std::locale & loc = std::locale()) const
+  basic_string( const Alloc& alloc = Alloc()) const
   {
-      return boost::process::v2::detail::convert_chars<Traits>(value_.begin(), value_.end(), CharT(), alloc, loc);
+      return boost::process::v2::detail::conv_string<CharT, Traits>(value_.begin(), value_.size(), alloc);
   }
 
-  std::string string() const       {return string<char>();}
-  std::wstring wstring() const     {return string<wchar_t>();}
-  std::u16string u16string() const {return string<char16_t>();}
-  std::u32string u32string() const {return string<char32_t>();}
+  std::string string() const       {return basic_string<char>();}
+  std::wstring wstring() const     {return basic_string<wchar_t>();}
 
   string_type native_string() const
   {
-    return string<char_type>();
+    return basic_string<char_type>();
   }
-
-#if BOOST_PROCESS_HAS_CHAR8_T
-  std::u8string u8string() const   {return string<char8_t>();}
-#endif
 
   bool empty() const {return value_.empty(); }
 
   key_view key() const
   {
-      const auto eq = value_.find(equality_sign);
+      auto eq = value_.find(equality_sign);
+      if (eq == 0)
+      {
+          auto eq2 = value_.find(equality_sign, 1);
+          if (eq2 != string_type::npos)
+              eq = eq2;
+      }
       const auto res = native().substr(0,  eq == string_view_type::npos ? value_.size() : eq);
       return key_view::string_view_type(res.data(), res.size());
   }
   value_view value() const
   {
-      return environment::value_view(native().substr(value_.find(equality_sign)  + 1));
+      auto eq = value_.find(equality_sign);
+      if (eq == 0)
+      {
+          auto eq2 = value_.find(equality_sign, 1);
+          if (eq2 != string_type::npos)
+              eq = eq2;
+      }
+      return environment::value_view(native().substr(eq + 1));
   }
 
-  friend bool operator==(key_value_pair_view l, key_value_pair_view r) { return l.value_ == r.value_; }
-  friend bool operator!=(key_value_pair_view l, key_value_pair_view r) { return l.value_ != r.value_; }
-  friend bool operator<=(key_value_pair_view l, key_value_pair_view r) { return l.value_ <= r.value_; }
-  friend bool operator>=(key_value_pair_view l, key_value_pair_view r) { return l.value_ >= r.value_; }
-  friend bool operator< (key_value_pair_view l, key_value_pair_view r) { return l.value_ <  r.value_; }
-  friend bool operator> (key_value_pair_view l, key_value_pair_view r) { return l.value_ >  r.value_; }
+  friend bool operator==(key_value_pair_view l, key_value_pair_view r) { return l.compare(r) == 0; }
+  friend bool operator!=(key_value_pair_view l, key_value_pair_view r) { return l.compare(r) != 0; }
+  friend bool operator<=(key_value_pair_view l, key_value_pair_view r) { return l.compare(r) <= 0; }
+  friend bool operator>=(key_value_pair_view l, key_value_pair_view r) { return l.compare(r) >= 0; }
+  friend bool operator< (key_value_pair_view l, key_value_pair_view r) { return l.compare(r) <  0; }
+  friend bool operator> (key_value_pair_view l, key_value_pair_view r) { return l.compare(r) >  0; }
 
 
   template< class CharT, class Traits >
   friend std::basic_ostream<CharT,Traits>&
   operator<<( std::basic_ostream<CharT,Traits>& os, const key_value_pair_view& p )
   {
-      os << boost::process::v2::quoted(p.string<CharT,Traits>());
+      os << boost::process::v2::quoted(p.basic_string<CharT,Traits>());
       return os;
   }
 
@@ -448,38 +463,35 @@ struct key
     key( const value_type * raw ) : value_(raw) {}
     key(       value_type * raw ) : value_(raw) {}
 
-    explicit key(key_view kv) : value_(kv.string()) {}
+    explicit key(key_view kv) : value_(kv.native_string()) {}
 
     template< class Source >
-    key( const Source& source, const std::locale& loc = std::locale(),
+    key( const Source& source, const std::locale& loc,
          decltype(source.data()) = nullptr)
-        : value_(boost::process::v2::detail::convert_chars<traits_type>(source.data(), source.data() + source.size(), char_type(), std::allocator<char_type>(), loc))
+        : value_(
+            boost::process::v2::detail::conv_string<char_type, traits_type>(source.data(), source.size()))
     {
     }
 
-    key(const typename conditional<is_same<value_type, char>::value, wchar_t, char>::type  * raw, const std::locale& loc = std::locale())
-        : value_(boost::process::v2::detail::convert_chars<traits_type>(
-                raw,
-                raw + std::char_traits<std::decay<std::remove_pointer<decltype(raw)>::type>::type>::length(raw),
-                char_type(), std::allocator<char_type>(), loc))
+    template< class Source >
+    key( const Source& source,
+        decltype(source.data()) = nullptr,
+        decltype(source.size()) = 0u)
+        : value_(
+             boost::process::v2::detail::conv_string<char_type, traits_type>(
+                source.data(), source.size()))
     {
     }
 
-    key(const char16_t * raw, const std::locale& loc = std::locale()) : value_(boost::process::v2::detail::convert_chars<traits_type>(raw,raw + std::char_traits<char16_t>::length(raw), char_type(), std::allocator<char_type>(), loc)) {}
-    key(const char32_t * raw, const std::locale& loc = std::locale()) : value_(boost::process::v2::detail::convert_chars<traits_type>(raw,raw + std::char_traits<char32_t>::length(raw), char_type(), std::allocator<char_type>(), loc)) {}
-#if BOOST_PROCESS_HAS_CHAR8_T
-    key(const char8_t * raw, const std::locale& loc = std::locale()) : value_(boost::process::v2::detail::convert_chars<traits_type>(raw,raw + std::char_traits<char8_t>::length(raw), char_type(), std::allocator<char_type>(), loc)) {}
-#endif
-
-    template<typename Char, typename Traits>
-    key(std::basic_string_view<Char, Traits> source, const std::locale& loc = std::locale())
-        : value_(boost::process::v2::detail::convert_chars<traits_type>(source.data(), source.data() + source.size(), char_type(), std::allocator<char_type>(), loc))
+    key(const typename conditional<is_same<value_type, char>::value, wchar_t, char>::type  * raw)
+        : value_(boost::process::v2::detail::conv_string<char_type, traits_type>(
+                raw, std::char_traits<std::decay<std::remove_pointer<decltype(raw)>::type>::type>::length(raw)))
     {
     }
 
     template< class InputIt >
-    key( InputIt first, InputIt last, const std::locale& loc = std::locale())
-    : key(std::basic_string(first, last), loc)
+    key( InputIt first, InputIt last)
+        : key(std::basic_string(first, last))
     {
     }
 
@@ -495,7 +507,7 @@ struct key
     template< class Source >
     key& operator=( const Source& source )
     {
-        value_ = boost::process::v2::detail::convert_chars<traits_type>(source.data(), source.data() + source.size(), char_type(), std::allocator<char_type>());
+        value_ = boost::process::v2::detail::conv_string<char_type, traits_type>(source.data(), source.size());
         return *this;
     }
 
@@ -505,9 +517,9 @@ struct key
         return *this;
     }
     template< class Source >
-    key& assign( const Source& source , const std::locale & loc)
+    key& assign( const Source& source )
     {
-        value_ = boost::process::v2::detail::convert_chars<traits_type>(source.data(), source.data() + source.size(), char_type(), std::allocator<char_type>(), loc);
+        value_ = boost::process::v2::detail::conv_string<char_type, traits_type>(source.data(), source.size());
         return *this;
     }
 
@@ -537,26 +549,22 @@ struct key
     int compare( const value_type* s ) const {return value_.compare(s);}
 
     template< class CharT, class Traits = std::char_traits<CharT>,
-            class Alloc = std::allocator<CharT> >
+        class Alloc = std::allocator<CharT> >
     std::basic_string<CharT,Traits,Alloc>
-    string( const Alloc& alloc = Alloc(), const std::locale & loc = std::locale() ) const
+    basic_string( const Alloc& alloc = Alloc()) const
     {
-        return boost::process::v2::detail::convert_chars<Traits>(value_.data(), value_.data() + value_.size(), CharT(), alloc, loc);
+        return boost::process::v2::detail::conv_string<CharT, Traits>(
+            value_.data(), value_.size(), alloc);
     }
 
-    std::string string() const       {return string<char>();}
-    std::wstring wstring() const     {return string<wchar_t>();}
-    std::u16string u16string() const {return string<char16_t>();}
-    std::u32string u32string() const {return string<char32_t>();}
 
-    std::basic_string<char_type, value_char_traits<char_type>> native_string() const
+    std::string string() const       {return basic_string<char>();}
+    std::wstring wstring() const     {return basic_string<wchar_t>();}
+
+    const string_type & native_string() const
     {
-        return string<char_type, value_char_traits<char_type>>();
+        return value_;
     }
-
-#if BOOST_PROCESS_HAS_CHAR8_T
-    std::u8string u8string() const   {return string<char8_t>();}
-#endif
 
     bool empty() const {return value_.empty(); }
 
@@ -571,7 +579,7 @@ struct key
     friend std::basic_ostream<CharT,Traits>&
     operator<<( std::basic_ostream<CharT,Traits>& os, const key& p )
     {
-        os << boost::process::v2::quoted(p.string<CharT,Traits>());
+        os << boost::process::v2::quoted(p.basic_string<CharT,Traits>());
         return os;
     }
 
@@ -671,29 +679,23 @@ struct value
     explicit value(value_view kv) : value_(kv.c_str()) {}
 
     template< class Source >
-    value( const Source& source, const std::locale& loc = std::locale(),
-         decltype(source.data()) = nullptr)
-            : value_(boost::process::v2::detail::convert_chars<traits_type>(source.data(), source.data() + source.size(), char_type(), std::allocator<char_type>(), loc))
+    value( const Source& source,
+           decltype(source.data()) = nullptr,
+    decltype(source.size()) = 0u)
+    : value_(boost::process::v2::detail::conv_string<char_type, traits_type>(
+        source.data(), source.data() + source.size()))
     {
     }
 
-    value(const typename conditional<is_same<value_type, char>::value, wchar_t, char>::type  * raw, const std::locale& loc = std::locale())
-            : value_(boost::process::v2::detail::convert_chars<traits_type>(
-            raw,
-            raw + std::char_traits<std::decay<std::remove_pointer<decltype(raw)>::type>::type>::length(raw),
-            char_type(), std::allocator<char_type>(), loc))
+    value(const typename conditional<is_same<value_type, char>::value, wchar_t, char>::type  * raw)
+            : value_(boost::process::v2::detail::conv_string<char_type, traits_type>(
+            raw, std::char_traits<std::decay<std::remove_pointer<decltype(raw)>::type>::type>::length(raw)))
     {
     }
-
-    value(const char16_t * raw, const std::locale& loc = std::locale()) : value_(boost::process::v2::detail::convert_chars<traits_type>(raw,raw + std::char_traits<char16_t>::length(raw), char_type(), std::allocator<char_type>(), loc)) {}
-    value(const char32_t * raw, const std::locale& loc = std::locale()) : value_(boost::process::v2::detail::convert_chars<traits_type>(raw,raw + std::char_traits<char32_t>::length(raw), char_type(), std::allocator<char_type>(), loc)) {}
-#if BOOST_PROCESS_HAS_CHAR8_T
-    value(const char8_t * raw, const std::locale& loc = std::locale()) : value_(boost::process::v2::detail::convert_chars<traits_type>(raw,raw + std::char_traits<char8_t>::length(raw), char_type(), std::allocator<char_type>(), loc)) {}
-#endif
 
     template< class InputIt >
-    value( InputIt first, InputIt last, const std::locale& loc = std::locale())
-            : value(std::basic_string(first, last), loc)
+    value( InputIt first, InputIt last)
+            : value(std::basic_string(first, last))
     {
     }
 
@@ -709,7 +711,8 @@ struct value
     template< class Source >
     value& operator=( const Source& source )
     {
-        value_ = boost::process::v2::detail::convert_chars<traits_type>(source.data(), source.data() + source.size(), char_type(), std::allocator<char_type>());
+        value_ = boost::process::v2::detail::conv_string<char_type, traits_type>(
+            source.data(), source.size);
         return *this;
     }
 
@@ -719,10 +722,11 @@ struct value
         return *this;
     }
     template< class Source >
-    value& assign( const Source& source, const std::locale & loc = std::locale() )
+    value& assign( const Source& source )
     {
-        value_ = boost::process::v2::detail::convert_chars<traits_type>(source.data(), source.data() + source.size(), char_type(), std::allocator<char_type>(), loc);
-        return *this;
+      value_ = boost::process::v2::detail::conv_string<char_type, traits_type>(
+          source.data(), source.data() + source.size());
+      return *this;
     }
 
     template< class InputIt >
@@ -759,24 +763,20 @@ struct value
     template< class CharT, class Traits = std::char_traits<CharT>,
             class Alloc = std::allocator<CharT> >
     std::basic_string<CharT,Traits,Alloc>
-    string( const Alloc& alloc = Alloc(), const std::locale & loc = std::locale()) const
+    basic_string( const Alloc& alloc = Alloc()) const
     {
-        return boost::process::v2::detail::convert_chars<Traits>(value_.data(), value_.data() + value_.size(), CharT(), alloc, loc);
+        return boost::process::v2::detail::conv_string<CharT, Traits>(
+            value_.data(), value_.size(),alloc);
     }
 
-    std::string string() const       {return string<char>();}
-    std::wstring wstring() const     {return string<wchar_t>();}
-    std::u16string u16string() const {return string<char16_t>();}
-    std::u32string u32string() const {return string<char32_t>();}
+    std::string string() const       {return basic_string<char>();}
+    std::wstring wstring() const     {return basic_string<wchar_t>();}
 
-    std::basic_string<char_type, value_char_traits<char_type>> native_string() const
+
+    const string_type & native_string() const
     {
-        return string<char_type, value_char_traits<char_type>>();
+        return value_;
     }
-
-#if BOOST_PROCESS_HAS_CHAR8_T
-    std::u8string u8string() const   {return string<char8_t>();}
-#endif
 
     bool empty() const {return value_.empty(); }
 
@@ -791,7 +791,7 @@ struct value
     friend std::basic_ostream<CharT,Traits>&
     operator<<( std::basic_ostream<CharT,Traits>& os, const value& p )
     {
-        os << boost::process::v2::quoted(p.string<CharT,Traits>());
+        os << boost::process::v2::quoted(p.basic_string<CharT,Traits>());
         return os;
     }
 
@@ -889,7 +889,8 @@ struct key_value_pair
     key_value_pair() noexcept = default;
     key_value_pair( const key_value_pair& p ) = default;
     key_value_pair( key_value_pair&& p ) noexcept = default;
-    key_value_pair(key_view key, value_view value) : value_(key.string<char_type>() + equality_sign + value.string<char_type>()) {}
+    key_value_pair(key_view key, value_view value) : value_(key.basic_string<char_type, traits_type>() + equality_sign + 
+                                                            value.basic_string<char_type, traits_type>()) {}
 
     key_value_pair(key_view key, std::initializer_list<basic_string_view<char_type>> values)
     {
@@ -915,29 +916,31 @@ struct key_value_pair
     explicit key_value_pair(key_value_pair_view kv) : value_(kv.c_str()) {}
 
     template< class Source >
-    key_value_pair( const Source& source, const std::locale& loc = std::locale(),
-           decltype(source.data()) = nullptr)
-            : value_(boost::process::v2::detail::convert_chars<traits_type>(source.data(), source.data() + source.size(), char_type(), std::allocator<char_type>(), loc))
+    key_value_pair( const Source& source,
+           decltype(source.data()) = nullptr,
+           decltype(source.size()) = 0u)
+            : value_(boost::process::v2::detail::conv_string<char_type, traits_type>(
+                source.data(), source.size()))
     {
     }
 
-    key_value_pair(const typename conditional<is_same<value_type, char>::value, wchar_t, char>::type  * raw, const std::locale& loc = std::locale())
-            : value_(boost::process::v2::detail::convert_chars<traits_type>(
+    key_value_pair(const typename conditional<is_same<value_type, char>::value, wchar_t, char>::type  * raw)
+            : value_(boost::process::v2::detail::conv_string<char_type, traits_type>(
                      raw,
-                     raw + std::char_traits<std::decay<std::remove_pointer<decltype(raw)>::type>::type>::length(raw),
-                     char_type(), std::allocator<char_type>(), loc))
+                     std::char_traits<std::decay<std::remove_pointer<decltype(raw)>::type>::type>::length(raw)))
     {
     }
-
-    key_value_pair(const char16_t * raw, const std::locale& loc = std::locale()) : value_(boost::process::v2::detail::convert_chars<traits_type>(raw,raw + std::char_traits<char16_t>::length(raw), char_type(), std::allocator<char_type>(), loc)) {}
-    key_value_pair(const char32_t * raw, const std::locale& loc = std::locale()) : value_(boost::process::v2::detail::convert_chars<traits_type>(raw,raw + std::char_traits<char32_t>::length(raw), char_type(), std::allocator<char_type>(), loc)) {}
-#if BOOST_PROCESS_HAS_CHAR8_T
-            key_value_pair(const char8_t * raw, const std::locale& loc = std::locale()) : value_(boost::process::v2::detail::convert_chars<traits_type>(raw,raw + std::char_traits<char8_t>::length(raw), char_type(), std::allocator<char_type>(), loc)) {}
-#endif
+    key_value_pair(const typename conditional<is_same<value_type, char>::value, wchar_t, char>::type  * raw,
+                   const std::locale& loc)
+            : value_(boost::process::v2::detail::conv_string<char_type, traits_type>(
+                     raw,
+                     std::char_traits<std::decay<std::remove_pointer<decltype(raw)>::type>::type>::length(raw)))
+    {
+    }
 
     template< class InputIt , typename std::iterator_traits<InputIt>::iterator_category>
-    key_value_pair( InputIt first, InputIt last, const std::locale& loc = std::locale())
-            : key_value_pair(std::basic_string(first, last), loc)
+    key_value_pair( InputIt first, InputIt last )
+            : key_value_pair(std::basic_string(first, last))
     {
     }
 
@@ -953,7 +956,8 @@ struct key_value_pair
     template< class Source >
     key_value_pair& operator=( const Source& source )
     {
-        value_ = boost::process::v2::detail::convert_chars<traits_type>(source.data(), source.data() + source.size(), char_type(), std::allocator<char_type>());
+        value_ = boost::process::v2::detail::conv_string<char_type, traits_type>(
+            source.data(), source.size());
         return *this;
     }
 
@@ -963,16 +967,24 @@ struct key_value_pair
         return *this;
     }
     template< class Source >
-    key_value_pair& assign( const Source& source, const std::locale & loc = std::locale() )
+    key_value_pair& assign( const Source& source )
     {
-        value_ = boost::process::v2::detail::convert_chars<traits_type>(source.data(), source.data() + source.size(), char_type(), std::allocator<char_type>(), loc);
+        value_ = boost::process::v2::detail::conv_string<char_type, traits_type>(
+            source.data(), source.size());
         return *this;
     }
+
 
     template< class InputIt >
     key_value_pair& assign( InputIt first, InputIt last )
     {
         return assign(std::string(first, last));
+    }
+
+    template< class InputIt >
+    key_value_pair& assign( InputIt first, InputIt last, const std::locale & loc  )
+    {
+        return assign(std::string(first, last), loc);
     }
 
     void clear() {value_.clear();}
@@ -988,57 +1000,80 @@ struct key_value_pair
 
     operator string_type() const {return native();}
     operator string_view_type() const {return native_view();}
+    operator key_value_pair_view() const {return native_view();}
 
-    int compare( const key_value_pair& p ) const noexcept {return value_.compare(p.value_);}
-    int compare( const string_type& str ) const {return value_.compare(str);}
-    int compare( string_view_type str ) const {return -str.compare(value_);}
-    int compare( const value_type* s ) const {return value_.compare(s);}
+    int compare( const key_value_pair& p ) const noexcept 
+    {
+        return key_value_pair_view(*this).compare(key_value_pair_view(p));
+    }
+    
+    int compare( const string_type& str ) const 
+    {
+        return key_value_pair_view(*this).compare(str);
+    }
+    int compare( string_view_type str ) const   
+    {
+        return key_value_pair_view(*this).compare(str);
+    }
+    int compare( const value_type* s ) const
+    {
+        return key_value_pair_view(*this).compare(s);
+    }
 
     template< class CharT, class Traits = std::char_traits<CharT>, class Alloc = std::allocator<CharT> >
     std::basic_string<CharT,Traits,Alloc>
-    string( const Alloc& alloc = Alloc(), const std::locale & loc = std::locale() ) const
+    basic_string( const Alloc& alloc = Alloc() ) const
     {
-        return boost::process::v2::detail::convert_chars<Traits>(value_.data(), value_.data() + value_.size(), CharT(), alloc, loc);
+        return boost::process::v2::detail::conv_string<CharT, Traits>(value_.data(), value_.size(), alloc);
     }
 
-    std::string string() const       {return string<char>();}
-    std::wstring wstring() const     {return string<wchar_t>();}
-    std::u16string u16string() const {return string<char16_t>();}
-    std::u32string u32string() const {return string<char32_t>();}
+    std::string string() const       {return basic_string<char>();}
+    std::wstring wstring() const     {return basic_string<wchar_t>();}
 
-    std::basic_string<char_type, value_char_traits<char_type>> native_string() const
+    const string_type & native_string() const
     {
-        return string<char_type, value_char_traits<char_type>>();
+        return value_;
     }
 
-    friend bool operator==(const key_value_pair & l, const key_value_pair & r) { return l.value_ == r.value_; }
-    friend bool operator!=(const key_value_pair & l, const key_value_pair & r) { return l.value_ != r.value_; }
-    friend bool operator<=(const key_value_pair & l, const key_value_pair & r) { return l.value_ <= r.value_; }
-    friend bool operator>=(const key_value_pair & l, const key_value_pair & r) { return l.value_ >= r.value_; }
-    friend bool operator< (const key_value_pair & l, const key_value_pair & r) { return l.value_ <  r.value_; }
-    friend bool operator> (const key_value_pair & l, const key_value_pair & r) { return l.value_ >  r.value_; }
-
-#if BOOST_PROCESS_HAS_CHAR8_T
-    std::u8string u8string() const   {return string<char8_t>();}
-#endif
+    friend bool operator==(const key_value_pair & l, const key_value_pair & r) { return l.compare(r) == 0; }
+    friend bool operator!=(const key_value_pair & l, const key_value_pair & r) { return l.compare(r) != 0; }
+    friend bool operator<=(const key_value_pair & l, const key_value_pair & r) { return l.compare(r) <= 0; }
+    friend bool operator>=(const key_value_pair & l, const key_value_pair & r) { return l.compare(r) >= 0; }
+    friend bool operator< (const key_value_pair & l, const key_value_pair & r) { return l.compare(r) <  0; }
+    friend bool operator> (const key_value_pair & l, const key_value_pair & r) { return l.compare(r) >  0; }
 
     bool empty() const {return value_.empty(); }
 
     struct key_view key() const
     {
-        const auto k = native_view().substr(0, value_.find(equality_sign));
+        auto eq = value_.find(equality_sign);
+        if (eq == 0)
+        {
+            auto eq2 = value_.find(equality_sign, 1);
+            if (eq2 != string_type::npos)
+              eq = eq2;
+        }
+        const auto k = native_view().substr(0, eq);
+
         return boost::process::v2::environment::key_view::string_view_type (k.data(), k.size());
     }
     struct value_view value() const
     {
-        return value_view::string_view_type(native_view().substr(value_.find(equality_sign)  + 1));
+        auto eq = value_.find(equality_sign);
+        if (eq == 0)
+        {
+            auto eq2 = value_.find(equality_sign, 1);
+            if (eq2 != string_type::npos)
+               eq = eq2;
+        }
+        return value_view::string_view_type(native_view().substr(eq + 1));
     }
 
     template< class CharT, class Traits >
     friend std::basic_ostream<CharT,Traits>&
     operator<<( std::basic_ostream<CharT,Traits>& os, const key_value_pair& p )
     {
-        os << boost::process::v2::quoted(p.string<CharT,Traits>());
+        os << boost::process::v2::quoted(p.basic_string<CharT,Traits>());
         return os;
     }
 
@@ -1060,14 +1095,14 @@ struct key_value_pair
     }
 
     template<std::size_t Idx>
-    inline auto get() const -> typename conditional<Idx == 0u, boost::process::v2::environment::key_view,
-            boost::process::v2::environment::value_view>::type;
+    inline auto get() const 
+        -> typename conditional<Idx == 0u, boost::process::v2::environment::key_view,
+                                           boost::process::v2::environment::value_view>::type;
 
     const value_type * data() const {return value_.data(); }
     std::size_t size() const {return value_.size(); }
 
 private:
-
     string_type value_;
 };
 
@@ -1146,13 +1181,13 @@ inline value_view key_value_pair::get<1u>() const
     return value();
 }
 
-struct view
+struct current_view
 {
     using native_handle_type = environment::native_handle_type;
     using value_type = key_value_pair_view;
 
-    view() = default;
-    view(view && nt) = default;
+    current_view() = default;
+    current_view(current_view && nt) = default;
 
     native_handle_type  native_handle() { return handle_.get(); }
 
@@ -1205,8 +1240,9 @@ struct view
                     detail::native_handle_deleter> handle_{environment::detail::load_native_handle()};
 };
 
+inline current_view current() {return current_view();}
 
-template<typename Environment = view>
+template<typename Environment = current_view>
 inline boost::process::v2::filesystem::path home(Environment && env = view())
 {
   auto find_key = [&](key_view ky) -> value
@@ -1230,10 +1266,9 @@ inline boost::process::v2::filesystem::path home(Environment && env = view())
 #else
   return find_key(L"HOME");
 #endif
-
 }
 
-template<typename Environment = view>
+template<typename Environment = current_view>
 inline boost::process::v2::filesystem::path find_executable(
                                              boost::process::v2::filesystem::path name,
                                              Environment && env = view())

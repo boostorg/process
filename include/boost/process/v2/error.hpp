@@ -12,9 +12,14 @@ BOOST_PROCESS_V2_BEGIN_NAMESPACE
 namespace error
 {
 
-extern BOOST_PROCESS_V2_DECL const error_category& get_codecvt_category();
-static const error_category& codecvt_category = error::get_codecvt_category();
+enum utf8_conv_error
+{
+    insufficient_buffer = 1,
+    invalid_character,
+};
 
+extern BOOST_PROCESS_V2_DECL const error_category& get_utf8_category();
+static const error_category& utf8_category = get_utf8_category();
 }
 
 BOOST_PROCESS_V2_END_NAMESPACE

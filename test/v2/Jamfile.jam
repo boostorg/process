@@ -23,13 +23,15 @@ project : requirements
   <target-os>linux:<linkflags>-lpthread
   <os>NT,<toolset>cw:<library>ws2_32
   <os>NT,<toolset>gcc:<library>ws2_32
-      <define>BOOST_PROCESS_V2_SEPARATE_COMPILATION=1
+  <define>BOOST_PROCESS_V2_SEPARATE_COMPILATION=1
 ;
-
 
 import testing ;
 
 alias filesystem       : /boost//filesystem      ;
+
+lib header_test : header_1.cpp header_2.cpp :
+        <define>BOOST_PROCESS_V2_HEADER_ONLY=1 ;
 
 lib test_impl : test_impl.cpp filesystem :
         <define>BOOST_PROCESS_V2_SEPARATE_COMPILATION=1
@@ -38,8 +40,7 @@ lib test_impl : test_impl.cpp filesystem :
         ;
 
 test-suite standalone :
-    [ run environment.cpp test_impl ]
-    [ run codecvt.cpp test_impl ]
+    [ run utf8.cpp test_impl ]
     [ run cstring_ref.cpp test_impl ]
     [ run environment.cpp test_impl ]
     [ run pid.cpp test_impl ]

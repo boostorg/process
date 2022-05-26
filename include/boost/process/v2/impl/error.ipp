@@ -17,34 +17,34 @@ namespace detail
 {
 
 // can be replaced with filesystem::codecvt_error_category in boost
-struct codecvt_category : public error_category
+struct utf8_category final : public error_category
 {
-    codecvt_category() : error_category(0xDAEDu) {}
+    utf8_category() : error_category(0xDAEDu) {}
 
     const char* name() const noexcept
     {
-        return "process.v2.codecvt";
+        return "process.v2.utf8";
     }
     std::string message(int value) const
     {
-        if (value == std::codecvt_base::ok)
-            return "conversion completed without error.";
-        else if (value == std::codecvt_base::partial)
-            return "not enough space in the output buffer or unexpected end of source buffer";
-        else if (value == std::codecvt_base::error)
-            return "encountered a character that could not be converted";
-        else if (value == std::codecvt_base::noconv)
-            return "this facet is non-converting, no output written";
-        return "process.v2.codecvt error";
+        switch (static_cast<utf8_conv_error>(value))
+        {
+            case utf8_conv_error::insufficient_buffer:
+                return "A supplied buffer size was not large enough";
+            case utf8_conv_error::invalid_character:
+                return "Invalid characters were found in a string.";
+            default:
+                return "process.v2.utf8 error";
+        }
     }
 };
 
 
 } // namespace detail
 
-BOOST_PROCESS_V2_DECL const error_category& get_codecvt_category()
+BOOST_PROCESS_V2_DECL const error_category& get_utf8_category()
 {
-    static detail::codecvt_category instance;
+    static detail::utf8_category instance;
     return instance;
 }
 

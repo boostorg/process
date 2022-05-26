@@ -10,6 +10,7 @@
 #include <asio/detail/config.hpp>
 #include <system_error>
 #include <filesystem>
+#include <string_view>
 #include <iomanip>
 
 #if defined(ASIO_WINDOWS)
@@ -50,6 +51,10 @@
 #define BOOST_PROCESS_V2_POSIX 1
 #endif
 
+#if !defined(BOOST_PROCESS_V2_WINDOWS) && !defined(BOOST_POSIX_API)
+#error Unsupported operating system
+#endif
+
 #if defined(BOOST_PROCESS_USE_STD_FS)
 #include <filesystem>
 #include <optional>
@@ -64,13 +69,6 @@
 #define BOOST_PROCESS_V2_NAMESPACE boost::process::v2
 
 #endif
-
-#if !defined(BOOST_PROCESS_HAS_CHAR8_T)
-# if (__cplusplus >= 202002)
-#  define BOOST_PROCESS_HAS_CHAR8_T 1
-# endif
-#endif
-
 
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
 

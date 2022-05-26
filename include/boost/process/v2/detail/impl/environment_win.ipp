@@ -127,7 +127,7 @@ native_iterator find_end(native_handle_type nh)
 {
   while ((*nh != L'\0') || (*std::next(nh) != L'\0'))
     nh++;
-  return ++ ++nh;
+  return ++nh;
 }
 
 bool is_executable(const filesystem::path & pth, error_code & ec)
