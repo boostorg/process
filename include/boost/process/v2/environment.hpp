@@ -1471,8 +1471,152 @@ struct tuple_element<1u, boost::process::v2::environment::key_value_pair_view>
     using type = boost::process::v2::environment::value_view;
 };
 
-
 }
 
+// sub process environment stuff
+BOOST_PROCESS_V2_BEGIN_NAMESPACE
+
+#if defined(BOOST_PROCESS_V2_WINDOWS)
+namespace windows { struct default_launcher ;}
+#else
+namespace posix { struct default_launcher ;}
+#endif 
+
+struct process_environment
+{
+
+#if defined(BOOST_PROCESS_V2_WINDOWS)
+
+
+  template<typename Args>
+  void build_env(Args && args, string_view rs)
+  {
+    std::vector<decltype(rs)> vec;
+  //  vec.reserve(std::end(args) - std::begin(args));
+    std::size_t length = 0u;
+    for (decltype(rs) v : std::forward<Args>(args))
+    {
+      vec.push_back(v);
+      length += v.size() + 1u;
+    }
+    length ++ ;
+
+    ascii_env.resize(length);
+
+    auto itr = ascii_env.begin();
+    for (const auto & v : vec )
+    {
+      itr = std::copy(v.begin(), v.end(), itr);
+      *(itr++) = '\0';
+    }
+    ascii_env.back() = '\0';
+  }
+  template<typename Args>
+  void build_env(Args && args, wstring_view rs)
+  {
+    std::vector<decltype(rs)> vec;
+//    vec.reserve(std::end(args) - std::begin(args));
+    std::size_t length = 0u;
+    for (decltype(rs) v : std::forward<Args>(args))
+    {
+      vec.push_back(v);
+      length += v.size() + 1u;
+    }
+    length ++ ;
+
+    unicode_env.resize(length);
+
+    auto itr = unicode_env.begin();
+    for (const auto & v : vec )
+    {
+      itr = std::copy(v.begin(), v.end(), itr);
+      *(itr++) = L'\0';
+    }
+    unicode_env.back() = L'\0';
+  }
+
+
+  process_environment(std::initializer_list<string_view> sv)  { build_env(sv,  ""); }
+  process_environment(std::initializer_list<wstring_view> sv) { build_env(sv, L""); }
+
+  template<typename Args>
+  process_environment(Args && args)
+  {
+    if (std::begin(args) != std::end(args))
+      build_env(std::forward<Args>(args), *std::begin(args));
+  }
+
+
+  std::vector<char> ascii_env;
+  std::vector<wchar_t> unicode_env;
+
+
+  error_code on_setup(windows::default_launcher & launcher,
+                      const filesystem::path &, const std::wstring &);
+
+#else
+
+  template<typename Args>
+  static
+  std::vector<const char *> build_env(Args && args,
+                                      typename enable_if<
+                                              std::is_convertible<
+                                                      decltype(*std::begin(std::declval<Args>())),
+                                                      ASIO_CSTRING_VIEW>::value>::type * = nullptr)
+  {
+    std::vector<const char *> env;
+    for (auto && e : args)
+      env.push_back(e.c_str());
+
+    env.push_back(nullptr);
+    return env;
+  }
+
+  template<typename Args>
+  std::vector<const char *> build_env(Args && args,
+                                      typename enable_if<
+                                              !std::is_convertible<
+                                                      decltype(*std::begin(std::declval<Args>())),
+                                                      ASIO_CSTRING_VIEW>::value>::type * = nullptr)
+  {
+    std::vector<const char *> env;
+
+    using char_type = typename decay<decltype((*std::begin(std::declval<Args>()))[0])>::type;
+    for (ASIO_BASIC_STRING_VIEW_PARAM(char_type)  arg : args)
+      env_buffer.push_back(detail::convert_chars(arg.data(), arg.data() + arg.size(), ' '));
+
+    for (auto && e : env_buffer)
+      env.push_back(e.c_str());
+    env.push_back(nullptr);
+    return env;
+  }
+
+
+  process_environment(std::initializer_list<string_view> sv) : env{build_env(sv)}  {  }
+
+  template<typename Args>
+  process_environment(Args && args) : env(build_env(std::forward<Args>(args)))
+  {
+  }
+
+
+  error_code on_setup(posix::default_launcher & launcher, 
+                      const filesystem::path &, const char * const *);
+
+  std::vector<const char *> env;
+  std::vector<std::string> env_buffer;
+
+#endif
+
+};
+
+
+BOOST_PROCESS_V2_END_NAMESPACE
+
+#if defined(BOOST_PROCESS_V2_HEADER_ONLY)
+
+#include <boost/process/v2/detail/impl/environment.ipp>
+
+#endif
 
 #endif //BOOST_PROCESS_V2_ENVIRONMENT_HPP

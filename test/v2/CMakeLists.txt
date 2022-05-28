@@ -15,5 +15,6 @@ boost_process_v2_standalone_test(utf8)
 boost_process_v2_standalone_test(cstring_ref)
 boost_process_v2_standalone_test(pid)
 boost_process_v2_standalone_test(environment)
+boost_process_v2_standalone_test(exit_code)
 
 add_library(boost_process_v2_header_test header_1.cpp header_2.cpp)

@@ -12,6 +12,7 @@ if [ os.name ] = NT
   lib shell32 ;
   lib Advapi32 ;
   lib Ntdll ;
+  lib user32 ;
 }
 
 project : requirements
@@ -28,6 +29,10 @@ project : requirements
 
 import testing ;
 
+exe target : target.cpp :
+    <warnings>off <target-os>windows:<source>shell32 <target-os>windows:<source>Ntdll
+    ;
+
 alias filesystem       : /boost//filesystem      ;
 
 lib header_test : header_1.cpp header_2.cpp :
@@ -37,6 +42,7 @@ lib test_impl : test_impl.cpp filesystem :
         <define>BOOST_PROCESS_V2_SEPARATE_COMPILATION=1
         <link>static
         <target-os>windows:<source>shell32
+        <target-os>windows:<source>user32
         ;
 
 test-suite standalone :
@@ -46,4 +52,7 @@ test-suite standalone :
     [ run pid.cpp test_impl ]
     ;
 
+test-suite with_target :
+    [ run process.cpp test_impl : : target ]
+    ;
 

@@ -133,4 +133,3 @@ BOOST_AUTO_TEST_CASE(wenvironment)
     BOOST_CHECK(bpe::key_value_pair(L"FOO", {L"X", L"YY", L"Z42"}) == cmp);
 #endif
 }
-

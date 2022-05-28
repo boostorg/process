@@ -19,4 +19,8 @@
 #include <boost/process/v2/detail/impl/last_error.ipp>
 #include <boost/process/v2/detail/impl/throw_error.ipp>
 #include <boost/process/v2/detail/impl/utf8.ipp>
+#include <boost/process/v2/impl/default_launcher.ipp>
+#include <boost/process/v2/impl/environment.ipp>
+#include <boost/process/v2/impl/process_handle.ipp>
+
 #endif //BOOST_PROCESS_V2_SRC_HPP
