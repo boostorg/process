@@ -51,14 +51,16 @@ struct basic_process
   basic_process& operator=(const basic_process&) = delete;
 
   basic_process(basic_process&& lhs) 
-    : attached_(lhs.attached_), 
+    : process_handle_(std::move(lhs.process_handle_)),
+      attached_(lhs.attached_),
       terminated_(lhs.terminated_), 
-      exit_status_{lhs.exit_status_}, 
-      process_handle_(std::move(lhs.process_handle_))
+      exit_status_{lhs.exit_status_}
+
 
   {
     lhs.attached_ = false;
   }
+
   basic_process& operator=(basic_process&& lhs)
   {
     attached_ = lhs.attached_;
@@ -68,6 +70,17 @@ struct basic_process
     lhs.attached_ = false;
     return *this;
   }
+    template<typename Executor1>
+    basic_process(basic_process<Executor1>&& lhs)
+            : process_handle_(std::move(lhs.process_handle_)),
+              attached_(lhs.attached_),
+              terminated_(lhs.terminated_),
+              exit_status_{lhs.exit_status_}
+
+
+    {
+        lhs.attached_ = false;
+    }
 
   /// Construct a child from a property list and launch it.
   template<typename ... Inits>
@@ -111,7 +124,8 @@ struct basic_process
           const filesystem::path&>::type exe,
       std::initializer_list<string_view> args,
       Inits&&... inits)
-      : basic_process(default_process_launcher()(executor_type(context.get_executor()), exe, args, std::forward<Inits>(inits)...))
+      : basic_process(default_process_launcher()(executor_type(context.get_executor()),
+                                                 exe, args, std::forward<Inits>(inits)...))
   {
   }
   /// Construct a child from a property list and launch it.
@@ -266,7 +280,7 @@ struct basic_process
   }
 
   bool is_open() const { return process_handle_.is_open(); }
-  explicit operator bool() const {return valid(); }
+  explicit operator bool() const {return is_open(); }
 
   
   template <BOOST_PROCESS_V2_COMPLETION_TOKEN_FOR(void (error_code, int))
@@ -279,6 +293,9 @@ struct basic_process
   }
 
 private:
+  template<typename Executor1>
+  friend struct basic_process;
+
   basic_process_handle<Executor> process_handle_;
   bool attached_{true};
   bool terminated_{false};

@@ -28,6 +28,7 @@
 #include <boost/asio/writable_pipe.hpp>
 
 #include <fstream>
+#include <thread>
 
 namespace bpv = boost::process::v2;
 namespace asio = boost::asio;
@@ -173,7 +174,7 @@ BOOST_AUTO_TEST_CASE(print_args_out)
 
   auto sz = asio::read(rp, st,  ec);
 
-  BOOST_CHECK_NE(sz, 0);
+  BOOST_CHECK_NE(sz, 0u);
   BOOST_CHECK_MESSAGE((ec == asio::error::broken_pipe) || (ec == asio::error::eof), ec.message());
 
   std::string line;
@@ -361,7 +362,6 @@ std::string read_env(const char * name, Inits && ... inits)
   auto sz = asio::read(rp, asio::dynamic_buffer(out),  ec);
   BOOST_CHECK_MESSAGE((ec == asio::error::broken_pipe) || (ec == asio::error::eof), ec.message());
 
-  printf("FOOBAR %lld '%s'\n", sz, out.c_str());
   trim_end(out);
 
   proc.wait();

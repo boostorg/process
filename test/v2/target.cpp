@@ -4,7 +4,10 @@
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 #include <windows.h>
+#else
+#include <unistd.h>
 #endif
+
 
 int main(int argc, char * argv[])
 {
@@ -29,7 +32,8 @@ int main(int argc, char * argv[])
         const auto sz = ::GetCurrentDirectoryW(sizeof(buf), buf);
         std::wcout << boost::process::v2::wstring_view(buf, sz) << std::flush;
 #else
-
+        char buf[65535];
+        printf(::getcwd(buf, sizeof(buf)));
 #endif
     }
     else if (mode == "check-eof")

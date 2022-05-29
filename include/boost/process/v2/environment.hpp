@@ -64,10 +64,8 @@ using native_handle = implementation-defined;
 struct value_iterator
 {
     using string_view_type  = basic_string_view<char_type, value_char_traits<char_type>>;
-    using difference_type   = std::size_t;
-    using value_type        = string_view_type;
-    using pointer           = const string_view_type *;
-    using reference         = const string_view_type & ;
+    using difference_type   = int;
+    using reference         = string_view_type;
     using iterator_category = std::forward_iterator_tag;
 
     value_iterator & operator++()
@@ -94,11 +92,6 @@ struct value_iterator
       else
         return view_.substr(0, delim);
     }
-    const string_view_type operator->() const
-    {
-        return **this;
-    }
-
 
     value_iterator() = default;
     value_iterator(const value_iterator & ) = default;
@@ -108,10 +101,6 @@ struct value_iterator
 
     friend bool operator==(const value_iterator & l, const value_iterator & r) { return l.view_ == r.view_; }
     friend bool operator!=(const value_iterator & l, const value_iterator & r) { return l.view_ != r.view_; }
-    friend bool operator<=(const value_iterator & l, const value_iterator & r) { return l.view_ <= r.view_; }
-    friend bool operator>=(const value_iterator & l, const value_iterator & r) { return l.view_ >= r.view_; }
-    friend bool operator< (const value_iterator & l, const value_iterator & r) { return l.view_ <  r.view_; }
-    friend bool operator> (const value_iterator & l, const value_iterator & r) { return l.view_ >  r.view_; }
 
   private:
     string_view_type view_;
@@ -1181,7 +1170,10 @@ struct current_view
 
     struct iterator
     {
-        using value_type = key_value_pair_view;
+        using value_type        = key_value_pair_view;
+        using difference_type   = int;
+        using reference         = key_value_pair_view;
+        using pointer           = key_value_pair_view;
         using iterator_category = std::forward_iterator_tag;
 
         iterator() = default;
@@ -1200,20 +1192,13 @@ struct current_view
             iterator_ = detail::next(iterator_);
             return last;
         }
-
-
-        const key_value_pair_view operator*() const
+        key_value_pair_view operator*() const
         {
-            return key_value_pair_view(detail::dereference(iterator_));
+            return detail::dereference(iterator_);
         }
 
-        optional<key_value_pair_view> operator->() const
-        {
-            return key_value_pair_view(detail::dereference(iterator_));
-        }
-
-      friend bool operator==(const iterator & l, const iterator & r) {return l.iterator_ == r.iterator_;}
-      friend bool operator!=(const iterator & l, const iterator & r) {return l.iterator_ != r.iterator_;}
+        friend bool operator==(const iterator & l, const iterator & r) {return l.iterator_ == r.iterator_;}
+        friend bool operator!=(const iterator & l, const iterator & r) {return l.iterator_ != r.iterator_;}
 
       private:
         environment::native_iterator iterator_;
@@ -1273,7 +1258,7 @@ inline boost::process::v2::filesystem::path find_executable(
                                                     return false;
                                             });
                         if (itr != nullptr)
-                          return itr->value();
+                          return (*itr).value();
                         else
                           return value_view();
                     };
@@ -1298,7 +1283,7 @@ inline boost::process::v2::filesystem::path find_executable(
     auto path = find_key("PATH");
     for (auto pp_view : path)
     {
-        auto p = boost::process::v2::filesystem::path(pp_view) / name;
+        auto p = boost::process::v2::filesystem::path(pp_view.begin(), pp_view.end()) / name;
         error_code ec;
         bool is_exec = detail::is_executable(p, ec);
         if (!ec && is_exec)
@@ -1558,10 +1543,10 @@ struct process_environment
   template<typename Args>
   static
   std::vector<const char *> build_env(Args && args,
-                                      typename enable_if<
+                                      typename std::enable_if<
                                               std::is_convertible<
                                                       decltype(*std::begin(std::declval<Args>())),
-                                                      ASIO_CSTRING_VIEW>::value>::type * = nullptr)
+                                                      cstring_ref>::value>::type * = nullptr)
   {
     std::vector<const char *> env;
     for (auto && e : args)
@@ -1573,16 +1558,16 @@ struct process_environment
 
   template<typename Args>
   std::vector<const char *> build_env(Args && args,
-                                      typename enable_if<
+                                      typename std::enable_if<
                                               !std::is_convertible<
                                                       decltype(*std::begin(std::declval<Args>())),
-                                                      ASIO_CSTRING_VIEW>::value>::type * = nullptr)
+                                                      cstring_ref>::value>::type * = nullptr)
   {
     std::vector<const char *> env;
 
     using char_type = typename decay<decltype((*std::begin(std::declval<Args>()))[0])>::type;
-    for (ASIO_BASIC_STRING_VIEW_PARAM(char_type)  arg : args)
-      env_buffer.push_back(detail::convert_chars(arg.data(), arg.data() + arg.size(), ' '));
+    for (basic_string_view<char_type> arg : args)
+      env_buffer.push_back(detail::conv_string<char>(arg.data(), arg.size()));
 
     for (auto && e : env_buffer)
       env.push_back(e.c_str());
@@ -1602,8 +1587,8 @@ struct process_environment
   error_code on_setup(posix::default_launcher & launcher, 
                       const filesystem::path &, const char * const *);
 
-  std::vector<const char *> env;
   std::vector<std::string> env_buffer;
+  std::vector<const char *> env;
 
 #endif
 

@@ -15,6 +15,13 @@
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 #include <boost/process/v2/windows/default_launcher.hpp>
+#else
+#if defined(BOOST_PROCESS_V2_PDFORK)
+#include <boost/process/v2/posix/pdfork_launcher.hpp>
+#else
+#include <boost/process/v2/posix/default_launcher.hpp>
+#endif
+
 #endif
 
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
@@ -22,8 +29,11 @@ BOOST_PROCESS_V2_BEGIN_NAMESPACE
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 typedef windows::default_launcher default_process_launcher;
 #else
-
-
+#if defined(BOOST_PROCESS_V2_PDFORK)
+typedef posix::pdfork_launcher default_process_launcher;
+#else
+typedef posix::default_launcher default_process_launcher;
+#endif
 #endif
 
 

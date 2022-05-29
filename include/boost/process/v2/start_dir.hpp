@@ -35,7 +35,7 @@ struct process_start_dir
                            const filesystem::path &, const char * const *)
   {
     if (::chdir(start_dir.c_str()) == -1)
-      return get_last_error();
+      return detail::get_last_error();
     else
       return error_code ();
   }

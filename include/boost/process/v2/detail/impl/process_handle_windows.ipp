@@ -113,11 +113,13 @@ void check_running_(HANDLE handle, error_code & ec, DWORD & exit_status)
         ec = detail::get_last_error();
 }
 
-}
 
 #if !defined(BOOST_PROCESS_V2_HEADER_ONLY)
-template struct basic_process_handle<>;
+template struct basic_process_handle_win<>;
 #endif
+
+}
+
 
 BOOST_PROCESS_V2_END_NAMESPACE
 
