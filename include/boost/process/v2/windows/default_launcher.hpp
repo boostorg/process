@@ -173,6 +173,23 @@ struct is_initializer : std::integral_constant<bool,
 {
 };
 
+template<typename Launcher, typename ... Inits>
+struct all_are_initializers;
+
+template<typename Launcher>
+struct all_are_initializers<Launcher> : std::true_type {};
+
+
+template<typename Launcher, typename Init>
+struct all_are_initializers<Launcher, Init> : is_initializer<Launcher, Init> {};
+
+template<typename Launcher, typename Init, typename ... Tail>
+struct all_are_initializers<Launcher, Init, Tail...> 
+  : std::integral_constant<bool,  is_initializer<Launcher, Init>::value && all_are_initializers<Launcher, Tail...>::value>
+{
+};
+
+
 }
 
 template<typename Executor>
@@ -187,17 +204,22 @@ struct default_launcher
   SECURITY_ATTRIBUTES * process_attributes = nullptr;
   SECURITY_ATTRIBUTES * thread_attributes = nullptr;
   bool inherit_handles = false;
-  DWORD creation_flags{EXTENDED_STARTUPINFO_PRESENT | CREATE_UNICODE_ENVIRONMENT};
+  DWORD creation_flags{EXTENDED_STARTUPINFO_PRESENT };
   void * environment = nullptr;
   filesystem::path current_directory{};
 
   STARTUPINFOEXW startup_info{{sizeof(STARTUPINFOEXW), nullptr, nullptr, nullptr,
                               0, 0, 0, 0, 0, 0, 0, 0, 0, 0, nullptr,
-                              ::GetStdHandle(STD_INPUT_HANDLE),
-                              ::GetStdHandle(STD_OUTPUT_HANDLE),
-                              ::GetStdHandle(STD_ERROR_HANDLE )},
+                              INVALID_HANDLE_VALUE,
+                              INVALID_HANDLE_VALUE,
+                              INVALID_HANDLE_VALUE},
                               nullptr};
   PROCESS_INFORMATION process_information{nullptr, nullptr, 0,0};
+
+  template<typename Executor, typename ... Inits>
+  using enable_init = typename std::enable_if< 
+                                    detail::all_are_initializers<default_launcher, Inits...>::value, 
+                                    basic_process<Executor>>::type;
 
   default_launcher() = default;
 
@@ -207,7 +229,7 @@ struct default_launcher
                              ExecutionContext&, BOOST_PROCESS_V2_ASIO_NAMESPACE::execution_context&>::value,
                              filesystem::path >::type & executable,
                   Args && args,
-                  Inits && ... inits ) -> basic_process<typename ExecutionContext::executor_type>
+                  Inits && ... inits ) -> enable_init<typename ExecutionContext::executor_type, Inits...>
   {
       error_code ec;
       auto proc =  (*this)(context, ec, executable, std::forward<Args>(args), std::forward<Inits>(inits)...);
@@ -226,7 +248,7 @@ struct default_launcher
                              ExecutionContext&, BOOST_PROCESS_V2_ASIO_NAMESPACE::execution_context&>::value,
                              filesystem::path >::type & executable,
                   Args && args,
-                  Inits && ... inits ) -> basic_process<typename ExecutionContext::executor_type>
+                  Inits && ... inits ) -> enable_init<typename ExecutionContext::executor_type, Inits...>
   {
       return (*this)(context.get_executor(), executable, std::forward<Args>(args), std::forward<Inits>(inits)...);
   }
@@ -238,7 +260,7 @@ struct default_launcher
                           || BOOST_PROCESS_V2_ASIO_NAMESPACE::is_executor<Executor>::value,
                              filesystem::path >::type & executable,
                   Args && args,
-                  Inits && ... inits ) -> basic_process<Executor>
+                  Inits && ... inits ) -> enable_init<Executor, Inits...>
   {
       error_code ec;
       auto proc =  (*this)(std::move(exec), ec, executable, std::forward<Args>(args), std::forward<Inits>(inits)...);
@@ -257,7 +279,7 @@ struct default_launcher
                              BOOST_PROCESS_V2_ASIO_NAMESPACE::is_executor<Executor>::value,
                              filesystem::path >::type & executable,
                   Args && args,
-                  Inits && ... inits ) -> basic_process<Executor>
+                  Inits && ... inits ) -> enable_init<Executor, Inits...>
   {
     auto command_line = this->build_command_line(executable, std::forward<Args>(args));
 

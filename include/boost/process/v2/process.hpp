@@ -114,21 +114,6 @@ struct basic_process
       : basic_process(default_process_launcher()(executor_type(context.get_executor()), exe, args, std::forward<Inits>(inits)...))
   {
   }
-
-    /// Construct a child from a property list and launch it.
-  template<typename ExecutionContext, typename ... Inits>
-  explicit basic_process(
-      ExecutionContext & context,
-      typename std::enable_if<
-          std::is_convertible<ExecutionContext&, 
-                              BOOST_PROCESS_V2_ASIO_NAMESPACE::execution_context&>::value,
-          const filesystem::path&>::type exe,
-      std::initializer_list<wstring_view> args,
-      Inits&&... inits)
-      : basic_process(default_process_launcher()(executor_type(context.get_executor()), exe, args, std::forward<Inits>(inits)...))
-  {
-  }
-
   /// Construct a child from a property list and launch it.
   template<typename ExecutionContext, typename Args, typename ... Inits>
   explicit basic_process(

@@ -29,11 +29,12 @@ project : requirements
 
 import testing ;
 
-exe target : target.cpp :
+alias filesystem       : /boost//filesystem      ;
+
+exe target : target.cpp filesystem : 
     <warnings>off <target-os>windows:<source>shell32 <target-os>windows:<source>Ntdll
     ;
 
-alias filesystem       : /boost//filesystem      ;
 
 lib header_test : header_1.cpp header_2.cpp :
         <define>BOOST_PROCESS_V2_HEADER_ONLY=1 ;

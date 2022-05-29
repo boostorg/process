@@ -1273,7 +1273,7 @@ inline boost::process::v2::filesystem::path find_executable(
                                                     return false;
                                             });
                         if (itr != nullptr)
-                          return itr->value_view();
+                          return itr->value();
                         else
                           return value_view();
                     };
@@ -1285,13 +1285,13 @@ inline boost::process::v2::filesystem::path find_executable(
         for (auto ext : pathext)
         {
             boost::process::v2::filesystem::path nm(name);
-            nm += ext;
+            nm.concat(ext.begin(), ext.end());
 
-            auto p = boost::process::v2::filesystem::path(pp_view) / nm;
+            auto p = boost::process::v2::filesystem::path(pp_view.begin(), pp_view.end()) / nm;
 
             error_code ec;
-            bool file = boost::process::v2::filesystem::is_regular_file(p, ec);
-            if (!ec && file && SHGetFileInfoW(p.native().c_str(), 0,0,0, SHGFI_EXETYPE))
+            bool is_exec = detail::is_executable(p, ec);
+            if (!ec && is_exec)
                 return p;
         }
 #else
@@ -1300,8 +1300,8 @@ inline boost::process::v2::filesystem::path find_executable(
     {
         auto p = boost::process::v2::filesystem::path(pp_view) / name;
         error_code ec;
-        bool file = boost::process::v2::filesystem::is_regular_file(p, ec);
-        if (!ec && file && ::access(p.c_str(), X_OK) == 0)
+        bool is_exec = detail::is_executable(p, ec);
+        if (!ec && is_exec)
             return p;
     }
 #endif
@@ -1491,43 +1491,42 @@ struct process_environment
   template<typename Args>
   void build_env(Args && args, string_view rs)
   {
-    std::vector<decltype(rs)> vec;
-  //  vec.reserve(std::end(args) - std::begin(args));
     std::size_t length = 0u;
-    for (decltype(rs) v : std::forward<Args>(args))
-    {
-      vec.push_back(v);
-      length += v.size() + 1u;
-    }
+    for (string_view v : args)
+      length += detail::size_as_wide(v.data(), v.size(), ec) + 1u;
+
+    if (ec)
+        return;
     length ++ ;
 
-    ascii_env.resize(length);
+    unicode_env.resize(length);
 
-    auto itr = ascii_env.begin();
-    for (const auto & v : vec )
+    auto itr = &unicode_env.front();
+    for (string_view v : args)
     {
-      itr = std::copy(v.begin(), v.end(), itr);
+        itr += detail::convert_to_wide(
+                        v.data(), v.size(), 
+                        itr, &unicode_env.back() - itr, 
+                        ec);
+      if (ec)
+        break;
       *(itr++) = '\0';
     }
-    ascii_env.back() = '\0';
+    unicode_env.back() = '\0';
   }
   template<typename Args>
   void build_env(Args && args, wstring_view rs)
   {
-    std::vector<decltype(rs)> vec;
-//    vec.reserve(std::end(args) - std::begin(args));
     std::size_t length = 0u;
-    for (decltype(rs) v : std::forward<Args>(args))
-    {
-      vec.push_back(v);
+    for (const auto & v : std::forward<Args>(args))
       length += v.size() + 1u;
-    }
+ 
     length ++ ;
 
     unicode_env.resize(length);
 
     auto itr = unicode_env.begin();
-    for (const auto & v : vec )
+    for (wstring_view v : args )
     {
       itr = std::copy(v.begin(), v.end(), itr);
       *(itr++) = L'\0';
@@ -1546,8 +1545,8 @@ struct process_environment
       build_env(std::forward<Args>(args), *std::begin(args));
   }
 
-
-  std::vector<char> ascii_env;
+  error_code error() {return ec;}
+  error_code ec;
   std::vector<wchar_t> unicode_env;
 
 

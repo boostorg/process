@@ -11,6 +11,7 @@
 #include <boost/process/v2/pid.hpp>
 #include <boost/process/v2/process_handle.hpp>
 #include <boost/process/v2/process.hpp>
+#include <boost/process/v2/start_dir.hpp>
 #include <boost/process/v2/stdio.hpp>
 
 #endif //BOOST_PROCESS_V2_HPP

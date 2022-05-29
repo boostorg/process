@@ -21,15 +21,13 @@ BOOST_PROCESS_V2_BEGIN_NAMESPACE
 
 error_code process_environment::on_setup(windows::default_launcher & launcher, const filesystem::path &, const std::wstring &)
 {
-    if (!unicode_env.empty())
+    if (!unicode_env.empty() && !ec)
     {
       launcher.creation_flags |= CREATE_UNICODE_ENVIRONMENT ;
       launcher.environment = unicode_env.data();
     }
-    else if (!ascii_env.empty())
-      launcher.environment = ascii_env.data();
 
-    return error_code {};
+    return ec;
 };
 
 #else
