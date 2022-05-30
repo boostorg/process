@@ -75,8 +75,11 @@ BOOST_AUTO_TEST_CASE(exit_code_sync)
     
     BOOST_CHECK_EQUAL(bpv::process(ctx, pth, {"exit-code", "0"}).wait(), 0);
     BOOST_CHECK_EQUAL(bpv::process(ctx, pth, {"exit-code", "1"}).wait(), 1);
-    BOOST_CHECK_EQUAL(bpv::process(ctx, pth, {"exit-code", "2"}).wait(), 2);
-    BOOST_CHECK_EQUAL(bpv::process(ctx, pth, {"exit-code", "42"}).wait(), 42);
+    std::vector<std::string> args = {"exit-code", "2"};
+    BOOST_CHECK_EQUAL(bpv::default_process_launcher()(ctx, pth, args).wait(), 2);
+    args[1] = "42";
+    auto proc = bpv::default_process_launcher()(ctx, pth, args);
+    BOOST_CHECK_EQUAL(proc.wait(), 42);
 
 }
 

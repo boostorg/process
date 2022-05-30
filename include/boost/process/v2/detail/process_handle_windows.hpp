@@ -9,6 +9,7 @@
 
 #include <boost/process/v2/exit_code.hpp>
 #include <boost/process/v2/pid.hpp>
+#include <boost/process/v2/detail/throw_error.hpp>
 
 #if defined(BOOST_PROCESS_V2_STANDALONE)
 #include <asio/any_io_executor.hpp>
@@ -79,10 +80,23 @@ struct basic_process_handle_win
     {
     }
 
+/*
     template<typename Executor1>
     basic_process_handle_win(basic_process_handle_win<Executor1> && handle)
-            : pid_(handle.pid_), handle_(std::move(handle).handle_)
+            : pid_(handle.pid_), handle_(handle.handle_.get_executor())
     {
+    }
+*/
+    basic_process_handle_win(basic_process_handle_win && ) = default;
+    basic_process_handle_win& operator=(basic_process_handle_win && ) = default;
+
+    ~basic_process_handle_win()
+    {
+        if (handle_.is_open())
+        {
+            error_code ec;
+            handle_.close(ec);
+        }
     }
 
     native_handle_type native_handle()

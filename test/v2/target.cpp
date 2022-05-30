@@ -47,6 +47,20 @@ int main(int argc, char * argv[])
         auto p = ::getenv(argv[2]);
         assert(printf("%s", p) > 0);
     }
+#if defined(BOOST_PROCESS_V2_WINDOWS)
+    else if (mode == "showwindow")
+    {
+        STARTUPINFO si;
+        GetStartupInfo(&si);   
+        return static_cast<int>(si.wShowWindow);
+    }
+    else if (mode == "creation-flags")
+    {
+        STARTUPINFO si;
+        GetStartupInfo(&si);   
+        return static_cast<int>(si.dwFlags);
+    }
+#endif
     else
         return 34;
         

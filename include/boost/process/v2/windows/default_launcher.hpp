@@ -14,6 +14,7 @@
 #include <boost/process/v2/cstring_ref.hpp>
 #include <boost/process/v2/detail/config.hpp>
 #include <boost/process/v2/detail/last_error.hpp>
+#include <boost/process/v2/detail/utf8.hpp>
 #include <boost/process/v2/error.hpp>
 
 #include <numeric>
@@ -318,10 +319,10 @@ struct default_launcher
     else
     {
       detail::on_success(*this, executable, command_line, inits...);
-/*
+
       if (process_information.hThread != INVALID_HANDLE_VALUE)
         ::CloseHandle(process_information.hThread);
-*/
+
       return basic_process<Executor>(exec,
                      this->process_information.dwProcessId,
                      this->process_information.hProcess);

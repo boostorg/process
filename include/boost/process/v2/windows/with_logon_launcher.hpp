@@ -95,9 +95,9 @@ struct with_logon_launcher : default_launcher
                      Args && args,
                      Inits && ... inits ) -> basic_process<Executor>
   {
-    auto command_line = this->build_command_line_(executable, args);
+    auto command_line = this->build_command_line(executable, args);
 
-    ec = on_init_(*this, executable, command_line, inits...);
+    ec = detail::on_setup(*this, executable, command_line, inits...);
     if (ec)
     {
       detail::on_error(*this, executable, command_line, ec, inits...);
@@ -109,7 +109,7 @@ struct with_logon_launcher : default_launcher
         password.c_str(),
         logon_flags
         executable.empty() ? nullptr : executable.c_str(),
-        command_line.empty() ? nullptr :  command_line.c_str(),
+        command_line.empty() ? nullptr : &command_line.front(),
         process_attributes,
         thread_attributes,
         inherit_handles ? TRUE : FALSE,
@@ -125,9 +125,9 @@ struct with_logon_launcher : default_launcher
       ec.assign(::GetLastError(), error::get_system_category());
       detail::on_error(*this, executable, command_line, ec, inits...);
 
-      if (process_information.hProcess != INVALID_HANDLE)
+      if (process_information.hProcess != INVALID_HANDLE_VALUE)
         ::CloseHandle(process_information.hProcess);
-      if (process_information.hThread != INVALID_HANDLE)
+      if (process_information.hThread != INVALID_HANDLE_VALUE)
         ::CloseHandle(process_information.hThread);
 
       return basic_process<Executor>(exec);
@@ -135,7 +135,7 @@ struct with_logon_launcher : default_launcher
     {
       detail::on_success(*this, executable, command_line, inits...);
 
-      if (process_information.hThread != INVALID_HANDLE)
+      if (process_information.hThread != INVALID_HANDLE_VALUE)
         ::CloseHandle(process_information.hThread);
 
       return basic_process<Executor>(exec,

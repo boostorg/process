@@ -32,7 +32,8 @@ import testing ;
 alias filesystem       : /boost//filesystem      ;
 
 exe target : target.cpp filesystem : 
-    <warnings>off <target-os>windows:<source>shell32 <target-os>windows:<source>Ntdll
+    <warnings>off <target-os>windows:<source>shell32
+                  <target-os>windows:<source>Ntdll
     ;
 
 
@@ -55,5 +56,6 @@ test-suite standalone :
 
 test-suite with_target :
     [ run process.cpp test_impl : : target ]
+    [ run windows.cpp test_impl : : target : <build>no <target-os>windows:<build>yes <target-os>windows:<source>Advapi32 ]
     ;
 

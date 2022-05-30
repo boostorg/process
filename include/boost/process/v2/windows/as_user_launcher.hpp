@@ -11,6 +11,7 @@
 #ifndef BOOST_PROCESS_V2_WINDOWS_AS_USER_LAUNCHER_HPP
 #define BOOST_PROCESS_V2_WINDOWS_AS_USER_LAUNCHER_HPP
 
+#include <boost/process/v2/detail/config.hpp>
 #include <boost/process/v2/windows/default_launcher.hpp>
 
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
@@ -23,10 +24,8 @@ struct as_user_launcher : default_launcher
   HANDLE token;
   as_user_launcher(HANDLE token = INVALID_HANDLE_VALUE) : token(token) {}
 
-
   template<typename ExecutionContext, typename Args, typename ... Inits>
   auto operator()(ExecutionContext & context,
-                  error_code & ec,
                   const typename std::enable_if<std::is_convertible<
                              ExecutionContext&, BOOST_PROCESS_V2_ASIO_NAMESPACE::execution_context&>::value,
                              filesystem::path >::type & executable,
@@ -34,7 +33,7 @@ struct as_user_launcher : default_launcher
                   Inits && ... inits ) -> basic_process<typename ExecutionContext::executor_type>
   {
       error_code ec;
-      auto proc =  (*this)(context, ec, path, std::forward<Args>(args), std::forward<Inits>(inits)...);
+      auto proc =  (*this)(context, ec, executable, std::forward<Args>(args), std::forward<Inits>(inits)...);
 
       if (ec)
           asio::detail::throw_error(ec, "as_user_launcher");
@@ -52,12 +51,11 @@ struct as_user_launcher : default_launcher
                      Args && args,
                      Inits && ... inits ) -> basic_process<typename ExecutionContext::executor_type>
   {
-      return (*this)(context.get_executor(), path, std::forward<Args>(args), std::forward<Inits>(inits)...);
+      return (*this)(context.get_executor(), executable, std::forward<Args>(args), std::forward<Inits>(inits)...);
   }
 
   template<typename Executor, typename Args, typename ... Inits>
   auto operator()(Executor exec,
-                     error_code & ec,
                      const typename std::enable_if<
                              BOOST_PROCESS_V2_ASIO_NAMESPACE::execution::is_executor<Executor>::value ||
                              BOOST_PROCESS_V2_ASIO_NAMESPACE::is_executor<Executor>::value,
@@ -66,7 +64,7 @@ struct as_user_launcher : default_launcher
                      Inits && ... inits ) -> basic_process<Executor>
   {
       error_code ec;
-      auto proc =  (*this)(std::move(exec), ec, path, std::forward<Args>(args), std::forward<Inits>(inits)...);
+      auto proc = (*this)(std::move(exec), ec, executable, std::forward<Args>(args), std::forward<Inits>(inits)...);
 
       if (ec)
           asio::detail::throw_error(ec, "as_user_launcher");
@@ -76,17 +74,17 @@ struct as_user_launcher : default_launcher
   
   template<typename Executor, typename Args, typename ... Inits>
   auto operator()(Executor exec,
-                     error_code & ec,
-                     const typename std::enable_if<
-                             BOOST_PROCESS_V2_ASIO_NAMESPACE::execution::is_executor<Executor>::value || 
-                             BOOST_PROCESS_V2_ASIO_NAMESPACE::is_executor<Executor>::value,
-                             filesystem::path >::type & executable,
-                     Args && args,
-                     Inits && ... inits ) -> basic_process<Executor>
+                  error_code & ec,
+                  const typename std::enable_if<
+                      BOOST_PROCESS_V2_ASIO_NAMESPACE::execution::is_executor<Executor>::value || 
+                      BOOST_PROCESS_V2_ASIO_NAMESPACE::is_executor<Executor>::value,
+                        filesystem::path >::type & executable,
+                  Args && args,
+                  Inits && ... inits ) -> basic_process<Executor>
   {
-    auto command_line = this->build_command_line_(executable, args);
+    auto command_line = this->build_command_line(executable, args);
 
-    ec = on_init_(*this, executable, command_line, inits...);
+    ec = detail::on_setup(*this, executable, command_line, inits...);
     if (ec)
     {
       detail::on_error(*this, executable, command_line, ec, inits...);
@@ -95,25 +93,25 @@ struct as_user_launcher : default_launcher
     auto ok = ::CreateProcessAsUserW(
         token,
         executable.empty() ? nullptr : executable.c_str(),
-        command_line.empty() ? nullptr :  command_line.c_str(),
+        command_line.empty() ? nullptr : &command_line.front(),
         process_attributes,
         thread_attributes,
         inherit_handles ? TRUE : FALSE,
         creation_flags,
         environment,
         current_directory.empty() ? nullptr : current_directory.c_str(),
-        &startup_info,
+        &startup_info.StartupInfo,
         &process_information);
 
 
     if (ok == 0)
     {
-      ec.assign(::GetLastError(), error::get_system_category());
+      ec = detail::get_last_error();
       detail::on_error(*this, executable, command_line, ec, inits...);
 
-      if (process_information.hProcess != INVALID_HANDLE)
+      if (process_information.hProcess != INVALID_HANDLE_VALUE)
         ::CloseHandle(process_information.hProcess);
-      if (process_information.hThread != INVALID_HANDLE)
+      if (process_information.hThread != INVALID_HANDLE_VALUE)
         ::CloseHandle(process_information.hThread);
 
       return basic_process<Executor>(exec);
@@ -121,7 +119,7 @@ struct as_user_launcher : default_launcher
     {
       detail::on_success(*this, executable, command_line, inits...);
 
-      if (process_information.hThread != INVALID_HANDLE)
+      if (process_information.hThread != INVALID_HANDLE_VALUE)
         ::CloseHandle(process_information.hThread);
 
       return basic_process<Executor>(exec,
