@@ -26,6 +26,9 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#if defined(__FreeBSD__)
+extern "C" { extern char **environ; }
+#endif
 
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
 

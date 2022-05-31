@@ -62,11 +62,7 @@ BOOST_AUTO_TEST_CASE(environment)
     ec.clear();
 
     for (auto && ke : bpe::current())
-    {
-      std::wcerr << "KV 1 " << ke << std::endl;
-      std::wcerr << "KV 2 " << ke.c_str() << std::endl;
       BOOST_CHECK_EQUAL(bpe::get(ke.get<0>()), ke.get<1>());
-    }
 
 
 #if defined(BOOST_PROCESS_V2_POSIX)

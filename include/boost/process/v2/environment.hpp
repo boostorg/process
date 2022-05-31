@@ -1063,15 +1063,6 @@ struct key_value_pair
     }
 
     template<std::size_t Idx>
-    auto get() const
-    {
-        if constexpr (Idx == 0u)
-            return key_view();
-        else
-            return value_view();
-    }
-
-    template<std::size_t Idx>
     inline auto get() const 
         -> typename conditional<Idx == 0u, boost::process::v2::environment::key_view,
                                            boost::process::v2::environment::value_view>::type;

@@ -14,6 +14,10 @@
 #include <boost/process/v2/detail/config.hpp>
 #include <boost/process/v2/cstring_ref.hpp>
 
+#if defined(__FreeBSD__)
+extern "C" { extern char **environ; }
+#endif
+
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
 
 namespace environment
