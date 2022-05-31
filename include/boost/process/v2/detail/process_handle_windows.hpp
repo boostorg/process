@@ -80,13 +80,13 @@ struct basic_process_handle_win
     {
     }
 
-/*
+
     template<typename Executor1>
     basic_process_handle_win(basic_process_handle_win<Executor1> && handle)
             : pid_(handle.pid_), handle_(handle.handle_.get_executor())
     {
     }
-*/
+
     basic_process_handle_win(basic_process_handle_win && ) = default;
     basic_process_handle_win& operator=(basic_process_handle_win && ) = default;
 

@@ -251,7 +251,7 @@ struct default_launcher
                   Args && args,
                   Inits && ... inits ) -> enable_init<typename ExecutionContext::executor_type, Inits...>
   {
-      return (*this)(context.get_executor(), executable, std::forward<Args>(args), std::forward<Inits>(inits)...);
+      return (*this)(context.get_executor(), ec, executable, std::forward<Args>(args), std::forward<Inits>(inits)...);
   }
 
   template<typename Executor, typename Args, typename ... Inits>

@@ -28,7 +28,6 @@ struct with_token_launcher : default_launcher
 
   template<typename ExecutionContext, typename Args, typename ... Inits>
   auto operator()(ExecutionContext & context,
-                  error_code & ec,
                   const typename std::enable_if<std::is_convertible<
                              ExecutionContext&, BOOST_PROCESS_V2_ASIO_NAMESPACE::execution_context&>::value,
                              filesystem::path >::type & executable,
@@ -36,7 +35,7 @@ struct with_token_launcher : default_launcher
                   Inits && ... inits ) -> basic_process<typename ExecutionContext::executor_type>
   {
       error_code ec;
-      auto proc =  (*this)(context, ec, path, std::forward<Args>(args), std::forward<Inits>(inits)...);
+      auto proc =  (*this)(context, ec, executable, std::forward<Args>(args), std::forward<Inits>(inits)...);
 
       if (ec)
           asio::detail::throw_error(ec, "with_token_launcher");
@@ -54,12 +53,11 @@ struct with_token_launcher : default_launcher
                      Args && args,
                      Inits && ... inits ) -> basic_process<typename ExecutionContext::executor_type>
   {
-      return (*this)(context.get_executor(), path, std::forward<Args>(args), std::forward<Inits>(inits)...);
+      return (*this)(context.get_executor(), ec, executable, std::forward<Args>(args), std::forward<Inits>(inits)...);
   }
 
   template<typename Executor, typename Args, typename ... Inits>
   auto operator()(Executor exec,
-                     error_code & ec,
                      const typename std::enable_if<
                              BOOST_PROCESS_V2_ASIO_NAMESPACE::execution::is_executor<Executor>::value ||
                              BOOST_PROCESS_V2_ASIO_NAMESPACE::is_executor<Executor>::value,
@@ -68,7 +66,7 @@ struct with_token_launcher : default_launcher
                      Inits && ... inits ) -> basic_process<Executor>
   {
       error_code ec;
-      auto proc =  (*this)(std::move(exec), ec, path, std::forward<Args>(args), std::forward<Inits>(inits)...);
+      auto proc =  (*this)(std::move(exec), ec, executable, std::forward<Args>(args), std::forward<Inits>(inits)...);
 
       if (ec)
           asio::detail::throw_error(ec, "with_token_launcher");
@@ -94,24 +92,21 @@ struct with_token_launcher : default_launcher
       detail::on_error(*this, executable, command_line, ec, inits...);
       return basic_process<Executor>(exec);
     }
-    auto ok = ::CreateProcessWithTokenW (
+    auto ok = ::CreateProcessWithTokenW(
         token,
-        logon_flags
+        logon_flags,
         executable.empty() ? nullptr : executable.c_str(),
         command_line.empty() ? nullptr :  &command_line.front(),
-        process_attributes,
-        thread_attributes,
-        inherit_handles ? TRUE : FALSE,
         creation_flags,
         environment,
         current_directory.empty() ? nullptr : current_directory.c_str(),
-        &startup_info,
+        &startup_info.StartupInfo,
         &process_information);
 
 
     if (ok == 0)
     {
-      ec.assign(::GetLastError(), error::get_system_category());
+      ec = detail::get_last_error();
       detail::on_error(*this, executable, command_line, ec, inits...);
 
       if (process_information.hProcess != INVALID_HANDLE_VALUE)
