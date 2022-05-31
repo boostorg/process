@@ -29,11 +29,22 @@ BOOST_PROCESS_V2_BEGIN_NAMESPACE
 template<typename Executor = BOOST_PROCESS_V2_ASIO_NAMESPACE::any_io_executor>
 struct basic_process
 {
+  /// The executor of the process
   using executor_type = Executor;
+  /// Get the executor of the process
   executor_type get_executor() {return process_handle_.get_executor();}
 
+  /// The non-closing handle type
+  using handle_type = basic_process_handle<executor_type>;
+
+  /// Get the underlying non-closing handle
+  handle_type & handle() { return process_handle_; }
+
+  /// Get the underlying non-closing handle
+  const handle_type & handle() const { return process_handle_; }
+
   /// Provides access to underlying operating system facilities
-  using native_handle_type = typename basic_process_handle<executor_type>::native_handle_type;
+  using native_handle_type = typename handle_type::native_handle_type;
 
   /// Rebinds the process_handle to another executor.
   template <typename Executor1>
