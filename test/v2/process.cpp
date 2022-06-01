@@ -18,6 +18,7 @@
 #include <boost/process/v2/process.hpp>
 #include <boost/process/v2/environment.hpp>
 #include <boost/process/v2/start_dir.hpp>
+#include <boost/process/v2/execute.hpp>
 #include <boost/process/v2/stdio.hpp>
 
 #include <boost/test/unit_test.hpp>
@@ -76,7 +77,7 @@ BOOST_AUTO_TEST_CASE(exit_code_sync)
     boost::asio::io_context ctx;
     
     BOOST_CHECK_EQUAL(bpv::process(ctx, pth, {"exit-code", "0"}).wait(), 0);
-    BOOST_CHECK_EQUAL(bpv::process(ctx, pth, {"exit-code", "1"}).wait(), 1);
+    BOOST_CHECK_EQUAL(bpv::execute(bpv::process(ctx, pth, {"exit-code", "1"})), 1);
     std::vector<std::string> args = {"exit-code", "2"};
     BOOST_CHECK_EQUAL(bpv::default_process_launcher()(ctx, pth, args).wait(), 2);
     args[1] = "42";
@@ -101,7 +102,9 @@ BOOST_AUTO_TEST_CASE(exit_code_async)
     bpv::process proc4(ctx, pth, {"exit-code", "42"});
 
     proc1.async_wait([&](bpv::error_code ec, int e) {BOOST_CHECK(!ec); called++; BOOST_CHECK_EQUAL(bpv::evaluate_exit_code(e), 0);});
-    proc2.async_wait([&](bpv::error_code ec, int e) {BOOST_CHECK(!ec); called++; BOOST_CHECK_EQUAL(bpv::evaluate_exit_code(e), 1);});
+    bpv::async_execute(
+            bpv::process(ctx, pth, {"exit-code", "1"}),
+            [&](bpv::error_code ec, int e) {BOOST_CHECK(!ec); called++; BOOST_CHECK_EQUAL(bpv::evaluate_exit_code(e), 1);});
     proc3.async_wait([&](bpv::error_code ec, int e) {BOOST_CHECK(!ec); called++; BOOST_CHECK_EQUAL(bpv::evaluate_exit_code(e), 2);});
     proc4.async_wait([&](bpv::error_code ec, int e) {BOOST_CHECK(!ec); called++; BOOST_CHECK_EQUAL(bpv::evaluate_exit_code(e), 42);});
     ctx.run();
