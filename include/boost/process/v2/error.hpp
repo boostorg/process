@@ -20,6 +20,10 @@ enum utf8_conv_error
 
 extern BOOST_PROCESS_V2_DECL const error_category& get_utf8_category();
 static const error_category& utf8_category = get_utf8_category();
+
+extern BOOST_PROCESS_V2_DECL const error_category& get_exit_code_category();
+static const error_category& exit_code_category = get_exit_code_category();
+
 }
 
 BOOST_PROCESS_V2_END_NAMESPACE
