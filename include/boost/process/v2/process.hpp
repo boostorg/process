@@ -154,11 +154,11 @@ struct basic_process
   }
 
   /// Attach to an existing process
-  explicit basic_process(executor_type exec, pid_type pid) : process_handle_{std::move(exec), pid} {}
+  explicit basic_process(executor_type exec, pid_type pid) : process_handle_(std::move(exec), pid) {}
 
   /// Attach to an existing process and the internal handle
   explicit basic_process(executor_type exec, pid_type pid, native_handle_type native_handle)
-        : process_handle_{std::move(exec), pid, native_handle} {}
+        : process_handle_(std::move(exec), pid, native_handle) {}
 
   /// Create an invalid handle
   explicit basic_process(executor_type exec) : process_handle_{std::move(exec)} {}
@@ -169,7 +169,7 @@ struct basic_process
                          typename std::enable_if<
                              std::is_convertible<ExecutionContext&,
                                 BOOST_PROCESS_V2_ASIO_NAMESPACE::execution_context&>::value, void *>::type = nullptr)
-       : process_handle_{context, pid} {}
+       : process_handle_(context, pid) {}
 
   /// Attach to an existing process and the internal handle
   template <typename ExecutionContext>
@@ -177,7 +177,7 @@ struct basic_process
                          typename std::enable_if<
                             std::is_convertible<ExecutionContext&, 
                                 BOOST_PROCESS_V2_ASIO_NAMESPACE::execution_context&>::value, void *>::type = nullptr)
-      : process_handle_{context, pid, native_handle} {}
+      : process_handle_(context, pid, native_handle) {}
 
   /// Create an invalid handle
   template <typename ExecutionContext>
@@ -185,7 +185,7 @@ struct basic_process
                          typename std::enable_if<
                              is_convertible<ExecutionContext&, 
                                 BOOST_PROCESS_V2_ASIO_NAMESPACE::execution_context&>::value, void *>::type = nullptr)
-     : process_handle_{context} {}
+     : process_handle_(context) {}
 
 
 

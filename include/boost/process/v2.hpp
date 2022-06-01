@@ -9,6 +9,7 @@
 #include <boost/process/v2/environment.hpp>
 #include <boost/process/v2/exit_code.hpp>
 #include <boost/process/v2/pid.hpp>
+#include <boost/process/v2/popen.hpp>
 #include <boost/process/v2/process_handle.hpp>
 #include <boost/process/v2/process.hpp>
 #include <boost/process/v2/start_dir.hpp>

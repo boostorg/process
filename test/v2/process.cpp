@@ -14,6 +14,7 @@
 #endif
 
 // Test that header file is self-contained.
+#include <boost/process/v2/popen.hpp>
 #include <boost/process/v2/process.hpp>
 #include <boost/process/v2/environment.hpp>
 #include <boost/process/v2/start_dir.hpp>
@@ -25,6 +26,7 @@
 #include <boost/asio/readable_pipe.hpp>
 #include <boost/asio/read.hpp>
 #include <boost/asio/streambuf.hpp>
+#include <boost/asio/write.hpp>
 #include <boost/asio/writable_pipe.hpp>
 
 #include <fstream>
@@ -307,6 +309,36 @@ BOOST_AUTO_TEST_CASE(print_same_cwd)
 
   proc.wait();
   BOOST_CHECK_MESSAGE(proc.exit_code() == 0, proc.exit_code());
+}
+
+
+BOOST_AUTO_TEST_CASE(popen)
+{
+    using boost::unit_test::framework::master_test_suite;
+    const auto pth =  master_test_suite().argv[1];
+
+    asio::io_context ctx;
+
+    asio::readable_pipe rp{ctx};
+
+
+    // default CWD
+    bpv::popen proc(ctx, pth, {"echo"});
+
+    asio::write(proc, asio::buffer("FOOBAR"));
+
+    proc.get_stdin().close();
+
+    std::string res;
+    boost::system::error_code ec;
+    std::size_t n = asio::read(proc, asio::dynamic_buffer(res), ec);
+    res.resize(n - 1);
+    BOOST_CHECK_EQUAL(ec, asio::error::eof);
+    // remove EOF
+    BOOST_CHECK_EQUAL(res, "FOOBAR");
+
+    proc.wait();
+    BOOST_CHECK_MESSAGE(proc.exit_code() == 0, proc.exit_code());
 }
 
 BOOST_AUTO_TEST_CASE(print_other_cwd)

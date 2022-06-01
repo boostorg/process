@@ -29,9 +29,9 @@ project : requirements
 
 import testing ;
 
-alias filesystem       : /boost//filesystem      ;
+alias filesystem   : /boost//filesystem ;
 
-exe target : target.cpp filesystem : 
+exe target : target.cpp :
     <warnings>off <target-os>windows:<source>shell32
                   <target-os>windows:<source>Ntdll
     ;

@@ -54,25 +54,24 @@ struct basic_process_handle_fd
 
     template<typename ExecutionContext>
     basic_process_handle_fd(ExecutionContext &context,
-                                typename std::enable_if<
-                                        std::is_convertible<ExecutionContext &,
-                                                BOOST_PROCESS_V2_ASIO_NAMESPACE::execution_context &>::value
-                                >::type = 0)
+                            typename std::enable_if<
+                                std::is_convertible<ExecutionContext &,
+                                    BOOST_PROCESS_V2_ASIO_NAMESPACE::execution_context &>::value>::type * = nullptr)
             : pid_(-1), descriptor_(context)
     {
     }
 
-    basic_process_handle_fd(Executor executor)
+    basic_process_handle_fd(executor_type executor)
             : pid_(-1), descriptor_(executor)
     {
     }
 
-    basic_process_handle_fd(Executor executor, pid_type pid)
+    basic_process_handle_fd(executor_type executor, pid_type pid)
             : pid_(pid), descriptor_(executor, syscall(SYS_pidfd_open, pid, 0))
     {
     }
 
-    basic_process_handle_fd(Executor executor, pid_type pid, native_handle_type process_handle)
+    basic_process_handle_fd(executor_type executor, pid_type pid, native_handle_type process_handle)
             : pid_(pid), descriptor_(executor, process_handle)
     {
     }
@@ -185,13 +184,15 @@ struct basic_process_handle_fd
         if (pid_ <= 0)
             return false;
         int code = 0;
-        int res = ::waitpid(pid_, &code, 0);
+        int res = ::waitpid(pid_, &code, WNOHANG);
         if (res == -1)
             ec = get_last_error();
+        else if (res == 0)
+            return true;
         else
             ec.clear();
 
-        if (process_is_running(res))
+        if (process_is_running(code))
             return true;
         else
         {
