@@ -291,13 +291,10 @@ BOOST_AUTO_TEST_CASE(print_same_cwd)
   asio::io_context ctx;
 
   asio::readable_pipe rp{ctx};
-  asio::writable_pipe wp{ctx};
-  asio::connect_pipe(rp, wp);
 
 
   // default CWD
-  bpv::process proc(ctx, pth, {"print-cwd"}, bpv::process_stdio{/*.in=*/{},/*.out=*/wp});
-  wp.close();
+  bpv::process proc(ctx, pth, {"print-cwd"}, bpv::process_stdio{/*.in=*/{},/*.out=*/rp});
 
   std::string out;
   bpv::error_code ec;

@@ -13,6 +13,11 @@
 #include <boost/process/v2/detail/config.hpp>
 #include <boost/process/v2/default_launcher.hpp>
 
+#if defined(BOOST_PROCESS_V2_STANDALONE)
+#include <asio/connect_pipe.hpp>
+#else
+#include <boost/asio/connect_pipe.hpp>
+#endif
 
 #if defined(BOOST_PROCESS_V2_POSIX)
 #include <fcntl.h>
@@ -91,6 +96,30 @@ struct process_io_binding
   }
 
 
+  template<typename Executor>
+  process_io_binding(BOOST_PROCESS_V2_ASIO_NAMESPACE::basic_readable_pipe<Executor> & readable_pipe,
+                     typename std::enable_if<Target != STD_INPUT_HANDLE, Executor*>::type = 0)
+  {
+    BOOST_PROCESS_V2_ASIO_NAMESPACE::detail::native_pipe_handle p[2];
+    BOOST_PROCESS_V2_ASIO_NAMESPACE::detail::create_pipe(p, ec);
+    if (ec)
+      return ;
+    h = std::unique_ptr<void, handle_closer>{p[1], true};
+    readable_pipe.assign(p[0], ec);
+  }
+
+
+  template<typename Executor>
+  process_io_binding(BOOST_PROCESS_V2_ASIO_NAMESPACE::basic_writable_pipe<Executor> & writable_pipe,
+                     typename std::enable_if<Target == STD_INPUT_HANDLE, Executor*>::type = 0)
+  {
+    BOOST_PROCESS_V2_ASIO_NAMESPACE::detail::native_pipe_handle p[2];
+    BOOST_PROCESS_V2_ASIO_NAMESPACE::detail::create_pipe(p, ec);
+    if (ec)
+      return ;
+    h = std::unique_ptr<void, handle_closer>{p[0], true};
+    writable_pipe.assign(p[1], ec);
+  }
 };
 
 typedef process_io_binding<STD_INPUT_HANDLE>  process_input_binding;
@@ -105,6 +134,7 @@ struct process_io_binding
   constexpr static int target = Target;
   int fd{target};
   bool fd_needs_closing{false};
+  error_code ec;
 
   ~process_io_binding()
   {
@@ -129,13 +159,56 @@ struct process_io_binding
   {
   }
 
-  error_code on_exec_setup(posix::default_launcher & launcher, 
+  template<typename Executor>
+  process_io_binding(BOOST_PROCESS_V2_ASIO_NAMESPACE::basic_readable_pipe<Executor> & readable_pipe,
+                     typename std::enable_if<Target != STDIN_FILENO, Executor*>::type = 0)
+  {
+    BOOST_PROCESS_V2_ASIO_NAMESPACE::detail::native_pipe_handle p[2];
+    BOOST_PROCESS_V2_ASIO_NAMESPACE::detail::create_pipe(p, ec);
+    if (ec)
+      return ;
+    fd = p[1];
+    if (::fcntl(p[0], F_SETFD, FD_CLOEXEC) == -1)
+    {
+      ec = detail::get_last_error();
+      return ;
+    }
+    fd_needs_closing = true;
+    readable_pipe.assign(p[0], ec);
+  }
+
+
+  template<typename Executor>
+  process_io_binding(BOOST_PROCESS_V2_ASIO_NAMESPACE::basic_writable_pipe<Executor> & writable_pipe,
+                     typename std::enable_if<Target == STDIN_FILENO, Executor*>::type = 0)
+  {
+    BOOST_PROCESS_V2_ASIO_NAMESPACE::detail::native_pipe_handle p[2];
+    BOOST_PROCESS_V2_ASIO_NAMESPACE::detail::create_pipe(p, ec);
+    if (ec)
+      return ;
+    fd = p[0];
+    if (::fcntl(p[1], F_SETFD, FD_CLOEXEC) == -1)
+    {
+      ec = detail::get_last_error();
+      return ;
+    }
+    fd_needs_closing = true;
+    writable_pipe.assign(p[1], ec);
+  }
+
+  error_code on_setup(posix::default_launcher &,
+                      const filesystem::path &, const char * const *)
+  {
+      return ec;
+  }
+
+  error_code on_exec_setup(posix::default_launcher & launcher,
                            const filesystem::path &, const char * const *)
   {
     if (::dup2(fd, target) == -1)
-      return error_code(errno, system_category());
+      return get_last_error();
     else
-      return error_code ();
+      return error_code();
   }
 };
 

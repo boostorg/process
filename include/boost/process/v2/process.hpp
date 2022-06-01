@@ -274,7 +274,7 @@ struct basic_process
     error_code ec;
     native_exit_code_type exit_code;
     auto r =  process_handle_.running(exit_code, ec);
-    if (!ec)
+    if (!ec && !r)
       exit_status_ = exit_code;
     else
       throw system_error(ec, "running failed");
@@ -285,7 +285,7 @@ struct basic_process
   {
     native_exit_code_type exit_code ;
     auto r =  process_handle_.running(exit_code, ec);
-    if (!ec)
+    if (!ec && !r)
       exit_status_ = exit_code;
     return r;
   }

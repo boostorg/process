@@ -2,6 +2,7 @@
 #include <string>
 #include <boost/process/v2/environment.hpp>
 
+
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 #include <windows.h>
 #else
@@ -35,6 +36,7 @@ int main(int argc, char * argv[])
         char buf[65535];
         printf(::getcwd(buf, sizeof(buf)));
 #endif
+        return 0;
     }
     else if (mode == "check-eof")
     {
