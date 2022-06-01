@@ -20,9 +20,7 @@ namespace bpe = boost::process::v2::environment;
 
 BOOST_AUTO_TEST_CASE(environment)
 {
-#if defined(BOOST_PROCESS_V2_WINDOWS)
 
-#endif
     for (const auto & elem : bpe::get("PATH"))
         BOOST_CHECK(std::find(elem.begin(), elem.end(), bpe::delimiter) == elem.end());
 
@@ -45,9 +43,6 @@ BOOST_AUTO_TEST_CASE(environment)
     BOOST_CHECK(bpe::get(key1) == "some test string");
 
     bpe::set(key2, "some test string");
-#if defined(BOOST_PROCESS_V2_POSIX)
-    //bpe::unset(key1);
-#endif
 
     bpe::get(key1, ec);
     BOOST_CHECK(!ec);

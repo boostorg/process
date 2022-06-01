@@ -13,6 +13,7 @@
 #include <boost/process/v2/detail/config.hpp>
 #include <boost/process/v2/cstring_ref.hpp>
 #include <boost/process/v2/detail/utf8.hpp>
+#include <functional>
 #include <memory>
 #include <numeric>
 
@@ -436,6 +437,44 @@ inline value_view key_value_pair_view::get<1u>() const
 {
     return value();
 }
+
+namespace detail
+{
+
+template<typename Char>
+std::size_t hash_step(std::size_t prev, Char c, std::char_traits<Char>)
+{
+    return prev ^ (c << 1);
+}
+
+}
+
+inline std::size_t hash_value(const key_view & value)
+{
+    std::size_t hash = 0u;
+    for (auto c = value.data(); *c != *v2::detail::null_char_(*c); c++)
+        hash = detail::hash_step(hash, *c, key_view::traits_type{});
+    return hash ;
+}
+
+
+inline std::size_t hash_value(const BOOST_PROCESS_V2_NAMESPACE::environment::value_view & value)
+{
+    std::size_t hash = 0u;
+    for (auto c = value.data(); *c != *v2::detail::null_char_(*c); c++)
+        hash = detail::hash_step(hash, *c, value_view::traits_type{});
+    return hash ;
+}
+
+
+inline std::size_t hash_value(const BOOST_PROCESS_V2_NAMESPACE::environment::key_value_pair_view & value)
+{
+    std::size_t hash = 0u;
+    for (auto c = value.data(); *c != *v2::detail::null_char_(*c); c++)
+        hash = detail::hash_step(hash, *c, key_value_pair_view::traits_type{});
+    return hash ;
+}
+
 
 struct key
 {
@@ -1586,7 +1625,73 @@ struct process_environment
 };
 
 
+
 BOOST_PROCESS_V2_END_NAMESPACE
+
+
+namespace std
+{
+
+template<>
+struct hash<BOOST_PROCESS_V2_NAMESPACE::environment::key_view>
+{
+    std::size_t operator()( BOOST_PROCESS_V2_NAMESPACE::environment::key_view kv) const noexcept
+    {
+        return BOOST_PROCESS_V2_NAMESPACE::environment::hash_value(kv);
+    }
+};
+
+
+template<>
+struct hash<BOOST_PROCESS_V2_NAMESPACE::environment::value_view>
+{
+    std::size_t operator()( BOOST_PROCESS_V2_NAMESPACE::environment::value_view kv) const noexcept
+    {
+        return BOOST_PROCESS_V2_NAMESPACE::environment::hash_value(kv);
+    }
+};
+
+template<>
+struct hash<BOOST_PROCESS_V2_NAMESPACE::environment::key_value_pair_view>
+{
+    std::size_t operator()( BOOST_PROCESS_V2_NAMESPACE::environment::key_value_pair_view kv) const noexcept
+    {
+        return BOOST_PROCESS_V2_NAMESPACE::environment::hash_value(kv);
+    }
+};
+
+
+template<>
+struct hash<BOOST_PROCESS_V2_NAMESPACE::environment::key>
+{
+    std::size_t operator()( BOOST_PROCESS_V2_NAMESPACE::environment::key_view kv) const noexcept
+    {
+        return BOOST_PROCESS_V2_NAMESPACE::environment::hash_value(kv);
+    }
+};
+
+
+template<>
+struct hash<BOOST_PROCESS_V2_NAMESPACE::environment::value>
+{
+    std::size_t operator()( BOOST_PROCESS_V2_NAMESPACE::environment::value_view kv) const noexcept
+    {
+        return BOOST_PROCESS_V2_NAMESPACE::environment::hash_value(kv);
+    }
+};
+
+template<>
+struct hash<BOOST_PROCESS_V2_NAMESPACE::environment::key_value_pair>
+{
+    std::size_t operator()( BOOST_PROCESS_V2_NAMESPACE::environment::key_value_pair_view kv) const noexcept
+    {
+        return BOOST_PROCESS_V2_NAMESPACE::environment::hash_value(kv);
+    }
+};
+
+}
+
+
 
 #if defined(BOOST_PROCESS_V2_HEADER_ONLY)
 

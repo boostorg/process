@@ -26,6 +26,11 @@
 
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
 
+#if defined(GENERATING_DOCUMENTATION)
+
+typedef implementation-typed default_process_launcher;
+
+#else
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 typedef windows::default_launcher default_process_launcher;
 #else
@@ -34,6 +39,9 @@ typedef posix::pdfork_launcher default_process_launcher;
 #else
 typedef posix::default_launcher default_process_launcher;
 #endif
+#endif
+
+
 #endif
 
 

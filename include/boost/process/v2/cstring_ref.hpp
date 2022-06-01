@@ -27,23 +27,27 @@ BOOST_CONSTEXPR static const char32_t* null_char_(char32_t) {return U"";}
 BOOST_CONSTEXPR static const char8_t* null_char_(char8_t) {return u8"";}
 #endif
 
-
 }
 
 #if defined(BOOST_PROCESS_V2_STANDALONE)
 using std::basic_string_view;
 using std::   string_view;
 using std::  wstring_view;
-using std::u16string_view;
-using std::u32string_view;
 #else
 using boost::basic_string_view;
 using boost::   string_view;
 using boost::  wstring_view;
-using boost::u16string_view;
-using boost::u32string_view;
 #endif
 
+
+/// Small wrapper for a null-terminated string that can be directly passed to C APIS
+/** This ref can only be modified by moving the front pointer. It does not store the 
+ * size, but can detect values that can directly be passed to system APIs.
+ * 
+ * It can be constructed from a `char*` pointer or any class that has a `c_str()` 
+ * member function, e.g. std::string or boost::static_string.
+ * 
+ */
 template<typename CharT, typename Traits = std::char_traits<CharT>>
 struct basic_cstring_ref
 {
@@ -208,9 +212,6 @@ operator<<(std::basic_ostream<charT, traits>& os,
 {
     return os << static_cast<basic_string_view<charT, traits>>(str);
 }
-
-// Forward declaration of Boost.ContainerHash function
-template <class It> std::size_t hash_range(It, It);
 
 template <class charT, class traits>
 std::size_t hash_value(basic_string_view<charT, traits> s) {

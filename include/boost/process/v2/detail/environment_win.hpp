@@ -137,6 +137,18 @@ struct key_char_traits
   }
 };
 
+namespace detail
+{
+
+
+template<typename Char>
+std::size_t hash_step(std::size_t prev, Char c, key_char_traits<Char>)
+{
+    return prev ^ (key_char_traits<Char>::to_lower(c) << 1);
+}
+
+
+}
 
 template<typename Char>
 using value_char_traits = std::char_traits<Char>;
