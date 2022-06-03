@@ -15,6 +15,7 @@ BOOST_PROCESS_V2_BEGIN_NAMESPACE
 namespace posix
 {
 
+/// Utility class to bind a file descriptor to an explicit file descriptor for the child process.
 struct bind_fd
 {
     int target;
@@ -28,19 +29,69 @@ struct bind_fd
     }
 
     bind_fd() = delete;
+    /// Inherit file descriptor with the same value.
+    /**
+     * This will pass descriptor 42 as 42 to the child process:
+     * @code
+     * process p{"test", {},  posix::bind_fd(42)};
+     * @endcode
+     */
     bind_fd(int target) : target(target), fd(target) {}
+
+    /// Inherit an asio io-object as a given file descriptor to the child process.
+    /**
+     * This will pass the tcp::socket, as 42 to the child process:
+     * @code
+     * extern tcp::socket sock; 
+     * process p{"test", {},  posix::bind_fd(42, sock)};
+     * @endcode
+     */
+
     template<typename Stream>
-    bind_fd(Stream && str, decltype(std::declval<Stream>().native_handle()) = -1)
-        : bind_fd(str.native_handle())
+    bind_fd(int target, Stream && str, decltype(std::declval<Stream>().native_handle()) = -1)
+        : bind_fd(target, str.native_handle())
     {}
+
+    /// Inherit a `FILE` as a given file descriptor to the child process.
+    /**
+     * This will pass the given `FILE*`, as 42 to the child process:
+     * @code
+     * process p{"test", {},  posix::bind_fd(42, stderr)};
+     * @endcode
+     */
     bind_fd(int target, FILE * f) : bind_fd(target, fileno(f)) {}
+    
+    /// Inherit a file descriptor with as a differnet value.
+    /**
+     * This will pass 24 as 42 to the child process:
+     * @code
+     * process p{"test", {},  posix::bind_fd(42, 24)};
+     * @endcode
+     */
     bind_fd(int target, int fd) : target(target), fd(fd) {}
+    
+    /// Inherit a null device as a set descriptor.
+    /**
+     * This will pass 24 as 42 to the child process:
+     * @code
+     * process p{"test", {},  posix::bind_fd(42, nullptr)};
+     * @endcode
+     */
     bind_fd(int target, std::nullptr_t) : bind_fd(target, filesystem::path("/dev/null")) {}
+
+    /// Inherit a newly openedfile as a set descriptor.
+    /**
+     * This will pass 24 as 42 to the child process:
+     * @code
+     * process p{"test", {},  posix::bind_fd(42, "extra-output.txt")};
+     * @endcode
+     */
     bind_fd(int target, const filesystem::path & pth, int flags = O_RDWR | O_CREAT)
             : target(target), fd(::open(pth.c_str(), flags, 0660)), fd_needs_closing(true)
     {
     }
 
+    /// Implementation of the initialization function.
     error_code on_exec_setup(posix::default_launcher & launcher, const filesystem::path &, const char * const *)
     {
         if (::dup2(fd, target) == -1)

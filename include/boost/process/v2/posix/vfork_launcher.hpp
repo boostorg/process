@@ -14,7 +14,7 @@ namespace posix
 {
 
 
-/// The default launcher for processes on windows.
+/// A launcher using vfork instead of fork. 
 struct vfork_launcher :  default_launcher
 {
     vfork_launcher() = default;

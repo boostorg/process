@@ -18,9 +18,10 @@ BOOST_PROCESS_V2_BEGIN_NAMESPACE
 namespace windows
 {
 
-/// The default launcher for processes on windows.
+/// A windows launcher using CreateProcessAsUser instead of CreateProcess
 struct as_user_launcher : default_launcher
 {
+  /// The token to be used in CreateProcessAsUser.
   HANDLE token;
   as_user_launcher(HANDLE token = INVALID_HANDLE_VALUE) : token(token) {}
 

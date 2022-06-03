@@ -12,7 +12,7 @@ BOOST_PROCESS_V2_BEGIN_NAMESPACE
 namespace posix
 {
 
-/// The default launcher for processes on windows.
+/// A posix fork launcher that ignores errors after `fork`.
 struct fork_and_forget_launcher : default_launcher
 {
     fork_and_forget_launcher() = default;

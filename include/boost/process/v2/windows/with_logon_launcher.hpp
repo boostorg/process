@@ -17,7 +17,7 @@ BOOST_PROCESS_V2_BEGIN_NAMESPACE
 namespace windows
 {
 
-/// The default launcher for processes on windows.
+/// A windows launcher using CreateProcessWithLogon instead of CreateProcess
 struct with_logon_launcher : default_launcher
 {
   std::wstring username, domain, password;

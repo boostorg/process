@@ -17,6 +17,7 @@ BOOST_PROCESS_V2_BEGIN_NAMESPACE
 namespace windows
 {
 
+/// A templated initializer to add wShowWindow flags.
 template<DWORD Flags>
 struct process_show_window
 {

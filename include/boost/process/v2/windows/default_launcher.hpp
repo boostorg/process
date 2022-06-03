@@ -202,19 +202,27 @@ namespace windows
 /// The default launcher for processes on windows.
 struct default_launcher
 {
+  //// The process_attributes passed to CreateProcess
   SECURITY_ATTRIBUTES * process_attributes = nullptr;
+  //// The thread_attributes passed to CreateProcess
   SECURITY_ATTRIBUTES * thread_attributes = nullptr;
+  /// The bInheritHandles option. Needs to be set to true by any initializers using handles.
   bool inherit_handles = false;
-  DWORD creation_flags{EXTENDED_STARTUPINFO_PRESENT };
+  /// The creation flags of the process. Initializers may add to them; extended startupinfo is assumed.
+  DWORD creation_flags{EXTENDED_STARTUPINFO_PRESENT};
+  /// A pointer to the subprocess environment.
   void * environment = nullptr;
+  /// The startup director. An empty path will get ignored.
   filesystem::path current_directory{};
 
+  /// The full startup info passed to CreateProcess
   STARTUPINFOEXW startup_info{{sizeof(STARTUPINFOEXW), nullptr, nullptr, nullptr,
                               0, 0, 0, 0, 0, 0, 0, 0, 0, 0, nullptr,
                               INVALID_HANDLE_VALUE,
                               INVALID_HANDLE_VALUE,
                               INVALID_HANDLE_VALUE},
                               nullptr};
+  /// The process_information that gets assigned after a call to CreateProcess
   PROCESS_INFORMATION process_information{nullptr, nullptr, 0,0};
 
   template<typename Executor, typename ... Inits>

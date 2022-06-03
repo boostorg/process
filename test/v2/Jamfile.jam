@@ -29,7 +29,7 @@ project : requirements
 
 import testing ;
 
-alias filesystem   : /boost//filesystem ;
+alias filesystem   : /boost//filesystem : <link>static ;
 
 exe target : target.cpp :
     <warnings>off <target-os>windows:<source>shell32

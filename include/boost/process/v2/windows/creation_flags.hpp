@@ -17,6 +17,11 @@ BOOST_PROCESS_V2_BEGIN_NAMESPACE
 namespace windows
 {
 
+
+/// An initializers to add to the dwFlags in the startup-info
+/**
+ * @tparam Flags The flags to be set.
+ */
 template<DWORD Flags>
 struct process_creation_flags
 {
@@ -31,6 +36,7 @@ struct process_creation_flags
   };
 };
 
+/// A flag to create a new process group. Necessary to allow interupts for the subproces.
 constexpr static process_creation_flags<CREATE_NEW_PROCESS_GROUP> create_new_process_group;
 
 }

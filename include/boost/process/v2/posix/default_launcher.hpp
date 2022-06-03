@@ -289,8 +289,10 @@ inline void on_exec_error(Launcher & launcher, const filesystem::path &executabl
 /// The default launcher for processes on windows.
 struct default_launcher
 {
+    /// The pointer to the environment forwarded to the subprocess.
     const char * const * env = ::environ;
-    int pid;
+    /// The pid of the subprocess - will be assigned after fork.
+    int pid = -1;
 
     default_launcher() = default;
 
