@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <thread>
 #include <boost/process/v2/environment.hpp>
 
 
@@ -15,6 +16,12 @@ int main(int argc, char * argv[])
     std::string mode = argv[1];
     if (mode == "exit-code")
         return std::stoi(argv[2]);
+    else if (mode == "sleep")
+    {
+        const auto delay = std::chrono::milliseconds(std::stoi(argv[2]));
+        std::this_thread::sleep_for(delay);
+        return 0;
+    }
     else if (mode == "print-args")
         for (auto i = 0; i < argc; i++)
         {

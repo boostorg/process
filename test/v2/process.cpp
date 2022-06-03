@@ -84,6 +84,10 @@ BOOST_AUTO_TEST_CASE(exit_code_sync)
     auto proc = bpv::default_process_launcher()(ctx, pth, args);
     BOOST_CHECK_EQUAL(proc.wait(), 42);
 
+    BOOST_CHECK_EQUAL(bpv::process(ctx, pth, {"sleep", "100"}).wait(), 0);
+    BOOST_CHECK_EQUAL(bpv::execute(bpv::process(ctx, pth, {"sleep", "100"})), 0);
+
+
 }
 
 BOOST_AUTO_TEST_CASE(exit_code_async)
@@ -97,9 +101,11 @@ BOOST_AUTO_TEST_CASE(exit_code_async)
     int called = 0;
     
     bpv::process proc1(ctx, pth, {"exit-code", "0"});
-    bpv::process proc2(ctx, pth, {"exit-code", "1"});
+
     bpv::process proc3(ctx, pth, {"exit-code", "2"});
     bpv::process proc4(ctx, pth, {"exit-code", "42"});
+    bpv::process proc5(ctx, pth, {"sleep", "100"});;
+
 
     proc1.async_wait([&](bpv::error_code ec, int e) {BOOST_CHECK(!ec); called++; BOOST_CHECK_EQUAL(bpv::evaluate_exit_code(e), 0);});
     bpv::async_execute(
@@ -107,8 +113,13 @@ BOOST_AUTO_TEST_CASE(exit_code_async)
             [&](bpv::error_code ec, int e) {BOOST_CHECK(!ec); called++; BOOST_CHECK_EQUAL(bpv::evaluate_exit_code(e), 1);});
     proc3.async_wait([&](bpv::error_code ec, int e) {BOOST_CHECK(!ec); called++; BOOST_CHECK_EQUAL(bpv::evaluate_exit_code(e), 2);});
     proc4.async_wait([&](bpv::error_code ec, int e) {BOOST_CHECK(!ec); called++; BOOST_CHECK_EQUAL(bpv::evaluate_exit_code(e), 42);});
+    proc5.async_wait([&](bpv::error_code ec, int e) {BOOST_CHECK(!ec); called++; BOOST_CHECK_EQUAL(bpv::evaluate_exit_code(e), 0);});
+    bpv::async_execute(
+            bpv::process(ctx, pth, {"sleep", "100"}),
+            [&](bpv::error_code ec, int e) {BOOST_CHECK(!ec); called++; BOOST_CHECK_EQUAL(bpv::evaluate_exit_code(e), 0);});
+
     ctx.run();
-    BOOST_CHECK_EQUAL(called, 4);
+    BOOST_CHECK_EQUAL(called, 6);
 }
 
 
@@ -297,7 +308,6 @@ BOOST_AUTO_TEST_CASE(print_same_cwd)
 
   asio::readable_pipe rp{ctx};
 
-
   // default CWD
   bpv::process proc(ctx, pth, {"print-cwd"}, bpv::process_stdio{/*.in=*/{},/*.out=*/rp});
 
@@ -347,7 +357,7 @@ BOOST_AUTO_TEST_CASE(popen)
 BOOST_AUTO_TEST_CASE(print_other_cwd)
 {
   using boost::unit_test::framework::master_test_suite;
-  const auto pth =  master_test_suite().argv[1];
+  const auto pth = bpv::filesystem::absolute(master_test_suite().argv[1]);
 
   asio::io_context ctx;
 
@@ -355,10 +365,12 @@ BOOST_AUTO_TEST_CASE(print_other_cwd)
   asio::writable_pipe wp{ctx};
   asio::connect_pipe(rp, wp);
 
-  auto tmp = bpv::filesystem::canonical(bpv::filesystem::temp_directory_path());
+  auto target = bpv::filesystem::canonical(bpv::filesystem::temp_directory_path());
 
   // default CWD
-  bpv::process proc(ctx, pth, {"print-cwd"}, bpv::process_stdio{/*.in=*/{}, /*.out=*/wp}, bpv::process_start_dir(tmp));
+  bpv::process proc(ctx, pth, {"print-cwd"},
+                    bpv::process_stdio{/*.in=*/{}, /*.out=*/wp},
+                    bpv::process_start_dir(target));
   wp.close();
 
   std::string out;
@@ -367,8 +379,8 @@ BOOST_AUTO_TEST_CASE(print_other_cwd)
   auto sz = asio::read(rp, asio::dynamic_buffer(out),  ec);
   BOOST_CHECK(sz != 0);
   BOOST_CHECK_MESSAGE((ec == asio::error::broken_pipe) || (ec == asio::error::eof), ec.message());
-  BOOST_CHECK_MESSAGE(bpv::filesystem::path(out) == tmp,
-                     bpv::filesystem::path(out) << " != " << tmp);
+  BOOST_CHECK_MESSAGE(bpv::filesystem::path(out) == target,
+                      bpv::filesystem::path(out) << " != " << target);
 
   proc.wait();
   BOOST_CHECK_MESSAGE(proc.exit_code() == 0, proc.exit_code() << " from " << proc.native_exit_code());
