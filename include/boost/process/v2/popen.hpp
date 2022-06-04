@@ -282,7 +282,7 @@ struct basic_popen : basic_process<Executor>
             BOOST_ASIO_COMPLETION_TOKEN_FOR(void (boost::system::error_code,
                                                     std::size_t)) WriteToken
             BOOST_ASIO_DEFAULT_COMPLETION_TOKEN_TYPE(executor_type)>
-    BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(WriteToken,
+    BOOST_PROCESS_V2_INITFN_AUTO_RESULT_TYPE(WriteToken,
                                        void (boost::system::error_code, std::size_t))
     async_write_some(const ConstBufferSequence& buffers,
                      BOOST_ASIO_MOVE_ARG(WriteToken) token
@@ -397,7 +397,7 @@ struct basic_popen : basic_process<Executor>
             BOOST_ASIO_COMPLETION_TOKEN_FOR(void (boost::system::error_code,
                                                     std::size_t)) ReadToken
             BOOST_ASIO_DEFAULT_COMPLETION_TOKEN_TYPE(executor_type)>
-    BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(ReadToken,
+    BOOST_PROCESS_V2_INITFN_AUTO_RESULT_TYPE(ReadToken,
                                        void (boost::system::error_code, std::size_t))
     async_read_some(const MutableBufferSequence& buffers,
                     BOOST_ASIO_MOVE_ARG(ReadToken) token

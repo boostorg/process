@@ -81,20 +81,38 @@ BOOST_AUTO_TEST_CASE(environment)
             {"HOMEDRIVE", "X:"},
             {"HOMEPATH", "\\users\\theodora"}
         };
+    std::vector<std::string> custom_env2 = 
+        {
+            "HOME=/home/byzantium",
+            "HOMEDRIVE=X:",
+            "HOMEPATH=\\users\\theodora"
+        };
     BOOST_CHECK_EQUAL(bpe::home(custom_env), "/home/byzantium");
+    BOOST_CHECK_EQUAL(bpe::home(custom_env2), "/home/byzantium");
 #else
     std::unordered_map<std::wstring, std::wstring> custom_env = 
         {
-            {"HOME", L"/home/byzantium"},
-            {"HOMEDRIVE", L"X:"},
-            {"HOMEPATH", L"\\users\\theodora"}
+            L"HOME", L"/home/byzantium",
+            L"HOMEDRIVE", L"X:",
+            L"HOMEPATH", L"\\users\\theodora"
+        };
+
+    std::vector<std::wstring> custom_env2 = 
+        {
+            {L"HOME=/home/byzantium"},
+            {L"HOMEDRIVE=X:"},
+            {L"HOMEPATH=\\users\\theodora"}
         };
     BOOST_CHECK_EQUAL(bpe::home(custom_env), L"X:\\Users\\theodora");
+    BOOST_CHECK_EQUAL(bpe::home(custom_env2), L"X:\\Users\\theodora");
 
 #endif
 
     bp2::process_environment env{custom_env };
     boost::ignore_unused(env);
+
+    bp2::process_environment env2{custom_env2};
+    boost::ignore_unused(env2);
 }
 
 

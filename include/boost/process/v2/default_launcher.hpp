@@ -40,7 +40,7 @@ BOOST_PROCESS_V2_BEGIN_NAMESPACE
  * 
  */
 
-typedef implementation-typed default_process_launcher;
+typedef implementation_defined default_process_launcher;
 
 #else
 #if defined(BOOST_PROCESS_V2_WINDOWS)

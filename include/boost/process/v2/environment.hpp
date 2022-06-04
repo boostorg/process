@@ -199,6 +199,7 @@ struct key_view
     string_view_type value_;
 };
 
+/// A view for a value in an environment
 struct value_view
 {
     using value_type       = char_type;
@@ -293,6 +294,7 @@ struct value_view
     string_view_type value_;
 };
 
+/// A view for a key value pair in an environment
 struct key_value_pair_view
 {
   using value_type       = char_type;
@@ -478,7 +480,7 @@ inline std::size_t hash_value(const BOOST_PROCESS_V2_NAMESPACE::environment::key
     return hash ;
 }
 
-
+/// A class representing a key within an environment.
 struct key
 {
     using value_type       = char_type;
@@ -624,6 +626,7 @@ struct key
     string_type value_;
 };
 
+#if !defined(GENERATING_DOCUMENTATION)
 
 template<typename T, typename U>
 typename std::enable_if<
@@ -684,6 +687,18 @@ typename std::enable_if<
          std::is_convertible<const T & , key_view>::value),
         bool>::type
 operator >(const T  &l, const U & r) { return key_view(l) >  key_view(r); }
+
+#else
+
+
+bool operator==(const value_view &, const value_view);
+bool operator!=(const value_view &, const value_view);
+bool operator<=(const value_view &, const value_view);
+bool operator< (const value_view &, const value_view);
+bool operator> (const value_view &, const value_view);
+bool operator>=(const value_view &, const value_view);
+
+#endif
 
 
 struct value
@@ -840,6 +855,7 @@ struct value
 };
 
 
+#if !defined(GENERATING_DOCUMENTATION)
 
 template<typename T, typename U>
 typename std::enable_if<
@@ -901,8 +917,16 @@ typename std::enable_if<
         bool>::type
 operator >(const T  &l, const U & r) { return value_view(l) >  value_view(r); }
 
+#else
 
+bool operator==(const value_view &, const value_view);
+bool operator!=(const value_view &, const value_view);
+bool operator<=(const value_view &, const value_view);
+bool operator< (const value_view &, const value_view);
+bool operator> (const value_view &, const value_view);
+bool operator>=(const value_view &, const value_view);
 
+#endif
 
 struct key_value_pair
 {
@@ -1118,6 +1142,8 @@ private:
     string_type value_;
 };
 
+#if !defined(GENERATING_DOCUMENTATION)
+
 template<typename T, typename U>
 typename std::enable_if<
         ((std::is_same<T, key_value_pair>::value || std::is_same<T, key_value_pair_view>::value) &&
@@ -1177,6 +1203,17 @@ typename std::enable_if<
          std::is_convertible<const T & , key_value_pair_view>::value),
         bool>::type
 operator >(const T  &l, const U & r) { return key_value_pair_view(l) >  key_value_pair_view(r); }
+
+#else
+
+bool operator==(const key_value_pair_view &, const key_value_pair_view);
+bool operator!=(const key_value_pair_view &, const key_value_pair_view);
+bool operator<=(const key_value_pair_view &, const key_value_pair_view);
+bool operator< (const key_value_pair_view &, const key_value_pair_view);
+bool operator> (const key_value_pair_view &, const key_value_pair_view);
+bool operator>=(const key_value_pair_view &, const key_value_pair_view);
+
+#endif
 
 
 template<>
@@ -1254,7 +1291,7 @@ namespace environment
  * void dump_my_env(current_view env = current())
  * {
  *    for (auto  & [k, v] : env)
-*         std::cout << k.string() << " = "  << v.string() << std::endl;
+ *        std::cout << k.string() << " = "  << v.string() << std::endl;
  * }
  * 
  * @endcode
@@ -1319,6 +1356,55 @@ struct current_view
 /// Obtain a handle to the current environment
 inline current_view current() {return current_view();}
 
+namespace detail
+{
+
+template<typename Environment>
+auto find_key(Environment & env, key_view ky) 
+    -> typename std::enable_if<std::is_convertible<decltype(*std::begin(env)), key_value_pair_view>::value, value_view>::type
+{
+    const auto itr = std::find_if(std::begin(env), std::end(env),
+                                  [&](key_value_pair_view vp)
+                                  {
+                                    auto tmp = std::get<0>(vp) == ky;
+                                    if (tmp)
+                                      return true;
+                                    else
+                                      return false;
+                                  });
+    
+    if (itr != std::end(env))
+      return key_value_pair_view(*itr).value();
+    else
+      return {};
+}
+
+template<typename Environment>
+auto find_key(Environment & env, key_view ky) 
+    -> typename std::enable_if<
+    !std::is_convertible<decltype(*std::begin(env)), key_value_pair_view>::value && 
+     std::is_convertible<decltype(*std::begin(env)), key_value_pair>::value, 
+    value>::type
+{
+    const auto itr = std::find_if(std::begin(env), std::end(env),
+                                  [&](key_value_pair vp)
+                                  {
+                                    auto tmp = std::get<0>(vp) == ky;
+                                    if (tmp)
+                                      return true;
+                                    else
+                                      return false;
+                                  });
+    if (itr != std::end(env))
+      return key_value_pair(*itr).value();
+    else
+      return {};
+}
+
+
+}
+
+
 /// Find the home folder in an environment-like type.
 /** 
  * @param env The environment to search. Defaults to the current environment of this process
@@ -1336,26 +1422,10 @@ inline current_view current() {return current_view();}
 template<typename Environment = current_view>
 inline filesystem::path home(Environment && env = current())
 {
-  auto find_key = [&](key_view ky) -> filesystem::path
-  {
-    const auto itr = std::find_if(std::begin(env), std::end(env),
-                                  [&](decltype(*std::begin(env)) vp)
-                                  {
-                                    auto tmp = std::get<0>(vp) == ky;
-                                    if (tmp)
-                                      return true;
-                                    else
-                                      return false;
-                                  });
-    if (itr != nullptr)
-      return std::get<1>(*itr);
-    else
-      return "";
-  };
 #if defined(ASIO_WINDOWS)
-  return find_key(L"HOMEDRIVE") + find_key(L"HOMEPATH");
+  return detail::find_key(env, L"HOMEDRIVE") + detail::find_key(env, L"HOMEPATH").native_string();
 #else
-  return find_key("HOME");
+  return detail::find_key(env, "HOME").native_string();
 #endif
 }
 
@@ -1379,26 +1449,10 @@ inline BOOST_PROCESS_V2_NAMESPACE::filesystem::path find_executable(
                                              BOOST_PROCESS_V2_NAMESPACE::filesystem::path name,
                                              Environment && env = current())
 {
-    auto find_key = [&](key_view ky) -> value_view
-                    {
-                        const auto itr = std::find_if(std::begin(env), std::end(env),
-                                            [&](decltype(*std::begin(env)) vp)
-                                            {
-                                                auto tmp =  std::get<0>(vp) == ky;
-                                                if (tmp)
-                                                    return true;
-                                                else
-                                                    return false;
-                                            });
-                        if (itr != nullptr)
-                          return std::get<1>(*itr);
-                        else
-                          return value_view();
-                    };
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
-    auto path = find_key(L"PATH");
-    auto pathext = find_key(L"PATHEXT");
+    auto path = detail::find_key(env, L"PATH");
+    auto pathext = detail::find_key(env, L"PATHEXT");
     for (auto pp_view : path)
     {
         // first check if it has the extension already
@@ -1423,7 +1477,7 @@ inline BOOST_PROCESS_V2_NAMESPACE::filesystem::path find_executable(
         }
     }
 #else
-    for (auto pp_view : find_key("PATH"))
+    for (auto pp_view : detail::find_key(env, "PATH"))
     {
         auto p = BOOST_PROCESS_V2_NAMESPACE::filesystem::path(pp_view.begin(), pp_view.end()) / name;
         error_code ec;
