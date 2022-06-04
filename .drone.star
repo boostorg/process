@@ -14,6 +14,7 @@ windowsglobalimage="cppalliance/dronevs2019"
 
 def main(ctx):
   return [
+  #freebsd_cxx("FreeBSD", "g++10", packages="g++10", buildtype="boost", buildscript="drone", environment={ "VARIANT": "release", "TOOLSET": "gcc", "COMPILER": "g++", "CXXSTD": "11" }, globalenv=globalenv),
   linux_cxx("gcc 11 arm64", "g++-11", packages="g++-11", buildtype="boost", buildscript="drone", image="cppalliance/droneubuntu2004:multiarch", environment={'B2_TOOLSET': 'gcc-11', 'B2_CXXSTD': '17,2a', 'DRONE_JOB_UUID': '17ba079169m'}, arch="arm64", globalenv=globalenv),
   # A set of jobs based on the earlier .travis.yml configuration:
   linux_cxx("GCC 10, Debug + Coverage", "g++-10", packages="g++-10 libssl-dev libffi-dev binutils-gold gdb mlocate", image="cppalliance/droneubuntu2004:1", buildtype="boost_v1", buildscript="drone", environment={"GCOV": "gcov-10", "LCOV_VERSION": "1.15", "VARIANT": "process_coverage", "TOOLSET": "gcc", "COMPILER": "g++-10", "CXXSTD": "14", "DRONE_BEFORE_INSTALL" : "process_coverage", "CODECOV_TOKEN": {"from_secret": "codecov_token"}}, globalenv=globalenv, privileged=True),
