@@ -54,7 +54,7 @@ struct basic_cstring_ref
     using value_type             = CharT;
     using traits_type            = Traits;
 
-    BOOST_CONSTEXPR basic_cstring_ref() : view_(detail::null_char_(value_type{})) {}
+    BOOST_CONSTEXPR basic_cstring_ref() noexcept : view_(detail::null_char_(value_type{})) {}
     BOOST_CONSTEXPR basic_cstring_ref(std::nullptr_t) = delete;
 
     BOOST_CONSTEXPR basic_cstring_ref( const value_type* s ) : view_(s) {}
@@ -157,7 +157,7 @@ struct basic_cstring_ref
         return traits_type::eq(view_[0], x);
     }
 
-    BOOST_CONSTEXPR size_type find( CharT ch, size_type pos = 0 ) const BOOST_NOEXCEPT
+    BOOST_CXX14_CONSTEXPR size_type find( CharT ch, size_type pos = 0 ) const BOOST_NOEXCEPT
     {
         for (auto p = view_ + pos; *p != *null_char_(); p++)
             if (traits_type::eq(*p, ch))

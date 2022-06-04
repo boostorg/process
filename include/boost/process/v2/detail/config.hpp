@@ -133,8 +133,13 @@ BOOST_PROCESS_V2_END_NAMESPACE
 #if defined(BOOST_PROCESS_V2_POSIX)
 
 #if defined(__linux__) && !defined(BOOST_PROCESS_V2_DISABLE_PIDFD_OPEN)
+
+#include <sys/syscall.h>
+
+#if defined(SYS_pidfd_open)
 #define BOOST_PROCESS_V2_PIDFD_OPEN 1
 #define BOOST_PROCESS_V2_HAS_PROCESS_HANDLE 1
+#endif
 #endif
 
 #if defined(__FreeBSD__) && !defined(BOOST_PROCESS_V2_DISABLE_PDFORK)
