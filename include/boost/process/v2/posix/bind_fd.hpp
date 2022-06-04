@@ -96,8 +96,9 @@ struct bind_fd
     {
         if (::dup2(fd, target) == -1)
             return error_code(errno, system_category());
-        else
-            return error_code ();
+        
+        launcher.fd_whitelist.push_back(target);
+        return error_code ();
     }
 };
 

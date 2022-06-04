@@ -88,6 +88,8 @@ The call sequence when exec fails:
 <imagedata fileref="boost_process/posix_exec_err.svg"/>
 '''
 
+The launcher will close all non-whitelisted file descriptors after `on_exec_setup`.
+
 [endsect]
 
 [section:windows Windows Launchers]

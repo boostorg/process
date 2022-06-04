@@ -7,6 +7,7 @@
 
 #include <boost/process/v2/detail/config.hpp>
 #include <boost/process/v2/cstring_ref.hpp>
+#include <boost/process/v2/posix/detail/close_handles.hpp>
 #include <boost/process/v2/detail/utf8.hpp>
 
 #if defined(BOOST_PROCESS_V2_STANDALONE)
@@ -294,6 +295,9 @@ struct default_launcher
     /// The pid of the subprocess - will be assigned after fork.
     int pid = -1;
 
+    /// The whitelist for file descriptors.
+    std::vector<int> fd_whitelist;
+
     default_launcher() = default;
 
     template<typename ExecutionContext, typename Args, typename ... Inits>
@@ -390,8 +394,12 @@ struct default_launcher
             {
                 ctx.notify_fork(BOOST_PROCESS_V2_ASIO_NAMESPACE::execution_context::fork_child);
                 ::close(pg.p[0]);
-
                 ec = detail::on_exec_setup(*this, executable, argv, inits...);
+                if (!ec)
+                {
+                    fd_whitelist.push_back(pg.p[1]);
+                    close_all_fds(ec);
+                }                
                 if (!ec)
                     ::execve(executable.c_str(), const_cast<char * const *>(argv), const_cast<char * const *>(env));
 
@@ -430,6 +438,13 @@ struct default_launcher
 
     }
   protected:
+
+    void close_all_fds(error_code & ec)
+    {
+        std::sort(fd_whitelist.begin(), fd_whitelist.end());
+        detail::close_all(fd_whitelist, ec);
+        fd_whitelist.clear();
+    }
 
     struct pipe_guard
     {

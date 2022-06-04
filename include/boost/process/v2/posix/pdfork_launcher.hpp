@@ -119,6 +119,11 @@ struct pdfork_launcher : default_launcher
 
                 ec = detail::on_exec_setup(*this, executable, argv, inits...);
                 if (!ec)
+                {
+                    fd_whitelist.push_back(pg.p[1]);
+                    close_all_fds(ec);
+                }                
+                if (!ec)
                     ::execve(executable.c_str(), const_cast<char * const *>(argv), const_cast<char * const *>(env));
 
                 ::write(pg.p[1], &errno, sizeof(int));

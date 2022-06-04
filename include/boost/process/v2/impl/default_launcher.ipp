@@ -15,6 +15,8 @@
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 #include <boost/process/v2/windows/impl/default_launcher.ipp>
+#else
+#include <boost/process/v2/posix/detail/close_handles.ipp>
 #endif
 
 

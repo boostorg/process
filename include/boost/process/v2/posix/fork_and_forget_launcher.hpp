@@ -102,6 +102,8 @@ struct fork_and_forget_launcher : default_launcher
 
                 ec = detail::on_exec_setup(*this, executable, argv, inits...);
                 if (!ec)
+                    close_all_fds(ec);
+                if (!ec)
                     ::execve(executable.c_str(), const_cast<char * const *>(argv), const_cast<char * const *>(env));
 
                 ec.assign(errno, system_category());

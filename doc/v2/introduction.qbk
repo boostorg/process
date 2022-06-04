@@ -11,6 +11,7 @@ The major changes are
 * Removed unreliable functionality
 * UTF8 Support
 * separate compilation
+* fd safe by default
 
 [section:simplified Simplified Interface]
 
@@ -56,8 +57,7 @@ file-handles for the subprocess.
 
 Certain parts of boost.process were not as reliable as they should've been. 
 
-This is true of `limit_handles` which cannot be done safely on posix (it only finds a subset of FDs),
-and especially for the `wait_for`` and `wait_until` functions on the process.
+This concerns especially the `wait_for`` and `wait_until` functions on the process.
 The latter are easy to do on windows, but posix does not provide an API for this. 
 Thus the wait_for used signals or fork, which was all but safe. 
 Since process v2 is based on asio and thus supports cancellation, 
@@ -78,6 +78,16 @@ Instead of using ascii-APIs on windows, process V2 just assumes UTF-8 everywhere
 Boost.process v2 supports separate compilation similar to other boost libraries. 
 It can be achieved by defining `BOOST_PROCESS_V2_SEPARATE_COMPILATION` and including 
 `<process/v2/src.hpp>` in a single compile unit.
+
+[endsect]
+
+[section:limit_fd Fd safe by default]
+
+While not a problem on windows (since HANDLEs get manually enabled for inheritance),
+posix systems create a problem with inheriting file handles by default.
+
+Process V2 will automatically close all non-whitelisted descriptors, 
+without needing any option to enable it.
 
 [endsect]
 
