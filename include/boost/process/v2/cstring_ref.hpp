@@ -140,7 +140,7 @@ struct basic_cstring_ref
                traits_type::to_int_type(x[idx]); // will compare to null char of either.
     }
 
-    BOOST_CONSTEXPR bool starts_with(string_view_type x) const BOOST_NOEXCEPT
+    BOOST_CXX14_CONSTEXPR bool starts_with(string_view_type x) const BOOST_NOEXCEPT
     {
         if (x.empty())
             return true;
