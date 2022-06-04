@@ -28,6 +28,18 @@ BOOST_PROCESS_V2_BEGIN_NAMESPACE
 
 #if defined(GENERATING_DOCUMENTATION)
 
+/// The default launcher for processes.
+/** This launcher will be used by process if a 
+ * process is launched through the constructor:
+ * 
+ * @code {.cpp}
+ * process proc("test", {});
+ * // equivalent to
+ * process prod = default_launcher()("test", {});
+ * @endcode
+ * 
+ */
+
 typedef implementation-typed default_process_launcher;
 
 #else

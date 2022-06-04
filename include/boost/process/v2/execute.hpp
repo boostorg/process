@@ -15,12 +15,21 @@
 
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
 
+/**
+ * @brief Run a process and wait for it to complete.
+ * 
+ * @tparam Executor The asio executor of the process handle
+ * @param proc The process to be run.
+ * @return int The exit code of the process
+ * @exception system_error An error that might have occured during the wait.
+ */
 template<typename Executor>
 inline int execute(basic_process<Executor> proc)
 {
     return proc.wait();
 }
 
+/** \overload int execute(const basic_process<Executor> proc) */
 template<typename Executor>
 inline int execute(basic_process<Executor> proc, error_code & ec)
 {
@@ -77,7 +86,19 @@ struct execute_op
 
 }
 
-
+/// Execute a process asynchronously
+/** This function asynchronously for a process to complete.
+ * 
+ * Cancelling the execution will signal the child process to exit
+ * with the following intepretations:
+ * 
+ *  - cancellation_type::total    -> interrupt
+ *  - cancellation_type::partial  -> request_exit
+ *  - cancellation_type::terminal -> terminate
+ * 
+ * It is to note that `async_execute` will us the lowest seelected cancellation 
+ * type. A subprocess might ignore anything not terminal.
+ */
 template<typename Executor = BOOST_PROCESS_V2_ASIO_NAMESPACE::any_io_executor,
         BOOST_PROCESS_V2_COMPLETION_TOKEN_FOR(void (error_code, int))
             WaitHandler BOOST_PROCESS_V2_DEFAULT_COMPLETION_TOKEN_TYPE(Executor)>
