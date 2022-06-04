@@ -77,8 +77,6 @@ struct basic_process
   basic_process(basic_process<Executor1>&& lhs)
           : process_handle_(std::move(lhs.process_handle_)),
             exit_status_{lhs.exit_status_}
-
-
   {
   }
 
@@ -278,7 +276,7 @@ struct basic_process
   bool running()
   {
     error_code ec;
-    native_exit_code_type exit_code;
+    native_exit_code_type exit_code{};
     auto r =  process_handle_.running(exit_code, ec);
     if (!ec && !r)
       exit_status_ = exit_code;
@@ -291,7 +289,7 @@ struct basic_process
   /// Throwing @overload bool running(error_code & ec)
   bool running(error_code & ec) noexcept
   {
-    native_exit_code_type exit_code ;
+    native_exit_code_type exit_code{};
     auto r =  process_handle_.running(exit_code, ec);
     if (!ec && !r)
       exit_status_ = exit_code;

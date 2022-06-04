@@ -32,11 +32,14 @@ BOOST_AUTO_TEST_CASE(environment)
 #if defined(BOOST_PROCESS_V2_WINDOWS)
     const auto key2 = "BP2_TeSt_NamE_\321\200\320\270\320\261\320\260"; // риба
 #else
-    const auto key2 = key1;
+    const auto key2 = key1; 
 #endif
-
-    BOOST_CHECK_THROW(bpe::get(key1) , bp2::system_error);
     bp2::error_code ec;
+    bpe::unset(key1, ec);
+    bpe::unset(key2, ec);
+    ec.clear();
+    
+    BOOST_CHECK_THROW(bpe::get(key1) , bp2::system_error);
     bpe::get(key2, ec);
     BOOST_CHECK(ec);
     ec.clear();

@@ -259,7 +259,7 @@ struct basic_process_handle_win
         template<typename Self>
         void operator()(Self &&self, error_code ec)
         {
-            native_exit_code_type exit_code;
+            native_exit_code_type exit_code{};
             if (!ec)
                 detail::get_exit_code_(handle.native_handle(), exit_code, ec);
             std::move(self).complete(ec, exit_code);
