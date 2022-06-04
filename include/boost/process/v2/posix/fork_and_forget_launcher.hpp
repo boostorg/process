@@ -118,7 +118,7 @@ struct fork_and_forget_launcher : default_launcher
                 return basic_process<Executor>{exec};
             }
         }
-        basic_process<Executor> proc{exec, pid};
+        basic_process<Executor> proc(exec, pid);
         detail::on_success(*this, executable, argv, ec, inits...);
         return proc;
 

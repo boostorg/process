@@ -153,9 +153,6 @@ struct exit_code_category final : public error_category
 #            if defined(SIGTTOU)
                     case SIGTTOU: return "SIGTTOU:   Terminal output for background process";
 #            endif
-#            if defined(SIGUNUSED)
-                    case SIGUNUSED: return "SIGUNUSED: Synonymous with SIGSYS";
-#            endif
 #            if defined(SIGURG)
                     case SIGURG: return "SIGURG:    Urgent condition on socket (4.2BSD)";
 #            endif

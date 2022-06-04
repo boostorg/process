@@ -19,7 +19,7 @@
 #include <asio/any_io_executor.hpp>
 #include <asio/compose.hpp>
 #include <asio/post.hpp>
-#include <asio/windows/signal_set.hpp>
+#include <asio/signal_set.hpp>
 #else
 #include <boost/asio/any_io_executor.hpp>
 #include <boost/asio/compose.hpp>
@@ -81,11 +81,11 @@ struct basic_process_handle_signal
         handle.pid_ = -1;
     }
 
-    basic_process_handle_win(basic_process_handle_win && handle)
+    basic_process_handle_signal(basic_process_handle_signal && handle)
     {
         pid_ = handle.id();
         signal_set_ = BOOST_PROCESS_V2_ASIO_NAMESPACE::basic_signal_set<Executor>(handle.get_executor(), SIGCHLD);
-        handle.pid_ = static_cast<DWORD>(-1);
+        handle.pid_ = -1;
         return *this;
     }
 

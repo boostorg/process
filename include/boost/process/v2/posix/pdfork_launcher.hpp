@@ -155,7 +155,7 @@ struct pdfork_launcher : default_launcher
                 return basic_process<Executor>{exec};
             }
         }
-        basic_process<Executor> proc{exec, pid, fd};
+        basic_process<Executor> proc(exec, pid, fd);
         detail::on_success(*this, executable, argv, ec, inits...);
         return proc;
     }

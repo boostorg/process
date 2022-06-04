@@ -103,7 +103,7 @@ struct basic_cstring_ref
     BOOST_ATTRIBUTE_NODISCARD BOOST_CONSTEXPR bool empty() const BOOST_NOEXCEPT {return *view_ == *detail::null_char_(CharT{}); }
 
     BOOST_CONSTEXPR const_reference operator[](size_type pos) const  {return view_[pos] ;}
-    BOOST_CONSTEXPR const_reference at(size_type pos) const
+    BOOST_CXX14_CONSTEXPR const_reference at(size_type pos) const
     {
         if (pos >= size())
             throw std::out_of_range("cstring-view out of range");

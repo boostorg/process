@@ -283,10 +283,11 @@ struct basic_process
     if (!ec && !r)
       exit_status_ = exit_code;
     else
-      throw system_error(ec, "running failed");
+      detail::throw_error(ec, "running failed");
 
     return r;
   }
+
   /// Throwing @overload bool running(error_code & ec)
   bool running(error_code & ec) noexcept
   {
@@ -296,9 +297,9 @@ struct basic_process
       exit_status_ = exit_code;
     return r;
   }
+  
   /// Check if the process is referring to an existing process.
   /** Note that this might be a process that already exited.*/
-
   bool is_open() const { return process_handle_.is_open(); }
   
   /// Asynchronously wait for the process to exit and deliver the portable exit-code in the completion handler.
