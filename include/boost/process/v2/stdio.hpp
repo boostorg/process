@@ -220,6 +220,46 @@ typedef process_io_binding<STDERR_FILENO> process_error_binding;
 
 }
 
+
+/// The initializer for the stdio of a subprocess
+/** The subprocess initializer has three members:
+ * 
+ *  - in for stdin
+ *  - out for stdout
+ *  - err for stderr
+ * 
+ * If the initializer is present all three will be set for the subprocess.
+ * By default they will inherit the stdio handles from the parent process. 
+ * This means that this will forward stdio to the subprocess:
+ * 
+ * @code {.cpp}
+ * asio::io_context ctx;
+ * v2::process proc(ctx, "/bin/bash", {}, v2::process_stdio{});
+ * @endcode
+ * 
+ * No constructors are provided in order to support designated initializers
+ * in later version of C++.
+ * 
+ * * @code {.cpp}
+ * asio::io_context ctx;
+ * /// C++17
+ * v2::process proc17(ctx, "/bin/bash", {}, v2::process_stdio{.stderr=nullptr});
+ * /// C++11 & C++14
+ * v2::process proc17(ctx, "/bin/bash", {}, v2::process_stdio{ {}, {}, nullptr});
+ *                                                        stdin ^  ^ stderr
+ * @endcode
+ * 
+ * Valid initializers for any stdio are:
+ * 
+ *  - `std::nullptr_t` assigning a null-device
+ *  - `FILE*` any open file, including `stdin`, `stdout` and `stderr`
+ *  - a filesystem::path, which will open a readable or writable depending on the direction of the stream
+ *  - `native_handle` any native file handle (`HANDLE` on windows) or file descriptor (`int` on posix)
+ *  - any io-object with a .native_handle() function that is comptaiblie with the above. E.g. a asio::ip::tcp::socket
+ *  - an asio::basic_writeable_pipe for stdin or asio::basic_readable_pipe for stderr/stdout. 
+ * 
+ * 
+ */ 
 struct process_stdio
 {
   detail::process_input_binding in;

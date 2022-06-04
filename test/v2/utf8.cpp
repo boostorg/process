@@ -15,8 +15,19 @@
 
 BOOST_AUTO_TEST_CASE(test_codecvt)
 {
-    auto end = [](const auto * c){return std::char_traits<std::remove_pointer_t<decltype(c)>>::length(c);};
+    struct end_t
+    {
+        std::size_t operator()(const char * c) 
+        {
+            return std::char_traits<char>::length(c);
+        }
+        std::size_t operator()(const wchar_t * c) 
+        {
+            return std::char_traits<wchar_t>::length(c);
+        }
+    } end{};
 
+    
     const char * in = "test-input-\320\240\320\230\320\221\320\220";
     const wchar_t  * win_t  = L"test-input-\u0420\u0418\u0411\u0410";
 

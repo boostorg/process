@@ -53,8 +53,6 @@ BOOST_AUTO_TEST_CASE(cstring_view_test)
 
     BOOST_CHECK_EQUAL(sv.length(), 5);
     BOOST_CHECK_EQUAL(sv.c_str(), s.c_str() + 1);
-    auto cp = sv;
-
     BOOST_CHECK_EQUAL(sv.substr(2).c_str(), s.c_str() + 3);
 
     bp2::string_view ssv = sv;

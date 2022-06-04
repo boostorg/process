@@ -23,6 +23,114 @@
 
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
 
+
+#if defined(GENERATING_DOCUMENTATION)
+/** A process handle is an unmanaged version of a process.
+ * This means it does not terminate the proces on destruction and
+ * will not keep track of the exit-code. 
+ * 
+ * Note that the exit code might be discovered early, during a call to `running`.
+ * Thus it can only be discovered that process has exited already.
+ */
+template<typename Executor = BOOST_PROCESS_V2_ASIO_NAMESPACE::any_io_executor>
+struct basic_process_handle
+{
+    /// The native handle of the process. 
+    /** This might be undefined on posix systems that only support signals */
+    using native_handle_type = implementation_defined;
+
+    /// The executor_type of the process_handle
+    using executor_type =  Executor;
+
+    /// Getter for the executor
+    executor_type get_executor();
+
+    /// Rebinds the process_handle to another executor.
+    template<typename Executor1>
+    struct rebind_executor
+    {
+        /// The socket type when rebound to the specified executor.
+        typedef basic_process_handle<Executor1> other;
+    };
+
+
+    /// Construct a basic_process_handle from an execution_context.
+    /**
+    * @tparam ExecutionContext The context must fulfill the asio::execution_context requirements
+    */
+    template<typename ExecutionContext>
+    basic_process_handle(ExecutionContext &context);
+
+    /// Construct an empty process_handle from an executor.
+    basic_process_handle(executor_type executor);
+
+    /// Construct an empty process_handle from an executor and bind it to a pid.
+    /** On NON-linux posix systems this call is not able to obtain a file-descriptor and will thus 
+     * rely on signals.
+     */
+    basic_process_handle(executor_type executor, pid_type pid);
+
+    /// Construct an empty process_handle from an executor and bind it to a pid and the native-handle
+    /** On some non-linux posix systems this overload is not present.
+     */
+    basic_process_handle(executor_type executor, pid_type pid, native_handle_type process_handle);
+
+    /// Move construct and rebind the executor.
+    template<typename Executor1>
+    basic_process_handle(basic_process_handle<Executor1> &&handle);
+
+    /// Get the id of the process
+    pid_type id() const
+    { return pid_; }
+
+    /// Terminate the process if it's still running and ignore the result
+    void terminate_if_running(error_code &);
+
+    /// Throwing @overload void terminate_if_running(error_code & ec;
+    void terminate_if_running();
+    /// wait for the process to exit and store the exit code in exit_status.
+    void wait(native_exit_code_type &exit_status, error_code &ec);
+    /// Throwing @overload wait(native_exit_code_type &exit_code, error_code & ec)
+    void wait(native_exit_code_type &exit_status);
+
+    /// Sends the process a signal to ask for an interrupt, which the process may interpret as a shutdown.
+    /** Maybe be ignored by the subprocess. */
+    void interrupt(error_code &ec);
+
+    /// Throwing @overload void interrupt()
+    void interrupt();
+
+    /// Sends the process a signal to ask for a graceful shutdown. Maybe be ignored by the subprocess.
+    void request_exit(error_code &ec);
+
+    /// Throwing @overload void request_exit(error_code & ec)
+    void request_exit()
+
+    /// Unconditionally terminates the process and stores the exit code in exit_status.
+    void terminate(native_exit_code_type &exit_status, error_code &ec);\
+    /// Throwing @overload void terminate(native_exit_code_type &exit_code, error_code & ec)
+    void terminate(native_exit_code_type &exit_status);/
+
+    /// Checks if the current process is running. 
+    /**If it has already completed, it assigns the exit code to `exit_code`.
+     */ 
+    bool running(native_exit_code_type &exit_code, error_code &ec);
+    /// Throwing @overload bool running(native_exit_code_type &exit_code, error_code & ec)
+    bool running(native_exit_code_type &exit_code);
+
+    /// Check if the process handle is referring to an existing process.
+    bool is_open() const;
+
+    /// Asynchronously wait for the process to exit and deliver the native exit-code in the completion handler.
+    template<BOOST_PROCESS_V2_COMPLETION_TOKEN_FOR(void(error_code, native_exit_code_type))
+             WaitHandler BOOST_PROCESS_V2_DEFAULT_COMPLETION_TOKEN_TYPE(executor_type)>
+             BOOST_PROCESS_V2_INITFN_AUTO_RESULT_TYPE(WaitHandler, void (error_code, native_exit_code_type))
+    async_wait(WaitHandler &&handler BOOST_ASIO_DEFAULT_COMPLETION_TOKEN(executor_type));
+
+};
+
+
+#else
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 template<typename Executor = BOOST_PROCESS_V2_ASIO_NAMESPACE::any_io_executor>
 using basic_process_handle = detail::basic_process_handle_win<Executor>;
@@ -40,7 +148,9 @@ template<typename Executor = BOOST_PROCESS_V2_ASIO_NAMESPACE::any_io_executor>
 using basic_process_handle = detail::basic_process_handle_signal<Executor>;
 
 #endif
+#endif
 
+/// Process handle with the default executor.
 using process_handle = basic_process_handle<>;
 
 #endif

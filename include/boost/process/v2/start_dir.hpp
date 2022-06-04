@@ -14,6 +14,8 @@
 #include <boost/process/v2/default_launcher.hpp>
 
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
+
+/// Initializer for the starting directory of a subprocess to be launched.
 struct process_start_dir
 {
   filesystem::path start_dir;

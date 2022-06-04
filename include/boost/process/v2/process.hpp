@@ -19,13 +19,18 @@
 
 #if defined(BOOST_PROCESS_V2_STANDALONE)
 #include <asio/any_io_executor.hpp>
+#include <utility>
 #else
 #include <boost/asio/any_io_executor.hpp>
+#include <boost/core/exchange.hpp>
 #endif
 
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
 
-
+/// A class managing a subprocess
+/* A `basic_process` object manages a subprocess; it tracks the status and exit-code,
+ * and will terminate the process on destruction if `detach` was not called.
+*/
 template<typename Executor = BOOST_PROCESS_V2_ASIO_NAMESPACE::any_io_executor>
 struct basic_process
 {
@@ -61,39 +66,23 @@ struct basic_process
   basic_process(const basic_process&) = delete;
   basic_process& operator=(const basic_process&) = delete;
 
-  basic_process(basic_process&& lhs) 
-    : process_handle_(std::move(lhs.process_handle_)),
-      attached_(lhs.attached_),
-      terminated_(lhs.terminated_), 
-      exit_status_{lhs.exit_status_}
+  /// Move construct the process. It will be detached from `lhs`.
+  basic_process(basic_process&& lhs) = default;
+
+  /// Move assign a process. It will be detached from `lhs`.
+  basic_process& operator=(basic_process&& lhs) = default;
+
+  /// Move construct and rebind the executor.
+  template<typename Executor1>
+  basic_process(basic_process<Executor1>&& lhs)
+          : process_handle_(std::move(lhs.process_handle_)),
+            exit_status_{lhs.exit_status_}
 
 
   {
-    lhs.attached_ = false;
   }
 
-  basic_process& operator=(basic_process&& lhs)
-  {
-    attached_ = lhs.attached_;
-    terminated_ = lhs.terminated_;
-    exit_status_ = lhs.exit_status_;
-    process_handle_ = std::move(lhs.process_handle_);
-    lhs.attached_ = false;
-    return *this;
-  }
-    template<typename Executor1>
-    basic_process(basic_process<Executor1>&& lhs)
-            : process_handle_(std::move(lhs.process_handle_)),
-              attached_(lhs.attached_),
-              terminated_(lhs.terminated_),
-              exit_status_{lhs.exit_status_}
-
-
-    {
-        lhs.attached_ = false;
-    }
-
-  /// Construct a child from a property list and launch it.
+  /// Construct a child from a property list and launch it using the default launcher..
   template<typename ... Inits>
   explicit basic_process(
       executor_type executor,
@@ -103,7 +92,7 @@ struct basic_process
       : basic_process(default_process_launcher()(std::move(executor), exe, args, std::forward<Inits>(inits)...))
   {
   }
-    /// Construct a child from a property list and launch it.
+    /// Construct a child from a property list and launch it using the default launcher..
   template<typename ... Inits>
   explicit basic_process(
       executor_type executor,
@@ -114,7 +103,7 @@ struct basic_process
   {
   }
 
-  /// Construct a child from a property list and launch it.
+  /// Construct a child from a property list and launch it using the default launcher..
   template<typename Args, typename ... Inits>
   explicit basic_process(
       executor_type executor,
@@ -125,7 +114,7 @@ struct basic_process
   {
   }
 
-  /// Construct a child from a property list and launch it.
+  /// Construct a child from a property list and launch it using the default launcher..
   template<typename ExecutionContext, typename ... Inits>
   explicit basic_process(
       ExecutionContext & context,
@@ -139,7 +128,7 @@ struct basic_process
                                                  exe, args, std::forward<Inits>(inits)...))
   {
   }
-  /// Construct a child from a property list and launch it.
+  /// Construct a child from a property list and launch it using the default launcher.
   template<typename ExecutionContext, typename Args, typename ... Inits>
   explicit basic_process(
       ExecutionContext & context,
@@ -189,13 +178,14 @@ struct basic_process
 
 
 
-  // tbd behavior
+  /// Destruct the handle and terminate the process if it wasn't detached.
   ~basic_process()
   {
-    if (attached_ && !terminated_)
-      process_handle_.terminate_if_running();
+    process_handle_.terminate_if_running();
   }
 
+  /// Sends the process a signal to ask for an interrupt, which the process may interpret as a shutdown.
+  /** Maybe be ignored by the subprocess. */
   void interrupt()
   {
     error_code ec;
@@ -204,11 +194,13 @@ struct basic_process
       throw system_error(ec, "interrupt failed");
 
   }
+  /// Throwing @overload void interrupt()
   void interrupt(error_code & ec)
   {
     process_handle_.interrupt(ec);
   }
 
+  /// Throwing @overload void request_exit(error_code & ec)
   void request_exit()
   {
     error_code ec;
@@ -216,11 +208,13 @@ struct basic_process
     if (ec)
       throw system_error(ec, "request_exit failed");
   }
+  /// Sends the process a signal to ask for a graceful shutdown. Maybe be ignored by the subprocess.
   void request_exit(error_code & ec)
   {
     process_handle_.request_exit(ec);
   }
 
+  /// Throwing @overload void terminate(native_exit_code_type &exit_code, error_code & ec)
   void terminate()
   {
     error_code ec;
@@ -228,11 +222,13 @@ struct basic_process
     if (ec)
       detail::throw_error(ec, "terminate failed");
   }
+  /// Unconditionally terminates the process and stores the exit code in exit_status.
   void terminate(error_code & ec)
   {
     process_handle_.terminate(exit_status_, ec);
   }
 
+  /// Throwing @overload wait(error_code & ec)
   int wait()
   {
     error_code ec;
@@ -242,6 +238,7 @@ struct basic_process
       detail::throw_error(ec, "wait failed");
     return exit_code();
   }
+  /// Waits for the process to exit, store the exit code internall and return it.
   int wait(error_code & ec)
   {
     if (running(ec))
@@ -249,26 +246,35 @@ struct basic_process
     return exit_code();
   }
 
-  void detach()
+  /// Detach the process.
+  handle_type detach()
   {
-    attached_ = false;
+#if defined(BOOST_PROCESS_V2_STANDALONE)
+    return std::exchange(process_handle_, get_executor());
+#else
+    return boost::exchange(process_handle_, get_executor());
+#endif
   }
-  void join() {wait();}
-  bool joinable() {return attached_ && process_handle_.is_open(); }
-
+  // Get the native 
   native_handle_type native_handle() {return process_handle_.native_handle(); }
   int exit_code() const
   {
     return evaluate_exit_code(exit_status_);
   }
 
+  /// Get the id of the process;
   pid_type id() const {return process_handle_.id();}
 
+  /// The native handle of the process. 
+  /** This might be undefined on posix systems that only support signals */
   native_exit_code_type native_exit_code() const
   {
     return exit_status_;
   }
-  
+  /// Checks if the current process is running. 
+  /** If it has already completed the exit code will be stored internally 
+   * and can be obtained by calling `exit_code.
+   */
   bool running()
   {
     error_code ec;
@@ -281,6 +287,7 @@ struct basic_process
 
     return r;
   }
+  /// Throwing @overload bool running(error_code & ec)
   bool running(error_code & ec) noexcept
   {
     native_exit_code_type exit_code ;
@@ -289,11 +296,12 @@ struct basic_process
       exit_status_ = exit_code;
     return r;
   }
+  /// Check if the process is referring to an existing process.
+  /** Note that this might be a process that already exited.*/
 
   bool is_open() const { return process_handle_.is_open(); }
-  explicit operator bool() const {return is_open(); }
-
   
+  /// Asynchronously wait for the process to exit and deliver the portable exit-code in the completion handler.
   template <BOOST_PROCESS_V2_COMPLETION_TOKEN_FOR(void (error_code, int))
             WaitHandler BOOST_PROCESS_V2_DEFAULT_COMPLETION_TOKEN_TYPE(executor_type)>
   BOOST_PROCESS_V2_INITFN_AUTO_RESULT_TYPE(WaitHandler, void (error_code, int))
@@ -308,8 +316,6 @@ private:
   friend struct basic_process;
 
   basic_process_handle<Executor> process_handle_;
-  bool attached_{true};
-  bool terminated_{false};
   native_exit_code_type exit_status_{detail::still_active};
 
   
@@ -339,7 +345,7 @@ private:
   };
 };
 
-
+/// Process with the default executor.
 typedef basic_process<> process;
 
 BOOST_PROCESS_V2_END_NAMESPACE

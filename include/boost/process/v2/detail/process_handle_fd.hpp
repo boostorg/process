@@ -76,10 +76,26 @@ struct basic_process_handle_fd
     {
     }
 
+    basic_process_handle_fd(basic_process_handle_fd &&handle)
+            : pid_(handle.pid_), descriptor_(std::move(handle.descriptor_))
+    {
+        handle.pid_ = -1;
+    }
+
     template<typename Executor1>
     basic_process_handle_fd(basic_process_handle_fd<Executor1> &&handle)
             : pid_(handle.pid_), descriptor_(std::move(handle.descriptor_))
     {
+        handle.pid_ = -1;
+    }
+
+
+    basic_process_handle_fd& operator=(basic_process_handle_fd &&handle)
+    {
+        pid_ = handle.pid_;
+        descriptor_ = std::move(handle.descriptor_);
+        handle.pid_ = -1;
+        return *this;
     }
 
     pid_type id() const
@@ -179,7 +195,7 @@ struct basic_process_handle_fd
             detail::throw_error(ec, "terminate");
     }
 
-    bool running(native_exit_code_type &exit_code, error_code ec)
+    bool running(native_exit_code_type &exit_code, error_code & ec)
     {
         if (pid_ <= 0)
             return false;
@@ -218,7 +234,7 @@ struct basic_process_handle_fd
         return pid_ != -1;
     }
 
-    template<BOOST_PROCESS_V2_COMPLETION_TOKEN_FOR(void(error_code, int))
+    template<BOOST_PROCESS_V2_COMPLETION_TOKEN_FOR(void(error_code, native_exit_code_type))
     WaitHandler BOOST_PROCESS_V2_DEFAULT_COMPLETION_TOKEN_TYPE(executor_type)>
     BOOST_PROCESS_V2_INITFN_AUTO_RESULT_TYPE(WaitHandler, void (error_code, native_exit_code_type))
     async_wait(WaitHandler &&handler BOOST_ASIO_DEFAULT_COMPLETION_TOKEN(executor_type))

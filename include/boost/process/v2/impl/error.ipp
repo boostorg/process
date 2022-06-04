@@ -177,7 +177,7 @@ struct exit_code_category final : public error_category
 #            if defined(SIGWINCH)
                     case SIGWINCH: return "SIGWINCH:  Window resize signal (4.3BSD, Sun)";
 #            endif
-                    default: "Unknown signal";
+                    default: return "Unknown signal";
                 }
 #endif
                 return "exited with other error";

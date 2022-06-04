@@ -14,6 +14,8 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include <unordered_map>
+
 namespace bp2 = boost::process::v2;
 namespace bpe = boost::process::v2::environment;
 
@@ -57,7 +59,7 @@ BOOST_AUTO_TEST_CASE(environment)
     ec.clear();
 
     for (auto && ke : bpe::current())
-      BOOST_CHECK_EQUAL(bpe::get(ke.get<0>()), ke.get<1>());
+      BOOST_CHECK_EQUAL(bpe::get(std::get<0>(ke)), std::get<1>(ke));
 
 
 #if defined(BOOST_PROCESS_V2_POSIX)
@@ -71,6 +73,28 @@ BOOST_AUTO_TEST_CASE(environment)
     BOOST_CHECK_EQUAL(bpe::key_value_pair("FOO", {"X", "YY", "Z42"}), cmp);
 #endif
 
+
+#if defined(BOOST_PROCESS_V2_POSIX)
+    std::unordered_map<std::string, std::string> custom_env = 
+        {
+            {"HOME", "/home/byzantium"},
+            {"HOMEDRIVE", "X:"},
+            {"HOMEPATH", "\\users\\theodora"}
+        };
+    BOOST_CHECK_EQUAL(bpe::home(custom_env), "/home/byzantium");
+#else
+    std::unordered_map<std::wstring, std::wstring> custom_env = 
+        {
+            {"HOME", L"/home/byzantium"},
+            {"HOMEDRIVE", L"X:"},
+            {"HOMEPATH", L"\\users\\theodora"}
+        };
+    BOOST_CHECK_EQUAL(bpe::home(custom_env), L"X:\\Users\\theodora");
+
+#endif
+
+    bp2::process_environment env{custom_env };
+    boost::ignore_unused(env);
 }
 
 
@@ -105,7 +129,7 @@ BOOST_AUTO_TEST_CASE(wenvironment)
     BOOST_CHECK(ec);
 
     for (const auto ke : bpe::current())
-        BOOST_CHECK_EQUAL(bpe::get(ke.get<0>()), ke.get<1>());
+        BOOST_CHECK_EQUAL(bpe::get(std::get<0>(ke)), std::get<1>(ke));
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
     BOOST_CHECK_EQUAL(bpe::key(L"FOO"), bpe::key_view(L"Foo"));

@@ -113,7 +113,7 @@ struct basic_cstring_ref
     BOOST_CONSTEXPR const_reference back()  const  {return view_[length() - 1];}
     BOOST_CONSTEXPR const_pointer data()    const BOOST_NOEXCEPT  {return view_;}
     BOOST_CXX14_CONSTEXPR void remove_prefix(size_type n)  {view_ = view_ + n;}
-    BOOST_CONSTEXPR void swap(basic_cstring_ref& s) BOOST_NOEXCEPT  {std::swap(view_, s.view_);}
+    void swap(basic_cstring_ref& s) BOOST_NOEXCEPT {std::swap(view_, s.view_);}
 
     size_type copy(value_type* s, size_type n, size_type pos = 0) const
     {

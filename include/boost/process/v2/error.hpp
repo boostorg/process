@@ -30,7 +30,8 @@ extern BOOST_PROCESS_V2_DECL const error_category& get_exit_code_category();
  * void run_my_process(filesystem::path pt, error_code & ec)
  * {
  *     process proc(pt, {});
- *     ec.assign(proc.wait(), error::get_exit_code_category());
+ *     proc.wait();
+ *     ec.assign(proc.native_exit_code(), error::get_exit_code_category());
  * }
  * 
  * */

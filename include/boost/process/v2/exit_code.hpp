@@ -19,6 +19,24 @@
 
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
 
+#if defined(GENERATING_DOCUMENTATION)
+
+/// The native exit-code type, usually an integral value
+/** The OS may have a value different from `int` to represent 
+ * the exit codes of subprocesses. It might also 
+ * contain additional information.
+ */ 
+typedef implementation_defined native_exit_code_type;
+
+
+/// Check if the native exit code indicates the process is still running
+bool process_is_running(native_exit_code_type code);
+
+/// Obtain the portable part of the exit code, i.e. what the subprocess has returned from main.
+int evaluate_exit_code(native_exit_code_type code);
+
+
+#else
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 
@@ -62,6 +80,8 @@ inline int evaluate_exit_code(int code)
   else
     return code;
 }
+
+#endif
 
 #endif
 

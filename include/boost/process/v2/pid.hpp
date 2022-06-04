@@ -9,6 +9,14 @@
 
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
 
+#if defined(GENERATING_DOCUMENTATION)
+
+//An integral type representing a process id.
+typedef implementation_defined pid_type;
+
+
+#else
+
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 
 typedef unsigned long pid_type;
@@ -17,6 +25,7 @@ typedef unsigned long pid_type;
 
 typedef int pid_type;
 
+#endif
 #endif
 
 /// Get the process id of the current process.

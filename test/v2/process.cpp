@@ -239,7 +239,7 @@ BOOST_AUTO_TEST_CASE(print_args_err)
 
   auto sz = asio::read(rp, st,  ec);
 
-  BOOST_CHECK_NE(sz , 0);
+  BOOST_CHECK_NE(sz , 0u);
   BOOST_CHECK_MESSAGE((ec == asio::error::broken_pipe) || (ec == asio::error::eof), ec.message());
 
   std::string line;
@@ -406,7 +406,7 @@ std::string read_env(const char * name, Inits && ... inits)
   std::string out;
   bpv::error_code ec;
 
-  auto sz = asio::read(rp, asio::dynamic_buffer(out),  ec);
+  asio::read(rp, asio::dynamic_buffer(out),  ec);
   BOOST_CHECK_MESSAGE((ec == asio::error::broken_pipe) || (ec == asio::error::eof), ec.message());
 
   trim_end(out);

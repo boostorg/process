@@ -78,10 +78,28 @@ struct basic_process_handle_fd_or_signal
     {
     }
 
+
+    basic_process_handle_fd_or_signal(basic_process_handle_fd_or_signal &&handle)
+            : pid_(handle.pid_), descriptor_(std::move(handle.descriptor_))
+    {
+        handle.pid_ = -1;
+    }
+
+    basic_process_handle_fd_or_signal& operator=(basic_process_handle_fd_or_signal &&handle)
+    {
+        pid_ = handle.pid_;
+        descriptor_ = std::move(handle.descriptor_);
+        signal_set_ = BOOST_PROCESS_V2_ASIO_NAMESPACE::basic_signal_set<Executor>(handle.get_executor(), SIGCHLD);
+        handle.pid_ = -1;
+        return *this;
+    }
+
+
     template<typename Executor1>
     basic_process_handle_fd_or_signal(basic_process_handle_fd_or_signal<Executor1> &&handle)
             : pid_(handle.pid_), descriptor_(std::move(handle.descriptor_))
     {
+        handle.pid_ = -1;
     }
 
     pid_type id() const
@@ -181,7 +199,7 @@ struct basic_process_handle_fd_or_signal
             detail::throw_error(ec, "terminate");
     }
 
-    bool running(native_exit_code_type &exit_code, error_code ec)
+    bool running(native_exit_code_type &exit_code, error_code & ec)
     {
         if (pid_ <= 0)
             return false;

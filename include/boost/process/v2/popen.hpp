@@ -20,7 +20,20 @@
 
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
 
-
+/// A subprocess with automatically assigned pipes.
+/** The purpose os the popen is to provide a convenient way 
+ * to use the stdin & stdout of a process. 
+ * 
+ * @code {.cpp}
+ * popen proc(executor, find_executable("addr2line"), {argv[0]});
+ * asio::write(proc, asio::buffer("main\n"));
+ * std::string line;
+ * asio::read_until(proc, asio::dynamic_buffer(line), '\n');
+ * @endcode
+ * 
+ * 
+ * Popen can be used as a stream object in other protocols.
+ */ 
 template<typename Executor = BOOST_PROCESS_V2_ASIO_NAMESPACE::any_io_executor>
 struct basic_popen : basic_process<Executor>
 {
@@ -35,20 +48,23 @@ struct basic_popen : basic_process<Executor>
         typedef basic_popen<Executor1> other;
     };
 
+    /// Move construct a popen
     basic_popen(basic_popen &&) = default;
+    /// Move assign a popen
     basic_popen& operator=(basic_popen &&) = default;
 
+    /// Move construct a popen and change the executor type.
     template<typename Executor1>
-    basic_popen(basic_process<Executor1>&& lhs)
+    basic_popen(basic_popen<Executor1>&& lhs)
         : basic_process<Executor>(std::move(lhs)),
                 stdin_(std::move(lhs.stdin_)), stdout_(std::move(lhs.stdout_))
     {
     }
 
-    /// Create an invalid handle
+    /// Create a closed process handle
     explicit basic_popen(executor_type exec) : basic_process<Executor>{std::move(exec)} {}
 
-    /// Create an invalid handle
+    /// Create a closed process handle
     template <typename ExecutionContext>
     explicit basic_popen(ExecutionContext & context,
         typename std::enable_if<
@@ -60,7 +76,7 @@ struct basic_popen : basic_process<Executor>
 
 
 
-    /// Construct a child from a property list and launch it.
+    /// Construct a child from a property list and launch it using the default process launcher.
     template<typename ... Inits>
     explicit basic_popen(
             executor_type executor,
@@ -77,7 +93,8 @@ struct basic_popen : basic_process<Executor>
                     );
 
     }
-    /// Construct a child from a property list and launch it.
+
+    /// Construct a child from a property list and launch it using the default process launcher.
     template<typename ... Inits>
     explicit basic_popen(
             executor_type executor,
@@ -94,7 +111,7 @@ struct basic_popen : basic_process<Executor>
                 );
     }
 
-    /// Construct a child from a property list and launch it.
+    /// Construct a child from a property list and launch it using the default process launcher.
     template<typename Args, typename ... Inits>
     explicit basic_popen(
             executor_type executor,
@@ -110,7 +127,7 @@ struct basic_popen : basic_process<Executor>
                 );
     }
 
-    /// Construct a child from a property list and launch it.
+    /// Construct a child from a property list and launch it using the default process launcher.
     template<typename ExecutionContext, typename ... Inits>
     explicit basic_popen(
             ExecutionContext & context,
@@ -130,7 +147,7 @@ struct basic_popen : basic_process<Executor>
                 );
     }
 
-    /// Construct a child from a property list and launch it.
+    /// Construct a child from a property list and launch it using the default process launcher.
     template<typename ExecutionContext, typename Args, typename ... Inits>
     explicit basic_popen(
             ExecutionContext & context,
@@ -148,13 +165,20 @@ struct basic_popen : basic_process<Executor>
                         process_stdio{stdin_, stdout_}
                 );
     }
+
+    /// The type used for stdin on the parent process side.
     using stdin_type = BOOST_PROCESS_V2_ASIO_NAMESPACE::basic_writable_pipe<Executor>;
+    /// The type used for stdout on the parent process side.
     using stdout_type = BOOST_PROCESS_V2_ASIO_NAMESPACE::basic_readable_pipe<Executor>;
 
+    /// Get the stdin pipe.
     stdin_type  & get_stdin()  {return stdin_; }
+    /// Get the stdout pipe.
     stdout_type & get_stdout() {return stdout_; }
 
+    /// Get the stdin pipe.
     const stdin_type  & get_stdin()  const {return stdin_; }
+    /// Get the stdout pipe.
     const stdout_type & get_stdout() const {return stdout_; }
 
     /// Write some data to the pipe.
@@ -169,7 +193,7 @@ struct basic_popen : basic_process<Executor>
      *
      * @throws boost::system::system_error Thrown on failure. An error code of
      * boost::asio::error::eof indicates that the connection was closed by the
-     * peer.
+     * subprocess.
      *
      * @note The write_some operation may not transmit all of the data to the
      * peer. Consider using the @ref write function if you need to ensure that
@@ -203,7 +227,7 @@ struct basic_popen : basic_process<Executor>
      * @returns The number of bytes written. Returns 0 if an error occurred.
      *
      * @note The write_some operation may not transmit all of the data to the
-     * peer. Consider using the @ref write function if you need to ensure that
+     * subprocess. Consider using the @ref write function if you need to ensure that
      * all data is written before the blocking operation completes.
      */
     template <typename ConstBufferSequence>
@@ -248,7 +272,7 @@ struct basic_popen : basic_process<Executor>
      * @par Example
      * To write a single data buffer use the @ref buffer function as follows:
      * @code
-     * pipe.async_write_some(boost::asio::buffer(data, size), handler);
+     * popen.async_write_some(boost::asio::buffer(data, size), handler);
      * @endcode
      * See the @ref buffer documentation for information on writing multiple
      * buffers in one go, and how to use it with arrays, boost::array or
@@ -389,6 +413,7 @@ struct basic_popen : basic_process<Executor>
     stdout_type stdout_{basic_process<Executor>::get_executor()};
 };
 
+/// A popen object with the default  executor.
 using popen = basic_popen<>;
 
 BOOST_PROCESS_V2_END_NAMESPACE
