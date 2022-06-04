@@ -14,7 +14,10 @@
 #include <boost/process/v2/detail/config.hpp>
 #include <boost/process/v2/cstring_ref.hpp>
 
-#if defined(__FreeBSD__)
+#if defined(__NetBSD__)
+ || defined(__FreeBSD__)
+ || defined(__APPLE__)
+ || defined(__MACH__)
 extern "C" { extern char **environ; }
 #endif
 
