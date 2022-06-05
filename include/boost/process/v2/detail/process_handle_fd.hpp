@@ -208,7 +208,7 @@ struct basic_process_handle_fd
         else
             ec.clear();
 
-        if (process_is_running(code))
+        if (res == 0)
             return true;
         else
         {
@@ -269,6 +269,7 @@ struct basic_process_handle_fd
                 if (wait_res == -1)
                     ec = get_last_error();
             }
+            
 
             if (!ec && (wait_res == 0))
             {

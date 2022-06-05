@@ -42,6 +42,7 @@ lib header_test : header_1.cpp header_2.cpp :
 
 lib test_impl : test_impl.cpp filesystem :
         <define>BOOST_PROCESS_V2_SEPARATE_COMPILATION=1
+        <define>BOOST_TEST_IGNORE_SIGCHLD=1
         <link>static
         <target-os>windows:<source>shell32
         <target-os>windows:<source>user32
@@ -55,7 +56,7 @@ test-suite standalone :
     ;
 
 test-suite with_target :
-    [ run process.cpp test_impl : --log_level=all -- : target ]
-    [ run windows.cpp test_impl : --log_level=all -- : target : <build>no <target-os>windows:<build>yes <target-os>windows:<source>Advapi32 ]
+    [ run process.cpp test_impl : --log_level=all --catch_system_errors=no -- : target ]
+    [ run windows.cpp test_impl : --log_level=all --catch_system_errors=no -- : target : <build>no <target-os>windows:<build>yes <target-os>windows:<source>Advapi32 ]
     ;
 

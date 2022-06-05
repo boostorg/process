@@ -291,7 +291,7 @@ struct basic_process_handle_fd_or_signal
                 ec = BOOST_PROCESS_V2_ASIO_NAMESPACE::error::bad_descriptor;
             else 
             {
-                 wait_res = ::waitpid(pid_, &exit_code, WNOHANG);
+                wait_res = ::waitpid(pid_, &exit_code, WNOHANG);
                 if (wait_res == -1)
                     ec = get_last_error();
             }
@@ -326,9 +326,8 @@ struct basic_process_handle_fd_or_signal
         void operator()(Self &&self, error_code ec, int = 0)
         {
             native_exit_code_type exit_code{};
-            if (!ec)
-                if (::waitpid(pid_, &exit_code, 0) == -1)
-                    ec = get_last_error();
+            if (!ec && ::waitpid(pid_, &exit_code, 0) == -1)
+                ec = get_last_error();
             std::move(self).complete(ec, exit_code);
         }
     };

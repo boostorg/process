@@ -12,7 +12,11 @@
 #if defined(BOOST_FILESYSTEM_DYN_LINK)
 #undef BOOST_FILESYSTEM_DYN_LINK
 #endif
+#define BOOST_TEST_IGNORE_SIGCHLD 1
 
+#if  true //defined(BOOST_POSIX_API)
+#   include <signal.h>
+#endif
 // Test that header file is self-contained.
 #include <boost/process/v2/popen.hpp>
 #include <boost/process/v2/process.hpp>
@@ -103,7 +107,7 @@ BOOST_AUTO_TEST_CASE(exit_code_async)
     bpv::process proc1(ctx, pth, {"exit-code", "0"});
     bpv::process proc3(ctx, pth, {"exit-code", "2"});
     bpv::process proc4(ctx, pth, {"exit-code", "42"});
-    bpv::process proc5(ctx, pth, {"sleep", "100"});;
+    bpv::process proc5(ctx, pth, {"sleep", "100"});
 
     proc1.async_wait([&](bpv::error_code ec, int e) {BOOST_CHECK_MESSAGE(!ec, ec.message()); called++; BOOST_CHECK_EQUAL(bpv::evaluate_exit_code(e), 0);});
     bpv::async_execute(

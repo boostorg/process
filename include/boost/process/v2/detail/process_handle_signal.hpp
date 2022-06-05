@@ -202,10 +202,8 @@ struct basic_process_handle_signal
         int res = ::waitpid(pid_, &code, WNOHANG);
         if (res == -1)
             ec = get_last_error();
-        else
-            ec.clear();
-
-        if (process_is_running(res))
+        
+        if (res == 0)
             return true;
         else
         {
@@ -254,8 +252,9 @@ struct basic_process_handle_signal
         void operator()(Self &&self)
         {
             error_code ec;
-            native_exit_code_type exit_code{};
+            native_exit_code_type exit_code{-1};
             int wait_res = -1;
+
             if (pid_ <= 0) // error, complete early
                 ec = BOOST_PROCESS_V2_ASIO_NAMESPACE::error::bad_descriptor;
             else 
@@ -282,15 +281,13 @@ struct basic_process_handle_signal
             };
             BOOST_PROCESS_V2_ASIO_NAMESPACE::post(handle.get_executor(),
                                                   completer{ec, exit_code, std::move(self)});
-
         }
 
         template<typename Self>
-        void operator()(Self &&self, error_code ec, int )
+        void operator()(Self &&self, error_code ec, int sig)
         {
             native_exit_code_type exit_code{};
-            if (!ec)
-                if (::waitpid(pid_, &exit_code, 0) == -1)
+            if (!ec && ::waitpid(pid_, &exit_code, 0) == -1)
                     ec = get_last_error();
             std::move(self).complete(ec, exit_code);
         }
