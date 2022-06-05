@@ -55,7 +55,7 @@ int main(int argc, char * argv[])
     else if (mode == "print-env")
     {
         auto p = ::getenv(argv[2]);
-        if (p)
+        if (p && *p)
             assert(printf("%s", p) > 0);
         else
         {

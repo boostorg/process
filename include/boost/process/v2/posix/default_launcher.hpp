@@ -399,7 +399,7 @@ struct default_launcher
                 if (!ec)
                 {
                     fd_whitelist.push_back(pg.p[1]);
-                    close_all_fds(ec);
+                    //close_all_fds(ec);
                 }                
                 if (!ec)
                     ::execve(executable.c_str(), const_cast<char * const *>(argv), const_cast<char * const *>(env));
