@@ -3,6 +3,7 @@
 #include <thread>
 #include <boost/process/v2/environment.hpp>
 
+extern char **environ;
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 #include <windows.h>
@@ -54,7 +55,15 @@ int main(int argc, char * argv[])
     else if (mode == "print-env")
     {
         auto p = ::getenv(argv[2]);
-        assert(printf("%s", p) > 0);
+        if (p)
+            assert(printf("%s", p) > 0);
+        else
+        {
+            printf("Can't find %s in environment\n", argv[2]);
+            for (auto e = environ; e != nullptr; e++)
+                printf("    %s\n", *e);
+            return 1;
+        }
     }
 #if defined(BOOST_PROCESS_V2_WINDOWS)
     else if (mode == "showwindow")
