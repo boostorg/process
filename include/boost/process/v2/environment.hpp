@@ -55,7 +55,7 @@ using char_type = implementation_defined ;
 constexpr char_type equality_sign = implementation_defined;
 
 /// The delimiter in environemtn lists. Commonly used by the `PATH` variable.
-constexpr char_type equality_sign = implementation_defined;
+constexpr char_type delimiter = implementation_defined;
 
 /// The native handle of an environment. Note that this can be an owning pointer and is generally not thread safe.
 using native_handle = implementation_defined;

@@ -421,16 +421,22 @@ std::string read_env(const char * name, Inits && ... inits)
 
 BOOST_AUTO_TEST_CASE(environment)
 {
+  std::string path = ::getenv("PATH");
+  using std::operator""s;
   BOOST_CHECK_EQUAL(read_env("PATH"), ::getenv("PATH"));
 
-  BOOST_CHECK_EQUAL("FOO-BAR", read_env("FOOBAR", bpv::process_environment{"FOOBAR=FOO-BAR"}));
-  BOOST_CHECK_EQUAL("BAR-FOO", read_env("PATH",   bpv::process_environment{"PATH=BAR-FOO", "XYZ=ZYX"}));
-  BOOST_CHECK_EQUAL("BAR-FOO", read_env("PATH",   bpv::process_environment{"PATH=BAR-FOO", "XYZ=ZYX"}));
+  path = "PATH=" + path;
+  BOOST_CHECK_EQUAL("FOO-BAR", read_env("FOOBAR", bpv::process_environment{"FOOBAR=FOO-BAR",  path.c_str()}));
+  path += static_cast<char>(bpv::environment::delimiter);
+  path += "/bar/foo";
+  BOOST_CHECK_EQUAL(path.substr(5), read_env("PATH", bpv::process_environment{path.c_str(), "XYZ=ZYX"}));
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
-  BOOST_CHECK_EQUAL("BAR-FOO", read_env("PATH",   bpv::process_environment{L"PATH=BAR-FOO", L"XYZ=ZYX"}));
-  BOOST_CHECK_EQUAL("BAR-FOO", read_env("PATH",   bpv::process_environment{L"PATH=BAR-FOO", L"XYZ=ZYX"}));
-  BOOST_CHECK_EQUAL("FOO-BAR", read_env("FOOBAR", bpv::process_environment{L"FOOBAR=FOO-BAR"}));
+  std::wstring wpath = L"PATh=" + std::wstring(_wgetenv(L"PatH"));
+  BOOST_CHECK_EQUAL("FOO-BAR", read_env("FOOBAR", bpv::process_environment{L"FOOBAR=FOO-BAR", wpath.c_str()}));
+  wpath += bpv::environment::delimiter;
+  wpath += L"C:\\bar\\foo";
+  BOOST_CHECK_EQUAL(wpath.substr(5), read_env("pATH",   bpv::process_environment{wpath.c_str(), std::wstring(L"XYZ=ZYX")}));
 #endif
 
   BOOST_CHECK_EQUAL(read_env("PATH", bpv::process_environment(bpv::environment::current())), ::getenv("PATH"));
