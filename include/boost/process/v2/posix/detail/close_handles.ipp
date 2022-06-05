@@ -17,10 +17,7 @@
 // linux has close_range since 5.19
 
 
-#if defined(__NetBSD__)
- || defined(__FreeBSD__)
- || defined(__APPLE__)
- || defined(__MACH__)
+#if defined(__NetBSD__) || defined(__FreeBSD__) || defined(__APPLE__) || defined(__MACH__)
 
 // https://www.freebsd.org/cgi/man.cgi?query=close_range&apropos=0&sektion=0&manpath=FreeBSD+13.1-RELEASE+and+Ports&arch=default&format=html
 // https://man.netbsd.org/closefrom.3
@@ -97,7 +94,7 @@ void close_all(const std::vector<int> & whitelist, error_code & ec)
     if (!whitelist.empty())
     {
         if (whitelist.front() != 0)
-            ::close_range(0, whitelist.front() - 1, CLOSE_RANGE_UNSHARE);
+            ::close_range(0, whitelist.front() - 1, 0);
 
         for (std::size_t idx = 0u; 
              idx < (whitelist.size() - 1u);
@@ -107,7 +104,7 @@ void close_all(const std::vector<int> & whitelist, error_code & ec)
             const auto next = whitelist[idx];
             if ((mine + 1) != next && (mine != next))
             {
-                ::close_range(mine + 1, next - 1, CLOSE_RANGE_UNSHARE);
+                ::close_range(mine + 1, next - 1, 0);
             }
         }
 

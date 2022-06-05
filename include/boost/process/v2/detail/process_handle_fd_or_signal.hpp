@@ -58,10 +58,33 @@ struct basic_process_handle_fd_or_signal
                                 typename std::enable_if<
                                         std::is_convertible<ExecutionContext &,
                                                 BOOST_PROCESS_V2_ASIO_NAMESPACE::execution_context &>::value
-                                >::type = 0)
+                                >::type * = nullptr)
             : pid_(-1), descriptor_(context)
     {
     }
+
+    template<typename ExecutionContext>
+    basic_process_handle_fd_or_signal(ExecutionContext &context,
+                                      pid_type pid,
+                                      typename std::enable_if<
+                                          std::is_convertible<ExecutionContext &,
+                                              BOOST_PROCESS_V2_ASIO_NAMESPACE::execution_context &>::value
+                                          >::type * = nullptr)
+            : pid_(pid), descriptor_(context)
+    {
+    }
+    
+    template<typename ExecutionContext>
+    basic_process_handle_fd_or_signal(ExecutionContext &context,
+                                      pid_type pid, native_handle_type process_handle,
+                                      typename std::enable_if<
+                                          std::is_convertible<ExecutionContext &,
+                                              BOOST_PROCESS_V2_ASIO_NAMESPACE::execution_context &>::value
+                                          >::type * = nullptr)
+            : pid_(pid), descriptor_(context, process_handle)
+    {
+    }
+    
 
     basic_process_handle_fd_or_signal(Executor executor)
             : pid_(-1), descriptor_(executor)
@@ -84,12 +107,11 @@ struct basic_process_handle_fd_or_signal
     {
         handle.pid_ = -1;
     }
-
+    // Warn: does not change the executor of the signal-set.
     basic_process_handle_fd_or_signal& operator=(basic_process_handle_fd_or_signal &&handle)
     {
         pid_ = handle.pid_;
         descriptor_ = std::move(handle.descriptor_);
-        signal_set_ = BOOST_PROCESS_V2_ASIO_NAMESPACE::basic_signal_set<Executor>(handle.get_executor(), SIGCHLD);
         handle.pid_ = -1;
         return *this;
     }

@@ -34,7 +34,7 @@ basic_cstring_ref<char_type, value_char_traits<char>> get(
     auto res = ::getenv(key.c_str());
     if (res == nullptr)
     {
-        ec = ::BOOST_PROCESS_V2_NAMESPACE::detail::get_last_error();
+        ec.assign(ENOENT, system_category());
         return {};
     }
     return res;

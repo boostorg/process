@@ -60,7 +60,7 @@ struct basic_process_handle_signal
                          typename std::enable_if<
                                  std::is_convertible<ExecutionContext &,
                                          BOOST_PROCESS_V2_ASIO_NAMESPACE::execution_context &>::value
-                         >::type = 0)
+                         >::type * = nullptr)
             : pid_(-1), signal_set_(context, SIGCHLD)
     {
     }
@@ -84,7 +84,7 @@ struct basic_process_handle_signal
     basic_process_handle_signal(basic_process_handle_signal && handle)
     {
         pid_ = handle.id();
-        signal_set_ = BOOST_PROCESS_V2_ASIO_NAMESPACE::basic_signal_set<Executor>(handle.get_executor(), SIGCHLD);
+        //signal_set_ = BOOST_PROCESS_V2_ASIO_NAMESPACE::basic_signal_set<Executor>(handle.get_executor(), SIGCHLD);
         handle.pid_ = -1;
         return *this;
     }
