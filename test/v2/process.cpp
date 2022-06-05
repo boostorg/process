@@ -422,7 +422,6 @@ std::string read_env(const char * name, Inits && ... inits)
 BOOST_AUTO_TEST_CASE(environment)
 {
   std::string path = ::getenv("PATH");
-  using std::operator""s;
   BOOST_CHECK_EQUAL(read_env("PATH"), ::getenv("PATH"));
 
   path = "PATH=" + path;
