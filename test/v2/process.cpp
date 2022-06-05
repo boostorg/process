@@ -391,7 +391,8 @@ template<typename ... Inits>
 std::string read_env(const char * name, Inits && ... inits)
 {
   using boost::unit_test::framework::master_test_suite;
-  const auto pth =  master_test_suite().argv[1];
+  const auto pth = bpv::filesystem::absolute(master_test_suite().argv[1]);
+
 
   asio::io_context ctx;
 
