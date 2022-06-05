@@ -107,13 +107,13 @@ BOOST_AUTO_TEST_CASE(exit_code_async)
     bpv::process proc5(ctx, pth, {"sleep", "100"});;
 
 
-    proc1.async_wait([&](bpv::error_code ec, int e) {BOOST_CHECK(!ec); called++; BOOST_CHECK_EQUAL(bpv::evaluate_exit_code(e), 0);});
+    proc1.async_wait([&](bpv::error_code ec, int e) {BOOST_CHECK_MESSAGE(!ec, ec.message()); called++; BOOST_CHECK_EQUAL(bpv::evaluate_exit_code(e), 0);});
     bpv::async_execute(
             bpv::process(ctx, pth, {"exit-code", "1"}),
-            [&](bpv::error_code ec, int e) {BOOST_CHECK(!ec); called++; BOOST_CHECK_EQUAL(bpv::evaluate_exit_code(e), 1);});
-    proc3.async_wait([&](bpv::error_code ec, int e) {BOOST_CHECK(!ec); called++; BOOST_CHECK_EQUAL(bpv::evaluate_exit_code(e), 2);});
-    proc4.async_wait([&](bpv::error_code ec, int e) {BOOST_CHECK(!ec); called++; BOOST_CHECK_EQUAL(bpv::evaluate_exit_code(e), 42);});
-    proc5.async_wait([&](bpv::error_code ec, int e) {BOOST_CHECK(!ec); called++; BOOST_CHECK_EQUAL(bpv::evaluate_exit_code(e), 0);});
+            [&](bpv::error_code ec, int e)          {BOOST_CHECK_MESSAGE(!ec, ec.message()); called++; BOOST_CHECK_EQUAL(bpv::evaluate_exit_code(e), 1);});
+    proc3.async_wait([&](bpv::error_code ec, int e) {BOOST_CHECK_MESSAGE(!ec, ec.message()); called++; BOOST_CHECK_EQUAL(bpv::evaluate_exit_code(e), 2);});
+    proc4.async_wait([&](bpv::error_code ec, int e) {BOOST_CHECK_MESSAGE(!ec, ec.message()); called++; BOOST_CHECK_EQUAL(bpv::evaluate_exit_code(e), 42);});
+    proc5.async_wait([&](bpv::error_code ec, int e) {BOOST_CHECK_MESSAGE(!ec, ec.message()); called++; BOOST_CHECK_EQUAL(bpv::evaluate_exit_code(e), 0);});
     bpv::async_execute(
             bpv::process(ctx, pth, {"sleep", "100"}),
             [&](bpv::error_code ec, int e) {BOOST_CHECK(!ec); called++; BOOST_CHECK_EQUAL(bpv::evaluate_exit_code(e), 0);});
@@ -168,7 +168,7 @@ BOOST_AUTO_TEST_CASE(interrupt)
 
 void trim_end(std::string & str)
 {
-    auto itr = std::find_if(str.rbegin(), str.rend(), [](char c) {return !std::isspace(c);});
+    auto itr = std::find_if(str.rbegin(), str.rend(), &std::char_traits<char>::not_eof);
     str.erase(itr.base(), str.end());
 }
 
@@ -406,10 +406,11 @@ std::string read_env(const char * name, Inits && ... inits)
   std::string out;
   bpv::error_code ec;
 
-  asio::read(rp, asio::dynamic_buffer(out),  ec);
+  const auto sz = asio::read(rp, asio::dynamic_buffer(out),  ec);
   BOOST_CHECK_MESSAGE((ec == asio::error::broken_pipe) || (ec == asio::error::eof), ec.message());
-
+  out.resize(sz);
   trim_end(out);
+  printf("Read env %s: '%s'\n", name, out.c_str());
 
   proc.wait();
   BOOST_CHECK_EQUAL(proc.exit_code(), 0);
