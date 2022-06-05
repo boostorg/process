@@ -286,12 +286,17 @@ struct basic_process_handle_fd_or_signal
         {
             error_code ec;
             native_exit_code_type exit_code{};
+            int wait_res = -1;
             if (pid_ <= 0) // error, complete early
                 ec = BOOST_PROCESS_V2_ASIO_NAMESPACE::error::bad_descriptor;
-            else if (::waitpid(pid_, &exit_code, 0) == -1)
-                ec = get_last_error();
+            else 
+            {
+                 wait_res = ::waitpid(pid_, &exit_code, WNOHANG);
+                if (wait_res == -1)
+                    ec = get_last_error();
+            }
 
-            if (!ec && process_is_running(exit_code))
+            if (!ec && (wait_res == 0))
             {
                 if (descriptor.is_open())
                     descriptor.async_wait(

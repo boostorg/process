@@ -101,11 +101,9 @@ BOOST_AUTO_TEST_CASE(exit_code_async)
     int called = 0;
     
     bpv::process proc1(ctx, pth, {"exit-code", "0"});
-
     bpv::process proc3(ctx, pth, {"exit-code", "2"});
     bpv::process proc4(ctx, pth, {"exit-code", "42"});
     bpv::process proc5(ctx, pth, {"sleep", "100"});;
-
 
     proc1.async_wait([&](bpv::error_code ec, int e) {BOOST_CHECK_MESSAGE(!ec, ec.message()); called++; BOOST_CHECK_EQUAL(bpv::evaluate_exit_code(e), 0);});
     bpv::async_execute(

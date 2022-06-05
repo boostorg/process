@@ -55,7 +55,7 @@ test-suite standalone :
     ;
 
 test-suite with_target :
-    [ run process.cpp test_impl : : target ]
-    [ run windows.cpp test_impl : : target : <build>no <target-os>windows:<build>yes <target-os>windows:<source>Advapi32 ]
+    [ run process.cpp test_impl : --log_level=all -- : target ]
+    [ run windows.cpp test_impl : --log_level=all -- : target : <build>no <target-os>windows:<build>yes <target-os>windows:<source>Advapi32 ]
     ;
 

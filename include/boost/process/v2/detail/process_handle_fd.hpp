@@ -260,12 +260,17 @@ struct basic_process_handle_fd
         {
             error_code ec;
             native_exit_code_type exit_code{};
+            int wait_res = -1;
             if (pid_ <= 0) // error, complete early
                 ec = BOOST_PROCESS_V2_ASIO_NAMESPACE::error::bad_descriptor;
-            else if (::waitpid(pid_, &exit_code, 0) == -1)
-                ec = get_last_error();
+            else 
+            {
+                wait_res = ::waitpid(pid_, &exit_code, WNOHANG);
+                if (wait_res == -1)
+                    ec = get_last_error();
+            }
 
-            if (!ec && process_is_running(exit_code))
+            if (!ec && (wait_res == 0))
             {
                 descriptor.async_wait(
                         BOOST_PROCESS_V2_ASIO_NAMESPACE::posix::descriptor_base::wait_read, std::move(self));

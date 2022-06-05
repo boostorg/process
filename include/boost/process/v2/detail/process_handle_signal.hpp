@@ -199,7 +199,7 @@ struct basic_process_handle_signal
         if (pid_ <= 0)
             return false;
         int code = 0;
-        int res = ::waitpid(pid_, &code, 0);
+        int res = ::waitpid(pid_, &code, WNOHANG);
         if (res == -1)
             ec = get_last_error();
         else
@@ -255,12 +255,16 @@ struct basic_process_handle_signal
         {
             error_code ec;
             native_exit_code_type exit_code{};
+            int wait_res = -1;
             if (pid_ <= 0) // error, complete early
                 ec = BOOST_PROCESS_V2_ASIO_NAMESPACE::error::bad_descriptor;
-            else if (::waitpid(pid_, &exit_code, 0) == -1)
-                ec = get_last_error();
-
-            if (!ec && process_is_running(exit_code))
+            else 
+            {
+                wait_res = ::waitpid(pid_, &exit_code, WNOHANG);
+                if (wait_res == -1)
+                    ec = get_last_error();
+            }
+            if (!ec && (wait_res == 0))
             {
                 handle.async_wait(std::move(self));
                 return ;
