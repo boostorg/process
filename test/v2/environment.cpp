@@ -23,7 +23,7 @@ namespace bpe = boost::process::v2::environment;
 BOOST_AUTO_TEST_CASE(environment)
 {
 
-    for (const auto & elem : bpe::get("PATH"))
+    for (auto && elem : bpe::get("PATH"))
         BOOST_CHECK(std::find(elem.begin(), elem.end(), bpe::delimiter) == elem.end());
 
     BOOST_CHECK(bpe::get("PATH").size() > 0);
@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE(environment)
 
 BOOST_AUTO_TEST_CASE(wenvironment)
 {
-    for (const auto & elem : bpe::get(L"PATH"))
+    for (auto && elem : bpe::get(L"PATH"))
         BOOST_CHECK(std::find(elem.begin(), elem.end(), bpe::delimiter) == elem.end());
 
     BOOST_CHECK(bpe::get(L"PATH").size() > 0);

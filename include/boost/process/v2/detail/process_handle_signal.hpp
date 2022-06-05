@@ -81,7 +81,7 @@ struct basic_process_handle_signal
         handle.pid_ = -1;
     }
 
-    basic_process_handle_signal(basic_process_handle_signal && handle)
+    basic_process_handle_signal& operator=(basic_process_handle_signal && handle)
     {
         pid_ = handle.id();
         //signal_set_ = BOOST_PROCESS_V2_ASIO_NAMESPACE::basic_signal_set<Executor>(handle.get_executor(), SIGCHLD);
