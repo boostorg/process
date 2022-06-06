@@ -59,10 +59,10 @@ int main(int argc, char * argv[])
             assert(printf("%s", p) > 0);
         else
         {
-            printf("Can't find %s in environment\n", argv[2]);
+            assert(printf("Can't find %s in environment\n", argv[2]) > 0);
             for (auto e = environ; e != nullptr; e++)
-                printf("    %s\n", *e);
-            return 1;
+                assert(printf("    %s\n", *e) > 0);
+            return 3;
         }
     }
 #if defined(BOOST_PROCESS_V2_WINDOWS)

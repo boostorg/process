@@ -87,6 +87,7 @@ BOOST_AUTO_TEST_CASE(exit_code_sync)
     args[1] = "42";
     auto proc = bpv::default_process_launcher()(ctx, pth, args);
     BOOST_CHECK_EQUAL(proc.wait(), 42);
+    printf("42: %d\n", proc.native_exit_code());
 
     BOOST_CHECK_EQUAL(bpv::process(ctx, pth, {"sleep", "100"}).wait(), 0);
     BOOST_CHECK_EQUAL(bpv::execute(bpv::process(ctx, pth, {"sleep", "100"})), 0);
@@ -424,7 +425,7 @@ std::string read_env(const char * name, Inits && ... inits)
   BOOST_CHECK_MESSAGE((ec == asio::error::broken_pipe) || (ec == asio::error::eof), ec.message());
   out.resize(sz);
   trim_end(out);
-  printf("Read env %s: '%s'\n", name, out.c_str());
+  printf("Read env (%ld) %s: '%s'\n", sz, name, out.c_str());
 
   proc.wait();
   BOOST_CHECK_EQUAL(proc.exit_code(), 0);
