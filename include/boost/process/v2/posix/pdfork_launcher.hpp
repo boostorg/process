@@ -126,7 +126,7 @@ struct pdfork_launcher : default_launcher
                 if (!ec)
                     ::execve(executable.c_str(), const_cast<char * const *>(argv), const_cast<char * const *>(env));
 
-                ::write(pg.p[1], &errno, sizeof(int));
+                default_launcher::ignore_unused(::write(pg.p[1], &errno, sizeof(int)));
                 ec.assign(errno, system_category());
                 detail::on_exec_error(*this, executable, argv, ec, inits...);
                 ::exit(EXIT_FAILURE);

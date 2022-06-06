@@ -326,7 +326,23 @@ private:
     template<typename Self>
     void operator()(Self && self)
     {
-      handle.async_wait(std::move(self));
+      if (!process_is_running(res))
+      {
+        struct completer
+        {
+            int code;
+            typename std::decay<Self>::type self;
+            void operator()()
+            {
+                self.complete(error_code{}, evaluate_exit_code(code));
+            }
+        };
+
+        BOOST_PROCESS_V2_ASIO_NAMESPACE::post(handle.get_executor(),
+                                              completer{res, std::move(self)});
+      }
+      else
+        handle.async_wait(std::move(self));
     }
 
     template<typename Self>

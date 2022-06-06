@@ -404,7 +404,7 @@ struct default_launcher
                 if (!ec)
                     ::execve(executable.c_str(), const_cast<char * const *>(argv), const_cast<char * const *>(env));
 
-                ::write(pg.p[1], &errno, sizeof(int));
+                ignore_unused(::write(pg.p[1], &errno, sizeof(int)));
                 ec.assign(errno, system_category());
                 detail::on_exec_error(*this, executable, argv, ec, inits...);
                 ::exit(EXIT_FAILURE);
@@ -440,6 +440,7 @@ struct default_launcher
     }
   protected:
 
+    void ignore_unused(std::size_t ) {}
     void close_all_fds(error_code & ec)
     {
         std::sort(fd_whitelist.begin(), fd_whitelist.end());
