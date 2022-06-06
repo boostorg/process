@@ -103,25 +103,36 @@ BOOST_AUTO_TEST_CASE(exit_code_async)
     boost::asio::io_context ctx;
 
     int called = 0;
+
     
     bpv::process proc1(ctx, pth, {"exit-code", "0"});
     bpv::process proc3(ctx, pth, {"exit-code", "2"});
     bpv::process proc4(ctx, pth, {"exit-code", "42"});
     bpv::process proc5(ctx, pth, {"sleep", "100"});
+    bpv::process proc6(ctx, pth, {"sleep", "50"});
 
-    proc1.async_wait([&](bpv::error_code ec, int e) {BOOST_CHECK_MESSAGE(!ec, ec.message()); called++; BOOST_CHECK_EQUAL(bpv::evaluate_exit_code(e), 0);});
-    bpv::async_execute(
-            bpv::process(ctx, pth, {"exit-code", "1"}),
-            [&](bpv::error_code ec, int e)          {BOOST_CHECK_MESSAGE(!ec, ec.message()); called++; BOOST_CHECK_EQUAL(bpv::evaluate_exit_code(e), 1);});
-    proc3.async_wait([&](bpv::error_code ec, int e) {BOOST_CHECK_MESSAGE(!ec, ec.message()); called++; BOOST_CHECK_EQUAL(bpv::evaluate_exit_code(e), 2);});
-    proc4.async_wait([&](bpv::error_code ec, int e) {BOOST_CHECK_MESSAGE(!ec, ec.message()); called++; BOOST_CHECK_EQUAL(bpv::evaluate_exit_code(e), 42);});
-    proc5.async_wait([&](bpv::error_code ec, int e) {BOOST_CHECK_MESSAGE(!ec, ec.message()); called++; BOOST_CHECK_EQUAL(bpv::evaluate_exit_code(e), 0);});
-    bpv::async_execute(
-            bpv::process(ctx, pth, {"sleep", "100"}),
-            [&](bpv::error_code ec, int e) {BOOST_CHECK(!ec); called++; BOOST_CHECK_EQUAL(bpv::evaluate_exit_code(e), 0);});
+#define CPL(Code)                                          \
+    [&](bpv::error_code ec, int e)                         \
+    {                                                      \
+      BOOST_CHECK_MESSAGE(!ec, ec.message());              \
+      called++;                                            \
+      BOOST_CHECK_EQUAL(bpv::evaluate_exit_code(e), Code); \
+    }
+
+    proc1.async_wait(CPL(0));
+    proc3.async_wait(CPL(2));
+    proc4.async_wait(CPL(42));
+    proc5.async_wait(CPL(0));
+    proc6.async_wait(CPL(0));
+    bpv::async_execute(bpv::process(ctx, pth, {"exit-code", "1"}),CPL(1));
+    bpv::async_execute(bpv::process(ctx, pth, {"sleep", "100"}),  CPL(0));
+
+#undef CPL
+
+    //signal(SIGCHLD, [](int){printf("SIGCHLD\n");});
 
     ctx.run();
-    BOOST_CHECK_EQUAL(called, 6);
+    BOOST_CHECK_EQUAL(called, 7);
 }
 
 

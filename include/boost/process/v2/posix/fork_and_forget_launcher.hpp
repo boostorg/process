@@ -90,6 +90,7 @@ struct fork_and_forget_launcher : default_launcher
             pid = ::fork();
             if (pid == -1)
             {
+                ctx.notify_fork(BOOST_PROCESS_V2_ASIO_NAMESPACE::execution_context::fork_parent);
                 detail::on_fork_error(*this, executable, argv, ec, inits...);
                 detail::on_error(*this, executable, argv, ec, inits...);
 

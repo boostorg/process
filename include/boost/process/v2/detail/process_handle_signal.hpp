@@ -246,11 +246,23 @@ struct basic_process_handle_signal
     {
         BOOST_PROCESS_V2_ASIO_NAMESPACE::basic_signal_set<Executor> &handle;
         pid_type pid_;
-        bool needs_post = true;
+        
+        template<typename Self>
+        void operator()(Self &&self)
+        {
+            handle.async_wait(std::move(self));
+            handle.cancel();
+            // we cancel so we end up on the signal-sets executor 
+        }
 
         template<typename Self>
-        void operator()(Self &&self, error_code ec = {}, int = 0)
+        void operator()(Self &&self, error_code ec, int sig)
         {
+            if (ec == BOOST_PROCESS_V2_ASIO_NAMESPACE::error::operation_aborted && 
+                self.get_cancellation_state().cancelled() 
+                    == BOOST_PROCESS_V2_ASIO_NAMESPACE::cancellation_type::none)
+                ec.clear();
+
             native_exit_code_type exit_code = -1;
             int wait_res = -1;
 
@@ -265,7 +277,6 @@ struct basic_process_handle_signal
 
             if (!ec && (wait_res == 0))
             {
-                needs_post = false;
                 handle.async_wait(std::move(self));
                 return ;
             }
@@ -283,11 +294,7 @@ struct basic_process_handle_signal
             };
 
             const auto exec = self.get_executor();
-            completer cpl{ec, exit_code, std::move(self)};
-            if (needs_post)
-                BOOST_PROCESS_V2_ASIO_NAMESPACE::post(exec, std::move(cpl));
-            else
-                BOOST_PROCESS_V2_ASIO_NAMESPACE::dispatch(exec, std::move(cpl));
+            BOOST_PROCESS_V2_ASIO_NAMESPACE::dispatch(exec, completer{ec, exit_code, std::move(self)});
         }
     };
 };

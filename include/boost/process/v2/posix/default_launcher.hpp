@@ -385,6 +385,7 @@ struct default_launcher
             pid = ::fork();
             if (pid == -1)
             {
+                ctx.notify_fork(BOOST_PROCESS_V2_ASIO_NAMESPACE::execution_context::fork_parent);
                 detail::on_fork_error(*this, executable, argv, ec, inits...);
                 detail::on_error(*this, executable, argv, ec, inits...);
 
@@ -393,13 +394,13 @@ struct default_launcher
             }
             else if (pid == 0)
             {
-                ctx.notify_fork(BOOST_PROCESS_V2_ASIO_NAMESPACE::execution_context::fork_child);
                 ::close(pg.p[0]);
+                ctx.notify_fork(BOOST_PROCESS_V2_ASIO_NAMESPACE::execution_context::fork_child);
                 ec = detail::on_exec_setup(*this, executable, argv, inits...);
                 if (!ec)
                 {
                     fd_whitelist.push_back(pg.p[1]);
-                    //close_all_fds(ec);
+                    close_all_fds(ec);
                 }                
                 if (!ec)
                     ::execve(executable.c_str(), const_cast<char * const *>(argv), const_cast<char * const *>(env));
@@ -411,6 +412,7 @@ struct default_launcher
                 return basic_process<Executor>{exec};
             }
 
+            ctx.notify_fork(BOOST_PROCESS_V2_ASIO_NAMESPACE::execution_context::fork_parent);
             ::close(pg.p[1]);
             pg.p[1] = -1;
             int child_error{0};

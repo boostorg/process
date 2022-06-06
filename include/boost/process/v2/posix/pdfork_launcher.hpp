@@ -106,6 +106,7 @@ struct pdfork_launcher : default_launcher
             pid = ::pdfork(&fd, PD_DAEMON | PD_CLOEXEC);
             if (pid == -1)
             {
+                ctx.notify_fork(BOOST_PROCESS_V2_ASIO_NAMESPACE::execution_context::fork_parent);
                 detail::on_fork_error(*this, executable, argv, ec, inits...);
                 detail::on_error(*this, executable, argv, ec, inits...);
 
@@ -132,7 +133,7 @@ struct pdfork_launcher : default_launcher
                 ::exit(EXIT_FAILURE);
                 return basic_process<Executor>{exec};
             }
-
+            ctx.notify_fork(BOOST_PROCESS_V2_ASIO_NAMESPACE::execution_context::fork_parent);
             ::close(pg.p[1]);
             pg.p[1] = -1;
             int child_error{0};
