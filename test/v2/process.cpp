@@ -95,6 +95,8 @@ BOOST_AUTO_TEST_CASE(exit_code_sync)
 BOOST_AUTO_TEST_CASE(exit_code_async)
 {
     using boost::unit_test::framework::master_test_suite;
+    printf("Args: '%d'\n", master_test_suite().argc);
+    printf("Exe '%s'\n", master_test_suite().argv[0]);
     const auto pth =  master_test_suite().argv[1];
     printf("Executing '%s'\n", pth);
 

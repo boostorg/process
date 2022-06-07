@@ -14,20 +14,7 @@ extern char **environ;
 
 int main(int argc, char * argv[])
 {
-    if (argc < 2)
-        return 30;
-    
     std::string mode = argv[1];
-
-    if (mode != "print-args")
-    {
-        fprintf(stderr, "Target process starting: ");
-        for (int i = 0; i < argc; i++)
-            fprintf(stderr, " '%s' ", argv[i]);
-        fprintf(stderr, "\n");
-
-    }
-
     if (mode == "exit-code")
         return std::stoi(argv[2]);
     else if (mode == "sleep")
@@ -54,7 +41,7 @@ int main(int argc, char * argv[])
         std::wcout << boost::process::v2::wstring_view(buf, sz) << std::flush;
 #else
         char buf[65535];
-        assert(printf(::getcwd(buf, sizeof(buf))) > 0);
+        printf(::getcwd(buf, sizeof(buf)));
 #endif
         return 0;
     }
@@ -68,12 +55,12 @@ int main(int argc, char * argv[])
     {
         auto p = ::getenv(argv[2]);
         if (p && *p)
-            assert(printf("%s", p) > 0);
+            printf("%s", p);
         else
         {
-            assert(printf("Can't find %s in environment\n", argv[2]) > 0);
+            printf("Can't find %s in environment\n", argv[2]);
             for (auto e = environ; e != nullptr; e++)
-                assert(printf("    %s\n", *e) > 0);
+                printf("    %s\n", *e);
             return 3;
         }
     }
