@@ -14,7 +14,20 @@ extern char **environ;
 
 int main(int argc, char * argv[])
 {
+    if (argc < 2)
+        return 30;
+    
     std::string mode = argv[1];
+
+    if (mode != "print-args")
+    {
+        fprintf(stderr, "Target process starting: ");
+        for (int i = 0; i < argc; i++)
+            fprintf(stderr, " '%s' ", argv[i]);
+        fprintf(stderr, "\n");
+
+    }
+
     if (mode == "exit-code")
         return std::stoi(argv[2]);
     else if (mode == "sleep")
@@ -30,7 +43,6 @@ int main(int argc, char * argv[])
             std::cerr << argv[i] << std::endl;
             if (!std::cout || !std::cerr)
                 return 1;
-
         }
     else if (mode == "echo")
         std::cout << std::cin.rdbuf();
@@ -42,7 +54,7 @@ int main(int argc, char * argv[])
         std::wcout << boost::process::v2::wstring_view(buf, sz) << std::flush;
 #else
         char buf[65535];
-        printf(::getcwd(buf, sizeof(buf)));
+        assert(printf(::getcwd(buf, sizeof(buf))) > 0);
 #endif
         return 0;
     }

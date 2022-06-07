@@ -77,7 +77,6 @@ BOOST_AUTO_TEST_CASE(exit_code_sync)
     using boost::unit_test::framework::master_test_suite;
     const auto pth =  master_test_suite().argv[1];
     
-    bpv::environment::set("BOOST_PROCESS_V2_TEST_SUBPROCESS", "test");
     boost::asio::io_context ctx;
     
     BOOST_CHECK_EQUAL(bpv::process(ctx, pth, {"exit-code", "0"}).wait(), 0);
@@ -91,20 +90,18 @@ BOOST_AUTO_TEST_CASE(exit_code_sync)
 
     BOOST_CHECK_EQUAL(bpv::process(ctx, pth, {"sleep", "100"}).wait(), 0);
     BOOST_CHECK_EQUAL(bpv::execute(bpv::process(ctx, pth, {"sleep", "100"})), 0);
-
-
 }
 
 BOOST_AUTO_TEST_CASE(exit_code_async)
 {
     using boost::unit_test::framework::master_test_suite;
     const auto pth =  master_test_suite().argv[1];
-    
-    bpv::environment::set("BOOST_PROCESS_V2_TEST_SUBPROCESS", "test");
+    printf("Executing '%s'\n", pth);
+
     boost::asio::io_context ctx;
 
     int called = 0;
-
+    printf("Setting up processes\n");
     
     bpv::process proc1(ctx, pth, {"exit-code", "0"});
     bpv::process proc3(ctx, pth, {"exit-code", "2"});
@@ -120,6 +117,8 @@ BOOST_AUTO_TEST_CASE(exit_code_async)
       BOOST_CHECK_EQUAL(bpv::evaluate_exit_code(e), Code); \
     }
 
+    printf("Waiting for processes\n");
+
     proc1.async_wait(CPL(0));
     proc3.async_wait(CPL(2));
     proc4.async_wait(CPL(42));
@@ -130,7 +129,7 @@ BOOST_AUTO_TEST_CASE(exit_code_async)
 
 #undef CPL
 
-    //signal(SIGCHLD, [](int){printf("SIGCHLD\n");});
+    printf("Running\n");
 
     ctx.run();
     BOOST_CHECK_EQUAL(called, 7);
