@@ -127,7 +127,7 @@ struct basic_process_handle_fd
     {
         if (pid_ <= 0)
             return;
-        if (::waitpid(pid_, &exit_status, 0) == 1)
+        if (::waitpid(pid_, &exit_status, 0) < 0)
             ec = get_last_error();
     }
 
