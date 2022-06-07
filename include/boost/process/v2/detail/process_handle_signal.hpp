@@ -124,8 +124,14 @@ struct basic_process_handle_signal
     {
         if (pid_ <= 0)
             return ;
-        if (::waitpid(pid_, &exit_status, 0)  < 0)
-            ec = get_last_error();
+        while (::waitpid(pid_, &exit_status, 0) < 0)
+        {
+            if (errno != EINTR)
+            {
+                ec = get_last_error();
+                break;
+            }      
+        }
     }
 
     void wait(native_exit_code_type &exit_status)

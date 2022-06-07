@@ -155,8 +155,15 @@ struct basic_process_handle_fd_or_signal
     {
         if (pid_ <= 0)
             return;
-        if (::waitpid(pid_, &exit_status, 0) < 0)
-            ec = get_last_error();
+        while (::waitpid(pid_, &exit_status, 0) < 0)
+        {
+            if (errno != EINTR)
+            {
+                ec = get_last_error();
+                break;
+            }               
+        }
+            
     }
 
     void wait(native_exit_code_type &exit_status)
@@ -228,7 +235,7 @@ struct basic_process_handle_fd_or_signal
         if (pid_ <= 0)
             return false;
         int code = 0;
-        int res = ::waitpid(pid_, &code, 0);
+        int res = ::waitpid(pid_, &code, WNOHANG);
         if (res == -1)
             ec = get_last_error();
         else
