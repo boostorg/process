@@ -71,7 +71,8 @@ struct execute_op
         if (s.is_connected())
             s.emplace<cancel>(proc.get());
 
-        proc->async_wait(
+        auto pro_ = proc.get();
+        pro_->async_wait(
                 BOOST_PROCESS_V2_ASIO_NAMESPACE::bind_cancellation_slot(
                     BOOST_PROCESS_V2_ASIO_NAMESPACE::cancellation_slot(),
                     std::move(self)));
@@ -79,7 +80,7 @@ struct execute_op
 
     template<typename Self>
     void operator()(Self && self, error_code ec, int res)
-    {
+    { 
         self.get_cancellation_state().slot().clear();
         self.complete(ec, res);
     }
