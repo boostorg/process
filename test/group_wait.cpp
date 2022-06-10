@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(wait_group_test_timeout, *boost::unit_test::timeout(15))
 
     bp::child c1(
             master_test_suite().argv[1],
-            "--wait", "1",
+            "--wait", "2",
             g,
             ec
     );
