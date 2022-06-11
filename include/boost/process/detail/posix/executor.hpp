@@ -151,6 +151,7 @@ class executor
 
     int _pipe_sink = -1;
 
+
     void write_error(const std::error_code & ec, const char * msg)
     {
         //I am the child
@@ -327,6 +328,13 @@ public:
     }
     void set_error(const std::error_code &ec, const std::string &msg) {set_error(ec, msg.c_str());};
 
+    std::vector<int> get_used_handles() const 
+    {
+        if (_pipe_sink == -1)
+            return {};
+        else
+            return {_pipe_sink};
+    };
 };
 
 template<typename Sequence>
