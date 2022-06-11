@@ -297,7 +297,7 @@ struct default_launcher
     int pid = -1;
 
     /// The whitelist for file descriptors.
-    std::vector<int> fd_whitelist;
+    std::vector<int> fd_whitelist = {STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO};
 
     default_launcher() = default;
 
@@ -447,7 +447,7 @@ struct default_launcher
     {
         std::sort(fd_whitelist.begin(), fd_whitelist.end());
         detail::close_all(fd_whitelist, ec);
-        fd_whitelist.clear();
+        fd_whitelist = {STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO};
     }
 
     struct pipe_guard
