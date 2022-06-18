@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE(iterate_handles, *boost::unit_test::timeout(5))
 
     BOOST_CHECK_MESSAGE(!ec, ec.message());
 
-    BOOST_CHECK_EQUAL(ret, 42u);
+    BOOST_CHECK_EQUAL(ret, 42);
     BOOST_CHECK_EQUAL(std::count(res.begin(), res.end(), p_in. native_sink()), 0u);
     BOOST_CHECK_EQUAL(std::count(res.begin(), res.end(), p_out.native_source()), 0u);
 }
