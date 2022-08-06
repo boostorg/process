@@ -159,7 +159,10 @@ struct exe_cmd_init : handler_base_ext
         return exe_cmd_init<Char>(std::move(sh), std::move(args_));
     }
 
-    static std:: string get_shell(char)    {return shell(). string(codecvt()); }
+    static std:: string get_shell(char)    {
+        std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
+        return converter.to_bytes(shell().wstring(codecvt()));
+    }
     static std::wstring get_shell(wchar_t) {return shell().wstring(codecvt());}
 
     static exe_cmd_init<Char> cmd_shell(string_type&& cmd)

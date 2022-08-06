@@ -26,7 +26,7 @@ inline boost::process::filesystem::path shell_path()
         throw_last_error("GetSystemDirectory() failed");
 
     boost::process::filesystem::path p = sysdir;
-    return p / "cmd.exe";
+    return p += L"\\cmd.exe";
 }
 
 inline boost::process::filesystem::path shell_path(std::error_code &ec) noexcept
@@ -43,7 +43,7 @@ inline boost::process::filesystem::path shell_path(std::error_code &ec) noexcept
     {
         ec.clear();
         p = sysdir;
-        p /= "cmd.exe";
+        p += L"\\cmd.exe";
     }
     return p;
 }
