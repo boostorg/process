@@ -264,6 +264,12 @@ class executor
             else if ((err != EAGAIN ) && (err != EINTR))
                 set_error(std::error_code(err, std::system_category()), "Error read pipe");
         }
+
+        int state = 0;
+        pid_t got_pid = waitpid(pid, &state, 0);
+        assert(got_pid == pid);
+        assert(WIFEXITED(state) == 1);
+
         set_error(ec, std::move(msg));
     }
 
