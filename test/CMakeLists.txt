@@ -2,7 +2,7 @@ enable_testing()
 
 
 add_executable(boost_process_sparring_partner sparring_partner.cpp )
-target_link_libraries(boost_process_sparring_partner Boost::process Boost::program_options Boost::filesystem Boost::iostreams)
+target_link_libraries(boost_process_sparring_partner Boost::process Boost::lambda Boost::program_options Boost::filesystem Boost::iostreams)
 
 add_executable(boost_process_exit_argc exit_argc.cpp)
 
@@ -11,7 +11,7 @@ target_link_libraries(boost_process_sub_launch Boost::process Boost::program_opt
 
 function(process_standalone_test name )
     add_executable(boost_process_${name} ${name}.cpp)
-    target_link_libraries(boost_process_${name} Boost::process Boost::system Boost::filesystem)
+    target_link_libraries(boost_process_${name} Boost::process Boost::system Boost::filesystem Boost::unit_test_framework)
     add_test(NAME boost_process_${name} COMMAND $<TARGET_FILE:boost_process_${name}> )
 endfunction()
 
@@ -21,7 +21,7 @@ process_standalone_test(pipe)
 
 function(process_sub_launch_test name )
     add_executable(boost_process_${name} ${name}.cpp)
-    target_link_libraries(boost_process_${name} Boost::process Boost::system Boost::filesystem Boost::thread)
+    target_link_libraries(boost_process_${name} Boost::process Boost::system Boost::filesystem Boost::thread Boost::unit_test_framework)
     add_test(NAME boost_process_${name} COMMAND $<TARGET_FILE:boost_process_${name}> $<TARGET_FILE:boost_process_sub_launch> )
 endfunction()
 
@@ -30,7 +30,7 @@ process_sub_launch_test(group_wait)
 
 function(process_sparring_partner_launch name )
     add_executable(boost_process_${name} ${name}.cpp)
-    target_link_libraries(boost_process_${name} Boost::process Boost::system Boost::filesystem Boost::thread)
+    target_link_libraries(boost_process_${name} Boost::process Boost::system Boost::filesystem Boost::thread Boost::unit_test_framework Boost::program_options)
     add_test(NAME boost_process_${name} COMMAND $<TARGET_FILE:boost_process_${name}> $<TARGET_FILE:boost_process_sparring_partner> )
 endfunction()
 
@@ -70,7 +70,11 @@ process_sparring_partner_launch(wait_for)
 process_sparring_partner_launch(on_exit)
 process_sparring_partner_launch(on_exit2)
 process_sparring_partner_launch(on_exit3)
-process_sparring_partner_launch(posix_specific)
-process_sparring_partner_launch(windows_specific)
+
+if(WIN32)
+    process_sparring_partner_launch(windows_specific)
+else()
+    process_sparring_partner_launch(posix_specific)
+endif()
 
 add_subdirectory(v2)
