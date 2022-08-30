@@ -155,8 +155,8 @@ class executor
     void write_error(const std::error_code & ec, const char * msg)
     {
         //I am the child
-        const auto len = std::strlen(msg);
-        int data[2] = {ec.value(), static_cast<int>(len + 1)};
+        const auto len = static_cast<int>(std::strlen(msg));
+        int data[2] = {ec.value(), len + 1};
 
         boost::ignore_unused(::write(_pipe_sink, &data[0], sizeof(int) * 2));
         boost::ignore_unused(::write(_pipe_sink, msg, len));
