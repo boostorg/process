@@ -289,11 +289,6 @@ struct process_stdio
     if (::dup2(err.fd, err.target) == -1)
       return error_code(errno, system_category());
 
-        
-    launcher.fd_whitelist.push_back(STDIN_FILENO);
-    launcher.fd_whitelist.push_back(STDOUT_FILENO);
-    launcher.fd_whitelist.push_back(STDERR_FILENO);
-
     return error_code {};
   };
 #endif
