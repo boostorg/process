@@ -7,6 +7,7 @@
 
 #include <boost/core/exchange.hpp>
 #include <boost/process/v2/detail/config.hpp>
+#include <boost/process/v2/detail/utf8.hpp>
 #include <boost/process/v2/detail/throw_error.hpp>
 #include <boost/process/v2/cstring_ref.hpp>
 #include <memory>
@@ -27,12 +28,16 @@ struct shell
 #endif
 
     template<typename Char, typename Traits>
-    shell(basic_cstring_ref<Char, Traits> input) 
-        : buffer_(conv_string(input.data(), input.size())) 
+    shell(basic_string_view<Char, Traits> input) 
+        : buffer_(detail::conv_string<char_type>(input.data(), input.size())) 
     {
     }
 
     shell(basic_cstring_ref<char_type> input) : input_(input) {}
+    shell(basic_string_view<
+                    typename std::conditional<
+                        std::is_same<char_type, char>::value,
+                        wchar_t, char>::type> input) : buffer_(detail::conv_string<char_type>(input.data(), input.size())) {}
 
     struct argv_t
     {

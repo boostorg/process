@@ -6,6 +6,7 @@
 #define BOOST_PROCESS_V2_IMPL_SHELL_IPP
 
 #include <boost/process/v2/detail/config.hpp>
+#include <boost/process/v2/detail/last_error.hpp>
 #include <boost/process/v2/detail/throw_error.hpp>
 #include <boost/process/v2/detail/config.hpp>
 #include <boost/process/v2/error.hpp>
@@ -62,6 +63,10 @@ BOOST_PROCESS_V2_DECL const error_category& get_shell_category()
 
 #endif
 
+#if defined (BOOST_PROCESS_V2_WINDOWS)
+
+#else
+
 shell::argv_t shell::argv_t::parse_(
     basic_cstring_ref<shell::char_type> input, 
     error_code & ec)
@@ -92,6 +97,27 @@ shell::argv_t::~argv_t()
             .we_offs = static_cast<std::size_t>(reserved_)
         };
         wordfree(&we);
+    }
+}
+
+#endif
+
+shell::argv_t shell::argv_t::parse_(
+    basic_cstring_ref<shell::char_type> input, 
+    error_code & ec)
+{
+    shell::argv_t res;
+    res.argv_ = ::CommandLineToArgvW(input.c_str(), &res.argc_);
+    if (res.argv_ == nullptr)
+        ec = detail::get_last_error();
+    return res;
+}
+
+shell::argv_t::~argv_t()
+{
+    if (argv_ != nullptr)
+    {
+        LocalFree(argv_);
     }
 }
 
