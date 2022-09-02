@@ -10,6 +10,8 @@
 
 // Test that header file is self-contained.
 #include <boost/process/v2/shell.hpp>
+#include <boost/process/v2/process.hpp>
+#include <boost/asio/io_context.hpp>
 
 #include <boost/test/unit_test.hpp>
 
@@ -25,27 +27,30 @@
 BOOST_AUTO_TEST_CASE(test_shell_parser)
 {
     using boost::process::v2::shell;
-
-    auto sh = shell("foo \"");
-    boost::system::error_code ec;
-    auto argv = sh.parse(ec);
-
+    namespace bpv = boost::process::v2;
 #if defined(BOOST_PROCESS_V2_POSIX)
-    for (auto s : sh.parse())
-    {
-        std::wcout << s << std::endl;
-    }
-    BOOST_CHECK(argv.empty());
-    BOOST_CHECK(ec);
+    BOOST_CHECK_THROW(shell("foo \""), bpv::system_error);
 #endif
 
-    sh = shell(STR("foo bar \"foo bar\""));
-    
-    ec.clear();
-    argv = sh.parse(ec);
-    BOOST_CHECK(argv.argc() == 3u);
-    BOOST_CHECK(!ec);
-    BOOST_CHECK(argv.argv()[0] == STR_VIEW("foo"));
-    BOOST_CHECK(argv.argv()[1] == STR_VIEW("bar"));
-    BOOST_CHECK(argv.argv()[2] == STR_VIEW("foo bar"));
+    auto sh = shell(STR("foo bar \"foo bar\""));   
+    BOOST_CHECK(sh.argc() == 3u);
+    BOOST_CHECK(sh.argv()[0] == STR_VIEW("foo"));
+    BOOST_CHECK(sh.argv()[1] == STR_VIEW("bar"));
+    BOOST_CHECK(sh.argv()[2] == STR_VIEW("foo bar"));
+
+#if defined(BOOST_PROCESS_V2_POSIX)
+    auto raw_shell = "sh -c false";
+#else
+    auto raw_shell = "cmd /c exit 1";
+#endif
+    sh = shell(raw_shell);
+
+    auto exe = sh.exe();
+    BOOST_CHECK(bpv::filesystem::exists(exe));
+
+    boost::asio::io_context ctx;
+    bpv::process proc{ctx, exe, sh.args()};
+
+    proc.wait();
+    BOOST_CHECK_EQUAL(proc.exit_code(), 1);
 }
