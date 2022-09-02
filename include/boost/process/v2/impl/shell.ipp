@@ -65,29 +65,45 @@ BOOST_PROCESS_V2_DECL const error_category& get_shell_category()
 
 #if defined (BOOST_PROCESS_V2_WINDOWS)
 
+void shell::parse_()
+{
+    argv_ = ::CommandLineToArgvW(input_.c_str(), &argc_);
+    if (argv_ == nullptr)
+        detail::throw_last_error();
+}
+
+shell::~shell()
+{
+    if (argv_ != nullptr)
+        LocalFree(argv_);
+}
+
+auto shell::args() const-> args_type
+{
+    return input_.c_str();
+}
+
 #else
 
-shell::argv_t shell::argv_t::parse_(
-    basic_cstring_ref<shell::char_type> input, 
-    error_code & ec)
+shell::parse_()
 {
     shell::argv_t res;
     wordexp_t we{};
-    auto cd = wordexp(input.c_str(), &we, WRDE_NOCMD);
+    auto cd = wordexp(input_.c_str(), &we, WRDE_NOCMD);
 
     if (cd != 0)
-        ec.assign(cd, get_shell_category());
+        detail::throw_error(error_code(cd, get_shell_category()), "shell::parse");
     else
     {
-        res.argc_ = static_cast<int>(we.we_wordc);
-        res.argv_ = we.we_wordv;
-        res.reserved_ = static_cast<int>(we.we_offs); 
+        argc_ = static_cast<int>(we.we_wordc);
+        argv_ = we.we_wordv;
+        reserved_ = static_cast<int>(we.we_offs); 
     }
 
     return res;
 }
 
-shell::argv_t::~argv_t()
+shell::~shell()
 {
     if (argv_ != nullptr)
     {
@@ -100,26 +116,18 @@ shell::argv_t::~argv_t()
     }
 }
 
-#endif
-
-shell::argv_t shell::argv_t::parse_(
-    basic_cstring_ref<shell::char_type> input, 
-    error_code & ec)
+auto shell::args() const -> args_type
 {
-    shell::argv_t res;
-    res.argv_ = ::CommandLineToArgvW(input.c_str(), &res.argc_);
-    if (res.argv_ == nullptr)
-        ec = detail::get_last_error();
-    return res;
-}
-
-shell::argv_t::~argv_t()
-{
-    if (argv_ != nullptr)
+    if (argc() == 0)
     {
-        LocalFree(argv_);
+        static char * helper = nullptr;
+        return &helper;
     }
+    else
+        return argv() + 1;
 }
+
+#endif
 
 BOOST_PROCESS_V2_END_NAMESPACE
 
