@@ -26,12 +26,18 @@ BOOST_AUTO_TEST_CASE(test_shell_parser)
 {
     using boost::process::v2::shell;
 
-    auto sh = shell(STR("foo \""));
-
+    auto sh = shell("foo \"");
     boost::system::error_code ec;
     auto argv = sh.parse(ec);
+
+#if defined(BOOST_PROCESS_V2_POSIX)
+    for (auto s : sh.parse())
+    {
+        std::wcout << s << std::endl;
+    }
     BOOST_CHECK(argv.empty());
     BOOST_CHECK(ec);
+#endif
 
     sh = shell(STR("foo bar \"foo bar\""));
     
