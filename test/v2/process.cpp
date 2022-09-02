@@ -164,6 +164,7 @@ BOOST_AUTO_TEST_CASE(request_exit)
     , asio::windows::show_window_minimized_not_active
 #endif
     );
+  BOOST_CHECK(proc.running());
   std::this_thread::sleep_for(std::chrono::milliseconds(250));
   proc.request_exit();
   proc.wait();
@@ -188,6 +189,8 @@ void trim_end(std::string & str)
 {
     auto itr = std::find_if(str.rbegin(), str.rend(), &std::char_traits<char>::not_eof);
     str.erase(itr.base(), str.end());
+    if (!str.empty() && str.back() == '\r')
+      str.pop_back();
 }
 
 BOOST_AUTO_TEST_CASE(print_args_out)
@@ -356,16 +359,16 @@ BOOST_AUTO_TEST_CASE(popen)
     // default CWD
     bpv::popen proc(ctx, pth, {"echo"});
 
-    asio::write(proc, asio::buffer("FOOBAR"));
-
+    auto written = asio::write(proc, asio::buffer("FOOBAR"));
     proc.get_stdin().close();
 
     std::string res;
     boost::system::error_code ec;
     std::size_t n = asio::read(proc, asio::dynamic_buffer(res), ec);
-    res.resize(n - 1);
-    BOOST_CHECK_EQUAL(ec, asio::error::eof);
+    BOOST_CHECK(ec == asio::error::eof || ec == asio::error::broken_pipe);
+    BOOST_REQUIRE_GE(n, 1);
     // remove EOF
+    res.pop_back();
     BOOST_CHECK_EQUAL(res, "FOOBAR");
 
     proc.wait();
@@ -429,7 +432,7 @@ std::string read_env(const char * name, Inits && ... inits)
   BOOST_CHECK_MESSAGE((ec == asio::error::broken_pipe) || (ec == asio::error::eof), ec.message());
   out.resize(sz);
   trim_end(out);
-  printf("Read env (%ld) %s: '%s'\n", sz, name, out.c_str());
+  printf("Read env (%ld) %s: '%s'\n", static_cast<long>(sz), name, out.c_str());
 
   proc.wait();
   BOOST_CHECK_EQUAL(proc.exit_code(), 0);
@@ -449,12 +452,12 @@ BOOST_AUTO_TEST_CASE(environment)
   BOOST_CHECK_EQUAL("FOO-BAR", read_env("FOOBAR", bpv::process_environment{sub_env}));
   
   sub_env.push_back("XYZ=ZYX");
-  auto itr = std::find_if(sub_env.begin(), sub_env.end(), [](const bpv::environment::key_value_pair & kv) {return kv.key() == "PATH";});
+  auto itr = std::find_if(sub_env.begin(), sub_env.end(), [](const bpv::environment::key_value_pair & kv) {return kv.key() == bpv::environment::key("PATH");});
   path += static_cast<char>(bpv::environment::delimiter);
   path += "/bar/foo";
   bpv::environment::value pval = itr->value();
   pval.push_back("/bar/foo");
-  *itr = bpv::environment::key_value_pair("PATH", pval);
+  *itr = bpv::environment::key_value_pair(bpv::environment::key("PATH"), pval);
   BOOST_CHECK_EQUAL(path, read_env("PATH", bpv::process_environment{sub_env}));
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
@@ -462,12 +465,13 @@ BOOST_AUTO_TEST_CASE(environment)
   BOOST_CHECK_EQUAL("FOO-BAR", read_env("FOOBAR", bpv::process_environment{L"FOOBAR=FOO-BAR", wpath.c_str()}));
   wpath += bpv::environment::delimiter;
   wpath += L"C:\\bar\\foo";
-  BOOST_CHECK_EQUAL(wpath.substr(5), read_env("pATH",   bpv::process_environment{wpath.c_str(), std::wstring(L"XYZ=ZYX")}));
+  BOOST_CHECK_EQUAL(
+    bpv::detail::conv_string<char>(wpath.c_str() + 5, wpath.size() - 5)
+    , read_env("pATH",   bpv::process_environment{wpath.c_str(), std::wstring(L"XYZ=ZYX")}));
 #endif
 
   BOOST_CHECK_EQUAL(read_env("PATH", bpv::process_environment(bpv::environment::current())), ::getenv("PATH"));
 }
-
 
 BOOST_AUTO_TEST_SUITE_END();
 
