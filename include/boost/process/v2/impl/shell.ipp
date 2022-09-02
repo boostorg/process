@@ -85,9 +85,8 @@ auto shell::args() const-> args_type
 
 #else
 
-shell::parse_()
+void shell::parse_()
 {
-    shell::argv_t res;
     wordexp_t we{};
     auto cd = wordexp(input_.c_str(), &we, WRDE_NOCMD);
 
@@ -99,8 +98,6 @@ shell::parse_()
         argv_ = we.we_wordv;
         reserved_ = static_cast<int>(we.we_offs); 
     }
-
-    return res;
 }
 
 shell::~shell()
@@ -120,11 +117,11 @@ auto shell::args() const -> args_type
 {
     if (argc() == 0)
     {
-        static char * helper = nullptr;
+        static const char * helper = nullptr;
         return &helper;
     }
     else
-        return argv() + 1;
+        return const_cast<const char**>(argv());
 }
 
 #endif

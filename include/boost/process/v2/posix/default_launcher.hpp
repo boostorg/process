@@ -485,6 +485,11 @@ struct default_launcher
         return argv_.data();
     }
 
+    const char * const * build_argv_(const filesystem::path &, const char ** argv)
+    {
+        return argv;
+    }
+
     template<typename Args>
     const char * const *  build_argv_(const filesystem::path & pt, const Args & args,
                                       typename std::enable_if<
