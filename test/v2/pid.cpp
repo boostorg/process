@@ -12,4 +12,8 @@ BOOST_AUTO_TEST_CASE(test_pid)
 {
     namespace bp2 = boost::process::v2;
     BOOST_CHECK_NE(bp2::current_pid(), static_cast<bp2::pid_type>(0));
+
+    auto all = bp2::all_pids();
+    auto itr = std::find(all.begin(), all.end(), bp2::current_pid());
+    BOOST_CHECK(itr != all.end());
 }
