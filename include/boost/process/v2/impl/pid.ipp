@@ -17,8 +17,44 @@
 #include <unistd.h>
 
 #if (defined(__APPLE__) && defined(__MACH__))
+#include <sys/sysctl.h>
 #include <sys/proc_info.h>
 #include <libproc.h>
+#endif
+
+
+#if (defined(__linux__) && !defined(__ANDROID__))
+#include <dirent.h>
+#endif
+
+#if defined(__FreeBSD__)
+#include <sys/socket.h>
+#include <sys/sysctl.h>
+#include <sys/param.h>
+#include <sys/queue.h>
+#include <sys/user.h>
+#include <libprocstat.h>
+#include <libutil.h>
+#endif
+
+#if defined(__DragonFly__) || defined(__OpenBSD__)
+#include <sys/param.h>
+#include <sys/sysctl.h>
+#include <sys/user.h>
+#include <kvm.h>
+#endif
+
+#if defined(__NetBSD__)
+#include <sys/param.h>
+#include <sys/sysctl.h>
+#include <kvm.h>
+#endif
+
+#if defined(__sun)
+#include <kvm.h>
+#include <sys/param.h>
+#include <sys/time.h>
+#include <sys/proc.h>
 #endif
 
 #endif
