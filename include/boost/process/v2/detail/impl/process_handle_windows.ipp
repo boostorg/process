@@ -12,6 +12,16 @@
 
 #include <windows.h>
 
+#if !defined(BOOST_PROCESS_V2_DISABLE_UNDOCUMENTED_API)
+extern "C" 
+{
+  
+LONG WINAPI NtResumeProcess(HANDLE ProcessHandle);
+LONG WINAPI NtSuspendProcess(HANDLE ProcessHandle);
+  
+}
+#endif
+
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
 
 namespace detail
@@ -113,6 +123,33 @@ void check_running_(HANDLE handle, error_code & ec, DWORD & exit_status)
         ec = detail::get_last_error();
 }
 
+#if !defined(BOOST_PROCESS_V2_DISABLE_UNDOCUMENTED_API)
+void suspend_(HANDLE handle, error_code & ec)
+{
+  auto nt_err = NtSuspendProcess(handle);
+  if (nt_err > 0xC0000000)
+    ec = detail::get_last_error();
+}
+
+void resume_(HANDLE handle, error_code & ec)
+{
+
+  auto nt_err = NtResumeProcess(handle);
+  if (nt_err > 0xC0000000)
+    ec = detail::get_last_error();
+}
+#else
+void suspend_(HANDLE, error_code & ec)
+{
+  ec.assign(ERROR_CALL_NOT_IMPLEMENTED, system_category());
+}
+
+void resume_(HANDLE handle, error_code & ec)
+{
+
+    ec.assign(ERROR_CALL_NOT_IMPLEMENTED, system_category());
+}
+#endif
 
 #if !defined(BOOST_PROCESS_V2_HEADER_ONLY)
 template struct basic_process_handle_win<>;
