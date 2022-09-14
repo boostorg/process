@@ -71,7 +71,7 @@ std::vector<pid_type> all_pids(error_code & ec)
     return vec;
 }
 
-#elif (defined(__linux__) && !defined(__ANDROID__))
+#elif defined(__linux__)
 
 std::vector<pid_type> all_pids(error_code & ec)
 {
