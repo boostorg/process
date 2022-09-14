@@ -99,26 +99,45 @@ std::vector<pid_type> all_pids(error_code & ec)
 {
     std::vector<pid_type> vec;
     int cntp = 0;
+    kinfo_proc *proc_info = kinfo_getallproc(&cntp);
+    if (proc_info) 
+    {
+      for (int i = 0; i < cntp; i++)
+        vec.push_back(proc_info[i].ki_pid);
+      free(proc_info);
+    }
+    else
+        ec = detail::get_last_error();
+    
+    return vec;
+}
+
+#elif defined(__DragonFly__)
+
+std::vector<pid_type> all_pids(error_code & ec)
+{
+    std::vector<pid_type> vec;
+    int cntp = 0;
     kinfo_proc *proc_info = nullptr;
     const char *nlistf, *memf;
     nlistf = memf = "/dev/null";
     kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr); 
-    if (!kd)
+    if (!kd) 
     {
         ec = detail::get_last_error();
         return vec;
-    } 
-    if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, &cntp)))
+    }
+        
+    if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, &cntp))) 
     {
-      vec.reserve(cntp);
-      for (int i = 0; i < cntp; i++) {
-        if (proc_info[i].kp_pid >= 0) {
-          vec.push_back(proc_info[i].kp_pid);
-        }
-      }
+        vec.reserve(cntp);
+        for (int i = 0; i < cntp; i++) 
+            if (proc_info[i].kp_pid >= 0) 
+                vec.push_back(proc_info[i].kp_pid);
     }
     else
         ec = detail::get_last_error();
+        
     kvm_close(kd);
     return vec;
 }
