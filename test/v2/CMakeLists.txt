@@ -4,6 +4,9 @@ add_library(boost_process_v2_test_impl test_impl.cpp)
 target_link_libraries(boost_process_v2_test_impl Boost::process Boost::unit_test_framework Boost::process)
 target_compile_definitions(boost_process_v2_test_impl PUBLIC -DBOOST_PROCESS_V2_SEPARATE_COMPILATION=1)
 
+if (WIN32)
+    target_compile_definitions(boost_process_v2_test_impl PUBLIC WIN32_LEAN_AND_MEAN=1)
+endif()
 
 function(boost_process_v2_standalone_test name)
     add_executable(boost_process_v2_${name} ${name}.cpp)
@@ -31,3 +34,4 @@ function(boost_process_v2_test_with_target name)
 endfunction()
 
 boost_process_v2_test_with_target(process)
+boost_process_v2_test_with_target(group)

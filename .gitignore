@@ -32,3 +32,8 @@
 /notes_p.txt
 .settings
 
+*.make
+*.cmake
+*.rsp
+*.marks
+cmake-*

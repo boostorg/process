@@ -11,8 +11,9 @@
 #ifndef BOOST_PROCESS_V2_WINDOWS_DEFAULT_LAUNCHER_HPP
 #define BOOST_PROCESS_V2_WINDOWS_DEFAULT_LAUNCHER_HPP
 
-#include <boost/process/v2/cstring_ref.hpp>
 #include <boost/process/v2/detail/config.hpp>
+
+#include <boost/process/v2/cstring_ref.hpp>
 #include <boost/process/v2/detail/last_error.hpp>
 #include <boost/process/v2/detail/utf8.hpp>
 #include <boost/process/v2/error.hpp>

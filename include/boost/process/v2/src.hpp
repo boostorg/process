@@ -24,4 +24,8 @@
 #include <boost/process/v2/impl/process_handle.ipp>
 #include <boost/process/v2/impl/shell.ipp>
 
+#if defined(BOOST_PROCESS_V2_WINDOWS)
+#include <boost/process/v2/detail/impl/group_impl_windows.ipp>
+#endif
+
 #endif //BOOST_PROCESS_V2_SRC_HPP

@@ -9,7 +9,7 @@
 #include <boost/process/v2/detail/last_error.hpp>
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
-#include <windows.h>
+#include <Windows.h>
 #else
 #include <cerrno>
 #endif

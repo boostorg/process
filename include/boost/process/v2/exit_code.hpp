@@ -12,12 +12,22 @@
 #define BOOST_PROCESS_V2_EXIT_CODE_HPP
 
 #include <boost/process/v2/detail/config.hpp>
+#include <boost/process/v2/pid.hpp>
 
 #if defined(BOOST_PROCESS_V2_POSIX)
 #include <sys/wait.h>
 #endif
 
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
+
+/// Result of a single process exiting.
+struct single_process_exit
+{
+    /// The pid of the process that exited
+    pid_type pid;
+    /// The exit code of the code
+    int exit_code;
+};
 
 #if defined(GENERATING_DOCUMENTATION)
 
