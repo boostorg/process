@@ -24,6 +24,7 @@
 #include <boost/process/v2/start_dir.hpp>
 #include <boost/process/v2/execute.hpp>
 #include <boost/process/v2/stdio.hpp>
+#include <boost/process/v2/bind_launcher.hpp>
 
 #include <boost/test/unit_test.hpp>
 #include <boost/asio/io_context.hpp>
@@ -357,16 +358,16 @@ BOOST_AUTO_TEST_CASE(popen)
 
 
     // default CWD
-    bpv::popen proc(ctx, pth, {"echo"});
+    bpv::popen proc(/*bpv::default_process_launcher(), */ctx, pth, {"echo"});
 
-    auto written = asio::write(proc, asio::buffer("FOOBAR"));
+    asio::write(proc, asio::buffer("FOOBAR"));
     proc.get_stdin().close();
 
     std::string res;
     boost::system::error_code ec;
     std::size_t n = asio::read(proc, asio::dynamic_buffer(res), ec);
     BOOST_CHECK(ec == asio::error::eof || ec == asio::error::broken_pipe);
-    BOOST_REQUIRE_GE(n, 1);
+    BOOST_REQUIRE_GE(n, 1u);
     // remove EOF
     res.pop_back();
     BOOST_CHECK_EQUAL(res, "FOOBAR");
@@ -495,6 +496,39 @@ BOOST_AUTO_TEST_CASE(exit_code_as_error)
   ctx.run();
   BOOST_CHECK_EQUAL(called, 3);
 
+}
+
+BOOST_AUTO_TEST_CASE(bind_launcher)
+{
+  using boost::unit_test::framework::master_test_suite;
+  const auto pth = bpv::filesystem::absolute(master_test_suite().argv[1]);
+
+  asio::io_context ctx;
+
+  asio::readable_pipe rp{ctx};
+  asio::writable_pipe wp{ctx};
+  asio::connect_pipe(rp, wp);
+
+  auto target = bpv::filesystem::canonical(bpv::filesystem::temp_directory_path());
+
+  auto l = bpv::bind_default_launcher(bpv::process_start_dir(target));
+
+  std::vector<std::string> args = {"print-cwd"};
+  // default CWD
+  bpv::process proc = l(ctx, pth, args, bpv::process_stdio{/*.in=*/{}, /*.out=*/wp});
+  wp.close();
+
+  std::string out;
+  bpv::error_code ec;
+
+  auto sz = asio::read(rp, asio::dynamic_buffer(out),  ec);
+  BOOST_CHECK(sz != 0);
+  BOOST_CHECK_MESSAGE((ec == asio::error::broken_pipe) || (ec == asio::error::eof), ec.message());
+  BOOST_CHECK_MESSAGE(bpv::filesystem::path(out) == target,
+                      bpv::filesystem::path(out) << " != " << target);
+
+  proc.wait();
+  BOOST_CHECK_MESSAGE(proc.exit_code() == 0, proc.exit_code() << " from " << proc.native_exit_code());
 }
 
 BOOST_AUTO_TEST_SUITE_END();
