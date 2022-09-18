@@ -473,5 +473,29 @@ BOOST_AUTO_TEST_CASE(environment)
   BOOST_CHECK_EQUAL(read_env("PATH", bpv::process_environment(bpv::environment::current())), ::getenv("PATH"));
 }
 
+BOOST_AUTO_TEST_CASE(exit_code_as_error)
+{
+  using boost::unit_test::framework::master_test_suite;
+  const auto pth = bpv::filesystem::absolute(master_test_suite().argv[1]);
+
+  asio::io_context ctx;
+
+  bpv::process proc1(ctx, pth, {"exit-code", "0"});
+  bpv::process proc2(ctx, pth, {"exit-code", "2"});
+  bpv::process proc3(ctx, pth, {"sleep", "2000"});
+
+  int called = 0;
+  
+  proc3.terminate();
+
+  proc1.async_wait(bpv::code_as_error([&](bpv::error_code ec){called ++; BOOST_CHECK(!ec);}));
+  proc2.async_wait(bpv::code_as_error([&](bpv::error_code ec){called ++; BOOST_CHECK_MESSAGE(ec, ec.message());}));
+  proc3.async_wait(bpv::code_as_error([&](bpv::error_code ec){called ++; BOOST_CHECK_MESSAGE(ec, ec.message());}));
+
+  ctx.run();
+  BOOST_CHECK_EQUAL(called, 3);
+
+}
+
 BOOST_AUTO_TEST_SUITE_END();
 
