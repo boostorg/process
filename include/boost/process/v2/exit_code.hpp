@@ -162,8 +162,16 @@ struct code_as_error_handler
 
 BOOST_PROCESS_V2_END_NAMESPACE
 
+
+#if !defined(BOOST_PROCESS_V2_STANDALONE)
+namespace boost
+{
+#endif
+namespace asio
+{
+
 template <typename CompletionToken>
-struct BOOST_PROCESS_V2_ASIO_NAMESPACE::async_result<
+struct async_result<
     BOOST_PROCESS_V2_NAMESPACE::code_as_error_t<CompletionToken>,
       void(BOOST_PROCESS_V2_NAMESPACE::error_code,
            BOOST_PROCESS_V2_NAMESPACE::native_exit_code_type)>
@@ -215,12 +223,6 @@ struct BOOST_PROCESS_V2_ASIO_NAMESPACE::async_result<
 };
 
 
-#if !defined(BOOST_PROCESS_V2_STANDALONE)
-namespace boost
-{
-#endif
-namespace asio
-{
 
 
 template<template <typename, typename> class Associator, typename Handler, typename DefaultCandidate>
