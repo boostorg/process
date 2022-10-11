@@ -39,9 +39,9 @@ BOOST_AUTO_TEST_CASE(test_shell_parser)
     BOOST_CHECK(sh.argv()[2] == STR_VIEW("foo bar"));
 
 #if defined(BOOST_PROCESS_V2_POSIX)
-    auto raw_shell = "sh -c false";
+    auto raw_shell = "sh -c true";
 #else
-    auto raw_shell = "cmd /c exit 1";
+    auto raw_shell = "cmd /c exit 0";
 #endif
     sh = shell(raw_shell);
 
@@ -52,5 +52,5 @@ BOOST_AUTO_TEST_CASE(test_shell_parser)
     bpv::process proc{ctx, exe, sh.args()};
 
     proc.wait();
-    BOOST_CHECK_EQUAL(proc.exit_code(), 1);
+    BOOST_CHECK_EQUAL(proc.exit_code(), 0);
 }
