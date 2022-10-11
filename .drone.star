@@ -14,7 +14,7 @@ windowsglobalimage="cppalliance/dronevs2019"
 
 def main(ctx):
   return [
-    #freebsd_cxx("FreeBSD", "g++10",  packages="g++10",  buildtype="boost", buildscript="drone",                                                environment={ "VARIANT": "release", "TOOLSET": "gcc", "COMPILER": "g++", "CXXSTD": "11" }, globalenv=globalenv),
+  freebsd_cxx("gcc 11", "g++11", buildtype="boost", buildscript="drone", image="", freebsd_version="13.1", environment={'B2_TOOLSET': 'gcc-11', 'B2_CXXSTD': '17,20'}, globalenv=globalenv),
   linux_cxx("docs", "", packages="docbook docbook-xml docbook-xsl xsltproc libsaxonhe-java default-jre-headless flex libfl-dev bison unzip rsync mlocate", image="cppalliance/droneubuntu1804:1", buildtype="docs", buildscript="drone", environment={"COMMENT": "docs"}, globalenv=globalenv),
   linux_cxx("asan",         "g++-8",  packages="g++-8",  buildtype="boost", buildscript="drone", image=linuxglobalimage,                        environment={'COMMENT': 'asan',  'B2_VARIANT': 'debug', 'B2_TOOLSET': 'gcc-8',  'B2_CXXSTD': '11', 'B2_ASAN':  '1', 'B2_DEFINES': 'BOOST_NO_STRESS_TEST=1', 'DRONE_EXTRA_PRIVILEGED': 'True', 'DRONE_JOB_UUID': '356a192b79'}, globalenv=globalenv, privileged=True),
   linux_cxx("ubsan",        "g++-8",  packages="g++-8",  buildtype="boost", buildscript="drone", image=linuxglobalimage,                        environment={'COMMENT': 'ubsan', 'B2_VARIANT': 'debug', 'B2_TOOLSET': 'gcc-8',  'B2_CXXSTD': '11', 'B2_UBSAN': '1', 'B2_DEFINES': 'BOOST_NO_STRESS_TEST=1', 'B2_LINKFLAGS': '-fuse-ld=gold',  'DRONE_JOB_UUID': '77de68daec'}, globalenv=globalenv),
