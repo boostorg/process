@@ -214,8 +214,17 @@ struct BOOST_PROCESS_V2_ASIO_NAMESPACE::async_result<
   }
 };
 
+
+#if !defined(BOOST_PROCESS_V2_STANDALONE)
+namespace boost
+{
+#endif
+namespace asio
+{
+
+
 template<template <typename, typename> class Associator, typename Handler, typename DefaultCandidate>
-struct BOOST_PROCESS_V2_ASIO_NAMESPACE::associator<Associator,
+struct associator<Associator,
     BOOST_PROCESS_V2_NAMESPACE::detail::code_as_error_handler<Handler>, DefaultCandidate>
   : Associator<Handler, DefaultCandidate>
 {
@@ -226,5 +235,12 @@ struct BOOST_PROCESS_V2_ASIO_NAMESPACE::associator<Associator,
     return Associator<Handler, DefaultCandidate>::get(h.handler_, c);
   }
 };
+
+
+}
+#if !defined(BOOST_PROCESS_V2_STANDALONE)
+} // boost
+#endif
+
 
 #endif //BOOST_PROCESS_V2_EXIT_CODE_HPP
