@@ -160,7 +160,12 @@ BOOST_AUTO_TEST_CASE(request_exit)
 
   auto sh = closable();
   BOOST_CHECK_MESSAGE(!sh.empty(), sh);
-  bpv::process proc(ctx, sh, {}
+
+  asio::readable_pipe rp{ctx};
+  asio::writable_pipe wp{ctx};
+  asio::connect_pipe(rp, wp);
+
+  bpv::process proc(ctx, sh, {}, bpv::process_stdio{wp}
 #if defined(ASIO_WINDOWS)
     , asio::windows::show_window_minimized_not_active
 #endif
