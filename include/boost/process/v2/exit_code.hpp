@@ -177,6 +177,8 @@ struct async_result<
            BOOST_PROCESS_V2_NAMESPACE::native_exit_code_type)>
 {
   using signature = void(BOOST_PROCESS_V2_NAMESPACE::error_code);
+  using return_type = typename async_result<CompletionToken, void(BOOST_PROCESS_V2_NAMESPACE::error_code)>::return_type;
+  
 
   template <typename Initiation>
   struct init_wrapper
