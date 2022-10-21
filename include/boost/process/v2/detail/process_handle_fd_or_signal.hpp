@@ -157,7 +157,7 @@ struct basic_process_handle_fd_or_signal
             return;
 
         int res = 0;
-        auto sz = ::read(descriptor.native_handler(), &res, sizeof(int));
+        auto sz = ::read(descriptor_.native_handler(), &res, sizeof(int));
         printf("probe %ldd -> %d\n", sz, res);
 
         while (::waitpid(pid_, &exit_status, 0) < 0)
