@@ -153,6 +153,8 @@ struct basic_process_handle_fd_or_signal
 
     void wait(native_exit_code_type &exit_status, error_code &ec)
     {
+        printf("WAIT: %d %d\n", pid_, descriptor_.native_handle());
+
         if (pid_ <= 0)
             return;
 
