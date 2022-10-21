@@ -317,8 +317,8 @@ struct basic_process_handle_fd_or_signal
                 needs_post = false;
                 static int res[1] = {0};
                 if (descriptor.is_open())
-                    descriptor.async_read_some(
-                            BOOST_PROCESS_V2_ASIO_NAMESPACE::buffer(res),
+                    descriptor.async_wait(
+                            BOOST_PROCESS_V2_ASIO_NAMESPACE::posix::stream_descriptor::wait_read,
                             std::move(self));
                 else
                     handle.async_wait(std::move(self));
