@@ -157,7 +157,7 @@ struct basic_process_handle_fd_or_signal
             return;
 
         int res = 0;
-        auto sz = ::read(descriptor_.native_handler(), &res, sizeof(int));
+        auto sz = ::read(descriptor_.native_handle(), &res, sizeof(int));
         printf("probe %ldd -> %d\n", sz, res);
 
         while (::waitpid(pid_, &exit_status, 0) < 0)
@@ -301,7 +301,7 @@ struct basic_process_handle_fd_or_signal
         {
             native_exit_code_type exit_code{};
             int res = 0;
-            auto sz = ::read(descriptor.native_handler(), &res, sizeof(int));
+            auto sz = ::read(descriptor.native_handle(), &res, sizeof(int));
             printf("PROCESS_HNALDE_FD %ldd -> %d\n", sz, res);
             int wait_res = -1;
             if (pid_ <= 0) // error, complete early
