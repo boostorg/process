@@ -27,7 +27,7 @@
 #include <boost/asio/any_io_executor.hpp>
 #include <boost/asio/compose.hpp>
 #include <boost/asio/dispatch.hpp>
-#include <boost/asio/posix/basic_stream_descriptor.hpp>
+#include <boost/asio/posix/basic_descriptor.hpp>
 #include <boost/asio/post.hpp>
 #include <boost/asio/signal_set.hpp>
 #endif
@@ -283,7 +283,7 @@ struct basic_process_handle_fd_or_signal
     friend
     struct basic_process_handle_fd_or_signal;
     pid_type pid_ = -1;
-    BOOST_PROCESS_V2_ASIO_NAMESPACE::posix::basic_stream_descriptor<Executor> descriptor_;
+    BOOST_PROCESS_V2_ASIO_NAMESPACE::posix::basic_descriptor<Executor> descriptor_;
     BOOST_PROCESS_V2_ASIO_NAMESPACE::basic_signal_set<Executor> signal_set_{descriptor_.get_executor(), SIGCHLD};
 
     struct async_wait_op_
@@ -316,7 +316,7 @@ struct basic_process_handle_fd_or_signal
                 needs_post = false;
                 if (descriptor.is_open())
                     descriptor.async_wait(
-                            0,
+                            BOOST_PROCESS_V2_ASIO_NAMESPACE::posix::stream_descriptor::wait_read,
                             std::move(self));
                 else
                     handle.async_wait(std::move(self));
