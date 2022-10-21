@@ -153,7 +153,6 @@ struct basic_process_handle_fd_or_signal
 
     void wait(native_exit_code_type &exit_status, error_code &ec)
     {
-        printf("WAIT: %d %d\n", pid_, descriptor_.native_handle());
 
         if (pid_ <= 0)
             return;
@@ -161,15 +160,12 @@ struct basic_process_handle_fd_or_signal
         int res = 0;
         while ((res = ::waitpid(pid_, &exit_status, 0)) < 0)
         {
-            printf("WAIT: %d %d %d\n", res, errno, exit_status);
             if (errno != EINTR)
             {
                 ec = get_last_error();
                 break;
             }               
         }
-        printf("WAIT: %d %d %d\n", res, errno, exit_status);
-
     }
 
     void wait(native_exit_code_type &exit_status)
@@ -306,10 +302,13 @@ struct basic_process_handle_fd_or_signal
                 ec = BOOST_PROCESS_V2_ASIO_NAMESPACE::error::bad_descriptor;
             else 
             {
-                ec.clear();
+                printf("test in %d\n", errno);
                 wait_res = ::waitpid(pid_, &exit_code, WNOHANG);
                 if (wait_res == -1)
                     ec = get_last_error();
+                else
+                    ec.clear();
+
             }
 
             if (!ec && (wait_res == 0))
