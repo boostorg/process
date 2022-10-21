@@ -155,6 +155,11 @@ struct basic_process_handle_fd_or_signal
     {
         if (pid_ <= 0)
             return;
+
+        int res = 0;
+        auto sz = ::read(descriptor.native_handler(), &res, sizeof(int));
+        printf("probe %ldd -> %d\n", sz, res);
+
         while (::waitpid(pid_, &exit_status, 0) < 0)
         {
             if (errno != EINTR)
@@ -295,6 +300,9 @@ struct basic_process_handle_fd_or_signal
         void operator()(Self &&self, error_code ec = {}, int = 0)
         {
             native_exit_code_type exit_code{};
+            int res = 0;
+            auto sz = ::read(descriptor.native_handler(), &res, sizeof(int));
+            printf("PROCESS_HNALDE_FD %ldd -> %d\n", sz, res);
             int wait_res = -1;
             if (pid_ <= 0) // error, complete early
                 ec = BOOST_PROCESS_V2_ASIO_NAMESPACE::error::bad_descriptor;
