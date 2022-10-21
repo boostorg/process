@@ -371,7 +371,7 @@ BOOST_AUTO_TEST_CASE(popen)
     std::string res;
     boost::system::error_code ec;
     std::size_t n = asio::read(proc, asio::dynamic_buffer(res), ec);
-    BOOST_CHECK(ec == asio::error::eof || ec == asio::error::broken_pipe);
+    BOOST_CHECK_MESSAGE(ec == asio::error::eof || ec == asio::error::broken_pipe, ec.message());
     BOOST_REQUIRE_GE(n, 1u);
     // remove EOF
     res.pop_back();
