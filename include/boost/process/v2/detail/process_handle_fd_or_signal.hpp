@@ -294,8 +294,9 @@ struct basic_process_handle_fd_or_signal
         bool needs_post = true;
 
         template<typename Self>
-        void operator()(Self &&self, error_code ec = {}, int = 0)
+        void operator()(Self &&self, error_code ec = {}, int res = 0)
         {
+            printf("RES : %d -> %s\n", res, ec.message().c_str());
             native_exit_code_type exit_code = -1;
             int wait_res = -1;
             if (pid_ <= 0) // error, complete early
@@ -314,9 +315,10 @@ struct basic_process_handle_fd_or_signal
             if (!ec && (wait_res == 0))
             {
                 needs_post = false;
+                static int res[1] = {0};
                 if (descriptor.is_open())
-                    descriptor.async_wait(
-                            BOOST_PROCESS_V2_ASIO_NAMESPACE::posix::stream_descriptor::wait_read,
+                    descriptor.async_read_some(
+                            BOOST_PROCESS_V2_ASIO_NAMESPACE::buffer(res),
                             std::move(self));
                 else
                     handle.async_wait(std::move(self));
