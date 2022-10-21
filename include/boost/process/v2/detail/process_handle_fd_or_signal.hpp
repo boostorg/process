@@ -300,6 +300,8 @@ struct basic_process_handle_fd_or_signal
         template<typename Self>
         void operator()(Self &&self, error_code ec = {}, int = 0)
         {
+            printf("AWAIT: %s\n", ec.message().c_str());
+
             native_exit_code_type exit_code{};
             int res = 0;
             auto sz = ::read(descriptor.native_handle(), &res, sizeof(int));
@@ -309,6 +311,8 @@ struct basic_process_handle_fd_or_signal
             else 
             {
                 wait_res = ::waitpid(pid_, &exit_code, WNOHANG);
+                printf("AWAIT: %d %d %d\n", wait_res, errno, exit_code);
+
                 if (wait_res == -1)
                     ec = get_last_error();
             }
