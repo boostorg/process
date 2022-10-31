@@ -16,7 +16,7 @@
 
 #include <boost/asio.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-
+#include <boost/scope_exit.hpp>
 #include <boost/process/error.hpp>
 #include <boost/process/io.hpp>
 #include <boost/process/args.hpp>
