@@ -45,6 +45,10 @@ BOOST_AUTO_TEST_CASE(wait_group_test, *boost::unit_test::timeout(5))
             BOOST_REQUIRE(done.load());
         }};
 
+    BOOST_SCOPE_EXIT_ALL(&) {    
+        done.store(true);
+        thr.join();
+    };
 
     using boost::unit_test::framework::master_test_suite;
 
@@ -69,18 +73,15 @@ BOOST_AUTO_TEST_CASE(wait_group_test, *boost::unit_test::timeout(5))
     BOOST_CHECK(c1.running());
     BOOST_CHECK(c2.running());
 
-    BOOST_CHECK(!ec);
-    BOOST_CHECK(c1.in_group(ec));
+    BOOST_REQUIRE(!ec);
+    BOOST_REQUIRE(c1.in_group(ec));
     BOOST_CHECK_MESSAGE(!ec, ec.message());
-    BOOST_CHECK(c2.in_group(ec));
+    BOOST_REQUIRE(c2.in_group(ec));
     BOOST_CHECK_MESSAGE(!ec, ec.message());
     g.wait();
 
     BOOST_CHECK(!c1.running());
     BOOST_CHECK(!c2.running());
-
-    done.store(true);
-    thr.join();
 }
 
 
