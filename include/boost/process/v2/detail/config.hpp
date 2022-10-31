@@ -142,7 +142,7 @@ BOOST_PROCESS_V2_END_NAMESPACE
 #endif
 #endif
 
-#if defined(__FreeBSD__) && !defined(BOOST_PROCESS_V2_DISABLE_PDFORK)
+#if defined(__FreeBSD__) && defined(BOOST_PROCESS_V2_ENABLE_PDFORK)
 #define BOOST_PROCESS_V2_PDFORK 1
 #define BOOST_PROCESS_V2_HAS_PROCESS_HANDLE 1
 #endif
