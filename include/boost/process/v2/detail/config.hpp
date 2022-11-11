@@ -19,6 +19,7 @@
 #include <filesystem>
 #include <string_view>
 #include <iomanip>
+#include <optional>
 
 #if defined(ASIO_WINDOWS)
 #define BOOST_PROCESS_V2_WINDOWS 1
@@ -51,6 +52,7 @@
 #include <boost/system/error_code.hpp>
 #include <boost/system/system_category.hpp>
 #include <boost/system/system_error.hpp>
+#include <boost/optional.hpp>
 
 #if defined(BOOST_WINDOWS_API)
 #define BOOST_PROCESS_V2_WINDOWS 1
@@ -72,11 +74,9 @@
 
 #if defined(BOOST_PROCESS_USE_STD_FS)
 #include <filesystem>
-#include <optional>
 #else
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
-#include <boost/optional.hpp>
 #endif
 
 #define BOOST_PROCESS_V2_BEGIN_NAMESPACE namespace boost { namespace process { namespace v2 {

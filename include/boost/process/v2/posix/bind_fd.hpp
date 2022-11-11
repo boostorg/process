@@ -94,6 +94,7 @@ struct bind_fd
     error_code on_setup(posix::default_launcher & launcher, const filesystem::path &, const char * const *)
     {
         launcher.fd_whitelist.push_back(target);
+        return {};
     }
 
     /// Implementation of the initialization function.
