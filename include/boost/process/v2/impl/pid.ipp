@@ -21,37 +21,32 @@
 #include <libproc.h>
 #endif
 
-#if (defined(__APPLE__) && defined(__MACH__))
-#include <sys/sysctl.h>
-#include <sys/proc_info.h>
-#include <libproc.h>
-#endif
-
-#if (defined(__linux__) && !defined(__ANDROID__))
+#if (defined(__linux__) || defined(__ANDROID__))
 #include <dirent.h>
 #endif
 
 #if defined(__FreeBSD__)
-#include <sys/socket.h>
-#include <sys/sysctl.h>
-#include <sys/param.h>
-#include <sys/queue.h>
+#include <sys/types.h>
 #include <sys/user.h>
-#include <libprocstat.h>
 #include <libutil.h>
+#include <cstdlib>
 #endif
 
-#if defined(__DragonFly__) || defined(__OpenBSD__)
+#if defined(__DragonFly__)
+#include <sys/types.h>
+#include <kvm.h>
+#endif
+
+#if defined(__OpenBSD__)
 #include <sys/param.h>
 #include <sys/sysctl.h>
-#include <sys/user.h>
 #include <kvm.h>
 #endif
 
 #if defined(__NetBSD__)
+#include <kvm.h>
 #include <sys/param.h>
 #include <sys/sysctl.h>
-#include <kvm.h>
 #endif
 
 #if defined(__sun)
@@ -72,6 +67,7 @@ pid_type current_pid() {return ::getpid();}
 #endif
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
+
 std::vector<pid_type> all_pids(error_code & ec)
 {
     std::vector<pid_type> vec;
@@ -84,10 +80,12 @@ std::vector<pid_type> all_pids(error_code & ec)
 
     PROCESSENTRY32 pe;
     pe.dwSize = sizeof(PROCESSENTRY32);
-    if (Process32First(hp, &pe)) {
-      do {
-        vec.push_back(pe.th32ProcessID);
-      } while (Process32Next(hp, &pe));
+    if (Process32First(hp, &pe)) 
+    {
+        do 
+        {
+            vec.push_back(pe.th32ProcessID);
+        } while (Process32Next(hp, &pe));
     }
     CloseHandle(hp);
     return vec;
@@ -111,7 +109,7 @@ std::vector<pid_type> all_pids(error_code & ec)
     return vec;
 }
 
-#elif defined(__linux__)
+#elif (defined(__linux__) || defined(__ANDROID__))
 
 std::vector<pid_type> all_pids(error_code & ec)
 {
@@ -122,13 +120,16 @@ std::vector<pid_type> all_pids(error_code & ec)
         ec = detail::get_last_error();
         return vec;
     } 
+
     struct dirent *ent = nullptr;
     while ((ent = readdir(proc))) 
     {
-      if (!isdigit(*ent->d_name))
-        continue;
-      vec.push_back(atoi(ent->d_name));
+        if (!isdigit(*ent->d_name))
+            continue;
+
+        vec.push_back(atoi(ent->d_name));
     }
+
     closedir(proc);
     return vec;
 }
@@ -140,11 +141,13 @@ std::vector<pid_type> all_pids(error_code & ec)
     std::vector<pid_type> vec;
     int cntp = 0;
     kinfo_proc *proc_info = kinfo_getallproc(&cntp);
+
     if (proc_info) 
     {
-      for (int i = 0; i < cntp; i++)
-        vec.push_back(proc_info[i].ki_pid);
-      free(proc_info);
+        for (int i = 0; i < cntp; i++)
+            vec.push_back(proc_info[i].ki_pid);
+
+        free(proc_info);
     }
     else
         ec = detail::get_last_error();
@@ -161,7 +164,8 @@ std::vector<pid_type> all_pids(error_code & ec)
     kinfo_proc *proc_info = nullptr;
     const char *nlistf, *memf;
     nlistf = memf = "/dev/null";
-    kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr); 
+    kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr);
+
     if (!kd) 
     {
         ec = detail::get_last_error();
@@ -190,6 +194,7 @@ std::vector<pid_type> all_pids(error_code & ec)
     int cntp = 0;
     kinfo_proc2  *proc_info = nullptr;
     kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
+
     if (!kd)
     {
         ec = detail::get_last_error();
@@ -197,13 +202,15 @@ std::vector<pid_type> all_pids(error_code & ec)
     } 
     if ((proc_info = kvm_getproc2(kd, KERN_PROC_ALL, 0, sizeof(struct kinfo_proc2), &cntp)))
     {
-      vec.reserve(cntp);
-      for (int i = cntp - 1; i >= 0; i--) {
-        vec.push_back(proc_info[i].p_pid);
-      }
+        vec.reserve(cntp);
+        for (int i = cntp - 1; i >= 0; i--) 
+        {
+            vec.push_back(proc_info[i].p_pid);
+        }
     }
     else
         ec = detail::get_last_error();
+
     kvm_close(kd);
     return vec;
 }
@@ -224,15 +231,18 @@ std::vector<pid_type> all_pids(error_code & ec)
     } 
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, sizeof(struct kinfo_proc), &cntp)))
     {
-      vec.reserve(cntp);
-      for (int i = 0; i < cntp; i++) {
-        if (proc_info[i].kp_pid >= 0) {
-          vec.push_back(proc_info[i].kp_pid);
+        vec.reserve(cntp);
+        for (int i = 0; i < cntp; i++) 
+        {
+            if (proc_info[i].kp_pid >= 0) 
+            {
+                vec.push_back(proc_info[i].kp_pid);
+            }
         }
-      }
     }
     else
         ec = detail::get_last_error();
+
     kvm_close(kd);
     return vec;
 }
@@ -245,6 +255,7 @@ std::vector<pid_type> all_pids(error_code & ec)
     struct pid cur_pid;
     proc *proc_info = nullptr;
     kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr);
+
     if (!kd)
     {
         ec = detail::get_last_error();
@@ -252,27 +263,27 @@ std::vector<pid_type> all_pids(error_code & ec)
     } 
     
     while ((proc_info = kvm_nextproc(kd)))
-     {
-      if (kvm_kread(kd, (std::uintptr_t)proc_info->p_pidp, &cur_pid, sizeof(cur_pid)) != -1) {
-        vec.insert(vec.begin(), cur_pid.pid_id);
-      }
-      else
-      {
-        ec = detail::get_last_error();
-        break;
-      }
+    {
+        if (kvm_kread(kd, (std::uintptr_t)proc_info->p_pidp, &cur_pid, sizeof(cur_pid)) != -1)
+        {
+            vec.insert(vec.begin(), cur_pid.pid_id);
+        }
+        else
+        {
+            ec = detail::get_last_error();
+            break;
+        }
     }
+
     kvm_close(kd);
     return vec;
 }
-
 
 #else
 #error "Platform not supported"
 
 
 #endif defined(BOOST_PROCESS_V2_WINDOWS)
-
 
 std::vector<pid_type> all_pids()
 {
@@ -282,8 +293,6 @@ std::vector<pid_type> all_pids()
         detail::throw_error(ec, "all_pids");
     return res;
 }
-
-
 
 BOOST_PROCESS_V2_END_NAMESPACE
 
