@@ -46,6 +46,7 @@ lib test_impl : test_impl.cpp filesystem :
         <link>static
         <target-os>windows:<source>shell32
         <target-os>windows:<source>user32
+        <target-os>windows:<source>Ntdll
         ;
 
 test-suite standalone :

@@ -150,6 +150,8 @@ BOOST_AUTO_TEST_CASE(terminate)
   
   BOOST_CHECK_MESSAGE(!sh.empty(), sh);
   bpv::process proc(ctx, sh, {});
+  proc.suspend();
+  proc.resume();
   proc.terminate();
   proc.wait();
 }

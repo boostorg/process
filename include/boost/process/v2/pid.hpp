@@ -6,6 +6,7 @@
 #define BOOST_PROCESS_V2_PID_HPP
 
 #include <boost/process/v2/detail/config.hpp>
+#include <boost/process/v2/detail/throw_error.hpp>
 
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
 
@@ -30,6 +31,12 @@ typedef int pid_type;
 
 /// Get the process id of the current process.
 BOOST_PROCESS_V2_DECL pid_type current_pid();
+
+/// List all available pids.
+BOOST_PROCESS_V2_DECL std::vector<pid_type> all_pids(error_code & ec);
+
+/// List all available pids.
+BOOST_PROCESS_V2_DECL std::vector<pid_type> all_pids();
 
 BOOST_PROCESS_V2_END_NAMESPACE
 

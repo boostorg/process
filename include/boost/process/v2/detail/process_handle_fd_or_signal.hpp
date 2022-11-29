@@ -211,6 +211,42 @@ struct basic_process_handle_fd_or_signal
         if (ec)
             detail::throw_error(ec, "request_exit");
     }
+    
+    void suspend()
+    {
+        if (pid_ <= 0)
+            return ;
+        error_code ec;
+        suspend(ec);
+        if (ec)
+            detail::throw_error(ec, "suspend");
+    }
+
+    void suspend(error_code &ec)
+    {
+        if (pid_ <= 0)
+            return ;
+        if (::kill(pid_, SIGCONT) == -1)
+            ec = get_last_error();
+    }
+
+    void resume()
+    {
+        if (pid_ <= 0)
+            return ;
+        error_code ec;
+        resume(ec);
+        if (ec)
+            detail::throw_error(ec, "resume");
+    }
+
+    void resume(error_code &ec)
+    {
+        if (pid_ <= 0)
+            return ;
+        if (::kill(pid_, SIGTERM) == -1)
+            ec = get_last_error();
+    }
 
     void terminate(native_exit_code_type &exit_status, error_code &ec)
     {
