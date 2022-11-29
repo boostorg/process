@@ -263,8 +263,7 @@ std::vector<pid_type> all_pids(error_code & ec)
 
 #else
 #error "Platform not supported"
-
-#endif defined(BOOST_PROCESS_V2_WINDOWS)
+#endif
 
 std::vector<pid_type> all_pids()
 {
