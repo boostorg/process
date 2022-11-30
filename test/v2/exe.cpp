@@ -15,6 +15,6 @@ BOOST_AUTO_TEST_CASE(test_exe)
 
     auto all = bp2::all_pids();
     for (unsigned i = 0; i < all.size(); i++) {
-        BOOST_CHECK(bp2::exe_path(all[i]).string().empty(), false);
+        BOOST_CHECK(bp2::exe_path(all[i]).string().empty() == false);
     }
 }
