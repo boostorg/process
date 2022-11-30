@@ -5,6 +5,7 @@
 #ifndef BOOST_PROCESS_V2_IMPL_EXE_IPP
 #define BOOST_PROCESS_V2_IMPL_EXE_IPP
 
+#include <boost/process/filesystem.hpp>
 #include <boost/process/v2/detail/config.hpp>
 #include <boost/process/v2/detail/last_error.hpp>
 #include <boost/process/v2/detail/throw_error.hpp>
@@ -42,9 +43,9 @@ namespace ext {
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 
-boost::filesystem::path exe_path(pid_type pid, error_code & ec)
+filesystem::path exe_path(pid_type pid, error_code & ec)
 {
-    boost::filesystem::path path;
+    filesystem::path path;
     if (pid == GetCurrentProcessId()) 
     {
         wchar_t buffer[MAX_PATH];
@@ -82,9 +83,9 @@ boost::filesystem::path exe_path(pid_type pid, error_code & ec)
 
 #elif (defined(__APPLE__) && defined(__MACH__))
 
-boost::filesystem::path exe_path(pid_type pid, error_code & ec)
+filesystem::path exe_path(pid_type pid, error_code & ec)
 {
-    boost::filesystem::path;
+    filesystem::path path;
     char exe[PROC_PIDPATHINFO_MAXSIZE];
     if (proc_pidpath(pid, exe, sizeof(exe)) > 0) 
     {
@@ -103,9 +104,9 @@ boost::filesystem::path exe_path(pid_type pid, error_code & ec)
 
 #elif (defined(__linux__) || defined(__ANDROID__))
 
-boost::filesystem::path exe_path(pid_type pid, error_code & ec)
+filesystem::path exe_path(pid_type pid, error_code & ec)
 {
-    boost::filesystem::path;
+    filesystem::path path;
     char exe[PATH_MAX];
     if (realpath(("/proc/" + std::to_string(pid) + "/exe").c_str(), exe)) 
     {
@@ -120,9 +121,9 @@ boost::filesystem::path exe_path(pid_type pid, error_code & ec)
 
 #elif defined(__FreeBSD__) || defined(__DragonFly__)
 
-boost::filesystem::path exe_path(pid_type pid, error_code & ec) 
+filesystem::path exe_path(pid_type pid, error_code & ec) 
 {
-    boost::filesystem::path;
+    filesystem::path path;
     int mib[4]; 
     std::size_t len;
     mib[0] = CTL_KERN;
@@ -152,9 +153,9 @@ boost::filesystem::path exe_path(pid_type pid, error_code & ec)
 
 #elif defined(__NetBSD__)
 
-boost::filesystem::path exe_path(pid_type pid, error_code & ec)
+filesystem::path exe_path(pid_type pid, error_code & ec)
 {
-    boost::filesystem::path;
+    filesystem::path path;
     int mib[4]; 
     std::size_t len;
     mib[0] = CTL_KERN;
@@ -184,9 +185,9 @@ boost::filesystem::path exe_path(pid_type pid, error_code & ec)
 
 #elif defined(__OpenBSD__)
 
-boost::filesystem::path exe_path(pid_type pid, error_code & ec)
+filesystem::path exe_path(pid_type pid, error_code & ec)
 {
-    boost::filesystem::path;
+    filesystem::path path;
     auto is_executable = [](pid_type pid, std::string in, std::string *out) 
     {
         *out = "";
@@ -280,9 +281,9 @@ boost::filesystem::path exe_path(pid_type pid, error_code & ec)
 
 #elif defined(__sun)
 
-boost::filesystem::path exe_path(pid_type pid, error_code & ec)
+filesystem::path exe_path(pid_type pid, error_code & ec)
 {
-    boost::filesystem::path;
+    filesystem::path path;
     char exe[PATH_MAX];
     if (realpath(("/proc/" + std::to_string(pid) + "/path/a.out").c_str(), exe)) 
     {
