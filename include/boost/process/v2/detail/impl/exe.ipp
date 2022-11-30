@@ -15,7 +15,7 @@ namespace detail
 #if defined(_WIN32)
 
 BOOST_PROCESS_V2_DECL
-HANDLE open_process_with_debug_privilege(ngs::xproc::PROCID proc_id) {
+HANDLE open_process_with_debug_privilege(pid_type pid) {
     HANDLE proc = nullptr;
     HANDLE hToken = nullptr;
     LUID luid;
@@ -26,7 +26,7 @@ HANDLE open_process_with_debug_privilege(ngs::xproc::PROCID proc_id) {
             tkp.Privileges[0].Luid = luid;
             tkp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
             if (AdjustTokenPrivileges(hToken, false, &tkp, sizeof(tkp), nullptr, nullptr)) {
-                proc = OpenProcess(PROCESS_ALL_ACCESS, false, proc_id);
+                proc = OpenProcess(PROCESS_ALL_ACCESS, false, pid);
             }
         }
         CloseHandle(hToken);

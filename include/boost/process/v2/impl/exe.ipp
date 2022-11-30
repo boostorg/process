@@ -152,7 +152,7 @@ boost::filesystem::path exe_path(pid_type pid, error_code & ec)
 
 #elif defined(__NetBSD__)
 
-boost::filesystem::path exe_path(pid_type pid)
+boost::filesystem::path exe_path(pid_type pid, error_code & ec)
 {
     std::boost::filesystem::path;
     int mib[4]; 
