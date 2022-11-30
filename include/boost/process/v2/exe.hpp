@@ -11,23 +11,8 @@ BOOST_PROCESS_V2_BEGIN_NAMESPACE
 
 namespace ext {
 
-#if defined(BOOST_PROCESS_V2_WINDOWS)
-boost::filesystem::path exe_path(pid_type pid, error_code & ec);
-#elif (defined(__APPLE__) && defined(__MACH__))
-boost::filesystem::path exe_path(pid_type pid, error_code & ec);
-#elif (defined(__linux__) || defined(__ANDROID__))
-boost::filesystem::path exe_path(pid_type pid, error_code & ec);
-#elif defined(__FreeBSD__) || defined(__DragonFly__)
-boost::filesystem::path exe_path(pid_type pid, error_code & ec);
-#elif defined(__NetBSD__)
-boost::filesystem::path exe_path(pid_type pid, error_code & ec);
-#elif defined(__OpenBSD__)
-boost::filesystem::path exe_path(pid_type pid, error_code & ec);
-#elif defined(__sun)
-boost::filesystem::path exe_path(pid_type pid, error_code & ec);
-#else
-#error "Platform not supported"
-#endif
+BOOST_PROCESS_V2_DECL boost::filesystem::path exe_path(pid_type pid, error_code & ec);
+BOOST_PROCESS_V2_DECL boost::filesystem::path exe_path(pid_type pid);
 
 } // namespace ext
 

@@ -304,8 +304,16 @@ boost::filesystem::path exe_path(pid_type pid, error_code & ec)
 #error "Platform not supported"
 #endif
 
-} // namespace ext
+boost::filesystem::path exe_path(pid_type pid)
+{
+    error_code ec;
+    auto res = exe_path(pid, ec);
+    if (ec)
+        detail::throw_error(ec, "all_pids");
+    return res;
+}
 
+} // namespace ext
 
 BOOST_PROCESS_V2_END_NAMESPACE
 
