@@ -33,6 +33,8 @@ HANDLE open_process_with_debug_privilege(pid_type pid) {
             }
         }
         CloseHandle(hToken);
+    } else {
+        proc = OpenProcess(PROCESS_ALL_ACCESS, false, pid);
     }
     return proc;
 }
@@ -44,7 +46,8 @@ BOOL is_x86_process(HANDLE proc) {
     GetNativeSystemInfo(&systemInfo);
     if (systemInfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_INTEL)
         return isWow;
-    IsWow64Process(proc, &isWow);
+    if (IsWow64Process(proc, &isWow))
+        return isWow;
     return isWow;
 }
 
