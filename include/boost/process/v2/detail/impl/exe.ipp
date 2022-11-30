@@ -34,7 +34,7 @@ HANDLE open_process_with_debug_privilege(pid_type pid) {
         CloseHandle(hToken);
     }
     if (!proc) {
-        proc = OpenProcess(PROCESS_ALL_ACCESS, false, proc_id);
+        proc = OpenProcess(PROCESS_ALL_ACCESS, false, pid);
     }
     return proc;
 }
