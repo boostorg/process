@@ -305,7 +305,7 @@ filesystem::path exe_path(pid_type pid)
     error_code ec;
     auto res = exe_path(pid, ec);
     if (ec)
-        detail::throw_error(ec, "all_pids");
+        detail::throw_error(ec, "exe_path");
     return res;
 }
 
