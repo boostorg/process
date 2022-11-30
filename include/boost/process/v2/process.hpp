@@ -15,6 +15,7 @@
 #include <boost/process/v2/default_launcher.hpp>
 #include <boost/process/v2/exit_code.hpp>
 #include <boost/process/v2/pid.hpp>
+#include <boost/process/v2/exe.hpp>
 #include <boost/process/v2/process_handle.hpp>
 
 #if defined(BOOST_PROCESS_V2_STANDALONE)
