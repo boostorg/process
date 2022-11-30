@@ -16,6 +16,9 @@ BOOST_PROCESS_V2_BEGIN_NAMESPACE
 namespace detail
 {
 
+namespace ext 
+{
+
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 
 BOOST_PROCESS_V2_DECL
@@ -25,6 +28,8 @@ BOOST_PROCESS_V2_DECL
 BOOL is_x86_process(HANDLE proc);
 
 #endif
+
+} // namespace ext
 
 } // namespace detail
 
