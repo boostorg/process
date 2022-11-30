@@ -17,7 +17,6 @@ namespace ext
 
 #if defined(_WIN32)
 
-BOOST_PROCESS_V2_DECL
 HANDLE open_process_with_debug_privilege(pid_type pid) {
     HANDLE proc = nullptr;
     HANDLE hToken = nullptr;
@@ -39,7 +38,6 @@ HANDLE open_process_with_debug_privilege(pid_type pid) {
     return proc;
 }
 
-BOOST_PROCESS_V2_DECL
 BOOL is_x86_process(HANDLE proc) {
     BOOL isWow = true;
     SYSTEM_INFO systemInfo;

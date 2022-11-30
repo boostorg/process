@@ -226,7 +226,7 @@ struct basic_process_handle_fd_or_signal
     {
         if (pid_ <= 0)
             return ;
-        if (::kill(pid_, SIGCONT) == -1)
+        if (::kill(pid_, SIGSTOP) == -1)
             ec = get_last_error();
     }
 
@@ -244,7 +244,7 @@ struct basic_process_handle_fd_or_signal
     {
         if (pid_ <= 0)
             return ;
-        if (::kill(pid_, SIGTERM) == -1)
+        if (::kill(pid_, SIGCONT) == -1)
             ec = get_last_error();
     }
 
