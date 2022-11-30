@@ -84,7 +84,7 @@ boost::filesystem::path exe_path(pid_type pid, error_code & ec)
 
 boost::filesystem::path exe_path(pid_type pid, error_code & ec)
 {
-    std::boost::filesystem::path;
+    boost::filesystem::path;
     char exe[PROC_PIDPATHINFO_MAXSIZE];
     if (proc_pidpath(pid, exe, sizeof(exe)) > 0) 
     {
@@ -105,7 +105,7 @@ boost::filesystem::path exe_path(pid_type pid, error_code & ec)
 
 boost::filesystem::path exe_path(pid_type pid, error_code & ec)
 {
-    std::boost::filesystem::path;
+    boost::filesystem::path;
     char exe[PATH_MAX];
     if (realpath(("/proc/" + std::to_string(pid) + "/exe").c_str(), exe)) 
     {
@@ -122,7 +122,7 @@ boost::filesystem::path exe_path(pid_type pid, error_code & ec)
 
 boost::filesystem::path exe_path(pid_type pid, error_code & ec) 
 {
-    std::boost::filesystem::path;
+    boost::filesystem::path;
     int mib[4]; 
     std::size_t len;
     mib[0] = CTL_KERN;
@@ -154,7 +154,7 @@ boost::filesystem::path exe_path(pid_type pid, error_code & ec)
 
 boost::filesystem::path exe_path(pid_type pid, error_code & ec)
 {
-    std::boost::filesystem::path;
+    boost::filesystem::path;
     int mib[4]; 
     std::size_t len;
     mib[0] = CTL_KERN;
@@ -186,7 +186,7 @@ boost::filesystem::path exe_path(pid_type pid, error_code & ec)
 
 boost::filesystem::path exe_path(pid_type pid, error_code & ec)
 {
-    std::boost::filesystem::path;
+    boost::filesystem::path;
     auto is_executable = [](pid_type pid, std::string in, std::string *out) 
     {
         *out = "";
@@ -287,7 +287,7 @@ boost::filesystem::path exe_path(pid_type pid, error_code & ec)
 
 boost::filesystem::path exe_path(pid_type pid, error_code & ec)
 {
-    std::boost::filesystem::path;
+    boost::filesystem::path;
     char exe[PATH_MAX];
     if (realpath(("/proc/" + std::to_string(pid) + "/path/a.out").c_str(), exe)) 
     {
