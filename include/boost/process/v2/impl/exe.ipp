@@ -192,32 +192,27 @@ boost::filesystem::path exe_path(pid_type pid, error_code & ec)
         *out = "";
         bool success = false;
         struct stat st;
-        if (!stat(in.c_str(), &st) && (st.st_mode & S_IXUSR) && (st.st_mode & S_IFREG)) 
+        char executable[PATH_MAX];
+        if (!stat(in.c_str(), &st) && (st.st_mode & S_IXUSR) && (st.st_mode & S_IFREG) && realpath(in.c_str(), executable)) 
         {
-            char executable[PATH_MAX];
-            if (realpath(in.c_str(), executable)) 
+            int cntp = 0;
+            kinfo_file *kif = nullptr;
+            kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
+            if (!kd) return false;
+            if ((kif = kvm_getfiles(kd, KERN_FILE_BYPID, pid, sizeof(struct kinfo_file), &cntp))) 
             {
-                int cntp = 0;
-                kinfo_file *kif = nullptr;
-                kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
-                if (!kd) return false;
-                if ((kif = kvm_getfiles(kd, KERN_FILE_BYPID, pid, sizeof(struct kinfo_file), &cntp))) 
+                for (int i = 0; i < cntp; i++) 
                 {
-                    for (int i = 0; i < cntp; i++) 
+                    if (kif[i].fd_fd == KERN_FILE_TEXT && 
+                        (st.st_dev == static_cast<dev_t>(kif[i].va_fsid) || st.st_ino == static_cast<ino_t>(kif[i].va_fileid))) 
                     {
-                        if (kif[i].fd_fd == KERN_FILE_TEXT) 
-                        {
-                            if (st.st_dev == (dev_t)kif[i].va_fsid || st.st_ino == (ino_t)kif[i].va_fileid) 
-                            {
-                                *out = executable;
-                                success = true;
-                                break;
-                            }
-                        }
+                        *out = executable;
+                        success = true;
+                        break;
                     }
                 }
-                kvm_close(kd);
             }
+            kvm_close(kd);
         }
         return success;
     };
