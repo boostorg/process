@@ -8,6 +8,8 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include <iostream>
+
 
 BOOST_AUTO_TEST_CASE(test_exe)
 {
@@ -15,6 +17,10 @@ BOOST_AUTO_TEST_CASE(test_exe)
 
     auto all = bp2::all_pids();
     for (unsigned i = 0; i < all.size(); i++) {
-        BOOST_CHECK(bp2::exe_path(all[i]).string().empty() == false);
+        auto pth = bp2::exe_path(all[i]);
+        std::cout << ((!pth.string().empty()) ? pth.string() : "<unknown>") << std::endl;
     }
+    
+    // Check failed if all executable paths are unknown.
+    BOOST_CHECK(std::count(all.begin(), all.end(), "<unknown>") != all.size());
 }
