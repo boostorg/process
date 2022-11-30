@@ -300,7 +300,7 @@ filesystem::path exe_path(pid_type pid, error_code & ec)
 #error "Platform not supported"
 #endif
 
-boost::filesystem::path exe_path(pid_type pid)
+filesystem::path exe_path(pid_type pid)
 {
     error_code ec;
     auto res = exe_path(pid, ec);
