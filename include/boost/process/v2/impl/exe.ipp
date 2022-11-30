@@ -59,7 +59,7 @@ boost::filesystem::path exe_path(pid_type pid, error_code & ec)
     } 
     else 
     {
-        HANDLE proc = detail::open_process_with_debug_privilege(pid);
+        HANDLE proc = detail::ext::open_process_with_debug_privilege(pid);
         if (proc == nullptr) return path;
         wchar_t buffer[MAX_PATH];
         DWORD size = sizeof(buffer);
