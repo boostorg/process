@@ -54,6 +54,7 @@ test-suite standalone :
     [ run cstring_ref.cpp test_impl ]
     [ run environment.cpp test_impl ]
     [ run pid.cpp test_impl ]
+    [ run exe.cpp test_impl ]
     [ run shell.cpp test_impl ]
     ;
 
