@@ -11,6 +11,10 @@
 #include <boost/process/v2/detail/throw_error.hpp>
 #include <boost/process/v2/detail/exe.hpp>
 
+#include <string>
+#include <vector>
+#include <sstream>
+
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 #include <windows.h>
 #else
@@ -56,16 +60,6 @@ filesystem::path exe_path(pid_type pid, error_code & ec)
             {
                 path = exe;
             }
-            else
-            {
-                ec = detail::get_last_error();
-                return "";
-            }
-        }
-        else
-        {
-            ec = detail::get_last_error();
-            return "";
         }
     } 
     else 
@@ -81,21 +75,11 @@ filesystem::path exe_path(pid_type pid, error_code & ec)
             {
                 path = exe;
             }
-            else
-            {
-                ec = detail::get_last_error();
-                CloseHandle(proc);
-                return "";
-            }
-        }
-        else
-        {
-            ec = detail::get_last_error();
-            CloseHandle(proc);
-            return "";
         }
         CloseHandle(proc);
     }
+    if (path.string().empty())
+        ec = detail::get_last_error();
     return path;
 }
 
@@ -103,7 +87,7 @@ filesystem::path exe_path(pid_type pid, error_code & ec)
 
 filesystem::path exe_path(pid_type pid, error_code & ec)
 {
-    filesystem::path path;
+    std::string path;
     char exe[PROC_PIDPATHINFO_MAXSIZE];
     if (proc_pidpath(pid, exe, sizeof(exe)) > 0) 
     {
@@ -112,17 +96,9 @@ filesystem::path exe_path(pid_type pid, error_code & ec)
         {
             path = buffer;
         }
-        else
-        {
-            ec = detail::get_last_error();
-            return "";
-        }
     }
-    else
-    {
+    if (path.empty())
         ec = detail::get_last_error();
-        return "";
-    }
     return path;
 }
 
@@ -130,17 +106,14 @@ filesystem::path exe_path(pid_type pid, error_code & ec)
 
 filesystem::path exe_path(pid_type pid, error_code & ec)
 {
-    filesystem::path path;
+    std::string path;
     char exe[PATH_MAX];
     if (realpath(("/proc/" + std::to_string(pid) + "/exe").c_str(), exe)) 
     {
         path = exe;
     }
-    else
-    {
+    if (path.empty())
         ec = detail::get_last_error();
-        return "";
-    }
     return path;
 }
 
@@ -148,7 +121,7 @@ filesystem::path exe_path(pid_type pid, error_code & ec)
 
 filesystem::path exe_path(pid_type pid, error_code & ec) 
 {
-    filesystem::path path;
+    std::string path;
     int mib[4]; 
     std::size_t len;
     mib[0] = CTL_KERN;
@@ -167,23 +140,10 @@ filesystem::path exe_path(pid_type pid, error_code & ec)
             {
                 path = buffer;
             }
-            else
-            {
-                ec = detail::get_last_error();
-                return "";
-            }
-        }
-        else
-        {
-            ec = detail::get_last_error();
-            return "";
         }
     }
-    else
-    {
+    if (path.empty())
         ec = detail::get_last_error();
-        return "";
-    }
     return path;
 }
 
@@ -191,7 +151,7 @@ filesystem::path exe_path(pid_type pid, error_code & ec)
 
 filesystem::path exe_path(pid_type pid, error_code & ec)
 {
-    filesystem::path path;
+    std::string path;
     int mib[4]; 
     std::size_t len;
     mib[0] = CTL_KERN;
@@ -210,23 +170,10 @@ filesystem::path exe_path(pid_type pid, error_code & ec)
             {
                 path = buffer;
             }
-            else
-            {
-                ec = detail::get_last_error();
-                return "";
-            }
-        }
-        else
-        {
-            ec = detail::get_last_error();
-            return "";
         }
     }
-    else
-    {
+    if (path.empty())
         ec = detail::get_last_error();
-        return "";
-    }
     return path;
 }
 
@@ -241,7 +188,10 @@ filesystem::path exe_path(pid_type pid, error_code & ec)
         bool success = false;
         struct stat st;
         char executable[PATH_MAX];
-        if (!stat(in.c_str(), &st) && (st.st_mode & S_IXUSR) && (st.st_mode & S_IFREG) && realpath(in.c_str(), executable)) 
+        if (!stat(in.c_str(), &st) && 
+            (st.st_mode & S_IXUSR) && 
+            (st.st_mode & S_IFREG) && 
+            realpath(in.c_str(), executable)) 
         {
             int cntp = 0;
             kinfo_file *kif = nullptr;
@@ -256,7 +206,8 @@ filesystem::path exe_path(pid_type pid, error_code & ec)
                 for (int i = 0; i < cntp; i++) 
                 {
                     if (kif[i].fd_fd == KERN_FILE_TEXT && 
-                        (st.st_dev == static_cast<dev_t>(kif[i].va_fsid) || st.st_ino == static_cast<ino_t>(kif[i].va_fileid))) 
+                        (st.st_dev == static_cast<dev_t>(kif[i].va_fsid) || 
+                        st.st_ino == static_cast<ino_t>(kif[i].va_fileid))) 
                     {
                         *out = executable;
                         success = true;
@@ -264,16 +215,10 @@ filesystem::path exe_path(pid_type pid, error_code & ec)
                     }
                 }
             }
-            else
-            {
-                ec = detail::get_last_error();
-            }
             kvm_close(kd);
         }
-        else
-        {
+        if (*out.empty())
             ec = detail::get_last_error();
-        }
         return success;
     };
     std::vector<std::string> buffer = cmdline_from_proc_id(pid, ec);
@@ -331,11 +276,8 @@ filesystem::path exe_path(pid_type pid, error_code & ec)
             }
         }
     }
-    else
-    {
+    if (path.empty())
         ec = detail::get_last_error();
-        return "";
-    }
     return path;
 }
 
@@ -343,17 +285,14 @@ filesystem::path exe_path(pid_type pid, error_code & ec)
 
 filesystem::path exe_path(pid_type pid, error_code & ec)
 {
-    filesystem::path path;
+    std::string path;
     char exe[PATH_MAX];
     if (realpath(("/proc/" + std::to_string(pid) + "/path/a.out").c_str(), exe)) 
     {
         path = exe;
     }
-    else
-    {
+    if (path.empty())
         ec = detail::get_last_error();
-        return "";
-    }
     return path;
 }
 
