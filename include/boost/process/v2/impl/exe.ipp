@@ -249,6 +249,7 @@ filesystem::path exe_path(pid_type pid, error_code & ec)
             if (!kd)
             {
                 ec = detail::get_last_error();
+                return false;
             }
             if ((kif = kvm_getfiles(kd, KERN_FILE_BYPID, pid, sizeof(struct kinfo_file), &cntp))) 
             {
