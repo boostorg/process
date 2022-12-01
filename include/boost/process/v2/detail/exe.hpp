@@ -7,6 +7,8 @@
 
 #include <boost/process/v2/pid.hpp>
 
+#include <system_error>
+
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 #include <windows.h>
 #endif
@@ -21,11 +23,8 @@ namespace ext
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 
-BOOST_PROCESS_V2_DECL
-HANDLE open_process_with_debug_privilege(pid_type pid);
-
-BOOST_PROCESS_V2_DECL
-BOOL is_x86_process(HANDLE proc);
+BOOST_PROCESS_V2_DECL HANDLE open_process_with_debug_privilege(pid_type pid, error_code & ec);
+BOOST_PROCESS_V2_DECL BOOL is_x86_process(HANDLE proc, error_code & ec);
 
 #endif
 
