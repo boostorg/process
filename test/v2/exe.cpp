@@ -10,7 +10,6 @@
 
 #include <vector>
 
-
 BOOST_AUTO_TEST_CASE(test_exe)
 {
     namespace bp2 = boost::process::v2;
