@@ -117,6 +117,32 @@ std::vector<pid_type> parent_pid(pid_type pid, error_code & ec)
     return vec;
 }
 
+std::vector<pid_type> child_pids(pid_type pid, error_code & ec)
+{
+    std::vector<pid_type> vec;
+    HANDLE hp = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (!hp)
+    {
+        ec = detail::get_last_error();
+        return vec;
+    }
+    PROCESSENTRY32 pe;
+    pe.dwSize = sizeof(PROCESSENTRY32);
+    if (Process32First(hp, &pe))
+    {
+        do
+        {
+            if (pe.th32ParentProcessID == parent_proc_id)
+            {
+                vec.push_back(pe.th32ProcessID);
+            }
+        } 
+        while (Process32Next(hp, &pe));
+    }
+    CloseHandle(hp);
+    return vec;
+}
+
 #elif (defined(__APPLE__) && defined(__MACH__))
 
 std::vector<pid_type> all_pids(error_code & ec)
@@ -149,6 +175,28 @@ std::vector<pid_type> parent_pid(pid_type pid, error_code & ec) {
     }
     if (vec.empty() && (pid == 0 || pid == 1))
         vec.push_back(0);
+    return vec;
+}
+
+std::vector<pid_type> child_pids(pid_type pid, error_code & ec) {
+    std::vector<pid_type> vec;
+    vec.resize(proc_listpids(PROC_PPID_ONLY, (uint32_t)parent_proc_id, nullptr, 0));
+    if (proc_listpids(PROC_PPID_ONLY, (uint32_t)parent_proc_id, &proc_info[0], sizeof(pid_type) * cntp))
+    {
+        ec = detail::get_last_error();
+        return {};
+    }
+    auto itr = std::partition(vec.begin(), vec.end(), [](pid_type pt) {return pt != 0;});
+    vec.erase(itr, vec.end());
+    std::reverse(vec.begin(), vec.end());
+    for (unsigned i = 0; i < vec.size(); i++)
+    {
+        if (proc_info[i] == 1 && parent_proc_id == 0)
+        {
+            vec.insert(vec.begin(), 0);
+            break;
+        }
+    }
     return vec;
 }
 
@@ -214,6 +262,20 @@ std::vector<pid_type> parent_pid(pid_type pid, error_code & ec) {
     return vec;
 }
 
+std::vector<pid_type> child_pids(pid_type pid, error_code & ec) {
+    std::vector<pid_type> vec;
+    std::vector<pid_type> pid = all_pids(ec);
+    for (std::size_t i = 0; i < pid.size(); i++)
+    {
+        std::vector<pid_type> ppid = parent_pid(pid[i], ec);
+        if (!ppid.empty() && ppid[0] == parent_proc_id)
+        {
+            vec.push_back(pid[i]);
+        }
+    }
+    return vec;
+}
+
 #elif defined(__FreeBSD__)
 
 std::vector<pid_type> all_pids(error_code & ec)
@@ -225,7 +287,6 @@ std::vector<pid_type> all_pids(error_code & ec)
     {
         for (int i = 0; i < cntp; i++)
             vec.push_back(proc_info[i].ki_pid);
-
         free(proc_info);
     }
     else
@@ -240,6 +301,26 @@ std::vector<pid_type> parent_pid(pid_type pid, error_code & ec)
     if (proc_info)
     {
         vec.push_back(proc_info->ki_ppid);
+        free(proc_info);
+    }
+    else
+        ec = detail::get_last_error();
+    return vec;
+}
+
+std::vector<pid_type> child_pids(pid_type pid, error_code & ec) {
+    std::vector<pid_type> vec;
+    int cntp = 0; 
+    kinfo_proc *proc_info = kinfo_getallproc(&cntp);
+    if (proc_info)
+    {
+        for (int i = 0; i < cntp; i++)
+        {
+            if (proc_info[i].ki_ppid == parent_proc_id)
+            {
+                vec.push_back(proc_info[i].ki_pid);
+            }
+        }
         free(proc_info);
     }
     else
@@ -303,6 +384,37 @@ std::vector<pid_type> parent_pid(pid_type pid, error_code & ec)
     return vec;
 }
 
+std::vector<pid_type> child_pids(pid_type pid, error_code & ec) {
+    std::vector<pid_type> vec;
+    int cntp = 0;
+    kinfo_proc *proc_info = nullptr;
+    const char *nlistf, *memf;
+    nlistf = memf = "/dev/null";
+    kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr);
+    if (!kd) 
+    {
+        ec = detail::get_last_error();
+        return vec;
+    }
+    if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, &cntp)))
+    {
+        for (int i = 0; i < cntp; i++)
+        {
+            if (proc_info[i].kp_pid == 1 && proc_info[i].kp_ppid == 0 && parent_proc_id == 0)
+            {
+                vec.push_back(0);
+            }
+            if (proc_info[i].kp_pid >= 0 && proc_info[i].kp_ppid >= 0 && proc_info[i].kp_ppid == parent_proc_id)
+            {
+                vec.push_back(proc_info[i].kp_pid);
+            }
+        }
+    else
+        ec = detail::get_last_error();
+    kvm_close(kd);
+    return vec;
+}
+
 #elif defined(__NetBSD__)
 
 std::vector<pid_type> all_pids(error_code & ec)
@@ -343,6 +455,32 @@ std::vector<pid_type> parent_pid(pid_type pid, error_code & ec) {
     if ((proc_info = kvm_getproc2(kd, KERN_PROC_PID, pid, sizeof(struct kinfo_proc2), &cntp)))
     {
         vec.push_back(proc_info->p_ppid);
+    }
+    else
+        ec = detail::get_last_error();
+    kvm_close(kd);
+    return vec;
+}
+
+std::vector<pid_type> child_pids(pid_type pid, error_code & ec) {
+    std::vector<pid_type> vec;
+    int cntp = 0;
+    kinfo_proc2 *proc_info = nullptr;
+    kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
+    if (!kd) 
+    {
+        ec = detail::get_last_error();
+        return vec;
+    }
+    if ((proc_info = kvm_getproc2(kd, KERN_PROC_ALL, 0, sizeof(struct kinfo_proc2), &cntp)))
+    {
+        for (int i = cntp - 1; i >= 0; i--)
+        {
+            if (proc_info[i].p_ppid == parent_proc_id)
+            {
+                vec.push_back(proc_info[i].p_pid);
+            }
+        }
     }
     else
         ec = detail::get_last_error();
@@ -403,6 +541,37 @@ std::vector<pid_type> parent_pid(pid_type pid, error_code & ec) {
     return vec;
 }
 
+std::vector<pid_type> child_pids(pid_type pid, error_code & ec) {
+    std::vector<pid_type> vec;
+    int cntp = 0;
+    kinfo_proc *proc_info = nullptr;
+    kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr); 
+    if (!kd) 
+    {
+        ec = detail::get_last_error();
+        return vec;
+    }
+    if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, sizeof(struct kinfo_proc), &cntp)))
+    {
+        for (int i = cntp - 1; i >= 0; i--)
+        {
+            if (proc_info[i].p_pid == 1 && proc_info[i].p_ppid == 0 && parent_proc_id == 0)
+            {
+                vec.push_back(0);
+            }
+            if (proc_info[i].p_ppid == parent_proc_id)
+            {
+                vec.push_back(proc_info[i].p_pid);
+            }
+        }
+    }
+    else
+        ec = detail::get_last_error();
+    kvm_close(kd);
+    return vec;
+}
+
+
 #elif defined(__sun)
 
 std::vector<pid_type> all_pids(error_code & ec)
@@ -451,6 +620,36 @@ std::vector<pid_type> parent_pid(pid_type pid, error_code & ec) {
     return vec;
 }
 
+std::vector<pid_type> child_pids(pid_type pid, error_code & ec)
+{
+    std::vector<pid_type> vec;
+    struct pid cur_pid;
+    proc *proc_info = nullptr;
+    kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr);
+    if (!kd)
+    {
+        ec = detail::get_last_error();
+        return vec;
+    }
+    while ((proc_info = kvm_nextproc(kd)))
+    {
+        if (proc_info->p_ppid == parent_proc_id)
+        {
+            if (kvm_kread(kd, (std::uintptr_t)proc_info->p_pidp, &cur_pid, sizeof(cur_pid)) != -1)
+            {
+                vec.insert(vec.begin(), cur_pid.pid_id);
+            }
+            else
+            {
+                ec = detail::get_last_error();
+                break;
+            }
+        }
+    }
+    kvm_close(kd);
+    return vec;
+}
+
 #else
 #error "Platform not supported"
 #endif
@@ -470,6 +669,15 @@ std::vector<pid_type> parent_pid(pid_type pid)
     auto res = parent_pid(pid, ec);
     if (ec)
         detail::throw_error(ec, "parent_pid");
+    return res;
+}
+
+std::vector<pid_type> child_pids(pid_type pid)
+{
+    error_code ec;
+    auto res = child_pids(pid, ec);
+    if (ec)
+        detail::throw_error(ec, "child_pids");
     return res;
 }
 
