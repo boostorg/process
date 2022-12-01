@@ -19,7 +19,7 @@ BOOST_AUTO_TEST_CASE(test_exe)
     auto all = bp2::all_pids();
     std::vector<filesystem::path> pths;
     for (unsigned i = 0; i < all.size(); i++) {
-        auto pth = bp2::exe_path(all[i]);
+        auto pth = bp2::ext::exe_path(all[i]);
         pths.push_back((!pth.string().empty()) ? pth.string() : "<unknown>");
     }
     // Check failed if all executable paths are unknown.
