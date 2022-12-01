@@ -191,11 +191,16 @@ std::vector<pid_type> parent_pid(pid_type pid, error_code & ec) {
         if (size > 0) 
         {
             char *token = nullptr;
-            if ((token = strtok(buffer, " ")))
-                if ((token = strtok(nullptr, " ")))
-                    if ((token = strtok(nullptr, " ")))
-                        if ((token = strtok(nullptr, " ")))
-                            vec.push_back((pid_type)strtoul(token, nullptr, 10));
+            if ((token = strtok(buffer, " "))) {
+                if ((token = strtok(nullptr, " "))) {
+                    if ((token = strtok(nullptr, " "))) {
+                        if ((token = strtok(nullptr, " "))) {
+                            pid_type ppid = (pid_type)strtoul(token, nullptr, 10);
+                            vec.push_back(ppid);
+                        }
+                    }
+                }
+            }
             if (!token)
             {
                 ec = detail::get_last_error();
