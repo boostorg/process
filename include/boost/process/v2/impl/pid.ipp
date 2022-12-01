@@ -103,6 +103,8 @@ std::vector<pid_type> all_pids(error_code & ec)
     }
     auto itr = std::partition(vec.begin(), vec.end(), [](pid_type pt) {return pt != 0;});
     vec.erase(itr, vec.end());
+    vec.push_back(0);
+    std::reverse(vec.begin(), vec.end());
     return vec;
 }
 
@@ -111,6 +113,7 @@ std::vector<pid_type> all_pids(error_code & ec)
 std::vector<pid_type> all_pids(error_code & ec)
 {
     std::vector<pid_type> vec;
+    vec.push_back(0);
     DIR *proc = opendir("/proc");
     if (proc == nullptr)
     {
@@ -207,6 +210,7 @@ std::vector<pid_type> all_pids(error_code & ec)
 std::vector<pid_type> all_pids(error_code & ec)
 {
     std::vector<pid_type> vec;
+    vec.push_back(0);
     int cntp = 0;
     kinfo_proc *proc_info = nullptr;
     kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
@@ -217,8 +221,8 @@ std::vector<pid_type> all_pids(error_code & ec)
     } 
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, sizeof(struct kinfo_proc), &cntp)))
     {
-        vec.reserve(cntp);
-        for (int i = 0; i < cntp; i++) 
+        vec.reserve(vec.size() + cntp);
+        for (int i = cntp - 1; i >= 0; i--) {
         {
             if (proc_info[i].kp_pid >= 0) 
             {
