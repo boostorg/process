@@ -275,7 +275,7 @@ filesystem::path exe_path(pid_type pid, error_code & ec)
         }
         return success;
     };
-    std::vector<std::string> buffer = cmdline_from_proc_id(pid);
+    std::vector<std::string> buffer = cmdline_from_proc_id(pid, ec);
     if (!buffer.empty()) 
     {
         bool is_exe = false;
