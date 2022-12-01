@@ -96,7 +96,7 @@ std::vector<pid_type> all_pids(error_code & ec)
 {
     std::vector<pid_type> vec;
     vec.resize(proc_listpids(PROC_ALL_PIDS, 0, nullptr, 0));
-    if (proc_listpids(PROC_ALL_PIDS, 0, &vec[0], sizeof(pid_type) * vec))
+    if (proc_listpids(PROC_ALL_PIDS, 0, &vec[0], sizeof(pid_type) * vec.size()))
     {
         ec = detail::get_last_error();
         return {};
