@@ -26,10 +26,11 @@ BOOST_AUTO_TEST_CASE(test_pid)
         std::vector<bp2::pid_type> & children, 
         std::vector<bp2::pid_type> & grand_children) 
     {  
-        children.push_back(bp2::child_pids(pid));
+        children = bp2::child_pids(pid);
         for (unsigned i = 0; i < children.size(); i++) 
         {
-            grand_children.push_back(bp2::child_pids(children[i]));
+            std::vector<bp2::pid_type> tmp = bp2::child_pids(children[i])
+            grand_children.insert(std::end(grand_children), std::begin(tmp), std::end(tmp));
         }
         return (!children.empty() && !grand_children.empty());
     }
