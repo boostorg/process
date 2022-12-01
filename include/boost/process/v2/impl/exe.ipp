@@ -56,6 +56,16 @@ filesystem::path exe_path(pid_type pid, error_code & ec)
             {
                 path = exe;
             }
+            else
+            {
+                ec = detail::get_last_error();
+                return "";
+            }
+        }
+        else
+        {
+            ec = detail::get_last_error();
+            return "";
         }
     } 
     else 
@@ -71,12 +81,20 @@ filesystem::path exe_path(pid_type pid, error_code & ec)
             {
                 path = exe;
             }
+            else
+            {
+                ec = detail::get_last_error();
+                CloseHandle(proc);
+                return "";
+            }
+        }
+        else
+        {
+            ec = detail::get_last_error();
+            CloseHandle(proc);
+            return "";
         }
         CloseHandle(proc);
-    }
-    if (path.string().empty())
-    {
-        ec = detail::get_last_error();
     }
     return path;
 }
@@ -94,10 +112,16 @@ filesystem::path exe_path(pid_type pid, error_code & ec)
         {
             path = buffer;
         }
+        else
+        {
+            ec = detail::get_last_error();
+            return "";
+        }
     }
-    if (path.string().empty())
+    else
     {
         ec = detail::get_last_error();
+        return "";
     }
     return path;
 }
@@ -112,9 +136,10 @@ filesystem::path exe_path(pid_type pid, error_code & ec)
     {
         path = exe;
     }
-    if (path.string().empty())
+    else
     {
         ec = detail::get_last_error();
+        return "";
     }
     return path;
 }
@@ -142,11 +167,22 @@ filesystem::path exe_path(pid_type pid, error_code & ec)
             {
                 path = buffer;
             }
+            else
+            {
+                ec = detail::get_last_error();
+                return "";
+            }
+        }
+        else
+        {
+            ec = detail::get_last_error();
+            return "";
         }
     }
-    if (path.string().empty())
+    else
     {
         ec = detail::get_last_error();
+        return "";
     }
     return path;
 }
@@ -174,11 +210,22 @@ filesystem::path exe_path(pid_type pid, error_code & ec)
             {
                 path = buffer;
             }
+            else
+            {
+                ec = detail::get_last_error();
+                return "";
+            }
+        }
+        else
+        {
+            ec = detail::get_last_error();
+            return "";
         }
     }
-    if (path.string().empty())
+    else
     {
         ec = detail::get_last_error();
+        return "";
     }
     return path;
 }
@@ -187,8 +234,8 @@ filesystem::path exe_path(pid_type pid, error_code & ec)
 
 filesystem::path exe_path(pid_type pid, error_code & ec)
 {
-    filesystem::path path;
-    auto is_executable = [](pid_type pid, std::string in, std::string *out) 
+    std::string path;
+    auto is_executable = [](pid_type pid, std::string in, std::string *out, error_code & ec) 
     {
         *out = "";
         bool success = false;
@@ -199,7 +246,10 @@ filesystem::path exe_path(pid_type pid, error_code & ec)
             int cntp = 0;
             kinfo_file *kif = nullptr;
             kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
-            if (!kd) return false;
+            if (!kd)
+            {
+                ec = detail::get_last_error();
+            }
             if ((kif = kvm_getfiles(kd, KERN_FILE_BYPID, pid, sizeof(struct kinfo_file), &cntp))) 
             {
                 for (int i = 0; i < cntp; i++) 
@@ -213,7 +263,15 @@ filesystem::path exe_path(pid_type pid, error_code & ec)
                     }
                 }
             }
+            else
+            {
+                ec = detail::get_last_error();
+            }
             kvm_close(kd);
+        }
+        else
+        {
+            ec = detail::get_last_error();
         }
         return success;
     };
@@ -227,7 +285,7 @@ filesystem::path exe_path(pid_type pid, error_code & ec)
             if (buffer[0][0] == '/') 
             {
                 argv0 = buffer[0];
-                is_exe = is_executable(pid, argv0.c_str(), &path);
+                is_exe = is_executable(pid, argv0.c_str(), &path, ec);
             } 
             else if (buffer[0].find('/') == std::string::npos) 
             {
@@ -243,38 +301,39 @@ filesystem::path exe_path(pid_type pid, error_code & ec)
                     for (std::size_t i = 0; i < env.size(); i++) 
                     {
                         argv0 = env[i] + "/" + buffer[0];
-                        is_exe = is_executable(pid, argv0.c_str(), &path);
+                        is_exe = is_executable(pid, argv0.c_str(), &path, ec);
                         if (is_exe) break;
                         if (buffer[0][0] == '-') 
                         {
                             argv0 = env[i] + "/" + buffer[0].substr(1);
-                            is_exe = is_executable(pid, argv0.c_str(), &path);
+                            is_exe = is_executable(pid, argv0.c_str(), &path, ec);
                             if (is_exe) break;
                         }
                     }
                 }
             } else {
-                std::string pwd = envvar_value_from_proc_id(pid, "PWD");
+                std::string pwd = envvar_value_from_proc_id(pid, "PWD", ec);
                 if (!pwd.empty()) 
                 {
                     argv0 = pwd + "/" + buffer[0];
-                    is_exe = is_executable(pid, argv0.c_str(), &path);
+                    is_exe = is_executable(pid, argv0.c_str(), &path, ec);
                 }
-                if (!is_exe) 
+                if (pwd.empty() || !is_exe) 
                 {
-                    std::string cwd = cwd_from_proc_id(pid);
+                    std::string cwd = cwd_from_proc_id(pid, ec);
                     if (!cwd.empty()) 
                     {
                        argv0 = cwd + "/" + buffer[0];
-                       is_exe = is_executable(pid, argv0.c_str(), &path);
+                       is_exe = is_executable(pid, argv0.c_str(), &path, ec);
                     }
                 }
             }
         }
     }
-    if (path.string().empty())
+    else
     {
         ec = detail::get_last_error();
+        return "";
     }
     return path;
 }
@@ -289,9 +348,10 @@ filesystem::path exe_path(pid_type pid, error_code & ec)
     {
         path = exe;
     }
-    if (path.string().empty())
+    else
     {
         ec = detail::get_last_error();
+        return "";
     }
     return path;
 }
