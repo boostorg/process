@@ -5,14 +5,16 @@
 #ifndef BOOST_PROCESS_V2_EXE_HPP
 #define BOOST_PROCESS_V2_EXE_HPP
 
-#include <boost/filesystem.hpp>
+#include <boost/process/filesystem.hpp>
+
+#include <system_error>
 
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
 
 namespace ext {
 
-BOOST_PROCESS_V2_DECL boost::filesystem::path exe_path(pid_type pid, error_code & ec);
-BOOST_PROCESS_V2_DECL boost::filesystem::path exe_path(pid_type pid);
+BOOST_PROCESS_V2_DECL filesystem::path exe_path(pid_type pid, error_code & ec);
+BOOST_PROCESS_V2_DECL filesystem::path exe_path(pid_type pid);
 
 } // namespace ext
 
