@@ -90,6 +90,33 @@ std::vector<pid_type> all_pids(error_code & ec)
     return vec;
 }
 
+std::vector<pid_type> parent_pid(pid_type pid)
+{
+    std::vector<pid_type> vec;
+    HANDLE hp = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (!hp)
+    {
+        ec = detail::get_last_error();
+        return vec;
+    }
+    PROCESSENTRY32 pe;
+    pe.dwSize = sizeof(PROCESSENTRY32);
+    if (Process32First(hp, &pe))
+    {
+        do
+        {
+            if (pe.th32ProcessID == pid)
+            {
+                vec.push_back(pe.th32ParentProcessID);
+                break;
+            }
+        }
+        while (Process32Next(hp, &pe));
+    }
+    CloseHandle(hp);
+    return vec;
+}
+
 #elif (defined(__APPLE__) && defined(__MACH__))
 
 std::vector<pid_type> all_pids(error_code & ec)
@@ -108,6 +135,23 @@ std::vector<pid_type> all_pids(error_code & ec)
     return vec;
 }
 
+std::vector<pid_type> parent_pid(pid_type pid) {
+    std::vector<pid_type> vec;
+    proc_bsdinfo proc_info;
+    if (proc_pidinfo(pid, PROC_PIDTBSDINFO, 0, &proc_info, sizeof(proc_info)) <= 0)
+    {
+        ec = detail::get_last_error();
+        return {};
+    }
+    else
+    {
+        vec.push_back(proc_info.pbi_ppid);
+    }
+    if (vec.empty() && (pid == 0 || pid == 1))
+        vec.push_back(0);
+    return vec;
+}
+
 #elif (defined(__linux__) || defined(__ANDROID__))
 
 std::vector<pid_type> all_pids(error_code & ec)
@@ -115,7 +159,7 @@ std::vector<pid_type> all_pids(error_code & ec)
     std::vector<pid_type> vec;
     vec.push_back(0);
     DIR *proc = opendir("/proc");
-    if (proc == nullptr)
+    if (!proc)
     {
         ec = detail::get_last_error();
         return vec;
@@ -131,6 +175,40 @@ std::vector<pid_type> all_pids(error_code & ec)
     return vec;
 }
 
+std::vector<pid_type> parent_pid(pid_type pid) {
+    std::vector<pid_type> vec;
+    char buffer[BUFSIZ];
+    sprintf(buffer, "/proc/%d/stat", pid);
+    FILE *stat = fopen(buffer, "r");
+    if (!stat)
+    {
+        ec = detail::get_last_error();
+        return vec;
+    } 
+    else
+    {
+        std::size_t size = fread(buffer, sizeof(char), sizeof(buffer), stat);
+        if (size > 0) 
+        {
+            char *token = nullptr;
+            if ((token = strtok(buffer, " ")))
+                if ((token = strtok(nullptr, " ")))
+                    if ((token = strtok(nullptr, " ")))
+                        if ((token = strtok(nullptr, " ")))
+                            vec.push_back((pid_type)strtoul(token, nullptr, 10));
+            if (!token)
+            {
+                ec = detail::get_last_error();
+                return vec;
+            }
+        }
+        fclose(stat);
+    }
+    if (vec.empty() && pid == 0) 
+        vec.push_back(0);
+    return vec;
+}
+
 #elif defined(__FreeBSD__)
 
 std::vector<pid_type> all_pids(error_code & ec)
@@ -143,6 +221,20 @@ std::vector<pid_type> all_pids(error_code & ec)
         for (int i = 0; i < cntp; i++)
             vec.push_back(proc_info[i].ki_pid);
 
+        free(proc_info);
+    }
+    else
+        ec = detail::get_last_error();
+    return vec;
+}
+
+std::vector<pid_type> parent_pid(pid_type pid)
+{
+    std::vector<pid_type> vec;
+    kinfo_proc *proc_info = kinfo_getproc(pid);
+    if (proc_info)
+    {
+        vec.push_back(proc_info->ki_ppid);
         free(proc_info);
     }
     else
@@ -178,6 +270,34 @@ std::vector<pid_type> all_pids(error_code & ec)
     return vec;
 }
 
+std::vector<pid_type> parent_pid(pid_type pid)
+{
+    std::vector<pid_type> vec;
+    int cntp = 0;
+    kinfo_proc *proc_info = nullptr;
+    const char *nlistf, *memf;
+    nlistf = memf = "/dev/null";
+    kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr); 
+    if (!kd) 
+    {
+        ec = detail::get_last_error();
+        return vec;
+    }
+    if ((proc_info = kvm_getprocs(kd, KERN_PROC_PID, pid, &cntp)))
+    {
+        if (proc_info->kp_ppid >= 0)
+        {
+            vec.push_back(proc_info->kp_ppid);
+        }
+    }
+    else
+        ec = detail::get_last_error();
+    kvm_close(kd);
+    if (vec.empty() && pid == 0)
+        vec.push_back(0);
+    return vec;
+}
+
 #elif defined(__NetBSD__)
 
 std::vector<pid_type> all_pids(error_code & ec)
@@ -198,6 +318,26 @@ std::vector<pid_type> all_pids(error_code & ec)
         {
             vec.push_back(proc_info[i].p_pid);
         }
+    }
+    else
+        ec = detail::get_last_error();
+    kvm_close(kd);
+    return vec;
+}
+
+std::vector<pid_type> parent_pid(pid_type pid) {
+    std::vector<pid_type> vec;
+    int cntp = 0;
+    kinfo_proc2 *proc_info = nullptr;
+    kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
+    if (!kd) 
+    {
+        ec = detail::get_last_error();
+        return vec;
+    }
+    if ((proc_info = kvm_getproc2(kd, KERN_PROC_PID, pid, sizeof(struct kinfo_proc2), &cntp)))
+    {
+        vec.push_back(proc_info->p_ppid);
     }
     else
         ec = detail::get_last_error();
@@ -236,6 +376,28 @@ std::vector<pid_type> all_pids(error_code & ec)
     return vec;
 }
 
+std::vector<pid_type> parent_pid(pid_type pid) {
+    std::vector<pid_type> vec;
+    int cntp = 0;
+    kinfo_proc *proc_info = nullptr;
+    kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
+    if (!kd)
+    {
+        ec = detail::get_last_error();
+        return vec;
+    }
+    if ((proc_info = kvm_getprocs(kd, KERN_PROC_PID, pid, sizeof(struct kinfo_proc), &cntp)))
+    {
+        vec.push_back(proc_info->p_ppid);
+    }
+    else
+        ec = detail::get_last_error();
+    kvm_close(kd);
+    if (vec.empty() && pid == 0)
+        vec.push_back(0);
+    return vec;
+}
+
 #elif defined(__sun)
 
 std::vector<pid_type> all_pids(error_code & ec)
@@ -261,6 +423,25 @@ std::vector<pid_type> all_pids(error_code & ec)
             break;
         }
     }
+    kvm_close(kd);
+    return vec;
+}
+
+std::vector<pid_type> parent_pid(pid_type pid) {
+    std::vector<pid_type> vec;
+    proc *proc_info = nullptr;
+    kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr);
+    if (!kd)
+    {
+        ec = detail::get_last_error();
+        return vec;
+    }
+    if ((proc_info = kvm_getproc(kd, pid)))
+    {
+        vec.push_back(proc_info->p_ppid);
+    }
+    else
+        ec = detail::get_last_error();
     kvm_close(kd);
     return vec;
 }
