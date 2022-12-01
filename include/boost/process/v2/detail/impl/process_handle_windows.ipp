@@ -15,10 +15,10 @@
 #if !defined(BOOST_PROCESS_V2_DISABLE_UNDOCUMENTED_API)
 extern "C" 
 {
-  
+
 LONG WINAPI NtResumeProcess(HANDLE ProcessHandle);
 LONG WINAPI NtSuspendProcess(HANDLE ProcessHandle);
-  
+
 }
 #endif
 
@@ -50,10 +50,10 @@ void terminate_if_running_(HANDLE handle)
 {
     DWORD exit_code = 0u;
     if (handle == INVALID_HANDLE_VALUE)
-      return ;
+        return ;
     if (::GetExitCodeProcess(handle, &exit_code))
-      if (exit_code == STILL_ACTIVE)
-        ::TerminateProcess(handle, 260);
+        if (exit_code == STILL_ACTIVE)
+            ::TerminateProcess(handle, 260);
 }
 
 bool check_handle_(HANDLE handle, error_code & ec)
@@ -70,8 +70,8 @@ bool check_pid_(pid_type pid_, error_code & ec)
 {
     if (pid_ == 0)
     {
-      ec.assign(ERROR_INVALID_HANDLE_STATE, system_category());
-      return false;
+        ec.assign(ERROR_INVALID_HANDLE_STATE, system_category());
+        return false;
     }
     return true;
 }
@@ -83,19 +83,19 @@ struct enum_windows_data_t
 };
 
 static BOOL CALLBACK enum_window(HWND hwnd, LPARAM param)
-  {
+{
     auto data = reinterpret_cast<enum_windows_data_t*>(param);
     DWORD pid{0u};
     GetWindowThreadProcessId(hwnd, &pid);
     if (pid != data->pid)
-      return TRUE;
+        return TRUE;
     
     LRESULT res = ::SendMessageW(hwnd, WM_CLOSE, 0, 0);
 
     if (res)
-      data->ec = detail::get_last_error();
+        data->ec = detail::get_last_error();
     return res == 0;
-  }
+}
 
 void request_exit_(pid_type pid_, error_code & ec)
 {
@@ -126,27 +126,25 @@ void check_running_(HANDLE handle, error_code & ec, DWORD & exit_status)
 #if !defined(BOOST_PROCESS_V2_DISABLE_UNDOCUMENTED_API)
 void suspend_(HANDLE handle, error_code & ec)
 {
-  auto nt_err = NtSuspendProcess(handle);
-  if (nt_err > 0xC0000000)
-    ec = detail::get_last_error();
+    auto nt_err = NtSuspendProcess(handle);
+    if (nt_err > 0xC0000000)
+       ec = detail::get_last_error();
 }
 
 void resume_(HANDLE handle, error_code & ec)
 {
-
-  auto nt_err = NtResumeProcess(handle);
-  if (nt_err > 0xC0000000)
-    ec = detail::get_last_error();
+    auto nt_err = NtResumeProcess(handle);
+    if (nt_err > 0xC0000000)
+        ec = detail::get_last_error();
 }
 #else
 void suspend_(HANDLE, error_code & ec)
 {
-  ec.assign(ERROR_CALL_NOT_IMPLEMENTED, system_category());
+    ec.assign(ERROR_CALL_NOT_IMPLEMENTED, system_category());
 }
 
 void resume_(HANDLE handle, error_code & ec)
 {
-
     ec.assign(ERROR_CALL_NOT_IMPLEMENTED, system_category());
 }
 #endif
