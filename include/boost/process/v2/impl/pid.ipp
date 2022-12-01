@@ -90,7 +90,7 @@ std::vector<pid_type> all_pids(error_code & ec)
     return vec;
 }
 
-std::vector<pid_type> parent_pid(pid_type pid)
+std::vector<pid_type> parent_pid(pid_type pid, error_code & ec)
 {
     std::vector<pid_type> vec;
     HANDLE hp = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
@@ -135,7 +135,7 @@ std::vector<pid_type> all_pids(error_code & ec)
     return vec;
 }
 
-std::vector<pid_type> parent_pid(pid_type pid) {
+std::vector<pid_type> parent_pid(pid_type pid, error_code & ec) {
     std::vector<pid_type> vec;
     proc_bsdinfo proc_info;
     if (proc_pidinfo(pid, PROC_PIDTBSDINFO, 0, &proc_info, sizeof(proc_info)) <= 0)
@@ -175,7 +175,7 @@ std::vector<pid_type> all_pids(error_code & ec)
     return vec;
 }
 
-std::vector<pid_type> parent_pid(pid_type pid) {
+std::vector<pid_type> parent_pid(pid_type pid, error_code & ec) {
     std::vector<pid_type> vec;
     char buffer[BUFSIZ];
     sprintf(buffer, "/proc/%d/stat", pid);
@@ -228,7 +228,7 @@ std::vector<pid_type> all_pids(error_code & ec)
     return vec;
 }
 
-std::vector<pid_type> parent_pid(pid_type pid)
+std::vector<pid_type> parent_pid(pid_type pid, error_code & ec)
 {
     std::vector<pid_type> vec;
     kinfo_proc *proc_info = kinfo_getproc(pid);
@@ -270,7 +270,7 @@ std::vector<pid_type> all_pids(error_code & ec)
     return vec;
 }
 
-std::vector<pid_type> parent_pid(pid_type pid)
+std::vector<pid_type> parent_pid(pid_type pid, error_code & ec)
 {
     std::vector<pid_type> vec;
     int cntp = 0;
@@ -325,7 +325,7 @@ std::vector<pid_type> all_pids(error_code & ec)
     return vec;
 }
 
-std::vector<pid_type> parent_pid(pid_type pid) {
+std::vector<pid_type> parent_pid(pid_type pid, error_code & ec) {
     std::vector<pid_type> vec;
     int cntp = 0;
     kinfo_proc2 *proc_info = nullptr;
@@ -376,7 +376,7 @@ std::vector<pid_type> all_pids(error_code & ec)
     return vec;
 }
 
-std::vector<pid_type> parent_pid(pid_type pid) {
+std::vector<pid_type> parent_pid(pid_type pid, error_code & ec) {
     std::vector<pid_type> vec;
     int cntp = 0;
     kinfo_proc *proc_info = nullptr;
@@ -427,7 +427,7 @@ std::vector<pid_type> all_pids(error_code & ec)
     return vec;
 }
 
-std::vector<pid_type> parent_pid(pid_type pid) {
+std::vector<pid_type> parent_pid(pid_type pid, error_code & ec) {
     std::vector<pid_type> vec;
     proc *proc_info = nullptr;
     kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr);
@@ -456,6 +456,15 @@ std::vector<pid_type> all_pids()
     auto res = all_pids(ec);
     if (ec)
         detail::throw_error(ec, "all_pids");
+    return res;
+}
+
+std::vector<pid_type> parent_pid(pid_type pid)
+{
+    error_code ec;
+    auto res = parent_pid(pid, ec);
+    if (ec)
+        detail::throw_error(ec, "parent_pid");
     return res;
 }
 

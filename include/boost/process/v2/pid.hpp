@@ -38,6 +38,12 @@ BOOST_PROCESS_V2_DECL std::vector<pid_type> all_pids(error_code & ec);
 /// List all available pids.
 BOOST_PROCESS_V2_DECL std::vector<pid_type> all_pids();
 
+// return parent pid of pid.
+BOOST_PROCESS_V2_DECL std::vector<pid_type> parent_pid(pid_type pid, error_code & ec);
+
+// return parent pid of pid.
+BOOST_PROCESS_V2_DECL std::vector<pid_type> parent_pid(pid_type pid);
+
 BOOST_PROCESS_V2_END_NAMESPACE
 
 #if defined(BOOST_PROCESS_V2_HEADER_ONLY)
