@@ -17,6 +17,7 @@
 #include <climits>
 
 #if (defined(__APPLE__) && defined(__MACH__))
+#include <sys/proc_info.h>
 #include <libproc.h>
 #endif
 
