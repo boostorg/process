@@ -112,7 +112,7 @@ struct basic_process_handle_signal
     void terminate_if_running()
     {
         if (pid_ <= 0)
-            return ;
+            return;
         if (::waitpid(pid_, nullptr, WNOHANG) == 0)
         {
             ::kill(pid_, SIGKILL);
@@ -123,7 +123,7 @@ struct basic_process_handle_signal
     void wait(native_exit_code_type &exit_status, error_code &ec)
     {
         if (pid_ <= 0)
-            return ;
+            return;
         while (::waitpid(pid_, &exit_status, 0) < 0)
         {
             if (errno != EINTR)
@@ -137,7 +137,7 @@ struct basic_process_handle_signal
     void wait(native_exit_code_type &exit_status)
     {
         if (pid_ <= 0)
-            return ;
+            return;
         error_code ec;
         wait(exit_status, ec);
         if (ec)
@@ -147,7 +147,7 @@ struct basic_process_handle_signal
     void interrupt(error_code &ec)
     {
         if (pid_ <= 0)
-            return ;
+            return;
         if (::kill(pid_, SIGTERM) == -1)
             ec = get_last_error();
     }
@@ -155,7 +155,7 @@ struct basic_process_handle_signal
     void interrupt()
     {
         if (pid_ <= 0)
-            return ;
+            return;
         error_code ec;
         interrupt(ec);
         if (ec)
@@ -165,7 +165,7 @@ struct basic_process_handle_signal
     void request_exit(error_code &ec)
     {
         if (pid_ <= 0)
-            return ;
+            return;
         if (::kill(pid_, SIGTERM) == -1)
             ec = get_last_error();
     }
@@ -173,7 +173,7 @@ struct basic_process_handle_signal
     void request_exit()
     {
         if (pid_ <= 0)
-            return ;
+            return;
         error_code ec;
         request_exit(ec);
         if (ec)
@@ -183,7 +183,7 @@ struct basic_process_handle_signal
     void interrupt(error_code &ec)
     {
         if (pid_ <= 0)
-            return ;
+            return;
         if (::kill(pid_, SIGTERM) == -1)
             ec = get_last_error();
     }
@@ -191,7 +191,7 @@ struct basic_process_handle_signal
     void suspend()
     {
         if (pid_ <= 0)
-            return ;
+            return;
         error_code ec;
         suspend(ec);
         if (ec)
@@ -201,7 +201,7 @@ struct basic_process_handle_signal
     void suspend(error_code &ec)
     {
         if (pid_ <= 0)
-            return ;
+            return;
         if (::kill(pid_, SIGCONT) == -1)
             ec = get_last_error();
     }
@@ -209,7 +209,7 @@ struct basic_process_handle_signal
     void resume()
     {
         if (pid_ <= 0)
-            return ;
+            return;
         error_code ec;
         resume(ec);
         if (ec)
@@ -219,7 +219,7 @@ struct basic_process_handle_signal
     void resume(error_code &ec)
     {
         if (pid_ <= 0)
-            return ;
+            return;
         if (::kill(pid_, SIGTERM) == -1)
             ec = get_last_error();
     }
@@ -227,7 +227,7 @@ struct basic_process_handle_signal
     void terminate(native_exit_code_type &exit_status, error_code &ec)
     {
         if (pid_ <= 0)
-            return ;
+            return;
         if (::kill(pid_, SIGKILL) == -1)
             ec = get_last_error();
     }
@@ -235,7 +235,7 @@ struct basic_process_handle_signal
     void terminate(native_exit_code_type &exit_status)
     {
         if (pid_ <= 0)
-            return ;
+            return;
         error_code ec;
         terminate(exit_status, ec);
         if (ec)
@@ -328,7 +328,7 @@ struct basic_process_handle_signal
             if (!ec && (wait_res == 0))
             {
                 handle.async_wait(std::move(self));
-                return ;
+                return;
             }
 
             struct completer
