@@ -16,4 +16,22 @@ BOOST_AUTO_TEST_CASE(test_pid)
     auto all = bp2::all_pids();
     auto itr = std::find(all.begin(), all.end(), bp2::current_pid());
     BOOST_CHECK(itr != all.end());
+    
+    auto current_parent_pid = parent_pid(bp2::current_pid);
+    BOOST_CHECK(!current_parent_pid.empty());
+
+    std::vector<bp2::pid_type> children, grand_children; 
+    auto grand_child_pids[](bp2::pid_type pid, 
+        std::vector<bp2::pid_type> & children, 
+        std::vector<bp2::pid_type> & grand_children) 
+    {  
+        children.push_back(bp2::child_pids(pid));
+        for (unsigned i = 0; i < children.size(); i++) 
+        {
+            grand_children.push_back(bp2::child_pids(children[i]));
+        }
+        return (!children.empty() && !grand_children.empty());
+    }
+    BOOST_CHECK(grand_child_pids(0));
+
 }
