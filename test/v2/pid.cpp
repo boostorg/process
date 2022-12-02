@@ -7,6 +7,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include <algorithm>
 #include <vector>
 
 BOOST_AUTO_TEST_CASE(test_pid)
@@ -19,7 +20,7 @@ BOOST_AUTO_TEST_CASE(test_pid)
     BOOST_CHECK(itr != all.end());
     
     auto current_parent_pid = bp2::parent_pid(bp2::current_pid());
-    BOOST_CHECK(!current_parent_pid.empty());
+    BOOST_CHECK(current_parent_pid.empty() != 0);
 
     std::vector<bp2::pid_type> children, grand_children; 
     auto grand_child_pids = [](bp2::pid_type pid, 
@@ -29,11 +30,12 @@ BOOST_AUTO_TEST_CASE(test_pid)
         children = bp2::child_pids(pid);
         for (unsigned i = 0; i < children.size(); i++) 
         {
-            std::vector<bp2::pid_type> tmp = bp2::child_pids(children[i])
-            grand_children.insert(std::end(grand_children), std::begin(tmp), std::end(tmp));
+            std::vector<bp2::pid_type> tmp1;
+            std::vector<bp2::pid_type> tmp2 = bp2::child_pids(children[i]);
+            tmp1.insert(std::end(tmp1), std::begin(tmp2), std::end(tmp2));
+            grand_children = tmp1;
         }
         return (!children.empty() && !grand_children.empty());
-    }
-    BOOST_CHECK(grand_child_pids(0));
-
+    };
+    BOOST_CHECK(grand_child_pids(0, children, grand_children) != 0);
 }

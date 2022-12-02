@@ -8,6 +8,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -22,5 +23,5 @@ BOOST_AUTO_TEST_CASE(test_exe)
         pths.push_back((!pth.empty()) ? pth : "<unknown>");
     }
     // Check failed if all executable paths are unknown.
-    BOOST_CHECK_NE(std::count(pths.begin(), pths.end(), "<unknown>"), pths.size());
+    BOOST_CHECK(std::count(pths.begin(), pths.end(), "<unknown>") != pths.size());
 }
