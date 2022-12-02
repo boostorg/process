@@ -15,6 +15,7 @@
 #include <tlhelp32.h>
 #else
 #include <unistd.h>
+#endif
 
 #if (defined(__APPLE__) && defined(__MACH__))
 #include <sys/proc_info.h>
@@ -54,8 +55,6 @@
 #include <sys/param.h>
 #include <sys/time.h>
 #include <sys/proc.h>
-#endif
-
 #endif
 
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
