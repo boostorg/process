@@ -683,5 +683,5 @@ std::vector<pid_type> child_pids(pid_type pid)
 
 BOOST_PROCESS_V2_END_NAMESPACE
 
-#endif //BOOST_PROCESS_V2_IMPL_PID_IPP
+#endif // BOOST_PROCESS_V2_IMPL_PID_IPP
 

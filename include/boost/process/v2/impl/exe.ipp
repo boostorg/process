@@ -319,5 +319,5 @@ filesystem::path exe_path(boost::process::v2::pid_type pid)
 
 BOOST_PROCESS_V2_END_NAMESPACE
 
-#endif //BOOST_PROCESS_V2_IMPL_EXE_IPP
+#endif // BOOST_PROCESS_V2_IMPL_EXE_IPP
 

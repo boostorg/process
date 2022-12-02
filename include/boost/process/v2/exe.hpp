@@ -15,6 +15,7 @@ BOOST_PROCESS_V2_BEGIN_NAMESPACE
 
 namespace ext {
 
+// return executable path from pid
 #ifdef BOOST_PROCESS_USE_STD_FS
 BOOST_PROCESS_V2_DECL std::filesystem::path exe_path(boost::process::v2::pid_type pid, std::error_code & ec);
 BOOST_PROCESS_V2_DECL std::filesystem::path exe_path(boost::process::v2::pid_type pid);

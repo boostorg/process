@@ -56,5 +56,5 @@ BOOST_PROCESS_V2_END_NAMESPACE
 #include <boost/process/v2/impl/pid.ipp>
 #endif
 
+#endif // BOOST_PROCESS_V2_PID_HPP
 
-#endif //BOOST_PROCESS_V2_PID_HPP
