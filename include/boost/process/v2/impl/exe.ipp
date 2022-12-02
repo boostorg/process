@@ -19,6 +19,7 @@
 #include <windows.h>
 #else
 #include <climits>
+#endif
 
 #if (defined(__APPLE__) && defined(__MACH__))
 #include <sys/proc_info.h>
