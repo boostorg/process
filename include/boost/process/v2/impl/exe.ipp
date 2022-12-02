@@ -5,11 +5,11 @@
 #ifndef BOOST_PROCESS_V2_IMPL_EXE_IPP
 #define BOOST_PROCESS_V2_IMPL_EXE_IPP
 
-#include <boost/process/v2/exe.hpp>
 #include <boost/process/v2/detail/config.hpp>
 #include <boost/process/v2/detail/last_error.hpp>
 #include <boost/process/v2/detail/throw_error.hpp>
 #include <boost/process/v2/detail/exe.hpp>
+#include <boost/process/v2/exe.hpp>
 
 #include <string>
 #include <vector>
@@ -41,13 +41,19 @@
 #include <kvm.h>
 #endif
 
+#ifdef BOOST_PROCESS_USE_STD_FS
+namespace filesystem = std::filesystem;
+#else
+namespace filesystem = boost::filesystem;
+#endif
+
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
 
 namespace ext {
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 
-filesystem::path exe_path(pid_type pid, error_code & ec)
+filesystem::path exe_path(boost::process::v2::pid_type pid, std::error_code & ec)
 {
     filesystem::path path;
     if (pid == GetCurrentProcessId()) 
@@ -85,7 +91,7 @@ filesystem::path exe_path(pid_type pid, error_code & ec)
 
 #elif (defined(__APPLE__) && defined(__MACH__))
 
-filesystem::path exe_path(pid_type pid, error_code & ec)
+filesystem::path exe_path(boost::process::v2::pid_type pid, std::error_code & ec)
 {
     std::string path;
     char exe[PROC_PIDPATHINFO_MAXSIZE];
@@ -104,7 +110,7 @@ filesystem::path exe_path(pid_type pid, error_code & ec)
 
 #elif (defined(__linux__) || defined(__ANDROID__))
 
-filesystem::path exe_path(pid_type pid, error_code & ec)
+filesystem::path exe_path(boost::process::v2::pid_type pid, std::error_code & ec)
 {
     std::string path;
     char exe[PATH_MAX];
@@ -119,7 +125,7 @@ filesystem::path exe_path(pid_type pid, error_code & ec)
 
 #elif defined(__FreeBSD__) || defined(__DragonFly__)
 
-filesystem::path exe_path(pid_type pid, error_code & ec) 
+filesystem::path exe_path(boost::process::v2::pid_type pid, std::error_code & ec) 
 {
     std::string path;
     int mib[4]; 
@@ -149,7 +155,7 @@ filesystem::path exe_path(pid_type pid, error_code & ec)
 
 #elif defined(__NetBSD__)
 
-filesystem::path exe_path(pid_type pid, error_code & ec)
+filesystem::path exe_path(boost::process::v2::pid_type pid, std::error_code & ec)
 {
     std::string path;
     int mib[4]; 
@@ -179,10 +185,10 @@ filesystem::path exe_path(pid_type pid, error_code & ec)
 
 #elif defined(__OpenBSD__)
 
-filesystem::path exe_path(pid_type pid, error_code & ec)
+filesystem::path exe_path(boost::process::v2::pid_type pid, std::error_code & ec)
 {
     std::string path;
-    auto is_executable = [](pid_type pid, std::string in, std::string *out, error_code & ec) 
+    auto is_executable = [](boost::process::v2::pid_type pid, std::string in, std::string *out, std::error_code & ec) 
     {
         *out = "";
         bool success = false;
@@ -283,7 +289,7 @@ filesystem::path exe_path(pid_type pid, error_code & ec)
 
 #elif defined(__sun)
 
-filesystem::path exe_path(pid_type pid, error_code & ec)
+filesystem::path exe_path(boost::process::v2::pid_type pid, std::error_code & ec)
 {
     std::string path;
     char exe[PATH_MAX];
@@ -300,9 +306,9 @@ filesystem::path exe_path(pid_type pid, error_code & ec)
 #error "Platform not supported"
 #endif
 
-filesystem::path exe_path(pid_type pid)
+filesystem::path exe_path(boost::process::v2::pid_type pid)
 {
-    error_code ec;
+    std::error_code ec;
     auto res = exe_path(pid, ec);
     if (ec)
         detail::throw_error(ec, "exe_path");
