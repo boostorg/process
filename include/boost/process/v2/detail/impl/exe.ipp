@@ -22,7 +22,7 @@ namespace ext
 
 // with debug_privilege enabled allows reading info from more processes
 // this includes stuff such as exe path, cwd path, cmdline, and environ
-HANDLE open_process_with_debug_privilege(pid_type pid, boost::system::error_code & ec)
+HANDLE open_process_with_debug_privilege(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
     HANDLE proc = nullptr;
     HANDLE hToken = nullptr;
