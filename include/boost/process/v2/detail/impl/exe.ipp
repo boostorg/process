@@ -20,7 +20,10 @@ namespace ext
 
 #if defined(_WIN32)
 
-HANDLE open_process_with_debug_privilege(pid_type pid, error_code & ec) {
+// with debug_privilege enabled allows reading info from more processes
+// this includes stuff such as exe path, cwd path, cmdline, and environ
+HANDLE open_process_with_debug_privilege(pid_type pid, error_code & ec)
+{
     HANDLE proc = nullptr;
     HANDLE hToken = nullptr;
     LUID luid;
@@ -46,6 +49,9 @@ HANDLE open_process_with_debug_privilege(pid_type pid, error_code & ec) {
     return proc;
 }
 
+// cwd, cmdline, and environ can only be read from by
+// the calling process when the platform architecture 
+// with the target process matches both the processes
 BOOL is_x86_process(HANDLE proc, error_code & ec) {
     BOOL isWow = true;
     SYSTEM_INFO systemInfo;
