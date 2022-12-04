@@ -28,12 +28,10 @@ typedef int pid_type;
 #endif
 #endif
 
-#ifndef ROOT_PID
 #if (defined(BOOST_PROCESS_V2_WINDOWS) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__sun))
-#define ROOT_PID 0
+constexpr static pid_type root_pid = 0;
 #elif (defined(__APPLE__) && defined(__MACH__) || defined(__linux__) || defined(__ANDROID__) || defined(__OpenBSD__))
-#define ROOT_PID 1
-#endif
+constexpr static pid_type root_pid = 1;
 #endif
 
 /// Get the process id of the current process.
