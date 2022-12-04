@@ -16,11 +16,11 @@ namespace ext {
 
 // return executable path from pid
 #ifdef BOOST_PROCESS_USE_STD_FS
-BOOST_PROCESS_V2_DECL std::filesystem::path exe_path(boost::process::v2::pid_type pid, boost::system::error_code & ec);
-BOOST_PROCESS_V2_DECL std::filesystem::path exe_path(boost::process::v2::pid_type pid);
+BOOST_PROCESS_V2_DECL std::filesystem::path executable(boost::process::v2::pid_type pid, boost::system::error_code & ec);
+BOOST_PROCESS_V2_DECL std::filesystem::path executable(boost::process::v2::pid_type pid);
 #else
-BOOST_PROCESS_V2_DECL boost::filesystem::path exe_path(boost::process::v2::pid_type pid, boost::system::error_code & ec);
-BOOST_PROCESS_V2_DECL boost::filesystem::path exe_path(boost::process::v2::pid_type pid);
+BOOST_PROCESS_V2_DECL boost::filesystem::path executable(boost::process::v2::pid_type pid, boost::system::error_code & ec);
+BOOST_PROCESS_V2_DECL boost::filesystem::path executable(boost::process::v2::pid_type pid);
 #endif
 
 } // namespace ext

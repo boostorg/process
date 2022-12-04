@@ -15,7 +15,7 @@
 BOOST_AUTO_TEST_CASE(test_exe)
 {
     namespace bp2 = boost::process::v2;
-    auto pth = bp2::ext::exe_path(bp2::current_pid()).string();
+    auto pth = bp2::ext::executable(bp2::current_pid()).string();
     BOOST_CHECK_NE(pth.empty(), true);
 }
 
