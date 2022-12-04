@@ -113,13 +113,17 @@ filesystem::path executable(boost::process::v2::pid_type pid, boost::system::err
     return "";
 }
 
-#elif (defined(__linux__) || defined(__ANDROID__))
+#elif (defined(__linux__) || defined(__ANDROID__) || defined(__sun))
 
 filesystem::path executable(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
     std::string path;
     char exe[PATH_MAX];
-    if (realpath(("/proc/" + std::to_string(pid) + "/exe").c_str(), exe)) 
+#if (defined(__linux__) || defined(__ANDROID__))
+    if (realpath(("/proc/" + std::to_string(pid) + "/exe").c_str(), exe))
+#elif defined(__sun)
+    if (realpath(("/proc/" + std::to_string(pid) + "/path/a.out").c_str(), exe))
+#endif
     {
         path = exe;
     }
@@ -133,11 +137,11 @@ filesystem::path executable(boost::process::v2::pid_type pid, boost::system::err
 filesystem::path executable(boost::process::v2::pid_type pid, boost::system::error_code & ec) 
 {
     std::string path;
-    #if (defined(__FreeBSD__) || defined(__DragonFly__))
+#if (defined(__FreeBSD__) || defined(__DragonFly__))
     int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, pid};
-    #elif defined(__NetBSD__)
+#elif defined(__NetBSD__)
     int mib[4] = {CTL_KERN, KERN_PROC_ARGS, pid, KERN_PROC_PATHNAME};
-    #endif
+#endif
     std::size_t len = 0;
     if (sysctl(mib, 4, nullptr, &len, nullptr, 0) == 0) 
     {
@@ -261,21 +265,6 @@ err:
         }
     }
     if (path.empty())
-        ec = detail::get_last_error();
-    return path;
-}
-
-#elif defined(__sun)
-
-filesystem::path executable(boost::process::v2::pid_type pid, boost::system::error_code & ec)
-{
-    std::string path;
-    char exe[PATH_MAX];
-    if (realpath(("/proc/" + std::to_string(pid) + "/path/a.out").c_str(), exe)) 
-    {
-        path = exe;
-    }
-    else
         ec = detail::get_last_error();
     return path;
 }
