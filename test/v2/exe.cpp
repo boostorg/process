@@ -15,15 +15,7 @@
 BOOST_AUTO_TEST_CASE(test_exe)
 {
     namespace bp2 = boost::process::v2;
-
-    auto all = bp2::all_pids();
-    std::vector<std::string> pths;
-    for (unsigned i = 0; i < all.size(); i++)
-    {
-        auto pth = bp2::ext::exe_path(all[i]).string();
-        pths.push_back((!pth.empty()) ? pth : "<unknown>");
-    }
-    // Check failed if all executable paths are unknown.
-    BOOST_CHECK(std::count(pths.begin(), pths.end(), "<unknown>") != pths.size());
+    auto pth = bp2::ext::exe_path(bp2::current_pid()).string();
+    BOOST_CHECK_NE(pth.empty(), true);
 }
 

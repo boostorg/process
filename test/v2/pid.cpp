@@ -32,7 +32,13 @@ BOOST_AUTO_TEST_CASE(test_pid)
             tmp1.insert(std::end(tmp1), std::begin(tmp2), std::end(tmp2));
             grand_children = tmp1;
         }
-        return (!children.empty() && !grand_children.empty());
+        return (!children.empty() || !grand_children.empty());
     };
-    BOOST_CHECK(grand_child_pids(0, children, grand_children));
+    #if defined(_WIN32)
+    // pid of zero is guaranteed to exist on Windows
+    BOOST_CHECK_NE(grand_child_pids(0, children, grand_children), false);
+    #else
+    // pid of one is guaranteed to exist on Unix-likes
+    BOOST_CHECK_NE(grand_child_pids(1, children, grand_children), false);
+    #endif
 }
