@@ -89,14 +89,14 @@ std::vector<pid_type> all_pids(boost::system::error_code & ec)
     return vec;
 }
 
-std::vector<pid_type> parent_pid(pid_type pid, boost::system::error_code & ec)
+pid_type parent_pid(pid_type pid, boost::system::error_code & ec)
 {
-    std::vector<pid_type> vec;
+    pid_type ppid = static_cast<pid_type>(-1);
     HANDLE hp = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (!hp)
     {
         ec = detail::get_last_error();
-        return vec;
+        return ppid;
     }
     PROCESSENTRY32 pe;
     pe.dwSize = sizeof(PROCESSENTRY32);
@@ -106,14 +106,14 @@ std::vector<pid_type> parent_pid(pid_type pid, boost::system::error_code & ec)
         {
             if (pe.th32ProcessID == pid)
             {
-                vec.push_back(pe.th32ParentProcessID);
+                ppid = pe.th32ParentProcessID;
                 break;
             }
         }
         while (Process32Next(hp, &pe));
     }
     CloseHandle(hp);
-    return vec;
+    return ppid;
 }
 
 std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec)
@@ -159,19 +159,17 @@ std::vector<pid_type> all_pids(boost::system::error_code & ec)
     return vec;
 }
 
-std::vector<pid_type> parent_pid(pid_type pid, boost::system::error_code & ec) {
-    std::vector<pid_type> vec;
+pid_type parent_pid(pid_type pid, boost::system::error_code & ec) {
+    pid_type ppid = static_cast<pid_type>(-1);
     proc_bsdinfo proc_info;
     if (proc_pidinfo(pid, PROC_PIDTBSDINFO, 0, &proc_info, sizeof(proc_info)) <= 0)
     {
         ec = detail::get_last_error();
-        return {};
+        return ppid;
     }
     else
-    {
-        vec.push_back(proc_info.pbi_ppid);
-    }
-    return vec;
+        ppid = proc_info.pbi_ppid;
+    return ppid;
 }
 
 std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec) {
@@ -185,14 +183,6 @@ std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec) {
     auto itr = std::partition(vec.begin(), vec.end(), [](pid_type pt) {return pt != 0;});
     vec.erase(itr, vec.end());
     std::reverse(vec.begin(), vec.end());
-    for (unsigned i = 0; i < vec.size(); i++)
-    {
-        if (proc_info[i] == 1 && pid == 0)
-        {
-            vec.insert(vec.begin(), 0);
-            break;
-        }
-    }
     return vec;
 }
 
@@ -218,15 +208,15 @@ std::vector<pid_type> all_pids(boost::system::error_code & ec)
     return vec;
 }
 
-std::vector<pid_type> parent_pid(pid_type pid, boost::system::error_code & ec) {
-    std::vector<pid_type> vec;
+pid_type parent_pid(pid_type pid, boost::system::error_code & ec) {
+    pid_type ppid = static_cast<pid_type>(-1);
     char buffer[BUFSIZ];
     sprintf(buffer, "/proc/%d/stat", pid);
     FILE *stat = fopen(buffer, "r");
     if (!stat)
     {
         ec = detail::get_last_error();
-        return vec;
+        return ppid;
     } 
     else
     {
@@ -238,8 +228,7 @@ std::vector<pid_type> parent_pid(pid_type pid, boost::system::error_code & ec) {
                 if ((token = strtok(nullptr, " "))) {
                     if ((token = strtok(nullptr, " "))) {
                         if ((token = strtok(nullptr, " "))) {
-                            pid_type ppid = (pid_type)strtoul(token, nullptr, 10);
-                            vec.push_back(ppid);
+                            ppid = (pid_type)strtoul(token, nullptr, 10);
                         }
                     }
                 }
@@ -248,12 +237,12 @@ std::vector<pid_type> parent_pid(pid_type pid, boost::system::error_code & ec) {
             {
                 fclose(stat);
                 ec = detail::get_last_error();
-                return vec;
+                return ppid;
             }
         }
         fclose(stat);
     }
-    return vec;
+    return ppid;
 }
 
 std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec) {
@@ -288,18 +277,18 @@ std::vector<pid_type> all_pids(boost::system::error_code & ec)
     return vec;
 }
 
-std::vector<pid_type> parent_pid(pid_type pid, boost::system::error_code & ec)
+pid_type parent_pid(pid_type pid, boost::system::error_code & ec)
 {
-    std::vector<pid_type> vec;
+    pid_type ppid = static_cast<pid_type>(-1);
     kinfo_proc *proc_info = kinfo_getproc(pid);
     if (proc_info)
     {
-        vec.push_back(proc_info->ki_ppid);
+        ppid = proc_info->ki_ppid;
         free(proc_info);
     }
     else
         ec = detail::get_last_error();
-    return vec;
+    return ppid;
 }
 
 std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec) {
@@ -350,9 +339,9 @@ std::vector<pid_type> all_pids(boost::system::error_code & ec)
     return vec;
 }
 
-std::vector<pid_type> parent_pid(pid_type pid, boost::system::error_code & ec)
+pid_type parent_pid(pid_type pid, boost::system::error_code & ec)
 {
-    std::vector<pid_type> vec;
+    pid_type ppid = static_cast<pid_type>(-1);
     int cntp = 0;
     kinfo_proc *proc_info = nullptr;
     const char *nlistf, *memf;
@@ -361,19 +350,19 @@ std::vector<pid_type> parent_pid(pid_type pid, boost::system::error_code & ec)
     if (!kd) 
     {
         ec = detail::get_last_error();
-        return vec;
+        return ppid;
     }
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_PID, pid, &cntp)))
     {
         if (proc_info->kp_ppid >= 0)
         {
-            vec.push_back(proc_info->kp_ppid);
+            ppid = proc_info->kp_ppid;
         }
     }
     else
         ec = detail::get_last_error();
     kvm_close(kd);
-    return vec;
+    return ppid;
 }
 
 std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec) {
@@ -430,24 +419,24 @@ std::vector<pid_type> all_pids(boost::system::error_code & ec)
     return vec;
 }
 
-std::vector<pid_type> parent_pid(pid_type pid, boost::system::error_code & ec) {
-    std::vector<pid_type> vec;
+pid_type parent_pid(pid_type pid, boost::system::error_code & ec) {
+    pid_type ppid = static_cast<pid_type>(-1);
     int cntp = 0;
     kinfo_proc2 *proc_info = nullptr;
     kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
     if (!kd) 
     {
         ec = detail::get_last_error();
-        return vec;
+        return ppid;
     }
     if ((proc_info = kvm_getproc2(kd, KERN_PROC_PID, pid, sizeof(struct kinfo_proc2), &cntp)))
     {
-        vec.push_back(proc_info->p_ppid);
+        ppid = proc_info->p_ppid;
     }
     else
         ec = detail::get_last_error();
     kvm_close(kd);
-    return vec;
+    return ppid;
 }
 
 std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec) {
@@ -506,24 +495,24 @@ std::vector<pid_type> all_pids(boost::system::error_code & ec)
     return vec;
 }
 
-std::vector<pid_type> parent_pid(pid_type pid, boost::system::error_code & ec) {
-    std::vector<pid_type> vec;
+pid_type parent_pid(pid_type pid, boost::system::error_code & ec) {
+    pid_type ppid = static_cast<pid_type>(-1);
     int cntp = 0;
     kinfo_proc *proc_info = nullptr;
     kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
     if (!kd)
     {
         ec = detail::get_last_error();
-        return vec;
+        return ppid;
     }
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_PID, pid, sizeof(struct kinfo_proc), &cntp)))
     {
-        vec.push_back(proc_info->p_ppid);
+        ppid = proc_info->p_ppid;
     }
     else
         ec = detail::get_last_error();
     kvm_close(kd);
-    return vec;
+    return ppid;
 }
 
 std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec) {
@@ -582,23 +571,23 @@ std::vector<pid_type> all_pids(boost::system::error_code & ec)
     return vec;
 }
 
-std::vector<pid_type> parent_pid(pid_type pid, boost::system::error_code & ec) {
-    std::vector<pid_type> vec;
+pid_type parent_pid(pid_type pid, boost::system::error_code & ec) {
+    pid_type ppid = static_cast<pid_type>(-1);
     proc *proc_info = nullptr;
     kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr);
     if (!kd)
     {
         ec = detail::get_last_error();
-        return vec;
+        return ppid;
     }
     if ((proc_info = kvm_getproc(kd, pid)))
     {
-        vec.push_back(proc_info->p_ppid);
+        ppid = proc_info->p_ppid;
     }
     else
         ec = detail::get_last_error();
     kvm_close(kd);
-    return vec;
+    return ppid;
 }
 
 std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec)
