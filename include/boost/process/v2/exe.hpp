@@ -6,10 +6,9 @@
 #define BOOST_PROCESS_V2_EXE_HPP
 
 #include <boost/process/v2/detail/config.hpp>
+#include <boost/process/v2/detail/throw_error.hpp>
 
 #include <boost/process/v2/pid.hpp>
-
-#include <system_error>
 
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
 
@@ -17,10 +16,10 @@ namespace ext {
 
 // return executable path from pid
 #ifdef BOOST_PROCESS_USE_STD_FS
-BOOST_PROCESS_V2_DECL std::filesystem::path exe_path(boost::process::v2::pid_type pid, std::error_code & ec);
+BOOST_PROCESS_V2_DECL std::filesystem::path exe_path(boost::process::v2::pid_type pid, boost::system::error_code & ec);
 BOOST_PROCESS_V2_DECL std::filesystem::path exe_path(boost::process::v2::pid_type pid);
 #else
-BOOST_PROCESS_V2_DECL boost::filesystem::path exe_path(boost::process::v2::pid_type pid, std::error_code & ec);
+BOOST_PROCESS_V2_DECL boost::filesystem::path exe_path(boost::process::v2::pid_type pid, boost::system::error_code & ec);
 BOOST_PROCESS_V2_DECL boost::filesystem::path exe_path(boost::process::v2::pid_type pid);
 #endif
 
