@@ -34,11 +34,5 @@ BOOST_AUTO_TEST_CASE(test_pid)
         }
         return (!children.empty() || !grand_children.empty());
     };
-    #if defined(_WIN32)
-    // pid of zero is guaranteed to exist on Windows
-    BOOST_CHECK_NE(grand_child_pids(0, children, grand_children), false);
-    #else
-    // pid of one is guaranteed to exist on Unix-likes
-    BOOST_CHECK_NE(grand_child_pids(1, children, grand_children), false);
-    #endif
+    BOOST_CHECK_NE(grand_child_pids(ROOT_PID, children, grand_children), false);
 }
