@@ -124,9 +124,7 @@ filesystem::path executable(boost::process::v2::pid_type pid, boost::system::err
 #elif defined(__sun)
     if (realpath(("/proc/" + std::to_string(pid) + "/path/a.out").c_str(), exe))
 #endif
-    {
         path = exe;
-    }
     else
         ec = detail::get_last_error();
     return path;
