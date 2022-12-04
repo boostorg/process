@@ -33,19 +33,19 @@ typedef int pid_type;
 BOOST_PROCESS_V2_DECL pid_type current_pid();
 
 /// List all available pids.
-BOOST_PROCESS_V2_DECL std::vector<pid_type> all_pids(std::error_code & ec);
+BOOST_PROCESS_V2_DECL std::vector<pid_type> all_pids(boost::system::error_code & ec);
 
 /// List all available pids.
 BOOST_PROCESS_V2_DECL std::vector<pid_type> all_pids();
 
 // return parent pid of pid.
-BOOST_PROCESS_V2_DECL std::vector<pid_type> parent_pid(pid_type pid, std::error_code & ec);
+BOOST_PROCESS_V2_DECL std::vector<pid_type> parent_pid(pid_type pid, boost::system::error_code & ec);
 
 // return parent pid of pid.
 BOOST_PROCESS_V2_DECL std::vector<pid_type> parent_pid(pid_type pid);
 
 // return child pids of pid.
-BOOST_PROCESS_V2_DECL std::vector<pid_type> child_pids(pid_type pid, std::error_code & ec);
+BOOST_PROCESS_V2_DECL std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec);
 
 // return child pids of pid.
 BOOST_PROCESS_V2_DECL std::vector<pid_type> child_pids(pid_type pid);

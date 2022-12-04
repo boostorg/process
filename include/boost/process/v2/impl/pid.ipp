@@ -67,7 +67,7 @@ pid_type current_pid() {return ::getpid();}
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 
-std::vector<pid_type> all_pids(std::error_code & ec)
+std::vector<pid_type> all_pids(boost::system::error_code & ec)
 {
     std::vector<pid_type> vec;
     HANDLE hp = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
@@ -89,7 +89,7 @@ std::vector<pid_type> all_pids(std::error_code & ec)
     return vec;
 }
 
-std::vector<pid_type> parent_pid(pid_type pid, std::error_code & ec)
+std::vector<pid_type> parent_pid(pid_type pid, boost::system::error_code & ec)
 {
     std::vector<pid_type> vec;
     HANDLE hp = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
@@ -116,7 +116,7 @@ std::vector<pid_type> parent_pid(pid_type pid, std::error_code & ec)
     return vec;
 }
 
-std::vector<pid_type> child_pids(pid_type pid, std::error_code & ec)
+std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec)
 {
     std::vector<pid_type> vec;
     HANDLE hp = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
@@ -144,7 +144,7 @@ std::vector<pid_type> child_pids(pid_type pid, std::error_code & ec)
 
 #elif (defined(__APPLE__) && defined(__MACH__))
 
-std::vector<pid_type> all_pids(std::error_code & ec)
+std::vector<pid_type> all_pids(boost::system::error_code & ec)
 {
     std::vector<pid_type> vec;
     vec.resize(proc_listpids(PROC_ALL_PIDS, 0, nullptr, 0));
@@ -159,7 +159,7 @@ std::vector<pid_type> all_pids(std::error_code & ec)
     return vec;
 }
 
-std::vector<pid_type> parent_pid(pid_type pid, std::error_code & ec) {
+std::vector<pid_type> parent_pid(pid_type pid, boost::system::error_code & ec) {
     std::vector<pid_type> vec;
     proc_bsdinfo proc_info;
     if (proc_pidinfo(pid, PROC_PIDTBSDINFO, 0, &proc_info, sizeof(proc_info)) <= 0)
@@ -174,7 +174,7 @@ std::vector<pid_type> parent_pid(pid_type pid, std::error_code & ec) {
     return vec;
 }
 
-std::vector<pid_type> child_pids(pid_type pid, std::error_code & ec) {
+std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec) {
     std::vector<pid_type> vec;
     vec.resize(proc_listpids(PROC_PPID_ONLY, (uint32_t)pid, nullptr, 0));
     if (proc_listpids(PROC_PPID_ONLY, (uint32_t)pid, &proc_info[0], sizeof(pid_type) * cntp))
@@ -198,7 +198,7 @@ std::vector<pid_type> child_pids(pid_type pid, std::error_code & ec) {
 
 #elif (defined(__linux__) || defined(__ANDROID__))
 
-std::vector<pid_type> all_pids(std::error_code & ec)
+std::vector<pid_type> all_pids(boost::system::error_code & ec)
 {
     std::vector<pid_type> vec;
     DIR *proc = opendir("/proc");
@@ -218,7 +218,7 @@ std::vector<pid_type> all_pids(std::error_code & ec)
     return vec;
 }
 
-std::vector<pid_type> parent_pid(pid_type pid, std::error_code & ec) {
+std::vector<pid_type> parent_pid(pid_type pid, boost::system::error_code & ec) {
     std::vector<pid_type> vec;
     char buffer[BUFSIZ];
     sprintf(buffer, "/proc/%d/stat", pid);
@@ -255,7 +255,7 @@ std::vector<pid_type> parent_pid(pid_type pid, std::error_code & ec) {
     return vec;
 }
 
-std::vector<pid_type> child_pids(pid_type pid, std::error_code & ec) {
+std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec) {
     std::vector<pid_type> vec;
     std::vector<pid_type> pids = all_pids(ec);
     for (std::size_t i = 0; i < pids.size(); i++)
@@ -271,7 +271,7 @@ std::vector<pid_type> child_pids(pid_type pid, std::error_code & ec) {
 
 #elif defined(__FreeBSD__)
 
-std::vector<pid_type> all_pids(std::error_code & ec)
+std::vector<pid_type> all_pids(boost::system::error_code & ec)
 {
     std::vector<pid_type> vec;
     int cntp = 0;
@@ -287,7 +287,7 @@ std::vector<pid_type> all_pids(std::error_code & ec)
     return vec;
 }
 
-std::vector<pid_type> parent_pid(pid_type pid, std::error_code & ec)
+std::vector<pid_type> parent_pid(pid_type pid, boost::system::error_code & ec)
 {
     std::vector<pid_type> vec;
     kinfo_proc *proc_info = kinfo_getproc(pid);
@@ -301,7 +301,7 @@ std::vector<pid_type> parent_pid(pid_type pid, std::error_code & ec)
     return vec;
 }
 
-std::vector<pid_type> child_pids(pid_type pid, std::error_code & ec) {
+std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec) {
     std::vector<pid_type> vec;
     int cntp = 0; 
     kinfo_proc *proc_info = kinfo_getallproc(&cntp);
@@ -323,7 +323,7 @@ std::vector<pid_type> child_pids(pid_type pid, std::error_code & ec) {
 
 #elif defined(__DragonFly__)
 
-std::vector<pid_type> all_pids(std::error_code & ec)
+std::vector<pid_type> all_pids(boost::system::error_code & ec)
 {
     std::vector<pid_type> vec;
     int cntp = 0;
@@ -349,7 +349,7 @@ std::vector<pid_type> all_pids(std::error_code & ec)
     return vec;
 }
 
-std::vector<pid_type> parent_pid(pid_type pid, std::error_code & ec)
+std::vector<pid_type> parent_pid(pid_type pid, boost::system::error_code & ec)
 {
     std::vector<pid_type> vec;
     int cntp = 0;
@@ -375,7 +375,7 @@ std::vector<pid_type> parent_pid(pid_type pid, std::error_code & ec)
     return vec;
 }
 
-std::vector<pid_type> child_pids(pid_type pid, std::error_code & ec) {
+std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec) {
     std::vector<pid_type> vec;
     int cntp = 0;
     kinfo_proc *proc_info = nullptr;
@@ -404,7 +404,7 @@ std::vector<pid_type> child_pids(pid_type pid, std::error_code & ec) {
 
 #elif defined(__NetBSD__)
 
-std::vector<pid_type> all_pids(std::error_code & ec)
+std::vector<pid_type> all_pids(boost::system::error_code & ec)
 {
     std::vector<pid_type> vec;
     int cntp = 0;
@@ -429,7 +429,7 @@ std::vector<pid_type> all_pids(std::error_code & ec)
     return vec;
 }
 
-std::vector<pid_type> parent_pid(pid_type pid, std::error_code & ec) {
+std::vector<pid_type> parent_pid(pid_type pid, boost::system::error_code & ec) {
     std::vector<pid_type> vec;
     int cntp = 0;
     kinfo_proc2 *proc_info = nullptr;
@@ -449,7 +449,7 @@ std::vector<pid_type> parent_pid(pid_type pid, std::error_code & ec) {
     return vec;
 }
 
-std::vector<pid_type> child_pids(pid_type pid, std::error_code & ec) {
+std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec) {
     std::vector<pid_type> vec;
     int cntp = 0;
     kinfo_proc2 *proc_info = nullptr;
@@ -477,7 +477,7 @@ std::vector<pid_type> child_pids(pid_type pid, std::error_code & ec) {
 
 #elif defined(__OpenBSD__)
 
-std::vector<pid_type> all_pids(std::error_code & ec)
+std::vector<pid_type> all_pids(boost::system::error_code & ec)
 {
     std::vector<pid_type> vec;
     int cntp = 0;
@@ -505,7 +505,7 @@ std::vector<pid_type> all_pids(std::error_code & ec)
     return vec;
 }
 
-std::vector<pid_type> parent_pid(pid_type pid, std::error_code & ec) {
+std::vector<pid_type> parent_pid(pid_type pid, boost::system::error_code & ec) {
     std::vector<pid_type> vec;
     int cntp = 0;
     kinfo_proc *proc_info = nullptr;
@@ -525,7 +525,7 @@ std::vector<pid_type> parent_pid(pid_type pid, std::error_code & ec) {
     return vec;
 }
 
-std::vector<pid_type> child_pids(pid_type pid, std::error_code & ec) {
+std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec) {
     std::vector<pid_type> vec;
     int cntp = 0;
     kinfo_proc *proc_info = nullptr;
@@ -554,7 +554,7 @@ std::vector<pid_type> child_pids(pid_type pid, std::error_code & ec) {
 
 #elif defined(__sun)
 
-std::vector<pid_type> all_pids(std::error_code & ec)
+std::vector<pid_type> all_pids(boost::system::error_code & ec)
 {
     std::vector<pid_type> vec;
     struct pid cur_pid;
@@ -581,7 +581,7 @@ std::vector<pid_type> all_pids(std::error_code & ec)
     return vec;
 }
 
-std::vector<pid_type> parent_pid(pid_type pid, std::error_code & ec) {
+std::vector<pid_type> parent_pid(pid_type pid, boost::system::error_code & ec) {
     std::vector<pid_type> vec;
     proc *proc_info = nullptr;
     kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr);
@@ -600,7 +600,7 @@ std::vector<pid_type> parent_pid(pid_type pid, std::error_code & ec) {
     return vec;
 }
 
-std::vector<pid_type> child_pids(pid_type pid, std::error_code & ec)
+std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec)
 {
     std::vector<pid_type> vec;
     struct pid cur_pid;
@@ -636,7 +636,7 @@ std::vector<pid_type> child_pids(pid_type pid, std::error_code & ec)
 
 std::vector<pid_type> all_pids()
 {
-    std::error_code ec;
+    boost::system::error_code ec;
     auto res = all_pids(ec);
     if (ec)
         detail::throw_error(ec, "all_pids");
@@ -645,7 +645,7 @@ std::vector<pid_type> all_pids()
 
 std::vector<pid_type> parent_pid(pid_type pid)
 {
-    std::error_code ec;
+    boost::system::error_code ec;
     auto res = parent_pid(pid, ec);
     if (ec)
         detail::throw_error(ec, "parent_pid");
@@ -654,7 +654,7 @@ std::vector<pid_type> parent_pid(pid_type pid)
 
 std::vector<pid_type> child_pids(pid_type pid)
 {
-    std::error_code ec;
+    boost::system::error_code ec;
     auto res = child_pids(pid, ec);
     if (ec)
         detail::throw_error(ec, "child_pids");
