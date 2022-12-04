@@ -54,7 +54,7 @@ namespace ext {
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 
-filesystem::path exe_path(boost::process::v2::pid_type pid, boost::system::error_code & ec)
+filesystem::path executable(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
     filesystem::path path;
     if (pid == GetCurrentProcessId()) 
@@ -92,7 +92,7 @@ filesystem::path exe_path(boost::process::v2::pid_type pid, boost::system::error
 
 #elif (defined(__APPLE__) && defined(__MACH__))
 
-filesystem::path exe_path(boost::process::v2::pid_type pid, boost::system::error_code & ec)
+filesystem::path executable(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
     std::string path;
     char exe[PROC_PIDPATHINFO_MAXSIZE];
@@ -111,7 +111,7 @@ filesystem::path exe_path(boost::process::v2::pid_type pid, boost::system::error
 
 #elif (defined(__linux__) || defined(__ANDROID__))
 
-filesystem::path exe_path(boost::process::v2::pid_type pid, boost::system::error_code & ec)
+filesystem::path executable(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
     std::string path;
     char exe[PATH_MAX];
@@ -126,7 +126,7 @@ filesystem::path exe_path(boost::process::v2::pid_type pid, boost::system::error
 
 #elif defined(__FreeBSD__) || defined(__DragonFly__)
 
-filesystem::path exe_path(boost::process::v2::pid_type pid, boost::system::error_code & ec) 
+filesystem::path executable(boost::process::v2::pid_type pid, boost::system::error_code & ec) 
 {
     std::string path;
     int mib[4]; 
@@ -156,7 +156,7 @@ filesystem::path exe_path(boost::process::v2::pid_type pid, boost::system::error
 
 #elif defined(__NetBSD__)
 
-filesystem::path exe_path(boost::process::v2::pid_type pid, boost::system::error_code & ec)
+filesystem::path executable(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
     std::string path;
     int mib[4]; 
@@ -186,7 +186,7 @@ filesystem::path exe_path(boost::process::v2::pid_type pid, boost::system::error
 
 #elif defined(__OpenBSD__)
 
-filesystem::path exe_path(boost::process::v2::pid_type pid, boost::system::error_code & ec)
+filesystem::path executable(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
     std::string path;
     auto is_executable = [](boost::process::v2::pid_type pid, std::string in, std::string *out, boost::system::error_code & ec) 
@@ -290,7 +290,7 @@ filesystem::path exe_path(boost::process::v2::pid_type pid, boost::system::error
 
 #elif defined(__sun)
 
-filesystem::path exe_path(boost::process::v2::pid_type pid, boost::system::error_code & ec)
+filesystem::path executable(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
     std::string path;
     char exe[PATH_MAX];
@@ -307,12 +307,12 @@ filesystem::path exe_path(boost::process::v2::pid_type pid, boost::system::error
 #error "Platform not supported"
 #endif
 
-filesystem::path exe_path(boost::process::v2::pid_type pid)
+filesystem::path executable(boost::process::v2::pid_type pid)
 {
     boost::system::error_code ec;
-    auto res = exe_path(pid, ec);
+    auto res = executable(pid, ec);
     if (ec)
-        detail::throw_error(ec, "exe_path");
+        detail::throw_error(ec, "executable");
     return res;
 }
 
