@@ -49,6 +49,7 @@ HANDLE open_process_with_debug_privilege(boost::process::v2::pid_type pid, boost
     return proc;
 }
 
+// NOTE: Windows-only limitation described right here
 // cwd, cmdline, and environ can only be read from by
 // the calling process when the platform architecture 
 // with the target process matches both the processes
