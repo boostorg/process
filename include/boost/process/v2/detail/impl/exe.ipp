@@ -18,7 +18,7 @@ namespace detail
 namespace ext
 {
 
-#if defined(_WIN32)
+#if defined(BOOST_PROCESS_V2_WINDOWS)
 
 // with debug_privilege enabled allows reading info from more processes
 // this includes stuff such as exe path, cwd path, cmdline, and environ
