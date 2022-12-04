@@ -124,12 +124,16 @@ filesystem::path executable(boost::process::v2::pid_type pid, boost::system::err
     return path;
 }
 
-#elif defined(__FreeBSD__) || defined(__DragonFly__)
+#elif (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__))
 
 filesystem::path executable(boost::process::v2::pid_type pid, boost::system::error_code & ec) 
 {
     std::string path;
+    #if (defined(__FreeBSD__) || defined(__DragonFly__))
     int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, pid};
+    #elif defined(__NetBSD__)
+    int mib[4] = {CTL_KERN, KERN_PROC_ARGS, pid, KERN_PROC_PATHNAME};
+    #endif
     std::size_t len;
     if (sysctl(mib, 4, nullptr, &len, nullptr, 0) == 0) 
     {
@@ -140,32 +144,6 @@ filesystem::path executable(boost::process::v2::pid_type pid, boost::system::err
         {
             char buffer[PATH_MAX];
             if (realpath(exe, buffer)) 
-            {
-                path = buffer;
-            }
-        }
-    }
-    if (path.empty())
-        ec = detail::get_last_error();
-    return path;
-}
-
-#elif defined(__NetBSD__)
-
-filesystem::path executable(boost::process::v2::pid_type pid, boost::system::error_code & ec)
-{
-    std::string path;
-    int mib[4] = {CTL_KERN, KERN_PROC_ARGS, pid, KERN_PROC_PATHNAME};
-    std::size_t len;
-    if (sysctl(mib, 4, nullptr, &len, nullptr, 0) == 0)
-    {
-        std::string strbuff;
-        strbuff.resize(len, '\0');
-        char *exe = strbuff.data();
-        if (sysctl(mib, 4, exe, &len, nullptr, 0) == 0)
-        {
-            char buffer[PATH_MAX];
-            if (realpath(exe, buffer))
             {
                 path = buffer;
             }
