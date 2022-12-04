@@ -129,12 +129,8 @@ filesystem::path executable(boost::process::v2::pid_type pid, boost::system::err
 filesystem::path executable(boost::process::v2::pid_type pid, boost::system::error_code & ec) 
 {
     std::string path;
-    int mib[4]; 
+    int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, pid};
     std::size_t len;
-    mib[0] = CTL_KERN;
-    mib[1] = KERN_PROC;
-    mib[2] = KERN_PROC_PATHNAME;
-    mib[3] = pid;
     if (sysctl(mib, 4, nullptr, &len, nullptr, 0) == 0) 
     {
         std::string strbuff;
@@ -159,12 +155,8 @@ filesystem::path executable(boost::process::v2::pid_type pid, boost::system::err
 filesystem::path executable(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
     std::string path;
-    int mib[4]; 
+    int mib[4] = {CTL_KERN, KERN_PROC_ARGS, pid, KERN_PROC_PATHNAME};
     std::size_t len;
-    mib[0] = CTL_KERN;
-    mib[1] = KERN_PROC_ARGS;
-    mib[2] = pid;
-    mib[3] = KERN_PROC_PATHNAME;
     if (sysctl(mib, 4, nullptr, &len, nullptr, 0) == 0)
     {
         std::string strbuff;
