@@ -15,7 +15,6 @@ BOOST_PROCESS_V2_BEGIN_NAMESPACE
 //An integral type representing a process id.
 typedef implementation_defined pid_type;
 
-
 #else
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
@@ -26,6 +25,14 @@ typedef unsigned long pid_type;
 
 typedef int pid_type;
 
+#endif
+#endif
+
+#ifndef ROOT_PID
+#if (defined(BOOST_PROCESS_V2_WINDOWS) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__sun))
+#define ROOT_PID 0
+#elif (defined(__APPLE__) && defined(__MACH__) || defined(__linux__) || defined(__ANDROID__) || defined(__OpenBSD__))
+#define ROOT_PID 1
 #endif
 #endif
 
