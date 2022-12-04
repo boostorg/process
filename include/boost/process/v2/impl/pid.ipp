@@ -246,6 +246,7 @@ std::vector<pid_type> parent_pid(pid_type pid, boost::system::error_code & ec) {
             }
             if (!token)
             {
+                fclose(stat);
                 ec = detail::get_last_error();
                 return vec;
             }
