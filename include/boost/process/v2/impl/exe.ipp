@@ -119,7 +119,7 @@ filesystem::path executable(boost::process::v2::pid_type pid, boost::system::err
     {
         path = exe;
     }
-    if (path.empty())
+    else
         ec = detail::get_last_error();
     return path;
 }
@@ -298,7 +298,7 @@ filesystem::path executable(boost::process::v2::pid_type pid, boost::system::err
     {
         path = exe;
     }
-    if (path.empty())
+    else
         ec = detail::get_last_error();
     return path;
 }
