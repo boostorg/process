@@ -44,10 +44,10 @@ BOOST_PROCESS_V2_DECL std::vector<pid_type> all_pids(boost::system::error_code &
 BOOST_PROCESS_V2_DECL std::vector<pid_type> all_pids();
 
 // return parent pid of pid.
-BOOST_PROCESS_V2_DECL std::vector<pid_type> parent_pid(pid_type pid, boost::system::error_code & ec);
+BOOST_PROCESS_V2_DECL pid_type parent_pid(pid_type pid, boost::system::error_code & ec);
 
 // return parent pid of pid.
-BOOST_PROCESS_V2_DECL std::vector<pid_type> parent_pid(pid_type pid);
+BOOST_PROCESS_V2_DECL pid_type parent_pid(pid_type pid);
 
 // return child pids of pid.
 BOOST_PROCESS_V2_DECL std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec);
