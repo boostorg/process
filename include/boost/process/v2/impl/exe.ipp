@@ -56,57 +56,61 @@ namespace ext {
 
 filesystem::path executable(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
-    filesystem::path path;
+    HANDLE proc = nullptr;
     if (pid == GetCurrentProcessId()) 
     {
         wchar_t buffer[MAX_PATH];
-        if (GetModuleFileNameW(nullptr, buffer, sizeof(buffer)) != 0) 
+        if (GetModuleFileNameW(nullptr, buffer, sizeof(buffer))) 
         {
             wchar_t exe[MAX_PATH];
             if (_wfullpath(exe, buffer, MAX_PATH)) 
             {
-                path = exe;
+                return exe;
             }
+            else
+                goto err;
         }
     } 
     else 
     {
-        HANDLE proc = detail::ext::open_process_with_debug_privilege(pid, ec);
-        if (proc == nullptr) return path;
+        proc = detail::ext::open_process_with_debug_privilege(pid, ec);
+        if (proc == nullptr) goto err;
         wchar_t buffer[MAX_PATH];
         DWORD size = sizeof(buffer);
-        if (QueryFullProcessImageNameW(proc, 0, buffer, &size) != 0) 
+        if (QueryFullProcessImageNameW(proc, 0, buffer, &size)) 
         {
             wchar_t exe[MAX_PATH];
             if (_wfullpath(exe, buffer, MAX_PATH)) 
             {
-                path = exe;
+                CloseHandle(proc);
+                return exe;
             }
+            else
+                goto err;
         }
-        CloseHandle(proc);
     }
-    if (path.string().empty())
-        ec = detail::get_last_error();
-    return path;
+err:
+    if (proc) 
+        CloseHandle(proc);
+    ec = detail::get_last_error();
+    return "";
 }
 
 #elif (defined(__APPLE__) && defined(__MACH__))
 
 filesystem::path executable(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
-    std::string path;
     char exe[PROC_PIDPATHINFO_MAXSIZE];
     if (proc_pidpath(pid, exe, sizeof(exe)) > 0) 
     {
         char buffer[PATH_MAX];
         if (realpath(exe, buffer)) 
         {
-            path = buffer;
+            return buffer;
         }
     }
-    if (path.empty())
-        ec = detail::get_last_error();
-    return path;
+    ec = detail::get_last_error();   
+    return "";
 }
 
 #elif (defined(__linux__) || defined(__ANDROID__))
@@ -134,7 +138,7 @@ filesystem::path executable(boost::process::v2::pid_type pid, boost::system::err
     #elif defined(__NetBSD__)
     int mib[4] = {CTL_KERN, KERN_PROC_ARGS, pid, KERN_PROC_PATHNAME};
     #endif
-    std::size_t len;
+    std::size_t len = 0;
     if (sysctl(mib, 4, nullptr, &len, nullptr, 0) == 0) 
     {
         std::string strbuff;
@@ -145,13 +149,17 @@ filesystem::path executable(boost::process::v2::pid_type pid, boost::system::err
             char buffer[PATH_MAX];
             if (realpath(exe, buffer)) 
             {
-                path = buffer;
+                return buffer;
             }
+            else
+                goto err;
         }
+        else
+            goto err;
     }
-    if (path.empty())
-        ec = detail::get_last_error();
-    return path;
+err:
+    ec = detail::get_last_error();
+    return "";
 }
 
 #elif defined(__OpenBSD__)
@@ -174,10 +182,7 @@ filesystem::path executable(boost::process::v2::pid_type pid, boost::system::err
             kinfo_file *kif = nullptr;
             kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
             if (!kd)
-            {
-                ec = detail::get_last_error();
-                return false;
-            }
+                goto err;
             if ((kif = kvm_getfiles(kd, KERN_FILE_BYPID, pid, sizeof(struct kinfo_file), &cntp))) 
             {
                 for (int i = 0; i < cntp; i++) 
@@ -191,11 +196,13 @@ filesystem::path executable(boost::process::v2::pid_type pid, boost::system::err
                         break;
                     }
                 }
-            }
+            } 
+            else
+                goto err;
             kvm_close(kd);
         }
-        if (*out.empty())
-            ec = detail::get_last_error();
+err:
+        ec = detail::get_last_error();
         return success;
     };
     std::vector<std::string> buffer = cmdline_from_proc_id(pid, ec);
