@@ -34,5 +34,5 @@ BOOST_AUTO_TEST_CASE(test_pid)
         }
         return (!children.empty() || !grand_children.empty());
     };
-    BOOST_CHECK_NE(grand_child_pids(root_pid, children, grand_children), false);
+    BOOST_CHECK_NE(grand_child_pids(bp2::root_pid, children, grand_children), false);
 }
