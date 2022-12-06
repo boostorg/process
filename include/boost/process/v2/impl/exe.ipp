@@ -13,7 +13,6 @@
 
 #include <string>
 #include <vector>
-#include <sstream>
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 #include <windows.h>
@@ -36,6 +35,11 @@
 #endif
 
 #if defined(__OpenBSD__)
+#include <boost/process/v2/cwd.hpp>
+#include <boost/process/v2/cmd.hpp>
+#include <boost/process/v2/env.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/classification.hpp>
 #include <sys/types.h>
 #include <sys/param.h>
 #include <sys/sysctl.h>
@@ -224,12 +228,7 @@ err:
                 std::string penv = envvar_value_from_proc_id(pid, "PATH");
                 if (!penv.empty()) {
                     std::vector<std::string> env;
-                    std::string tmp;
-                    std::stringstream sstr(penv); 
-                    while (std::getline(sstr, tmp, ':')) 
-                    {
-                        env.push_back(tmp);
-                    }
+                    boost::split(env, penv, boost::is_any_of(":"));
                     for (std::size_t i = 0; i < env.size(); i++) 
                     {
                         argv0 = env[i] + "/" + buffer[0];
