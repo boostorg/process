@@ -252,7 +252,7 @@ err:
                 }
                 if (pwd.empty() || !is_exe) 
                 {
-                    std::string cwd = cwd_from_proc_id(pid, ec);
+                    std::string cwd = current_path(pid, ec).string();
                     if (!cwd.empty()) 
                     {
                        argv0 = cwd + "/" + buffer[0];
