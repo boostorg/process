@@ -3,8 +3,8 @@
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-#ifndef BOOST_PROCESS_V2_IMPL_DETAIL_EXE_IPP
-#define BOOST_PROCESS_V2_IMPL_DETAIL_EXE_IPP
+#ifndef BOOST_PROCESS_V2_IMPL_DETAIL_XPROC_INFO_IPP
+#define BOOST_PROCESS_V2_IMPL_DETAIL_XPROC_INFO_IPP
 
 #include <boost/process/v2/detail/config.hpp>
 #include <boost/process/v2/detail/throw_error.hpp>
@@ -195,7 +195,6 @@ std::vector<std::string> cmd_env_from_proc_id(ngs::xproc::PROCID proc_id, int ty
     return vec;
 }
 #endif
-#endif
 
 } // namespace ext
 
@@ -203,5 +202,5 @@ std::vector<std::string> cmd_env_from_proc_id(ngs::xproc::PROCID proc_id, int ty
 
 BOOST_PROCESS_V2_END_NAMESPACE
 
-#endif // BOOST_PROCESS_V2_IMPL_DETAIL_EXE_IPP
+#endif // BOOST_PROCESS_V2_IMPL_DETAIL_XPROC_INFO_IPP
 
