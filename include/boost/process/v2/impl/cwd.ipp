@@ -139,9 +139,11 @@ filesystem::path current_path(boost::process::v2::pid_type pid, boost::system::e
             if (head) {
                 filestat *fst = nullptr;
                 STAILQ_FOREACH(fst, head, next) {
-                    if (fst->fs_uflags & PS_FST_UFLAG_CDIR) {
+                    if (fst->fs_uflags & PS_FST_UFLAG_CDIR) 
+                    {
                         char buffer[PATH_MAX];
-                        if (realpath(fst->fs_path, buffer)) {
+                        if (realpath(fst->fs_path, buffer)) 
+                        {
                             path = buffer;
                         }
                     }
@@ -165,15 +167,19 @@ filesystem::path current_path(boost::process::v2::pid_type pid, boost::system::e
         std::to_string(pid) + " | /usr/bin/sed -n 3p`; /usr/bin/awk -v str=\"$str\" -v pos=\"$pos\" " +
         "'BEGIN{print substr(str, 0, pos + 4)}' | /usr/bin/awk 'NF{NF--};1 {$1=$2=$3=$4=\"\"; print" +
         " substr($0, 5)'}").c_str(), "r");
-    if (fp) {
+    if (fp) 
+    {
         char buffer[PATH_MAX];
-        if (fgets(buffer, sizeof(buffer), fp)) {
+        if (fgets(buffer, sizeof(buffer), fp)) 
+        {
             std::string str = buffer;
             std::size_t pos = str.find("\n", strlen(buffer) - 1);
-            if (pos != std::string::npos) {
+            if (pos != std::string::npos) 
+            {
                 str.replace(pos, 1, "");
             }
-            if (realpath(str.c_str(), buffer)) {
+            if (realpath(str.c_str(), buffer)) 
+            {
                 path = buffer;
             }
         }
