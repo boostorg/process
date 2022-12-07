@@ -130,6 +130,7 @@ filesystem::path current_path(boost::process::v2::pid_type pid, boost::system::e
 // FIXME: Add error handling.
 filesystem::path current_path(boost::process::v2::pid_type pid, boost::system::error_code & ec) 
 {
+    std::string path;
     unsigned cntp = 0;
     procstat *proc_stat = procstat_open_sysctl();
     if (proc_stat) {
@@ -154,6 +155,7 @@ filesystem::path current_path(boost::process::v2::pid_type pid, boost::system::e
         }
         procstat_close(proc_stat);
     }
+    return path;
 }
 
 #elif defined(__DragonFly__)
@@ -161,6 +163,7 @@ filesystem::path current_path(boost::process::v2::pid_type pid, boost::system::e
 // FIXME: Add error handling.
 filesystem::path current_path(boost::process::v2::pid_type pid, boost::system::error_code & ec) 
 {
+    std::string path;
     /* Probably the hackiest thing ever we are doing here, because the "official" API is broken OS-level. */
     FILE *fp = popen(("pos=`ans=\\`/usr/bin/fstat -w -p " + std::to_string(pid) + " | /usr/bin/sed -n 1p\\`; " +
         "/usr/bin/awk -v ans=\"$ans\" 'BEGIN{print index(ans, \"INUM\")}'`; str=`/usr/bin/fstat -w -p " + 
@@ -185,6 +188,7 @@ filesystem::path current_path(boost::process::v2::pid_type pid, boost::system::e
         }
         pclose(fp);
     }
+    return path;
 }
 
 #elif (defined(__NetBSD__) || defined(__OpenBSD__))
