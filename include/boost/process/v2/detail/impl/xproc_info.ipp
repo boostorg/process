@@ -8,8 +8,6 @@
 
 #include <boost/process/v2/detail/last_error.hpp>
 
-#include <boost/process/v2/detail/exe.hpp>
-
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 #include <windows.h>
 #elif (defined(__APPLE__) && defined(__MACH__))
@@ -37,19 +35,24 @@ void cwd_cmd_env_from_proc(HANDLE proc, wchar_t **buffer, int type, boost::syste
     ULONG len = 0;
     PROCESS_BASIC_INFORMATION pbi;
     RTL_USER_PROCESS_PARAMETERS upp;
+    wchar_t *res = nullptr;
+    FARPROC farProc = nullptr;
+    NTSTATUS status = 0;
+    PVOID buf = nullptr;
     typedef NTSTATUS (__stdcall *NTQIP)(HANDLE, PROCESSINFOCLASS, PVOID, ULONG, PULONG);
+    NTQIP NtQueryInformationProcess;
     HMODULE hModule = GetModuleHandleW(L"ntdll.dll");
     if (!hModule) { goto err; }
-    FARPROC farProc = GetProcAddress(hModule, "NtQueryInformationProcess");
+    farProc = GetProcAddress(hModule, "NtQueryInformationProcess");
     if (!farProc) { goto err; }
-    NTQIP NtQueryInformationProcess = (NTQIP)farProc;
-    NTSTATUS status = NtQueryInformationProcess(proc, ProcessBasicInformation, &pbi, sizeof(pbi), &len);
+    NtQueryInformationProcess = (NTQIP)farProc;
+    status = NtQueryInformationProcess(proc, ProcessBasicInformation, &pbi, sizeof(pbi), &len);
     if (status) { goto err; }
     ReadProcessMemory(proc, pbi.PebBaseAddress, &peb, sizeof(peb), &nRead);
     if (!nRead) { goto err; }
     ReadProcessMemory(proc, peb.ProcessParameters, &upp, sizeof(upp), &nRead);
     if (!nRead) { goto err; }
-    PVOID buf = nullptr; len = 0;
+    len = 0;
     if (type == MEMCWD) {
         buf = upp.CurrentDirectory.DosPath.Buffer;
         len = upp.CurrentDirectory.DosPath.Length;
@@ -60,7 +63,7 @@ void cwd_cmd_env_from_proc(HANDLE proc, wchar_t **buffer, int type, boost::syste
         buf = upp.CommandLine.Buffer;
         len = upp.CommandLine.Length;
     }
-    wchar_t *res = new wchar_t[len / 2 + 1];
+    res = new wchar_t[len / 2 + 1];
     ReadProcessMemory(proc, buf, res, len, &nRead);
     if (!nRead) { goto err; }
     res[len / 2] = L'\0';

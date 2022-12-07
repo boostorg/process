@@ -63,6 +63,8 @@ namespace ext {
 filesystem::path current_path(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
     std::wstring path;
+    wchar_t *buffer = nullptr;
+    wchar_t cwd[MAX_PATH];
     HANDLE proc = open_process_with_debug_privilege(pid, ec);
     if (proc == nullptr) return path;
     if (is_x86_process(GetCurrentProcess(), ec) != is_x86_process(proc, ec)) {
@@ -71,10 +73,8 @@ filesystem::path current_path(boost::process::v2::pid_type pid, boost::system::e
     } else {
       goto err;
     }
-    wchar_t *buffer = nullptr;
     cwd_cmd_env_from_proc(proc, &buffer, MEMCWD, ec);
     if (buffer) {
-      wchar_t cwd[MAX_PATH];
       if (_wfullpath(cwd, buffer, MAX_PATH)) {
         path = cwd;
         if (!path.empty() && std::count(path.begin(), path.end(), '\\') > 1 && path.back() == '\\') {
