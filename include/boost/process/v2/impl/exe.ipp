@@ -39,6 +39,7 @@
 #include <boost/process/v2/cwd.hpp>
 #include <boost/process/v2/cmd.hpp>
 #include <boost/process/v2/env.hpp>
+#include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
 #include <sys/types.h>
@@ -229,7 +230,7 @@ err:
                 std::string penv = envvar_value_from_proc_id(pid, "PATH");
                 if (!penv.empty()) {
                     std::vector<std::string> env;
-                    boost::split(env, penv, boost::is_any_of(":"));
+                    boost::split(env, penv, boost::is_any_of(":"));
                     for (std::size_t i = 0; i < env.size(); i++) 
                     {
                         argv0 = env[i] + "/" + buffer[0];

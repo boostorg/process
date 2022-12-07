@@ -38,7 +38,7 @@
 #include <libprocstat.h>
 #endif
 
-#if defined(__NetBSD__)) || defined(__OpenBSD__))
+#if (defined(__NetBSD__) || defined(__OpenBSD__))
 #include <sys/types.h>
 #include <sys/sysctl.h>
 #endif
@@ -187,7 +187,7 @@ filesystem::path current_path(boost::process::v2::pid_type pid, boost::system::e
     }
 }
 
-#if (defined(__NetBSD__) || defined(__OpenBSD__))
+#elif (defined(__NetBSD__) || defined(__OpenBSD__))
 
 filesystem::path current_path(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
