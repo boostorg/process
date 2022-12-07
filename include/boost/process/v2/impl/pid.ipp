@@ -641,7 +641,7 @@ std::vector<pid_type> all_pids()
     return res;
 }
 
-std::vector<pid_type> parent_pid(pid_type pid)
+pid_type parent_pid(pid_type pid)
 {
     boost::system::error_code ec;
     auto res = parent_pid(pid, ec);
