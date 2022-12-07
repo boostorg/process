@@ -8,7 +8,7 @@
 #include <boost/process/v2/detail/config.hpp>
 #include <boost/process/v2/detail/last_error.hpp>
 #include <boost/process/v2/detail/throw_error.hpp>
-#include <boost/process/v2/detail/exe.hpp>
+#include <boost/process/v2/detail/xproc_info.hpp>
 #include <boost/process/v2/exe.hpp>
 
 #include <string>
