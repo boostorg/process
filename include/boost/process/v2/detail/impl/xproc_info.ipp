@@ -6,7 +6,9 @@
 #ifndef BOOST_PROCESS_V2_IMPL_DETAIL_EXE_IPP
 #define BOOST_PROCESS_V2_IMPL_DETAIL_EXE_IPP
 
-#include <boost/process/v2/detail/last_error.hpp>
+#include <boost/process/v2/detail/config.hpp>
+#include <boost/process/v2/detail/throw_error.hpp>
+#include <boost/process/v2/detail/xproc_info.hpp>
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 #include <windows.h>

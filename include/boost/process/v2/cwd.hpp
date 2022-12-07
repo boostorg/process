@@ -15,7 +15,7 @@ BOOST_PROCESS_V2_BEGIN_NAMESPACE
 
 namespace ext {
 
-// return working directoy path from pid
+// return current path from pid
 #ifdef BOOST_PROCESS_USE_STD_FS
 BOOST_PROCESS_V2_DECL std::filesystem::path current_path(boost::process::v2::pid_type pid, boost::system::error_code & ec);
 BOOST_PROCESS_V2_DECL std::filesystem::path current_path(boost::process::v2::pid_type pid);
