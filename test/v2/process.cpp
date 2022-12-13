@@ -530,6 +530,8 @@ BOOST_AUTO_TEST_CASE(bind_launcher)
   bpv::error_code ec;
 
   auto sz = asio::read(rp, asio::dynamic_buffer(out),  ec);
+  while (ec == asio::error::interrupted)
+    sz += asio::read(rp, asio::dynamic_buffer(out),  ec);
   BOOST_CHECK(sz != 0);
   BOOST_CHECK_MESSAGE((ec == asio::error::broken_pipe) || (ec == asio::error::eof), ec.message());
   BOOST_CHECK_MESSAGE(bpv::filesystem::path(out) == target,
