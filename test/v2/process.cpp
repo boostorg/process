@@ -434,7 +434,10 @@ std::string read_env(const char * name, Inits && ... inits)
   std::string out;
   bpv::error_code ec;
 
-  const auto sz = asio::read(rp, asio::dynamic_buffer(out),  ec);
+   auto sz = asio::read(rp, asio::dynamic_buffer(out),  ec);
+  while (ec == asio::error::interrupted)
+    sz += asio::read(rp, asio::dynamic_buffer(out),  ec);
+
   BOOST_CHECK_MESSAGE((ec == asio::error::broken_pipe) || (ec == asio::error::eof), ec.message());
   out.resize(sz);
   trim_end(out);
