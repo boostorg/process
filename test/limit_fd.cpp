@@ -16,7 +16,7 @@
 #include <boost/process/async_pipe.hpp>
 #include <boost/process/extend.hpp>
 
-#include <boost/filesystem.hpp>
+#include <boost/process/filesystem.hpp>
 
 #include <system_error>
 #include <string>
@@ -27,9 +27,12 @@
 #if defined(BOOST_WINDOWS_API)
 #include <boost/winapi/get_current_thread.hpp>
 #include <boost/winapi/get_current_process.hpp>
+
+#elif defined(__APPLE__)
+#include <dirent.h>
 #endif
 
-namespace fs = boost::filesystem;
+namespace fs = boost::process::filesystem;
 namespace bp = boost::process;
 namespace bt = boost::this_process;
 
@@ -37,12 +40,19 @@ BOOST_AUTO_TEST_CASE(leak_test, *boost::unit_test::timeout(5))
 {
     using boost::unit_test::framework::master_test_suite;
 
+    
+
 #if defined(BOOST_WINDOWS_API)
     const auto get_handle       = [](FILE * f)                       {return reinterpret_cast<bt::native_handle_type>(_get_osfhandle(_fileno(f)));};
     const auto socket_to_handle = [](::boost::winapi::UINT_PTR_ sock){return reinterpret_cast<::boost::winapi::HANDLE_>(sock);};
 #else
     const auto get_handle = [](FILE * f) {return fileno(f);};
     const auto socket_to_handle = [](int i){ return i;};
+
+#if !defined(__linux__)
+    return ;
+#endif
+
 #endif
 
     std::error_code ec;
@@ -98,7 +108,8 @@ BOOST_AUTO_TEST_CASE(leak_test, *boost::unit_test::timeout(5))
     int event_fd =::eventfd(0, EFD_CLOEXEC | EFD_NONBLOCK);
     BOOST_CHECK(!bt::is_stream_handle(event_fd , ec)); BOOST_CHECK_MESSAGE(!ec, ec.message());
 #endif
-    int dir_fd = ::dirfd(::opendir("."));
+    auto od = ::opendir(".");
+    int dir_fd = ::dirfd(od);
     BOOST_CHECK(!bt::is_stream_handle(dir_fd , ec)); BOOST_CHECK_MESSAGE(!ec, ec.message());
 #endif
 
@@ -115,6 +126,9 @@ BOOST_AUTO_TEST_CASE(leak_test, *boost::unit_test::timeout(5))
     BOOST_CHECK(bt::is_stream_handle(socket_to_handle(udp_socket.native_handle()), ec)); BOOST_CHECK_MESSAGE(!ec, ec.message());
     BOOST_CHECK(bt::is_stream_handle(std::move(ap).sink().  native_handle(), ec)); BOOST_CHECK_MESSAGE(!ec, ec.message());
     BOOST_CHECK(bt::is_stream_handle(std::move(ap).source().native_handle(), ec)); BOOST_CHECK_MESSAGE(!ec, ec.message());
+#if !defined( BOOST_WINDOWS_API )
+    ::closedir(od);
+#endif
 }
 
 struct on_setup_t
@@ -154,7 +168,7 @@ BOOST_AUTO_TEST_CASE(iterate_handles, *boost::unit_test::timeout(5))
 
     BOOST_CHECK_MESSAGE(!ec, ec.message());
 
-    BOOST_CHECK_EQUAL(ret, 42u);
+    BOOST_CHECK_EQUAL(ret, 42);
     BOOST_CHECK_EQUAL(std::count(res.begin(), res.end(), p_in. native_sink()), 0u);
     BOOST_CHECK_EQUAL(std::count(res.begin(), res.end(), p_out.native_source()), 0u);
 }
@@ -167,14 +181,14 @@ BOOST_AUTO_TEST_CASE(limit_fd, *boost::unit_test::timeout(5))
     const auto get_handle = [](FILE * f){return std::to_string(fileno(f));};
 #endif
 
+    auto p = fopen("./test-file", "w");
+
     using boost::unit_test::framework::master_test_suite;
-    
-    BOOST_CHECK_EQUAL(bp::system(master_test_suite().argv[1], "--has-handle",  get_handle(stdin), bp::std_err > stderr), EXIT_SUCCESS);
-    BOOST_CHECK_EQUAL(bp::system(master_test_suite().argv[1], "--has-handle",  get_handle(stderr), bp::std_err > stderr), EXIT_SUCCESS);
 
+    BOOST_CHECK_EQUAL(bp::system(master_test_suite().argv[1], "--has-handle", bp::limit_handles, get_handle(p),  bp::std_in  < p), EXIT_SUCCESS);
+    BOOST_CHECK_EQUAL(bp::system(master_test_suite().argv[1], "--has-handle", bp::limit_handles, get_handle(p),  bp::std_err > p), EXIT_SUCCESS);
+    BOOST_CHECK_EQUAL(bp::system(master_test_suite().argv[1], "--has-handle", bp::limit_handles, get_handle(p),  bp::std_out > p), EXIT_SUCCESS);
+    BOOST_CHECK_EQUAL(bp::system(master_test_suite().argv[1], "--has-handle", bp::limit_handles, get_handle(p)), EXIT_FAILURE);
 
-    BOOST_CHECK_EQUAL(bp::system(master_test_suite().argv[1], "--has-handle", get_handle(stdin), bp::std_err > stderr, bp::limit_handles), EXIT_FAILURE);
-    BOOST_CHECK_EQUAL(bp::system(master_test_suite().argv[1], "--has-handle", get_handle(stderr), bp::std_err > stderr, bp::limit_handles), EXIT_SUCCESS);
-
-
+    fclose(p);
 }
