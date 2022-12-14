@@ -124,11 +124,11 @@ namespace ext
 {
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
-BOOST_PROCESS_V2_DECL void cwd_cmd_env_from_proc(HANDLE proc, wchar_t **buffer, int type, boost::system::error_code & ec);
+BOOST_PROCESS_V2_DECL std::vector<wchar_t> cwd_cmd_env_from_proc(HANDLE proc, int type, boost::system::error_code & ec);
 BOOST_PROCESS_V2_DECL HANDLE open_process_with_debug_privilege(boost::process::v2::pid_type pid, boost::system::error_code & ec);
 BOOST_PROCESS_V2_DECL BOOL is_x86_process(HANDLE proc, boost::system::error_code & ec);
 #elif (defined(__APPLE__) && defined(__MACH__))
-BOOST_PROCESS_V2_DECL std::vector<std::string> cmd_env_from_proc_id(ngs::xproc::PROCID proc_id, int type, boost::system::error_code & ec);
+BOOST_PROCESS_V2_DECL std::vector<std::string> cmd_env_from_proc_id(boost::process::v2::pid_type pid, int type, boost::system::error_code & ec);
 #elif defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun)
 kvm_t *kd = nullptr;
 #endif

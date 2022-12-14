@@ -9,8 +9,8 @@
 #include <boost/process/v2/detail/config.hpp>
 #include <boost/process/v2/detail/last_error.hpp>
 #include <boost/process/v2/detail/throw_error.hpp>
-#include <boost/process/v2/detail/xproc_info.hpp>
-#include <boost/process/v2/exe.hpp>
+#include <boost/process/v2/ext/detail/proc_info.hpp>
+#include <boost/process/v2/ext/exe.hpp>
 
 #include <string>
 #include <vector>
@@ -36,9 +36,9 @@
 #endif
 
 #if defined(__OpenBSD__)
-#include <boost/process/v2/cwd.hpp>
-#include <boost/process/v2/cmd.hpp>
-#include <boost/process/v2/env.hpp>
+#include <boost/process/v2/ext/cwd.hpp>
+#include <boost/process/v2/ext/cmd.hpp>
+#include <boost/process/v2/ext/env.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
