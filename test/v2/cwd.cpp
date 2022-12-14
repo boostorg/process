@@ -5,7 +5,7 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include <boost/process/v2/pid.hpp>
-#include <boost/process/v2/ext/exe.hpp>
+#include <boost/process/v2/ext/cwd.hpp>
 
 #include <boost/test/unit_test.hpp>
 
@@ -16,7 +16,7 @@
 BOOST_AUTO_TEST_CASE(test_exe)
 {
     namespace bp2 = boost::process::v2;
-    auto pth = bp2::ext::executable(bp2::current_pid()).string();
+    auto pth = bp2::ext::current_path(bp2::current_pid()).string();
     BOOST_CHECK_NE(pth.empty(), true);
 }
 

@@ -9,8 +9,8 @@
 #include <boost/process/v2/detail/config.hpp>
 #include <boost/process/v2/detail/last_error.hpp>
 #include <boost/process/v2/detail/throw_error.hpp>
-#include <boost/process/v2/detail/xproc_info.hpp>
-#include <boost/process/v2/cwd.hpp>
+#include <boost/process/v2/ext/detail/proc_info.hpp>
+#include <boost/process/v2/ext/cwd.hpp>
 
 #include <string>
 
@@ -63,7 +63,7 @@ namespace ext {
 filesystem::path current_path(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
     std::wstring path;
-    wchar_t *buffer = nullptr;
+    std::vector<wchar_t> buffer;
     wchar_t cwd[MAX_PATH];
     HANDLE proc = boost::process::v2::detail::ext::open_process_with_debug_privilege(pid, ec);
     if (proc == nullptr) return path;
@@ -73,20 +73,17 @@ filesystem::path current_path(boost::process::v2::pid_type pid, boost::system::e
     } else {
       goto err;
     }
-    boost::process::v2::detail::ext::cwd_cmd_env_from_proc(proc, &buffer, MEMCWD, ec);
-    if (buffer) {
-      if (_wfullpath(cwd, buffer, MAX_PATH)) {
+    boost::process::v2::detail::ext::cwd_cmd_env_from_proc(proc, MEMCWD, ec);
+    if (!buffer.empty()) {
+      if (_wfullpath(cwd, &buffer[0], MAX_PATH)) {
         path = cwd;
         if (!path.empty() && std::count(path.begin(), path.end(), '\\') > 1 && path.back() == '\\') {
           path = path.substr(0, path.length() - 1);
         }
       } else {
-        delete[] buffer;
         goto err;
       }
-      delete[] buffer;
     } else {
-      delete[] buffer;
       goto err;
     }
     CloseHandle(proc);

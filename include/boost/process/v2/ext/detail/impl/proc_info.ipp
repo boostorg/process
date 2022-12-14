@@ -8,9 +8,11 @@
 
 #include <boost/process/v2/detail/config.hpp>
 #include <boost/process/v2/detail/throw_error.hpp>
-#include <boost/process/v2/detail/xproc_info.hpp>
+#include <boost/process/v2/ext/detail/proc_info.hpp>
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
+#include <iterator>
+#include <algorithm>
 #include <windows.h>
 #elif (defined(__APPLE__) && defined(__MACH__))
 #include <cstdlib>
@@ -31,7 +33,8 @@ namespace ext
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 // type of process memory to read?
 enum MEMTYP {MEMCMD, MEMENV, MEMCWD};
-void cwd_cmd_env_from_proc(HANDLE proc, wchar_t **buffer, int type, boost::system::error_code & ec) {
+std::vector<wchar_t> cwd_cmd_env_from_proc(HANDLE proc, int type, boost::system::error_code & ec) {
+    std::vector<wchar_t> buffer;
     PEB peb;
     SIZE_T nRead = 0; 
     ULONG len = 0;
@@ -67,12 +70,14 @@ void cwd_cmd_env_from_proc(HANDLE proc, wchar_t **buffer, int type, boost::syste
     }
     res = new wchar_t[len / 2 + 1];
     ReadProcessMemory(proc, buf, res, len, &nRead);
-    if (!nRead) { goto err; }
+    if (!nRead) { delete[] res; goto err; }
     res[len / 2] = L'\0';
-    *buffer = res;
-    return;
+    std::copy(res, res + (len / 2 + 1), std::back_inserter(buffer));
+    delete[] res;
+    return buffer;
 err:
     ec = detail::get_last_error();
+    return buffer;
 }
 
 // with debug_privilege enabled allows reading info from more processes
