@@ -74,7 +74,7 @@ filesystem::path current_path(boost::process::v2::pid_type pid, boost::system::e
     } else {
       goto err;
     }
-    boost::process::v2::detail::ext::cwd_cmd_env_from_proc(proc, 2/*=MEMCWD*/, ec);
+    buffer = boost::process::v2::detail::ext::cwd_cmd_env_from_proc(proc, 2/*=MEMCWD*/, ec);
     if (!buffer.empty()) {
       if (_wfullpath(cwd, &buffer[0], MAX_PATH)) {
         path = cwd;
