@@ -3,8 +3,8 @@
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-#ifndef BOOST_PROCESS_V2_DETAIL_XPROC_INFO_HPP
-#define BOOST_PROCESS_V2_DETAIL_XPROC_INFO_HPP
+#ifndef BOOST_PROCESS_V2_DETAIL_PROC_INFO_HPP
+#define BOOST_PROCESS_V2_DETAIL_PROC_INFO_HPP
 
 #include <boost/process/v2/detail/config.hpp>
 #include <boost/process/v2/detail/throw_error.hpp>
@@ -13,6 +13,7 @@
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 #include <windows.h>
+#include <winternl.h>
 
 #if !defined(_MSC_VER)
 #pragma pack(push, 8)
@@ -139,5 +140,5 @@ kvm_t *kd = nullptr;
 
 BOOST_PROCESS_V2_END_NAMESPACE
 
-#endif // BOOST_PROCESS_V2_DETAIL_XPROC_INFO_HPP
+#endif // BOOST_PROCESS_V2_DETAIL_PROC_INFO_HPP
 
