@@ -44,15 +44,9 @@ std::vector<wchar_t> cwd_cmd_env_from_proc(HANDLE proc, int type, boost::system:
     FARPROC farProc = nullptr;
     NTSTATUS status = 0;
     PVOID buf = nullptr;
-    typedef NTSTATUS (__stdcall *NTQIP)(HANDLE, PROCESSINFOCLASS, PVOID, ULONG, PULONG);
-    NTQIP NtQueryInformationProcess;
-    HMODULE hModule = GetModuleHandleW(L"ntdll.dll");
-    if (!hModule) { goto err; }
-    farProc = GetProcAddress(hModule, "NtQueryInformationProcess");
-    if (!farProc) { goto err; }
-    NtQueryInformationProcess = (NTQIP)farProc;
     status = NtQueryInformationProcess(proc, ProcessBasicInformation, &pbi, sizeof(pbi), &len);
-    if (status) { goto err; }
+    ULONG error = RtlNtStatusToDosError(status);
+    if (error) { goto err; }
     ReadProcessMemory(proc, pbi.PebBaseAddress, &peb, sizeof(peb), &nRead);
     if (!nRead) { goto err; }
     ReadProcessMemory(proc, peb.ProcessParameters, &upp, sizeof(upp), &nRead);
@@ -68,12 +62,10 @@ std::vector<wchar_t> cwd_cmd_env_from_proc(HANDLE proc, int type, boost::system:
         buf = upp.CommandLine.Buffer;
         len = upp.CommandLine.Length;
     }
-    res = new wchar_t[len / 2 + 1];
-    ReadProcessMemory(proc, buf, res, len, &nRead);
-    if (!nRead) { delete[] res; goto err; }
-    res[len / 2] = L'\0';
-    std::copy(res, res + (len / 2 + 1), std::back_inserter(buffer));
-    delete[] res;
+    buffer.resize(len / 2 + 1);
+    ReadProcessMemory(proc, buf, &buffer[0], len, &nRead);
+    if (!nRead) { goto err; }
+    buffer[len / 2] = L'\0';
     return buffer;
 err:
     ec = detail::get_last_error();
