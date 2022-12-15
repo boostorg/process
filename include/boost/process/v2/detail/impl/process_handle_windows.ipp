@@ -127,14 +127,16 @@ void check_running_(HANDLE handle, error_code & ec, DWORD & exit_status)
 void suspend_(HANDLE handle, error_code & ec)
 {
     auto nt_err = NtSuspendProcess(handle);
-    if (nt_err > 0xC0000000)
+    ULONG dos_err = RtlNtStatusToDosError(nt_err);
+    if (dos_err)
        ec = detail::get_last_error();
 }
 
 void resume_(HANDLE handle, error_code & ec)
 {
     auto nt_err = NtResumeProcess(handle);
-    if (nt_err > 0xC0000000)
+    ULONG dos_err = RtlNtStatusToDosError(nt_err);
+    if (dos_err)
         ec = detail::get_last_error();
 }
 #else
