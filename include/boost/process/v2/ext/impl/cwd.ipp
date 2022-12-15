@@ -67,13 +67,14 @@ filesystem::path current_path(boost::process::v2::pid_type pid, boost::system::e
     wchar_t cwd[MAX_PATH];
     HANDLE proc = boost::process::v2::detail::ext::open_process_with_debug_privilege(pid, ec);
     if (proc == nullptr) return path;
-    if (is_x86_process(GetCurrentProcess(), ec) != is_x86_process(proc, ec)) {
+    if (boost::process::v2::detail::ext::is_x86_process(GetCurrentProcess(), ec) != 
+	    boost::process::v2::detail::ext::is_x86_process(proc, ec)) {
         CloseHandle(proc); 
         return "";
     } else {
       goto err;
     }
-    boost::process::v2::detail::ext::cwd_cmd_env_from_proc(proc, MEMCWD, ec);
+    boost::process::v2::detail::ext::cwd_cmd_env_from_proc(proc, 2/*=MEMCWD*/, ec);
     if (!buffer.empty()) {
       if (_wfullpath(cwd, &buffer[0], MAX_PATH)) {
         path = cwd;
