@@ -180,11 +180,11 @@ filesystem::path executable(boost::process::v2::pid_type pid, boost::system::err
         *out = "";
         bool success = false;
         struct stat st;
-        char executable[PATH_MAX];
+        char exe[PATH_MAX];
         if (!stat(in.c_str(), &st) && 
             (st.st_mode & S_IXUSR) && 
             (st.st_mode & S_IFREG) && 
-            realpath(in.c_str(), executable)) 
+            realpath(in.c_str(), exe)) 
         {
             int cntp = 0;
             kinfo_file *kif = nullptr;
@@ -199,7 +199,7 @@ filesystem::path executable(boost::process::v2::pid_type pid, boost::system::err
                         (st.st_dev == static_cast<dev_t>(kif[i].va_fsid) || 
                         st.st_ino == static_cast<ino_t>(kif[i].va_fileid))) 
                     {
-                        *out = executable;
+                        *out = exe;
                         success = true;
                         break;
                     }
