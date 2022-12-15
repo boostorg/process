@@ -69,7 +69,7 @@ std::vector<wchar_t> cwd_cmd_env_from_proc(HANDLE proc, int type, boost::system:
     return buffer;
 err:
     ec = detail::get_last_error();
-    return buffer;
+    return {};
 }
 
 // with debug_privilege enabled allows reading info from more processes
