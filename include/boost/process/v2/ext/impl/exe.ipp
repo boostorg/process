@@ -149,7 +149,7 @@ filesystem::path executable(boost::process::v2::pid_type pid, boost::system::err
     std::size_t len = 0;
     if (sysctl(mib, 4, nullptr, &len, nullptr, 0) == 0) 
     {
-        std::string strbuff;
+        std::vector<char> strbuff;
         strbuff.resize(len, '\0');
         char *exe = strbuff.data();
         if (sysctl(mib, 4, exe, &len, nullptr, 0) == 0) 

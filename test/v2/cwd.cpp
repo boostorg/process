@@ -9,10 +9,6 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <algorithm>
-#include <string>
-#include <vector>
-
 BOOST_AUTO_TEST_CASE(test_exe)
 {
     namespace bp2 = boost::process::v2;
