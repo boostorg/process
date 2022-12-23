@@ -66,12 +66,14 @@ filesystem::path current_path(boost::process::v2::pid_type pid, boost::system::e
     std::vector<wchar_t> buffer;
     wchar_t cwd[MAX_PATH];
     HANDLE proc = boost::process::v2::detail::ext::open_process_with_debug_privilege(pid, ec);
-    if (proc == nullptr) return path;
+    if (proc == nullptr) {ec = detail::get_last_error(); return path;}
     if (boost::process::v2::detail::ext::is_x86_process(GetCurrentProcess(), ec) != 
 	    boost::process::v2::detail::ext::is_x86_process(proc, ec)) {
         CloseHandle(proc); 
         return "";
-    } else {
+    } 
+    else 
+    {
       goto err;
     }
     buffer = boost::process::v2::detail::ext::cwd_cmd_env_from_proc(proc, 2/*=MEMCWD*/, ec);
@@ -81,10 +83,14 @@ filesystem::path current_path(boost::process::v2::pid_type pid, boost::system::e
         if (!path.empty() && std::count(path.begin(), path.end(), '\\') > 1 && path.back() == '\\') {
           path = path.substr(0, path.length() - 1);
         }
-      } else {
+      } 
+      else 
+      {
         goto err;
       }
-    } else {
+    } 
+    else 
+    {
       goto err;
     }
     CloseHandle(proc);
@@ -149,10 +155,16 @@ filesystem::path current_path(boost::process::v2::pid_type pid, boost::system::e
                 }
                 procstat_freefiles(proc_stat, head);
             }
+            else
+                ec = detail::get_last_error();
             procstat_freeprocs(proc_stat, proc_info);
         }
+        else
+            ec = detail::get_last_error();
         procstat_close(proc_stat);
     }
+    else
+         ec = detail::get_last_error();
     return path;
 }
 
@@ -183,9 +195,15 @@ filesystem::path current_path(boost::process::v2::pid_type pid, boost::system::e
             {
                 path = buffer;
             }
+            else
+                ec = detail::get_last_error();
         }
+        else
+            ec = detail::get_last_error();
         pclose(fp);
     }
+    else
+        ec = detail::get_last_error();
     return path;
 }
 
@@ -204,7 +222,7 @@ filesystem::path current_path(boost::process::v2::pid_type pid, boost::system::e
     std::size_t len = 0;
     if (sysctl(mib, sz, nullptr, &len, nullptr, 0) == 0) 
     {
-        std::string strbuff;
+        std::vector<char> strbuff;
         strbuff.resize(len, '\0');
         char *exe = strbuff.data();
         if (sysctl(mib, sz, exe, &len, nullptr, 0) == 0) 

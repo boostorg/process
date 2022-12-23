@@ -17,6 +17,7 @@
 #include <boost/process/v2/impl/pid.ipp>
 #include <boost/process/v2/ext/impl/exe.ipp>
 #include <boost/process/v2/ext/impl/cwd.ipp>
+#include <boost/process/v2/ext/impl/cmd.ipp>
 #include <boost/process/v2/ext/detail/impl/proc_info.ipp>
 #include <boost/process/v2/detail/impl/environment.ipp>
 #include <boost/process/v2/detail/impl/last_error.ipp>

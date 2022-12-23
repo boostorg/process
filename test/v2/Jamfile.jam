@@ -26,6 +26,7 @@ project : requirements
   <target-os>freebsd:<linkflags>-lc
   <target-os>freebsd:<linkflags>-lutil
   <target-os>freebsd:<linkflags>-lprocstat
+  <target-os>freebsd:<cxxflags>-std=c++11
   <os>NT,<toolset>cw:<library>ws2_32
   <os>NT,<toolset>gcc:<library>ws2_32
   <define>BOOST_PROCESS_V2_SEPARATE_COMPILATION=1
@@ -60,6 +61,8 @@ test-suite standalone :
     [ run environment.cpp test_impl ]
     [ run pid.cpp test_impl ]
     [ run exe.cpp test_impl ]
+    [ run cwd.cpp test_impl ]
+    [ run cmd.cpp test_impl ]
     [ run shell.cpp test_impl ]
     ;
 
