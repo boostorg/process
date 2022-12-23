@@ -18,11 +18,10 @@
 #include <windows.h>
 #include <shellapi.h>
 #else
-#include <climits>
+#include <cstdlib>
 #endif
 
-#if (defined(BOOST_PROCESS_V2_WINDOWS) || defined(__linux__) || defined(__ANDROID__)
-#include <cstdlib>
+#if (defined(__linux__) || defined(__ANDROID__)
 #include <cstdio>
 #endif
 
