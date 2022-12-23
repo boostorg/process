@@ -15,6 +15,7 @@
 #include <boost/process/v2/default_launcher.hpp>
 #include <boost/process/v2/exit_code.hpp>
 #include <boost/process/v2/pid.hpp>
+#include <boost/process/v2/ext/exe.hpp>
 #include <boost/process/v2/process_handle.hpp>
 
 #if defined(BOOST_PROCESS_V2_STANDALONE)
@@ -212,6 +213,37 @@ struct basic_process
   void request_exit(error_code & ec)
   {
     process_handle_.request_exit(ec);
+  }
+
+  /// Send the process a signal requesting it to stop. This may rely on undocmented functions.
+  void suspend(error_code &ec)
+  {
+    process_handle_.suspend(ec);
+  }
+
+  /// Send the process a signal requesting it to stop. This may rely on undocmented functions.
+  void suspend()
+  {
+    error_code ec;
+    suspend(ec);
+    if (ec)
+        detail::throw_error(ec, "suspend");
+  }
+
+
+  /// Send the process a signal requesting it to resume. This may rely on undocmented functions.
+  void resume(error_code &ec)
+  {
+    process_handle_.resume(ec);  
+  }
+
+  /// Send the process a signal requesting it to resume. This may rely on undocmented functions.
+  void resume()
+  {
+      error_code ec;
+      suspend(ec);
+      if (ec)
+          detail::throw_error(ec, "resume");
   }
 
   /// Throwing @overload void terminate(native_exit_code_type &exit_code, error_code & ec)

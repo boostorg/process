@@ -22,6 +22,11 @@ project : requirements
   <toolset>msvc:<cxxflags>/bigobj
   <target-os>windows:<define>WIN32_LEAN_AND_MEAN
   <target-os>linux:<linkflags>-lpthread
+  <target-os>freebsd:<linkflags>-lpthread
+  <target-os>freebsd:<linkflags>-lc
+  <target-os>freebsd:<linkflags>-lutil
+  <target-os>freebsd:<linkflags>-lprocstat
+  <target-os>freebsd:<cxxflags>-std=c++11
   <os>NT,<toolset>cw:<library>ws2_32
   <os>NT,<toolset>gcc:<library>ws2_32
   <define>BOOST_PROCESS_V2_SEPARATE_COMPILATION=1
@@ -46,6 +51,8 @@ lib test_impl : test_impl.cpp filesystem :
         <link>static
         <target-os>windows:<source>shell32
         <target-os>windows:<source>user32
+        <target-os>windows:<source>Ntdll
+        <target-os>windows:<source>Advapi32
         ;
 
 test-suite standalone :
@@ -53,6 +60,9 @@ test-suite standalone :
     [ run cstring_ref.cpp test_impl ]
     [ run environment.cpp test_impl ]
     [ run pid.cpp test_impl ]
+    [ run exe.cpp test_impl ]
+    [ run cwd.cpp test_impl ]
+    [ run cmd.cpp test_impl ]
     [ run shell.cpp test_impl ]
     ;
 
