@@ -21,7 +21,7 @@
 #include <cstdlib>
 #endif
 
-#if (defined(__linux__) || defined(__ANDROID__)
+#if (defined(__linux__) || defined(__ANDROID__))
 #include <cstdio>
 #endif
 
