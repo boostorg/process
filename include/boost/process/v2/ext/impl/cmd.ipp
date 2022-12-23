@@ -16,12 +16,14 @@
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 #include <windows.h>
+#include <shellapi.h>
 #else
 #include <climits>
 #endif
 
 #if (defined(BOOST_PROCESS_V2_WINDOWS) || defined(__linux__) || defined(__ANDROID__)
 #include <cstdlib>
+#include <cstdio>
 #endif
 
 #if defined(__FreeBSD__)
