@@ -20,7 +20,7 @@
 #include <climits>
 #endif
 
-#if (defined(BOOST_PROCESS_V2_WINDOWS) || defined(__linux__) || defined(__ANDROID__) || defined(__sun))
+#if (defined(BOOST_PROCESS_V2_WINDOWS) || defined(__linux__) || defined(__ANDROID__)
 #include <cstdlib>
 #endif
 
@@ -33,20 +33,28 @@
 #include <libprocstat.h>
 #endif
 
-#if (defined(__NetBSD__) || defined(__OpenBSD__))
-#include <sys/types.h>
+#if defined(__NetBSD__)
+#include <kvm.h>
+#include <sys/param.h>
 #include <sys/sysctl.h>
 #endif
 
-#if defined(__DragonFly__)
-#include <cstring>
-#include <cstdio>
+#if defined(__OpenBSD__)
+#include <sys/param.h>
+#include <sys/sysctl.h>
+#include <kvm.h>
 #endif
 
-#ifdef BOOST_PROCESS_USE_STD_FS
-namespace filesystem = std::filesystem;
-#else
-namespace filesystem = boost::filesystem;
+#if defined(__DragonFly__)
+#include <sys/types.h>
+#include <kvm.h>
+#endif
+
+#if defined(__sun)
+#include <kvm.h>
+#include <sys/param.h>
+#include <sys/user.h>
+#include <sys/proc.h>
 #endif
 
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
