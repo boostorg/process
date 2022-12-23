@@ -12,8 +12,6 @@
 #include <boost/process/v2/ext/detail/proc_info.hpp>
 #include <boost/process/v2/ext/cmd.hpp>
 
-#include <string>
-
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 #include <windows.h>
 #include <shellapi.h>
