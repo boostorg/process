@@ -34,3 +34,4 @@ function(boost_process_v2_test_with_target name)
 endfunction()
 
 boost_process_v2_test_with_target(process)
+boost_process_v2_test_with_target(ext)

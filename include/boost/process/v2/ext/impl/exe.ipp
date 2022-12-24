@@ -33,6 +33,7 @@
 #if (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__))
 #include <sys/types.h>
 #include <sys/sysctl.h>
+#include <alloca.h>
 #endif
 
 #if defined(__OpenBSD__)
@@ -48,72 +49,84 @@
 #include <kvm.h>
 #endif
 
-#ifdef BOOST_PROCESS_USE_STD_FS
-namespace filesystem = std::filesystem;
-#else
-namespace filesystem = boost::filesystem;
-#endif
-
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
 
 namespace ext {
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 
-filesystem::path executable(boost::process::v2::pid_type pid, boost::system::error_code & ec)
+filesystem::path exe(HANDLE process_handle p_handle)
 {
-    HANDLE proc = nullptr;
-    if (pid == GetCurrentProcessId()) 
+    boost::system::error_code ec;
+    auto res = exe(p_handle, ec);
+    if (ec)
+        detail::throw_error(ec, "exe");
+    return res;
+}
+
+
+filesystem::path exe(HANDLE process_handle, boost::system::error_code & ec)
+{
+    wchar_t buffer[MAX_PATH];
+    // On input, specifies the size of the lpExeName buffer, in characters.
+    DWORD size = MAX_PATH;
+    if (QueryFullProcessImageNameW(proc, 0, buffer, &size))
+    {
+        wchar_t exe[MAX_PATH];
+        if (_wfullpath(exe, buffer, MAX_PATH))
+            return exe;
+        else
+            ec = detail::get_last_error();
+    }
+    else
+        ec = detail::get_last_error();
+
+    return "";
+}
+
+filesystem::path exe(boost::process::v2::pid_type pid, boost::system::error_code & ec)
+{
+    if (pid == GetCurrentProcessId())
     {
         wchar_t buffer[MAX_PATH];
         if (GetModuleFileNameW(nullptr, buffer, sizeof(buffer))) 
         {
             wchar_t exe[MAX_PATH];
             if (_wfullpath(exe, buffer, MAX_PATH)) 
-            {
                 return exe;
-            }
             else
-                goto err;
+                ec = detail::get_last_error();
         }
     } 
     else 
     {
-        proc = detail::ext::open_process_with_debug_privilege(pid, ec);
-        if (proc == nullptr) goto err;
-        wchar_t buffer[MAX_PATH];
-        DWORD size = sizeof(buffer);
-        if (QueryFullProcessImageNameW(proc, 0, buffer, &size)) 
+        struct del
         {
-            wchar_t exe[MAX_PATH];
-            if (_wfullpath(exe, buffer, MAX_PATH)) 
+            void operator()(HANDLE h)
             {
-                CloseHandle(proc);
-                return exe;
-            }
-            else
-                goto err;
-        }
+                ::CloseHandle(h);
+            };
+        };
+        std::unique_ptr<void, del> proc{detail::ext::open_process_with_debug_privilege(pid, ec)};
+        if (proc == nullptr)
+            ec = detail::get_last_error();
+        else
+            return exe(proc.get(), ec);
     }
-err:
-    if (proc) 
-        CloseHandle(proc);
-    ec = detail::get_last_error();
     return "";
 }
 
 #elif (defined(__APPLE__) && defined(__MACH__))
 
-filesystem::path executable(boost::process::v2::pid_type pid, boost::system::error_code & ec)
+filesystem::path exe(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
     char exe[PROC_PIDPATHINFO_MAXSIZE];
     if (proc_pidpath(pid, exe, sizeof(exe)) > 0) 
     {
         char buffer[PATH_MAX];
         if (realpath(exe, buffer)) 
-        {
             return buffer;
-        }
+
     }
     ec = detail::get_last_error();   
     return "";
@@ -121,26 +134,23 @@ filesystem::path executable(boost::process::v2::pid_type pid, boost::system::err
 
 #elif (defined(__linux__) || defined(__ANDROID__) || defined(__sun))
 
-filesystem::path executable(boost::process::v2::pid_type pid, boost::system::error_code & ec)
+filesystem::path exe(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
-    std::string path;
-    char exe[PATH_MAX];
 #if (defined(__linux__) || defined(__ANDROID__))
-    if (realpath(("/proc/" + std::to_string(pid) + "/exe").c_str(), exe))
+    return filesystem::canonical(
+            filesystem::path("/proc") / std::to_string(pid) / "exe"
+            );
 #elif defined(__sun)
-    if (realpath(("/proc/" + std::to_string(pid) + "/path/a.out").c_str(), exe))
+    return fileystem::canonical(
+            filesystem::path("/proc") / std::to_string(pid) / "path/a.out"
+            );
 #endif
-        path = exe;
-    else
-        ec = detail::get_last_error();
-    return path;
 }
 
 #elif (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__))
 
-filesystem::path executable(boost::process::v2::pid_type pid, boost::system::error_code & ec) 
+filesystem::path exe(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
-    std::string path;
 #if (defined(__FreeBSD__) || defined(__DragonFly__))
     int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, pid};
 #elif defined(__NetBSD__)
@@ -149,137 +159,41 @@ filesystem::path executable(boost::process::v2::pid_type pid, boost::system::err
     std::size_t len = 0;
     if (sysctl(mib, 4, nullptr, &len, nullptr, 0) == 0) 
     {
-        std::vector<char> strbuff;
-        strbuff.resize(len, '\0');
-        char *exe = strbuff.data();
-        if (sysctl(mib, 4, exe, &len, nullptr, 0) == 0) 
+        std::string strbuff;
+        strbuff.resize(len);
+        if (sysctl(mib, 4, strbuff.data(), &len, nullptr, 0) == 0)
         {
             char buffer[PATH_MAX];
-            if (realpath(exe, buffer)) 
-            {
+            if (realpath(strbuff.data(), buffer))
                 return buffer;
-            }
-            else
-                goto err;
         }
-        else
-            goto err;
     }
-err:
+
     ec = detail::get_last_error();
     return "";
 }
 
 #elif defined(__OpenBSD__)
 
-filesystem::path executable(boost::process::v2::pid_type pid, boost::system::error_code & ec)
+filesystem::path exe(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
-    std::string path;
-    auto is_executable = [](boost::process::v2::pid_type pid, std::string in, std::string *out, boost::system::error_code & ec) 
-    {
-        *out = "";
-        bool success = false;
-        struct stat st;
-        char exe[PATH_MAX];
-        if (!stat(in.c_str(), &st) && 
-            (st.st_mode & S_IXUSR) && 
-            (st.st_mode & S_IFREG) && 
-            realpath(in.c_str(), exe)) 
-        {
-            int cntp = 0;
-            kinfo_file *kif = nullptr;
-            kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
-            if (!kd)
-                goto err;
-            if ((kif = kvm_getfiles(kd, KERN_FILE_BYPID, pid, sizeof(struct kinfo_file), &cntp))) 
-            {
-                for (int i = 0; i < cntp; i++) 
-                {
-                    if (kif[i].fd_fd == KERN_FILE_TEXT && 
-                        (st.st_dev == static_cast<dev_t>(kif[i].va_fsid) || 
-                        st.st_ino == static_cast<ino_t>(kif[i].va_fileid))) 
-                    {
-                        *out = exe;
-                        success = true;
-                        break;
-                    }
-                }
-            } 
-            else
-                goto err;
-            kvm_close(kd);
-        }
-err:
-        ec = detail::get_last_error();
-        return success;
-    };
-    std::vector<std::string> buffer = cmdline_from_proc_id(pid, ec);
-    if (!buffer.empty()) 
-    {
-        bool is_exe = false;
-        std::string argv0;
-        if (!buffer[0].empty()) 
-        {
-            if (buffer[0][0] == '/') 
-            {
-                argv0 = buffer[0];
-                is_exe = is_executable(pid, argv0.c_str(), &path, ec);
-            } 
-            else if (buffer[0].find('/') == std::string::npos) 
-            {
-                std::string penv = envvar_value_from_proc_id(pid, "PATH");
-                if (!penv.empty()) {
-                    std::vector<std::string> env;
-                    boost::split(env, penv, boost::is_any_of(":"));
-                    for (std::size_t i = 0; i < env.size(); i++) 
-                    {
-                        argv0 = env[i] + "/" + buffer[0];
-                        is_exe = is_executable(pid, argv0.c_str(), &path, ec);
-                        if (is_exe) break;
-                        if (buffer[0][0] == '-') 
-                        {
-                            argv0 = env[i] + "/" + buffer[0].substr(1);
-                            is_exe = is_executable(pid, argv0.c_str(), &path, ec);
-                            if (is_exe) break;
-                        }
-                    }
-                }
-            } else {
-                std::string pwd = envvar_value_from_proc_id(pid, "PWD", ec);
-                if (!pwd.empty()) 
-                {
-                    argv0 = pwd + "/" + buffer[0];
-                    is_exe = is_executable(pid, argv0.c_str(), &path, ec);
-                }
-                if (pwd.empty() || !is_exe) 
-                {
-                    std::string cwd = current_path(pid, ec).string();
-                    if (!cwd.empty()) 
-                    {
-                       argv0 = cwd + "/" + buffer[0];
-                       is_exe = is_executable(pid, argv0.c_str(), &path, ec);
-                    }
-                }
-            }
-        }
-    }
-    if (path.empty())
-        ec = detail::get_last_error();
-    return path;
+    ec.assign(ENOTSUP, boost::system::system_category());
+    return "";
 }
 
 #else
 #error "Platform not supported"
 #endif
 
-filesystem::path executable(boost::process::v2::pid_type pid)
+filesystem::path exe(boost::process::v2::pid_type pid)
 {
     boost::system::error_code ec;
-    auto res = executable(pid, ec);
+    auto res = exe(pid, ec);
     if (ec)
-        detail::throw_error(ec, "executable");
+        detail::throw_error(ec, "exe");
     return res;
 }
+
 
 } // namespace ext
 

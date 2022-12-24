@@ -128,6 +128,7 @@ struct basic_process_handle_fd_or_signal
 
     pid_type id() const
     { return pid_; }
+    native_handle_type native_handle() {return pid_;}
 
     void terminate_if_running(error_code &)
     {
