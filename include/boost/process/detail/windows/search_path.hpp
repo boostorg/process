@@ -63,7 +63,11 @@ inline boost::process::filesystem::path search_path(
         {
             boost::process::filesystem::path pp_ext = p;
             pp_ext += ext;
+#if defined(BOOST_PROCESS_USE_STD_FS)
+            std::error_code ec;
+#else
             boost::system::error_code ec;
+#endif
             bool file = boost::process::filesystem::is_regular_file(pp_ext, ec);
             if (!ec && file &&
                 ::boost::winapi::sh_get_file_info(pp_ext.native().c_str(), 0, 0, 0, ::boost::winapi::SHGFI_EXETYPE_))
