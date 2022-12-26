@@ -9,6 +9,7 @@
 #include <boost/process/v2/detail/config.hpp>
 #include <boost/process/v2/detail/throw_error.hpp>
 #include <boost/process/v2/ext/detail/proc_info.hpp>
+#include <string>
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 #include <iterator>
@@ -33,43 +34,64 @@ namespace ext
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 // type of process memory to read?
 enum MEMTYP {MEMCMD, MEMENV, MEMCWD};
-std::vector<wchar_t> cwd_cmd_env_from_proc(HANDLE proc, int type, boost::system::error_code & ec) {
-    std::vector<wchar_t> buffer;
+std::wstring cwd_cmd_env_from_proc(HANDLE proc, int type, boost::system::error_code & ec)
+{
+    std::wstring buffer;
     PEB peb;
     SIZE_T nRead = 0; 
     ULONG len = 0;
     PROCESS_BASIC_INFORMATION pbi;
     RTL_USER_PROCESS_PARAMETERS upp;
+
     wchar_t *res = nullptr;
     FARPROC farProc = nullptr;
     NTSTATUS status = 0;
     PVOID buf = nullptr;
     status = NtQueryInformationProcess(proc, ProcessBasicInformation, &pbi, sizeof(pbi), &len);
     ULONG error = RtlNtStatusToDosError(status);
-    if (error) { goto err; }
-    ReadProcessMemory(proc, pbi.PebBaseAddress, &peb, sizeof(peb), &nRead);
-    if (!nRead) { goto err; }
-    ReadProcessMemory(proc, peb.ProcessParameters, &upp, sizeof(upp), &nRead);
-    if (!nRead) { goto err; }
+
+    if (error)
+    {
+        ec.assign(error, boost::system::system_category());
+        return {};
+    }
+
+    if (!ReadProcessMemory(proc, pbi.PebBaseAddress, &peb, sizeof(peb), &nRead))
+    {
+        ec = detail::get_last_error();
+        return {};
+    }
+
+    if (!ReadProcessMemory(proc, peb.ProcessParameters, &upp, sizeof(upp), &nRead))
+    {
+        ec = detail::get_last_error();
+        return {};
+    }
     len = 0;
-    if (type == MEMCWD) {
+    if (type == MEMCWD)
+    {
         buf = upp.CurrentDirectory.DosPath.Buffer;
         len = upp.CurrentDirectory.DosPath.Length;
-    } else if (type == MEMENV) {
+    }
+    else if (type == MEMENV)
+    {
         buf = upp.Environment;
         len = (ULONG)upp.EnvironmentSize;
-    } else if (type == MEMCMD) {
+    }
+    else if (type == MEMCMD)
+    {
         buf = upp.CommandLine.Buffer;
         len = upp.CommandLine.Length;
     }
+
     buffer.resize(len / 2 + 1);
-    ReadProcessMemory(proc, buf, &buffer[0], len, &nRead);
-    if (!nRead) { goto err; }
+    if (!ReadProcessMemory(proc, buf, &buffer[0], len, &nRead))
+    {
+        ec = detail::get_last_error();
+        return {};
+    }
     buffer[len / 2] = L'\0';
     return buffer;
-err:
-    ec = detail::get_last_error();
-    return {};
 }
 
 // with debug_privilege enabled allows reading info from more processes

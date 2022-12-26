@@ -66,6 +66,6 @@ test-suite standalone :
 test-suite with_target :
     [ run process.cpp test_impl : --log_level=all --catch_system_errors=no -- : target ]
     [ run windows.cpp test_impl : --log_level=all --catch_system_errors=no -- : target : <build>no <target-os>windows:<build>yes <target-os>windows:<source>Advapi32 ]
-    [ run ext.cpp     test_impl : --log_level=all --catch_system_errors=no -- : target : <build>no <target-os>windows:<build>yes <target-os>windows:<source>Advapi32 ]
+    [ run ext.cpp     test_impl : --log_level=all --catch_system_errors=no -- : target ]
     ;
 

@@ -26,13 +26,13 @@ BOOST_PROCESS_V2_DECL filesystem::path exe(HANDLE handle);
 #endif
 
 template<typename Executor>
-BOOST_PROCESS_V2_DECL filesystem::path exe(basic_process_handle<Executor> & handle, error_code & ec)
+filesystem::path exe(basic_process_handle<Executor> & handle, error_code & ec)
 {
     return exe(handle.native_handle(), ec);
 }
 
 template<typename Executor>
-BOOST_PROCESS_V2_DECL filesystem::path exe(basic_process_handle<Executor> & handle)
+filesystem::path exe(basic_process_handle<Executor> & handle)
 {
     return exe(handle.native_handle());
 }

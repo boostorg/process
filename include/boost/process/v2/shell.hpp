@@ -80,7 +80,7 @@ struct shell
           input_(std::move(lhs.input_)),
           argc_(boost::exchange(lhs.argc_, 0)),
           argv_(boost::exchange(lhs.argv_, nullptr)),
-          reserved_(boost::exchange(lhs.reserved_, 0))  
+          free_argv_(boost::exchange(lhs.free_argv_, nullptr))
     {
     }
     shell& operator=(shell && lhs) noexcept
@@ -90,7 +90,7 @@ struct shell
         input_ = std::move(lhs.input_);
         argc_  = boost::exchange(lhs.argc_, 0);
         argv_ = boost::exchange(lhs.argv_, nullptr);
-        reserved_ = boost::exchange(lhs.reserved_, 0);
+        free_argv_ = boost::exchange(lhs.free_argv_, nullptr);
         return *this;
     }
 
@@ -116,6 +116,9 @@ struct shell
     BOOST_PROCESS_V2_DECL ~shell();
 
   private:
+
+    friend struct make_cmd_shell_;
+
     BOOST_PROCESS_V2_DECL void parse_();
     
     // storage in case we need a conversion
@@ -124,7 +127,10 @@ struct shell
     // impl details
     int argc_ = 0;
     char_type  ** argv_ = nullptr;
-    int reserved_ = 0;
+
+#if defined(BOOST_PROCESS_V2_POSIX)
+    void(*free_argv_)(int, char **);
+#endif
     
 };
 

@@ -119,7 +119,7 @@ namespace ext
 {
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
-BOOST_PROCESS_V2_DECL std::vector<wchar_t> cwd_cmd_env_from_proc(HANDLE proc, int type, boost::system::error_code & ec);
+BOOST_PROCESS_V2_DECL std::wstring cwd_cmd_env_from_proc(HANDLE proc, int type, boost::system::error_code & ec);
 BOOST_PROCESS_V2_DECL HANDLE open_process_with_debug_privilege(boost::process::v2::pid_type pid, boost::system::error_code & ec);
 BOOST_PROCESS_V2_DECL BOOL is_x86_process(HANDLE proc, boost::system::error_code & ec);
 #elif (defined(__APPLE__) && defined(__MACH__))
