@@ -79,8 +79,10 @@ struct shell
         : buffer_(std::move(lhs.buffer_)),
           input_(std::move(lhs.input_)),
           argc_(boost::exchange(lhs.argc_, 0)),
-          argv_(boost::exchange(lhs.argv_, nullptr)),
-          free_argv_(boost::exchange(lhs.free_argv_, nullptr))
+          argv_(boost::exchange(lhs.argv_, nullptr))
+#if defined(BOOST_PROCESS_V2_POSIX)
+        , free_argv_(boost::exchange(lhs.free_argv_, nullptr))
+#endif
     {
     }
     shell& operator=(shell && lhs) noexcept
@@ -90,7 +92,9 @@ struct shell
         input_ = std::move(lhs.input_);
         argc_  = boost::exchange(lhs.argc_, 0);
         argv_ = boost::exchange(lhs.argv_, nullptr);
+#if defined(BOOST_PROCESS_V2_POSIX)
         free_argv_ = boost::exchange(lhs.free_argv_, nullptr);
+#endif
         return *this;
     }
 

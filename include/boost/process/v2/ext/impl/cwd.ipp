@@ -67,23 +67,16 @@ filesystem::path cwd(HANDLE proc, boost::system::error_code & ec)
         ec.assign(ERROR_NOT_SUPPORTED, system::system_category());
         return "";
     } 
-    else 
-    {
-      goto err;
-    }
+
     auto buffer = boost::process::v2::detail::ext::cwd_cmd_env_from_proc(proc, 2/*=MEMCWD*/, ec);
     if (!buffer.empty())
       return filesystem::canonical(buffer, ec);
     else 
         ec = detail::get_last_error();
     return "";
-err:
-    CloseHandle(proc);
-    ec = detail::get_last_error();  
-    return "";
 }
 
-filesystem::path cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
+filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
     struct del
     {
@@ -97,7 +90,7 @@ filesystem::path cmd(boost::process::v2::pid_type pid, boost::system::error_code
         ec = detail::get_last_error();
     else
         return cwd(proc.get(), ec);
-
+    return {};
 }
 
 filesystem::path cwd(HANDLE proc)

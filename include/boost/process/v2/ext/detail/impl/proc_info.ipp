@@ -15,6 +15,98 @@
 #include <iterator>
 #include <algorithm>
 #include <windows.h>
+#include <winternl.h>
+#if !defined(_MSC_VER)
+#pragma pack(push, 8)
+#else
+#include <pshpack8.h>
+#endif
+
+BOOST_PROCESS_V2_BEGIN_NAMESPACE
+
+namespace detail
+{
+namespace ext
+{
+
+/* CURDIR struct from:
+ https://github.com/processhacker/phnt/
+ CC BY 4.0 licence */
+
+typedef struct {
+  UNICODE_STRING DosPath;
+  HANDLE Handle;
+} CURDIR;
+
+/* RTL_DRIVE_LETTER_CURDIR struct from:
+ https://github.com/processhacker/phnt/
+ CC BY 4.0 licence */
+
+typedef struct {
+  USHORT Flags;
+  USHORT Length;
+  ULONG TimeStamp;
+  STRING DosPath;
+} RTL_DRIVE_LETTER_CURDIR;
+
+/* RTL_USER_PROCESS_PARAMETERS struct from:
+ https://github.com/processhacker/phnt/
+ CC BY 4.0 licence */
+
+typedef struct {
+  ULONG MaximumLength;
+  ULONG Length;
+  ULONG Flags;
+  ULONG DebugFlags;
+  HANDLE ConsoleHandle;
+  ULONG ConsoleFlags;
+  HANDLE StandardInput;
+  HANDLE StandardOutput;
+  HANDLE StandardError;
+  CURDIR CurrentDirectory;
+  UNICODE_STRING DllPath;
+  UNICODE_STRING ImagePathName;
+  UNICODE_STRING CommandLine;
+  PVOID Environment;
+  ULONG StartingX;
+  ULONG StartingY;
+  ULONG CountX;
+  ULONG CountY;
+  ULONG CountCharsX;
+  ULONG CountCharsY;
+  ULONG FillAttribute;
+  ULONG WindowFlags;
+  ULONG ShowWindowFlags;
+  UNICODE_STRING WindowTitle;
+  UNICODE_STRING DesktopInfo;
+  UNICODE_STRING ShellInfo;
+  UNICODE_STRING RuntimeData;
+  RTL_DRIVE_LETTER_CURDIR CurrentDirectories[32];
+  ULONG_PTR EnvironmentSize;
+  ULONG_PTR EnvironmentVersion;
+  PVOID PackageDependencyData;
+  ULONG ProcessGroupId;
+  ULONG LoaderThreads;
+  UNICODE_STRING RedirectionDllName;
+  UNICODE_STRING HeapPartitionName;
+  ULONG_PTR DefaultThreadpoolCpuSetMasks;
+  ULONG DefaultThreadpoolCpuSetMaskCount;
+} RTL_USER_PROCESS_PARAMETERS_EXTENDED;
+
+
+
+}
+}
+
+BOOST_PROCESS_V2_END_NAMESPACE
+
+
+#if !defined(_MSC_VER)
+#pragma pack(pop)
+#else
+#include <poppack.h>
+#endif
+
 #elif (defined(__APPLE__) && defined(__MACH__))
 #include <cstdlib>
 #include <sys/types.h>
@@ -41,7 +133,7 @@ std::wstring cwd_cmd_env_from_proc(HANDLE proc, int type, boost::system::error_c
     SIZE_T nRead = 0; 
     ULONG len = 0;
     PROCESS_BASIC_INFORMATION pbi;
-    RTL_USER_PROCESS_PARAMETERS upp;
+    RTL_USER_PROCESS_PARAMETERS_EXTENDED upp;
 
     wchar_t *res = nullptr;
     FARPROC farProc = nullptr;
@@ -90,7 +182,8 @@ std::wstring cwd_cmd_env_from_proc(HANDLE proc, int type, boost::system::error_c
         ec = detail::get_last_error();
         return {};
     }
-    buffer[len / 2] = L'\0';
+    //buffer[len / 2] = L'\0';
+    buffer.pop_back();
     return buffer;
 }
 

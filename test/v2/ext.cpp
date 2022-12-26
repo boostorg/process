@@ -44,11 +44,21 @@ BOOST_AUTO_TEST_CASE(cmd)
     auto cmd = bp2::ext::cmd(bp2::current_pid());
 
     // the test framework drops a bunch of args.
-    BOOST_CHECK_EQUAL(std::string(cmd.args()[0]), master_test_suite().argv[0]);
+    bp2::basic_cstring_ref<typename bp2::shell::char_type> ref(cmd.argv()[0]);
+    BOOST_CHECK_EQUAL(
+        bp2::detail::conv_string<char>(
+            ref.data(), ref.size()
+            ), master_test_suite().argv[0]);
 
     auto cm = cmd.argv() + (cmd.argc() - master_test_suite().argc);
     for (auto i = 1; i < master_test_suite().argc; i++)
-        BOOST_CHECK_EQUAL(std::string(cm[i]), master_test_suite().argv[i]);
+    {
+      bp2::basic_cstring_ref<typename bp2::shell::char_type> ref(cm[i]);
+
+      BOOST_CHECK_EQUAL(bp2::detail::conv_string<char>(ref.data(), ref.size()),
+                        master_test_suite().argv[i]);
+    }
+
 }
 
 
@@ -64,11 +74,16 @@ BOOST_AUTO_TEST_CASE(cmd_exe)
     bp2::process proc(ctx, pth, args);
     auto cm = bp2::ext::cmd(proc.handle());
 
-    BOOST_CHECK_EQUAL(cm.args()[0], pth);
+    bp2::basic_cstring_ref<typename bp2::shell::char_type> ref(cm.argv()[0]);
+    BOOST_CHECK_EQUAL(bp2::detail::conv_string<char>(ref.data(), ref.size()), pth);
 
     BOOST_REQUIRE_EQUAL(cm.argc(), args.size() + 1);
     for (auto i = 0; i < args.size(); i++)
-        BOOST_CHECK_EQUAL(cm.args()[i + 1], args[i]);
+    {
+      ref = cm.argv()[i + 1];
+
+      BOOST_CHECK_EQUAL(bp2::detail::conv_string<char>(ref.data(), ref.size()), args[i]);
+    }
 
 }
 
@@ -76,6 +91,8 @@ BOOST_AUTO_TEST_CASE(test_cwd)
 {
     namespace bp2 = boost::process::v2;
     auto pth = bp2::ext::cwd(bp2::current_pid()).string();
+    if (pth.back() == '\\')
+      pth.pop_back();
     BOOST_CHECK_EQUAL(pth, bp2::filesystem::current_path());
 }
 
@@ -90,7 +107,10 @@ BOOST_AUTO_TEST_CASE(test_cwd_exe)
     boost::asio::io_context ctx;
     bp2::process proc(ctx, pth, {"sleep", "10000"},
                       bp2::process_start_dir{tmp});
-    BOOST_CHECK_EQUAL(bp2::ext::cwd(proc.handle()), tmp);
+    auto tt = bp2::ext::cwd(proc.handle()).string();
+    if (tt.back() == '\\')
+      tt.pop_back();
+    BOOST_CHECK_EQUAL(tt, tmp);
     bp2::error_code ec;
     bp2::filesystem::remove(tmp, ec);
 }

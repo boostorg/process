@@ -55,17 +55,17 @@ namespace ext {
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 
-filesystem::path exe(HANDLE process_handle p_handle)
+filesystem::path exe(HANDLE process_handle)
 {
     boost::system::error_code ec;
-    auto res = exe(p_handle, ec);
+    auto res = exe(process_handle, ec);
     if (ec)
         detail::throw_error(ec, "exe");
     return res;
 }
 
 
-filesystem::path exe(HANDLE process_handle, boost::system::error_code & ec)
+filesystem::path exe(HANDLE proc, boost::system::error_code & ec)
 {
     wchar_t buffer[MAX_PATH];
     // On input, specifies the size of the lpExeName buffer, in characters.
