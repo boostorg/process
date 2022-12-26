@@ -128,7 +128,16 @@ shell cmd(HANDLE proc, error_code & ec)
         return {};
 }
 
-session cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
+shell cmd(HANDLE proc)
+{
+    boost::system::error_code ec;
+    auto res = cmd(proc, ec);
+    if (ec)
+        detail::throw_error(ec, "cmd");
+    return res;
+}
+
+shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
     struct del
     {
@@ -450,11 +459,11 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 
 shell cmd(boost::process::v2::pid_type pid)
 {
-        boost::system::error_code ec;
-        auto res = cmd(pid, ec);
-        if (ec)
-                detail::throw_error(ec, "cmd");
-        return res;
+    boost::system::error_code ec;
+    auto res = cmd(pid, ec);
+    if (ec)
+            detail::throw_error(ec, "cmd");
+    return res;
 }
 
 } // namespace ext

@@ -5,9 +5,11 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include <boost/process/v2/ext/cmd.hpp>
+#include <boost/process/v2/ext/cwd.hpp>
 #include <boost/process/v2/ext/exe.hpp>
 #include <boost/process/v2/pid.hpp>
 #include <boost/process/v2/process.hpp>
+#include <boost/process/v2/start_dir.hpp>
 #include <boost/test/unit_test.hpp>
 
 BOOST_AUTO_TEST_SUITE(ext)
@@ -70,5 +72,27 @@ BOOST_AUTO_TEST_CASE(cmd_exe)
 
 }
 
+BOOST_AUTO_TEST_CASE(test_cwd)
+{
+    namespace bp2 = boost::process::v2;
+    auto pth = bp2::ext::cwd(bp2::current_pid()).string();
+    BOOST_CHECK_EQUAL(pth, bp2::filesystem::current_path());
+}
+
+BOOST_AUTO_TEST_CASE(test_cwd_exe)
+{
+    using boost::unit_test::framework::master_test_suite;
+    const auto pth =  master_test_suite().argv[1];
+    namespace bp2 = boost::process::v2;
+
+    auto tmp = bp2::filesystem::temp_directory_path();
+
+    boost::asio::io_context ctx;
+    bp2::process proc(ctx, pth, {"sleep", "10000"},
+                      bp2::process_start_dir{tmp});
+    BOOST_CHECK_EQUAL(bp2::ext::cwd(proc.handle()), tmp);
+    bp2::error_code ec;
+    bp2::filesystem::remove(tmp, ec);
+}
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -60,50 +60,58 @@ namespace ext {
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 
-filesystem::path current_path(boost::process::v2::pid_type pid, boost::system::error_code & ec)
+filesystem::path cwd(HANDLE proc, boost::system::error_code & ec)
 {
-    std::wstring path;
-    std::vector<wchar_t> buffer;
-    wchar_t cwd[MAX_PATH];
-    HANDLE proc = boost::process::v2::detail::ext::open_process_with_debug_privilege(pid, ec);
-    if (proc == nullptr) {ec = detail::get_last_error(); return path;}
-    if (boost::process::v2::detail::ext::is_x86_process(GetCurrentProcess(), ec) != 
+    if (boost::process::v2::detail::ext::is_x86_process(GetCurrentProcess(), ec) !=
 	    boost::process::v2::detail::ext::is_x86_process(proc, ec)) {
-        CloseHandle(proc); 
+        ec.assign(ERROR_NOT_SUPPORTED, system::system_category());
         return "";
     } 
     else 
     {
       goto err;
     }
-    buffer = boost::process::v2::detail::ext::cwd_cmd_env_from_proc(proc, 2/*=MEMCWD*/, ec);
-    if (!buffer.empty()) {
-      if (_wfullpath(cwd, &buffer[0], MAX_PATH)) {
-        path = cwd;
-        if (!path.empty() && std::count(path.begin(), path.end(), '\\') > 1 && path.back() == '\\') {
-          path = path.substr(0, path.length() - 1);
-        }
-      } 
-      else 
-      {
-        goto err;
-      }
-    } 
+    auto buffer = boost::process::v2::detail::ext::cwd_cmd_env_from_proc(proc, 2/*=MEMCWD*/, ec);
+    if (!buffer.empty())
+      return filesystem::canonical(buffer, ec);
     else 
-    {
-      goto err;
-    }
-    CloseHandle(proc);
-    return path;
+        ec = detail::get_last_error();
+    return "";
 err:
     CloseHandle(proc);
     ec = detail::get_last_error();  
     return "";
 }
 
+filesystem::path cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
+{
+    struct del
+    {
+        void operator()(HANDLE h)
+        {
+            ::CloseHandle(h);
+        };
+    };
+    std::unique_ptr<void, del> proc{detail::ext::open_process_with_debug_privilege(pid, ec)};
+    if (proc == nullptr)
+        ec = detail::get_last_error();
+    else
+        return cwd(proc.get(), ec);
+
+}
+
+filesystem::path cwd(HANDLE proc)
+{
+    boost::system::error_code ec;
+    auto res = cwd(proc, ec);
+    if (ec)
+        detail::throw_error(ec, "cwd");
+    return res;
+}
+
 #elif (defined(__APPLE__) && defined(__MACH__))
 
-filesystem::path current_path(boost::process::v2::pid_type pid, boost::system::error_code & ec)
+filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
     proc_vnodepathinfo vpi;
     if (proc_pidinfo(pid, PROC_PIDVNODEPATHINFO, 0, &vpi, sizeof(vpi)) > 0) {
@@ -118,21 +126,16 @@ filesystem::path current_path(boost::process::v2::pid_type pid, boost::system::e
 
 #elif (defined(__linux__) || defined(__ANDROID__) || defined(__sun))
 
-filesystem::path current_path(boost::process::v2::pid_type pid, boost::system::error_code & ec)
+filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
-    std::string path;
-    char cwd[PATH_MAX];
-    if (realpath(("/proc/" + std::to_string(pid) + "/cwd").c_str(), cwd))
-        path = cwd;
-    else
-        ec = detail::get_last_error();
-    return path;
+    return filesystem::canonical(
+                filesystem::path("/proc") /  std::to_string(pid) / "cwd", ec);
 }
 
 #elif defined(__FreeBSD__)
 
 // FIXME: Add error handling.
-filesystem::path current_path(boost::process::v2::pid_type pid, boost::system::error_code & ec) 
+filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code & ec) 
 {
     std::string path;
     unsigned cntp = 0;
@@ -171,7 +174,7 @@ filesystem::path current_path(boost::process::v2::pid_type pid, boost::system::e
 #elif defined(__DragonFly__)
 
 // FIXME: Add error handling.
-filesystem::path current_path(boost::process::v2::pid_type pid, boost::system::error_code & ec) 
+filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code & ec) 
 {
     std::string path;
     /* Probably the hackiest thing ever we are doing here, because the "official" API is broken OS-level. */
@@ -209,7 +212,7 @@ filesystem::path current_path(boost::process::v2::pid_type pid, boost::system::e
 
 #elif (defined(__NetBSD__) || defined(__OpenBSD__))
 
-filesystem::path current_path(boost::process::v2::pid_type pid, boost::system::error_code & ec)
+filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
     std::string path;
 #if defined(__NetBSD__)
@@ -229,17 +232,14 @@ filesystem::path current_path(boost::process::v2::pid_type pid, boost::system::e
         {
             char buffer[PATH_MAX];
             if (realpath(exe, buffer)) 
-            {
                 return buffer;
-            }
             else
-                goto err;
+                ec = detail::get_last_error();
         }
         else
-            goto err;
+            ec = detail::get_last_error();
     }
-err:
-    ec = detail::get_last_error();
+
     return "";
 }
 
@@ -247,12 +247,12 @@ err:
 #error "Platform not supported"
 #endif
 
-filesystem::path current_path(boost::process::v2::pid_type pid)
+filesystem::path cwd(boost::process::v2::pid_type pid)
 {
     boost::system::error_code ec;
-    auto res = current_path(pid, ec);
+    auto res = cwd(pid, ec);
     if (ec)
-        detail::throw_error(ec, "current_path");
+        detail::throw_error(ec, "cwd");
     return res;
 }
 

@@ -138,7 +138,7 @@ filesystem::path exe(boost::process::v2::pid_type pid, boost::system::error_code
 {
 #if (defined(__linux__) || defined(__ANDROID__))
     return filesystem::canonical(
-            filesystem::path("/proc") / std::to_string(pid) / "exe"
+            filesystem::path("/proc") / std::to_string(pid) / "exe", ec
             );
 #elif defined(__sun)
     return fileystem::canonical(
