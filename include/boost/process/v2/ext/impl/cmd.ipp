@@ -81,6 +81,36 @@ struct make_cmd_shell_
 
         return res;
     }
+
+    static shell clone(char ** cmd)
+    {
+        shell res;
+        res.argc_ = 0;
+        std::size_t str_lengths = 0;
+        for (auto c = cmd; *c != nullptr; c++)
+        {
+            res.argc_++;
+            str_lengths += (std::strlen(*c) + 1);
+        }
+        // yes, not the greatest solution.
+        std::string buffer;
+        res.buffer_.resize(str_lengths);
+
+        res.argv_ = new char*[res.argc_ + 1];
+        res.free_argv_ = +[](int argc, char ** argv) {delete[] argv;};
+        res.argv_[res.argc_] = nullptr;
+        auto p = &buffer[sizeof(int) * (res.argc_) + 1];
+
+        for (int i = 0; i < res.argc_; i++)
+        {
+            const auto ln = std::strlen(cmd[i]);
+            res.argv_[i] = std::strcpy(p, cmd[i]);
+            p += (ln + 1);
+        }
+
+        return res;
+    }
+
 #endif
 };
 
@@ -281,141 +311,125 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 
     proc_info.get_deleter().has_cmd = true;
 
-    int argc = 0;
-    std::size_t str_lengths = 0;
-    for (auto c = cmd; *c != nullptr; c++)
-    {
-        argc++;
-        str_lengths += (std::strlen(*c) + 1);
-    }
-    // yes, not the greatest solution.
-    std::string buffer;
-    buffer.resize(
-            sizeof(int) * (argc + 1)
-            + str_lengths);
-
-    char ** argv = reinterpret_cast<char**>(&*buffer.begin());
-    argv[argc] = nullptr;
-    auto p = &buffer[sizeof(int) * (argc) + 1];
-
-    for (int i = 0; i < argc; i++)
-    {
-        const auto ln = std::strlen(cmd[i]);
-        argv[i] = std::strcpy(p, cmd[i]);
-        p += (ln + 1);
-    }
-
-    return make_cmd_shell_::make(std::move(buffer),
-                                 argc, argv, nullptr);
+    return make_cmd_shell_::clone(cmd);
 }
     
 #elif defined(__DragonFly__)
 
-std::vector<std::string> commandline(boost::process::v2::pid_type pid, boost::system::error_code & ec) 
+shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
-    std::vector<std::string> vec;
     int cntp = 0;
     kinfo_proc *proc_info = nullptr;
     const char *nlistf, *memf;
     nlistf = memf = "/dev/null";
-    boost::process::v2::detail::ext::kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr);
-    if (!boost::process::v2::detail::ext::kd) {ec = detail::get_last_error(); return vec;}
+    struct closer
+    {
+        void operator()(kvm_t * kd)
+        {
+            kvm_close(kd);
+        }
+    };
+
+    std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr)};
+    if (!kd) {ec = detail::get_last_error(); return {};}
     if ((proc_info = kvm_getprocs(boost::process::v2::detail::ext::kd, KERN_PROC_PID, pid, &cntp))) 
     {
-        char **cmd = kvm_getargv(boost::process::v2::detail::ext::kd, proc_info, 0);
+        char **cmd = kvm_getargv(kd, proc_info, 0);
         if (cmd)
-        {
-            for (int i = 0; cmd[i]; i++) 
-            {
-                vec.push_back(cmd[i]);
-            }
-        }
+            return make_cmd_shell_::clone(cmd);
         else
             ec = detail::get_last_error();
     }
     else
         ec = detail::get_last_error();
-    kvm_close(boost::process::v2::detail::ext::kd);
-    return vec;
+    return {};
 }
     
 #elif defined(__NetBSD__)
 
-std::vector<std::string> commandline(boost::process::v2::pid_type pid, boost::system::error_code & ec) 
+shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
+
     std::vector<std::string> vec;
     int cntp = 0;
     kinfo_proc2 *proc_info = nullptr;
-    boost::process::v2::detail::ext::kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
+    struct closer
+    {
+        void operator()(kvm_t * kd)
+        {
+            kvm_close(kd);
+        }
+    };
+
+    std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr)};
+
     if (!boost::process::v2::detail::ext::kd) {ec = detail::get_last_error(); return vec;}
     if ((proc_info = kvm_getproc2(boost::process::v2::detail::ext::kd, KERN_PROC_PID, pid, sizeof(struct kinfo_proc2), &cntp))) 
     {
         char **cmd = kvm_getargv2(boost::process::v2::detail::ext::kd, proc_info, 0);
-        if (cmd) 
-        {
-            for (int i = 0; cmd[i]; i++) 
-            {
-                vec.push_back(cmd[i]);
-            }
-        }
+        if (cmd)
+            return make_cmd_shell_::clone(cmd);
         else
             ec = detail::get_last_error();
     }
     else
         ec = detail::get_last_error();
-    kvm_close(boost::process::v2::detail::ext::kd);
     return vec;
 }
     
 #elif defined(__OpenBSD__)
 
-std::vector<std::string> commandline(boost::process::v2::pid_type pid, boost::system::error_code & ec) 
+shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
     std::vector<std::string> vec;
     int cntp = 0;
     kinfo_proc *proc_info = nullptr;
-    boost::process::v2::detail::ext::kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
-    if (!boost::process::v2::detail::ext::kd) {ec = detail::get_last_error(); return vec;}
+
+    struct closer
+    {
+        void operator()(kvm_t * kd)
+        {
+            kvm_close(kd);
+        }
+    };
+
+    std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr)};
+    if (!kd) {ec = detail::get_last_error(); return vec;}
     if ((proc_info = kvm_getprocs(boost::process::v2::detail::ext::kd, KERN_PROC_PID, pid, sizeof(struct kinfo_proc), &cntp))) 
     {
         char **cmd = kvm_getargv(boost::process::v2::detail::ext::kd, proc_info, 0);
-        if (cmd) 
-        {
-            for (int i = 0; cmd[i]; i++) 
-            {
-                vec.push_back(cmd[i]);
-            }
-        }
+        if (cmd)
+            return make_cmd_shell_::clone(cmd);
         else
             ec = detail::get_last_error();
     }
     else
         ec = detail::get_last_error();
     kvm_close(boost::process::v2::detail::ext::kd);
-    return vec;
+    return {};
 }
     
 #elif defined(__sun)
 
-std::vector<std::string> commandline(boost::process::v2::pid_type pid, boost::system::error_code & ec) 
+shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
-    std::vector<std::string> vec;
     char **cmd = nullptr;
     proc *proc_info = nullptr;
     user *proc_user = nullptr;
     boost::process::v2::detail::ext::kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr);
-    if (!boost::process::v2::detail::ext::kd) {ec = detail::get_last_error(); return vec;}
+    if (!boost::process::v2::detail::ext::kd) {ec = detail::get_last_error(); return {};}
     if ((proc_info = kvm_getproc(boost::process::v2::detail::ext::kd, pid))) 
     {
         if ((proc_user = kvm_getu(boost::process::v2::detail::ext::kd, proc_info))) 
         {
             if (!kvm_getcmd(boost::process::v2::detail::ext::kd, proc_info, proc_user, &cmd, nullptr)) 
             {
-                for (int i = 0; cmd[i]; i++) 
-                {
-                    vec.push_back(cmd[i]);
-                }
-                free(cmd);
+                int argc = 0;
+                for (int i = 0; cmd[i] != nullptr; i++)
+                    argc ++;
+                return make_cmd_shell_::make(
+                        {}, argc, cmd,
+                        +[](int, char ** argv) {::free(argv);})
             }
             else
                 ec = detail::get_last_error();
@@ -427,7 +441,7 @@ std::vector<std::string> commandline(boost::process::v2::pid_type pid, boost::sy
         ec = detail::get_last_error();
     
     kvm_close(boost::process::v2::detail::ext::kd);
-    return vec;
+    return {};
 }
 
 #else
