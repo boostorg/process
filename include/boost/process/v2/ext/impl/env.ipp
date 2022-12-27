@@ -8,8 +8,8 @@
 #include <boost/process/v2/detail/config.hpp>
 #include <boost/process/v2/detail/last_error.hpp>
 #include <boost/process/v2/detail/throw_error.hpp>
+#include <boost/process/v2/ext/detail/proc_info.hpp>
 #include <boost/process/v2/ext/env.hpp>
-
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 #include <windows.h>
@@ -61,8 +61,75 @@ const environment::char_type * dereference(native_env_iterator iterator)
 namespace ext
 {
 
-#if (defined(__linux__) || defined(__ANDROID__))
+#if defined(_WIN32)
 
+env_view env(HANDLE proc, boost::system::error_code & ec)
+{
+    wchar_t *buffer = nullptr;
+    detail::ext::PEB peb;
+    SIZE_T nRead = 0; 
+    ULONG len = 0;
+    PROCESS_BASIC_INFORMATION pbi;
+    detail::ext::RTL_USER_PROCESS_PARAMETERS_EXTENDED upp;
+
+    NTSTATUS status = 0;
+    PVOID buf = nullptr;
+    status = NtQueryInformationProcess(proc, ProcessBasicInformation, &pbi, sizeof(pbi), &len);
+    ULONG error = RtlNtStatusToDosError(status);
+
+    if (error)
+    {
+        ec.assign(error, boost::system::system_category());
+        return {};
+    }
+
+    if (!ReadProcessMemory(proc, pbi.PebBaseAddress, &peb, sizeof(peb), &nRead))
+    {
+        ec = detail::get_last_error();
+        return {};
+    }
+
+    if (!ReadProcessMemory(proc, peb.ProcessParameters, &upp, sizeof(upp), &nRead))
+    {
+        ec = detail::get_last_error();
+        return {};
+    }
+
+    buf = upp.Environment;
+    len = (ULONG)upp.EnvironmentSize;
+    ev.handle_.reset(new wchar_t[len / 2 + 1]());
+
+    if (!ReadProcessMemory(proc, buf, ev.handle_.get(), len, &nRead))
+    {
+        ec = detail::get_last_error();
+        return {};
+    }
+
+    env_view ev;
+    ev.handle_.get()[len / 2] = L'\0';
+    return ev;
+}
+
+env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
+{
+    struct del
+    {
+        void operator()(HANDLE h)
+        {
+            ::CloseHandle(h);
+        };
+    };
+    std::unique_ptr<void, del> proc{detail::ext::open_process_with_debug_privilege(pid, ec)};
+    if (proc == nullptr)
+        ec = detail::get_last_error();
+    else
+	    return env(proc.get(), ec);
+
+	return {};
+}
+
+
+#elif (defined(__linux__) || defined(__ANDROID__))
 
 env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
