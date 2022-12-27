@@ -423,6 +423,7 @@ std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec)
                 vec.push_back(proc_info[i].kp_pid);
             }
         }
+    }
     else
         ec = detail::get_last_error();
     return vec;
