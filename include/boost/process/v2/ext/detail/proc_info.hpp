@@ -52,5 +52,11 @@ BOOST_PROCESS_V2_DECL BOOL is_x86_process(HANDLE proc, boost::system::error_code
 
 BOOST_PROCESS_V2_END_NAMESPACE
 
+#if defined(BOOST_PROCESS_V2_HEADER_ONLY)
+
+#include <boost/process/v2/ext/detail/impl/proc_info.ipp>
+
+#endif
+
 #endif // BOOST_PROCESS_V2_DETAIL_PROC_INFO_HPP
 

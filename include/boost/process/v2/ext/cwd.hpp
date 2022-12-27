@@ -40,4 +40,8 @@ BOOST_PROCESS_V2_DECL filesystem::path cwd(basic_process_handle<Executor> & hand
 
 BOOST_PROCESS_V2_END_NAMESPACE
 
+#if defined(BOOST_PROCESS_V2_HEADER_ONLY)
+#include <boost/process/v2/ext/impl/cwd.ipp>
+#endif
+
 #endif // BOOST_PROCESS_V2_CWD_HPP
