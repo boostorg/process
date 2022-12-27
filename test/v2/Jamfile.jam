@@ -27,6 +27,10 @@ project : requirements
   <target-os>freebsd:<linkflags>-lutil
   <target-os>freebsd:<linkflags>-lprocstat
   <target-os>freebsd:<cxxflags>-std=c++11
+  <target-os>bsd:<linkflags>-lpthread
+  <target-os>bsd:<linkflags>-lc
+  <target-os>bsd:<linkflags>-lkvm
+  <target-os>bsd:<cxxflags>-std=c++11
   <os>NT,<toolset>cw:<library>ws2_32
   <os>NT,<toolset>gcc:<library>ws2_32
   <define>BOOST_PROCESS_V2_SEPARATE_COMPILATION=1

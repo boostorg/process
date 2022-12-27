@@ -32,27 +32,26 @@
 #include <libprocstat.h>
 #endif
 
+#if (defined(__DragonFly__) ||  defined(__OpenBSD__))
+#include <sys/types.h>
+#include <sys/param.h>
+#include <sys/sysctl.h>
+#include <sys/user.h>
+#include <kvm.h>
+#endif
+
 #if defined(__NetBSD__)
-#include <kvm.h>
-#include <sys/param.h>
-#include <sys/sysctl.h>
-#endif
-
-#if defined(__OpenBSD__)
-#include <sys/param.h>
-#include <sys/sysctl.h>
-#include <kvm.h>
-#endif
-
-#if defined(__DragonFly__)
 #include <sys/types.h>
 #include <kvm.h>
+#include <sys/param.h>
+#include <sys/sysctl.h>
 #endif
 
 #if defined(__sun)
+#include <sys/types.h>
 #include <kvm.h>
 #include <sys/param.h>
-#include <sys/user.h>
+#include <sys/time.h>
 #include <sys/proc.h>
 #endif
 
@@ -340,10 +339,10 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     };
 
     std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr)};
-    if (!kd) {ec = detail::get_last_error(); return {};}
-    if ((proc_info = kvm_getprocs(boost::process::v2::detail::ext::kd, KERN_PROC_PID, pid, &cntp))) 
+    if (!kd.get()) {ec = detail::get_last_error(); return {};}
+    if ((proc_info = kvm_getprocs(kd.get(), KERN_PROC_PID, pid, &cntp))) 
     {
-        char **cmd = kvm_getargv(kd, proc_info, 0);
+        char **cmd = kvm_getargv(kd.get(), proc_info, 0);
         if (cmd)
             return make_cmd_shell_::clone(cmd);
         else
@@ -372,10 +371,10 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 
     std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr)};
 
-    if (!boost::process::v2::detail::ext::kd) {ec = detail::get_last_error(); return vec;}
-    if ((proc_info = kvm_getproc2(boost::process::v2::detail::ext::kd, KERN_PROC_PID, pid, sizeof(struct kinfo_proc2), &cntp))) 
+    if (!kd.get()) {ec = detail::get_last_error(); return vec;}
+    if ((proc_info = kvm_getproc2(kd.get().get().get().get().get().get().get(), KERN_PROC_PID, pid, sizeof(struct kinfo_proc2), &cntp))) 
     {
-        char **cmd = kvm_getargv2(boost::process::v2::detail::ext::kd, proc_info, 0);
+        char **cmd = kvm_getargv2(kd.get(), proc_info, 0);
         if (cmd)
             return make_cmd_shell_::clone(cmd);
         else
@@ -403,10 +402,10 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     };
 
     std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr)};
-    if (!kd) {ec = detail::get_last_error(); return vec;}
-    if ((proc_info = kvm_getprocs(boost::process::v2::detail::ext::kd, KERN_PROC_PID, pid, sizeof(struct kinfo_proc), &cntp))) 
+    if (!kd.get()) {ec = detail::get_last_error(); return vec;}
+    if ((proc_info = kvm_getprocs(kd.get(), KERN_PROC_PID, pid, sizeof(struct kinfo_proc), &cntp))) 
     {
-        char **cmd = kvm_getargv(boost::process::v2::detail::ext::kd, proc_info, 0);
+        char **cmd = kvm_getargv(kd.get(), proc_info, 0);
         if (cmd)
             return make_cmd_shell_::clone(cmd);
         else
@@ -414,7 +413,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     }
     else
         ec = detail::get_last_error();
-    kvm_close(boost::process::v2::detail::ext::kd);
+    kvm_close(kd);
     return {};
 }
     
@@ -425,13 +424,13 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     char **cmd = nullptr;
     proc *proc_info = nullptr;
     user *proc_user = nullptr;
-    boost::process::v2::detail::ext::kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr);
-    if (!boost::process::v2::detail::ext::kd) {ec = detail::get_last_error(); return {};}
-    if ((proc_info = kvm_getproc(boost::process::v2::detail::ext::kd, pid))) 
+    kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr);
+    if (!kd.get()) {ec = detail::get_last_error(); return {};}
+    if ((proc_info = kvm_getproc(kd, pid))) 
     {
-        if ((proc_user = kvm_getu(boost::process::v2::detail::ext::kd, proc_info))) 
+        if ((proc_user = kvm_getu(kd, proc_info))) 
         {
-            if (!kvm_getcmd(boost::process::v2::detail::ext::kd, proc_info, proc_user, &cmd, nullptr)) 
+            if (!kvm_getcmd(kd, proc_info, proc_user, &cmd, nullptr)) 
             {
                 int argc = 0;
                 for (int i = 0; cmd[i] != nullptr; i++)
@@ -449,7 +448,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     else
         ec = detail::get_last_error();
     
-    kvm_close(boost::process::v2::detail::ext::kd);
+    kvm_close(kd);
     return {};
 }
 

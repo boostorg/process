@@ -93,8 +93,6 @@ typedef struct {
   ULONG DefaultThreadpoolCpuSetMaskCount;
 } RTL_USER_PROCESS_PARAMETERS_EXTENDED;
 
-
-
 }
 }
 

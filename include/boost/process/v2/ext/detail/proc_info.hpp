@@ -13,24 +13,8 @@
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 
-#elif (defined(__APPLE__) && defined(__MACH__))
 #include <string>
 #include <vector>
-#elif defined(__DragonFly__)
-#include <sys/types.h>
-#include <kvm.h>
-#elif defined(__NetBSD__)
-#include <kvm.h>
-#include <sys/param.h>
-#include <sys/sysctl.h>
-#elif defined(__OpenBSD__)
-#include <sys/param.h>
-#include <sys/sysctl.h>
-#include <kvm.h>
-#elif defined(__sun)
-#include <kvm.h>
-#include <fcntl.h>
-#endif
 
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
 
