@@ -181,14 +181,6 @@ struct basic_process_handle_signal
             detail::throw_error(ec, "request_exit");
     }
 
-    void interrupt(error_code &ec)
-    {
-        if (pid_ <= 0)
-            return;
-        if (::kill(pid_, SIGTERM) == -1)
-            ec = get_last_error();
-    }
-
     void suspend()
     {
         if (pid_ <= 0)
