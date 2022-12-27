@@ -86,10 +86,12 @@ env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
         procargs = std::move(buf);
         size += r;
         if (r < 4096) // done!
+        {
+            procargs.get()[size] = EOF;
             break;
+        }
     }
     ::close(f);
-
 
     env_view ev;
     ev.handle_ = std::move(procargs);

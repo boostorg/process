@@ -154,8 +154,7 @@ BOOST_AUTO_TEST_CASE(test_env_exe)
     new_env.push_back("FOO=42");
     new_env.push_back("BAR=FOO");
 
-
-    bp2::process proc(ctx, pth, {"sleep", "10000"},
+        bp2::process proc(ctx, pth, {"sleep", "10000"},
                       bp2::process_environment(new_env));
 
     auto env = bp2::ext::env(proc.handle());
