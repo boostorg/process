@@ -6,7 +6,7 @@
 
 #include <boost/process/v2/ext/cmd.hpp>
 #include <boost/process/v2/ext/cwd.hpp>
-#include <boost/process/v2/ext/env.hpp>
+//#include <boost/process/v2/ext/env.hpp>
 #include <boost/process/v2/ext/exe.hpp>
 #include <boost/process/v2/pid.hpp>
 #include <boost/process/v2/process.hpp>
@@ -117,6 +117,7 @@ BOOST_AUTO_TEST_CASE(test_cwd_exe)
     bp2::filesystem::remove(tmp, ec);
 }
 
+/*
 BOOST_AUTO_TEST_CASE(test_env)
 {
     namespace bp2 = boost::process::v2;
@@ -169,5 +170,6 @@ BOOST_AUTO_TEST_CASE(test_env_exe)
         BOOST_CHECK_EQUAL(kp.value(), (*itr).value());
     }
 }
+*/
 
 BOOST_AUTO_TEST_SUITE_END()
