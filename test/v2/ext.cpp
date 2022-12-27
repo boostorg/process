@@ -6,6 +6,7 @@
 
 #include <boost/process/v2/ext/cmd.hpp>
 #include <boost/process/v2/ext/cwd.hpp>
+#include <boost/process/v2/ext/env.hpp>
 #include <boost/process/v2/ext/exe.hpp>
 #include <boost/process/v2/pid.hpp>
 #include <boost/process/v2/process.hpp>
@@ -87,12 +88,13 @@ BOOST_AUTO_TEST_CASE(cmd_exe)
 
 }
 
+
 BOOST_AUTO_TEST_CASE(test_cwd)
 {
     namespace bp2 = boost::process::v2;
     auto pth = bp2::ext::cwd(bp2::current_pid()).string();
     if (pth.back() == '\\')
-      pth.pop_back();
+        pth.pop_back();
     BOOST_CHECK_EQUAL(pth, bp2::filesystem::current_path());
 }
 
@@ -109,10 +111,64 @@ BOOST_AUTO_TEST_CASE(test_cwd_exe)
                       bp2::process_start_dir{tmp});
     auto tt = bp2::ext::cwd(proc.handle()).string();
     if (tt.back() == '\\')
-      tt.pop_back();
+        tt.pop_back();
     BOOST_CHECK_EQUAL(tt, tmp);
     bp2::error_code ec;
     bp2::filesystem::remove(tmp, ec);
+}
+
+BOOST_AUTO_TEST_CASE(test_env)
+{
+    namespace bp2 = boost::process::v2;
+    auto env = bp2::ext::env(bp2::current_pid());
+
+
+    for (const auto & kp : bp2::environment::current())
+    {
+        auto itr = std::find_if(env.begin(), env.end(),
+                                [&](bp2::environment::key_value_pair_view kp_)
+                                {
+                                   return kp.key() == kp_.key();
+                                });
+        BOOST_REQUIRE(itr != env.end());
+        BOOST_CHECK_EQUAL(kp.value(), (*itr).value());
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_env_exe)
+{
+    using boost::unit_test::framework::master_test_suite;
+    const auto pth =  master_test_suite().argv[1];
+    namespace bp2 = boost::process::v2;
+
+    auto tmp = bp2::filesystem::temp_directory_path();
+
+    boost::asio::io_context ctx;
+
+    std::vector<bp2::environment::key_value_pair> new_env;
+    {
+        auto cr = bp2::environment::current();
+        new_env.assign(cr.begin(), cr.end());
+    }
+
+    new_env.push_back("FOO=42");
+    new_env.push_back("BAR=FOO");
+
+
+    bp2::process proc(ctx, pth, {"sleep", "10000"},
+                      bp2::process_environment(new_env));
+
+    auto env = bp2::ext::env(proc.handle());
+    for (const auto & kp : new_env)
+    {
+        auto itr = std::find_if(env.begin(), env.end(),
+                                [&](bp2::environment::key_value_pair_view kp_)
+                                {
+                                    return kp.key() == kp_.key();
+                                });
+        BOOST_REQUIRE(itr != env.end());
+        BOOST_CHECK_EQUAL(kp.value(), (*itr).value());
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
