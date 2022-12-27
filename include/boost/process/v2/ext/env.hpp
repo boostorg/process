@@ -5,7 +5,7 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 #ifndef BOOST_PROCESS_V2_ENV_HPP
 #define BOOST_PROCESS_V2_ENV_HPP
-
+/*
 #include <string>
 #include <vector>
 
@@ -136,3 +136,4 @@ BOOST_PROCESS_V2_END_NAMESPACE
 
 #endif
 #endif // BOOST_PROCESS_V2_ENV_HPP
+*/

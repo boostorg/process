@@ -11,8 +11,6 @@
 
 #include <boost/process/v2/pid.hpp>
 
-#if defined(BOOST_PROCESS_V2_WINDOWS)
-
 #include <string>
 #include <vector>
 
