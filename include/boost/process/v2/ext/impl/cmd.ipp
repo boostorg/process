@@ -339,7 +339,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     };
 
     std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr)};
-    if (!kd.get()) {ec = detail::get_last_error(); return {};}
+    if (!kd) {ec = detail::get_last_error(); return {};}
     if ((proc_info = kvm_getprocs(kd.get(), KERN_PROC_PID, pid, &cntp))) 
     {
         char **cmd = kvm_getargv(kd.get(), proc_info, 0);
@@ -371,7 +371,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 
     std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr)};
 
-    if (!kd.get()) {ec = detail::get_last_error(); return vec;}
+    if (!kd) {ec = detail::get_last_error(); return vec;}
     if ((proc_info = kvm_getproc2(kd.get(), KERN_PROC_PID, pid, sizeof(struct kinfo_proc2), &cntp))) 
     {
         char **cmd = kvm_getargv2(kd.get(), proc_info, 0);
@@ -402,7 +402,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     };
 
     std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr)};
-    if (!kd.get()) {ec = detail::get_last_error(); return vec;}
+    if (!kd) {ec = detail::get_last_error(); return vec;}
     if ((proc_info = kvm_getprocs(kd.get(), KERN_PROC_PID, pid, sizeof(struct kinfo_proc), &cntp))) 
     {
         char **cmd = kvm_getargv(kd.get(), proc_info, 0);
@@ -425,7 +425,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     proc *proc_info = nullptr;
     user *proc_user = nullptr;
     kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr);
-    if (!kd.get()) {ec = detail::get_last_error(); return {};}
+    if (!kd) {ec = detail::get_last_error(); return {};}
     if ((proc_info = kvm_getproc(kd, pid))) 
     {
         if ((proc_user = kvm_getu(kd, proc_info))) 
