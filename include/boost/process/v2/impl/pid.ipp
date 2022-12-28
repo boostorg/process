@@ -342,7 +342,7 @@ std::vector<pid_type> all_pids(boost::system::error_code & ec)
     };
 
     std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr)};
-    if (!kd.get()) 
+    if (!kd) 
     {
         ec = detail::get_last_error();
         return vec;
@@ -375,7 +375,7 @@ pid_type parent_pid(pid_type pid, boost::system::error_code & ec)
     };
 
     std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr)}; 
-    if (!kd.get()) 
+    if (!kd) 
     {
         ec = detail::get_last_error();
         return ppid;
@@ -408,7 +408,7 @@ std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec)
     };
 
     std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr)};
-    if (!kd.get()) 
+    if (!kd) 
     {
         ec = detail::get_last_error();
         return vec;
@@ -445,7 +445,7 @@ std::vector<pid_type> all_pids(boost::system::error_code & ec)
     };
 
     std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr)};
-    if (!kd.get())
+    if (!kd)
     {
         ec = detail::get_last_error();
         return vec;
@@ -477,7 +477,7 @@ pid_type parent_pid(pid_type pid, boost::system::error_code & ec)
     };
 
     std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr)};
-    if (!kd.get()) 
+    if (!kd) 
     {
         ec = detail::get_last_error();
         return ppid;
@@ -505,7 +505,7 @@ std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec)
     };
 
     std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr)};
-    if (!kd.get()) 
+    if (!kd) 
     {
         ec = detail::get_last_error();
         return vec;
@@ -542,7 +542,7 @@ std::vector<pid_type> all_pids(boost::system::error_code & ec)
     };
 
     std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr)};
-    if (!kd.get())
+    if (!kd)
     {
         ec = detail::get_last_error();
         return vec;
@@ -577,7 +577,7 @@ pid_type parent_pid(pid_type pid, boost::system::error_code & ec)
     };
 
     std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr)};
-    if (!kd.get())
+    if (!kd)
     {
         ec = detail::get_last_error();
         return ppid;
@@ -605,7 +605,7 @@ std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec)
     };
 
     std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr)}; 
-    if (!kd.get()) 
+    if (!kd) 
     {
         ec = detail::get_last_error();
         return vec;
@@ -643,7 +643,7 @@ std::vector<pid_type> all_pids(boost::system::error_code & ec)
     };
 
     std::unique_ptr<kvm_t, closer> kd{kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr)};
-    if (!kd.get())
+    if (!kd)
     {
         ec = detail::get_last_error();
         return vec;
@@ -676,7 +676,7 @@ pid_type parent_pid(pid_type pid, boost::system::error_code & ec)
     };
 
     std::unique_ptr<kvm_t, closer> kd{kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr)};
-    if (!kd.get())
+    if (!kd)
     {
         ec = detail::get_last_error();
         return ppid;
@@ -704,7 +704,7 @@ std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec)
     };
 
     std::unique_ptr<kvm_t, closer> kd{kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr);
-    if (!kd.get())
+    if (!kd)
     {
         ec = detail::get_last_error();
         return vec;
