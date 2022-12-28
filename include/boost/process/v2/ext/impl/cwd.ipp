@@ -220,7 +220,7 @@ filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code
     {
         std::vector<char> strbuff;
         strbuff.resize(len);
-        if (sysctl(mib, sz,  strbuff.data(), &len, nullptr, 0) == 0) 
+        if (sysctl(mib, sz, strbuff.data(), &len, nullptr, 0) == 0) 
         {
             char buffer[PATH_MAX];
             if (realpath(strbuff.data(), buffer)) 
