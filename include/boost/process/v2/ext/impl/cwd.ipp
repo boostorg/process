@@ -218,12 +218,12 @@ filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code
     std::size_t len = 0;
     if (sysctl(mib, sz, nullptr, &len, nullptr, 0) == 0) 
     {
-        std::vector<char> strbuff;
+        std::string strbuff;
         strbuff.resize(len);
-        if (sysctl(mib, sz, strbuff.data(), &len, nullptr, 0) == 0) 
+        if (sysctl(mib, 4, &strbuff[0], &len, nullptr, 0) == 0)
         {
             char buffer[PATH_MAX];
-            if (realpath(strbuff.data(), buffer)) 
+            if (realpath(strbuff.c_str(), buffer))
                 return buffer;
             else
                 ec = detail::get_last_error();
