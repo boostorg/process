@@ -159,12 +159,12 @@ filesystem::path exe(boost::process::v2::pid_type pid, boost::system::error_code
     std::size_t len = 0;
     if (sysctl(mib, 4, nullptr, &len, nullptr, 0) == 0) 
     {
-        std::vector<char> strbuff;
+        std::string strbuff;
         strbuff.resize(len);
-        if (sysctl(mib, 4, strbuff.data(), &len, nullptr, 0) == 0)
+        if (sysctl(mib, 4, &strbuff[0], &len, nullptr, 0) == 0)
         {
             char buffer[PATH_MAX];
-            if (realpath(strbuff.data(), buffer))
+            if (realpath(strbuff.c_str(), buffer))
                 return buffer;
         }
     }
