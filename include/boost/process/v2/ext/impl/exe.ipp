@@ -72,11 +72,7 @@ filesystem::path exe(HANDLE proc, boost::system::error_code & ec)
     DWORD size = MAX_PATH;
     if (QueryFullProcessImageNameW(proc, 0, buffer, &size))
     {
-        wchar_t exe[MAX_PATH];
-        if (_wfullpath(exe, buffer, MAX_PATH))
-            return exe;
-        else
-            ec = detail::get_last_error();
+        return filesystem::canonical(buffer, ec);
     }
     else
         ec = detail::get_last_error();
@@ -91,11 +87,7 @@ filesystem::path exe(boost::process::v2::pid_type pid, boost::system::error_code
         wchar_t buffer[MAX_PATH];
         if (GetModuleFileNameW(nullptr, buffer, sizeof(buffer))) 
         {
-            wchar_t exe[MAX_PATH];
-            if (_wfullpath(exe, buffer, MAX_PATH)) 
-                return exe;
-            else
-                ec = detail::get_last_error();
+            return filesystem::canonical(buffer, ec)
         }
     } 
     else 
@@ -120,13 +112,10 @@ filesystem::path exe(boost::process::v2::pid_type pid, boost::system::error_code
 
 filesystem::path exe(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
-    char exe[PROC_PIDPATHINFO_MAXSIZE];
-    if (proc_pidpath(pid, exe, sizeof(exe)) > 0) 
+    char buffer[PROC_PIDPATHINFO_MAXSIZE];
+    if (proc_pidpath(pid, buffer, sizeof(buffer)) > 0) 
     {
-        char buffer[PATH_MAX];
-        if (realpath(exe, buffer)) 
-            return buffer;
-
+        return filesystem::canonical(buffer, ec);
     }
     ec = detail::get_last_error();   
     return "";
@@ -163,9 +152,7 @@ filesystem::path exe(boost::process::v2::pid_type pid, boost::system::error_code
         strbuff.resize(len);
         if (sysctl(mib, 4, &strbuff[0], &len, nullptr, 0) == 0)
         {
-            char buffer[PATH_MAX];
-            if (realpath(strbuff.c_str(), buffer))
-                return buffer;
+             return filesystem::canonical(strbuff, ec);
         }
     }
 
