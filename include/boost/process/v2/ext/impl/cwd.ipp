@@ -108,10 +108,7 @@ filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code
 {
     proc_vnodepathinfo vpi;
     if (proc_pidinfo(pid, PROC_PIDVNODEPATHINFO, 0, &vpi, sizeof(vpi)) > 0) {
-        char buffer[PATH_MAX];
-        if (realpath(vpi.pvi_cdir.vip_path, buffer)) {
-            return buffer;
-        }
+        return filesystem::canonical(vpi.pvi_cdir.vip_path, ec);
     }
     ec = detail::get_last_error();   
     return "";
@@ -130,7 +127,7 @@ filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code
 // FIXME: Add error handling.
 filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code & ec) 
 {
-    std::string path;
+    filesystem::path path;
     unsigned cntp = 0;
     procstat *proc_stat = procstat_open_sysctl();
     if (proc_stat) {
@@ -142,11 +139,7 @@ filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code
                 STAILQ_FOREACH(fst, head, next) {
                     if (fst->fs_uflags & PS_FST_UFLAG_CDIR) 
                     {
-                        char buffer[PATH_MAX];
-                        if (realpath(fst->fs_path, buffer)) 
-                        {
-                            path = buffer;
-                        }
+                        path = filesystem::canonical(fst->fs_path, ec);
                     }
                 }
                 procstat_freefiles(proc_stat, head);
@@ -169,7 +162,7 @@ filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code
 // FIXME: Add error handling.
 filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code & ec) 
 {
-    std::string path;
+    filesystem::path path;
     /* Probably the hackiest thing ever we are doing here, because the "official" API is broken OS-level. */
     FILE *fp = popen(("pos=`ans=\\`/usr/bin/fstat -w -p " + std::to_string(pid) + " | /usr/bin/sed -n 1p\\`; " +
         "/usr/bin/awk -v ans=\"$ans\" 'BEGIN{print index(ans, \"INUM\")}'`; str=`/usr/bin/fstat -w -p " + 
@@ -187,12 +180,7 @@ filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code
             {
                 str.replace(pos, 1, "");
             }
-            if (realpath(str.c_str(), buffer)) 
-            {
-                path = buffer;
-            }
-            else
-                ec = detail::get_last_error();
+            path = filesystem::canonical(str.c_str(), ec);
         }
         else
             ec = detail::get_last_error();
@@ -222,11 +210,7 @@ filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code
         strbuff.resize(len);
         if (sysctl(mib, 4, &strbuff[0], &len, nullptr, 0) == 0)
         {
-            char buffer[PATH_MAX];
-            if (realpath(strbuff.c_str(), buffer))
-                return buffer;
-            else
-                ec = detail::get_last_error();
+            filesystem::canonical(strbuff, ec);
         }
         else
             ec = detail::get_last_error();
