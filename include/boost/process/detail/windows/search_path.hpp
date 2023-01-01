@@ -35,7 +35,9 @@ inline boost::process::filesystem::path search_path(
             [&](const value_type & e)
              {return id == ::boost::to_upper_copy(e.get_name(), ::boost::process::detail::process_locale());});
 
-    auto extensions_in = itr->to_vector();
+    std::vector<std::wstring> extensions_in;
+    if (itr != ne.cend())
+        extensions_in = itr->to_vector();
 
     std::vector<std::wstring> extensions((extensions_in.size() * 2) + 1);
 
