@@ -22,10 +22,8 @@ project : requirements
   <toolset>msvc:<cxxflags>/bigobj
   <target-os>windows:<define>WIN32_LEAN_AND_MEAN
   <target-os>linux:<linkflags>-lpthread
-  <target-os>freebsd:<linkflags>-lc
   <target-os>freebsd:<linkflags>-lutil
   <target-os>freebsd:<linkflags>-lprocstat
-  <target-os>bsd:<linkflags>-lc
   <target-os>bsd:<linkflags>-lkvm
   <os>NT,<toolset>cw:<library>ws2_32
   <os>NT,<toolset>gcc:<library>ws2_32
