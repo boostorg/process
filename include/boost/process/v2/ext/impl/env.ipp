@@ -2,7 +2,7 @@
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-/*
+
 #ifndef BOOST_PROCESS_V2_EXT_IMPL_ENV_IPP
 #define BOOST_PROCESS_V2_EXT_IMPL_ENV_IPP
 
@@ -113,4 +113,3 @@ env_view env(boost::process::v2::pid_type pid)
 BOOST_PROCESS_V2_END_NAMESPACE
 
 #endif //BOOST_PROCESS_V2_EXT_IMPL_ENV_IPP
-*/
