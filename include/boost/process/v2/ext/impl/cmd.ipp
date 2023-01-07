@@ -119,7 +119,7 @@ namespace ext {
 
 shell cmd(HANDLE proc, error_code & ec)
 {
-    std::wstring buffer = boost::process::v2::detail::ext::cwd_cmd_env_from_proc(proc, 0/*=MEMCMD*/, ec);
+    std::wstring buffer = boost::process::v2::detail::ext::cwd_cmd_from_proc(proc, 0/*=MEMCMD*/, ec);
 
     if (!ec)
         return make_cmd_shell_::make(std::move(buffer));

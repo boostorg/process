@@ -61,8 +61,35 @@ const environment::char_type * dereference(native_env_iterator iterator)
 namespace ext
 {
 
-#if (defined(__linux__) || defined(__ANDROID__))
+#if defined(_WIN32)
 
+env_view env(HANDLE proc, boost::system::error_code & ec)
+{	
+	env_view ev;
+	std::unique_ptr<wchar_t, detail::ext::native_env_handle_deleter> buf{env_from_proc(proc, ec));
+
+}
+
+env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
+{
+    struct del
+    {
+        void operator()(HANDLE h)
+        {
+            ::CloseHandle(h);
+        };
+    };
+    std::unique_ptr<void, del> proc{detail::ext::open_process_with_debug_privilege(pid, ec)};
+    if (proc == nullptr)
+        ec = detail::get_last_error();
+    else
+	    return env(proc.get(), ec);
+
+	return {};
+}
+
+
+#elif (defined(__linux__) || defined(__ANDROID__))
 
 env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {

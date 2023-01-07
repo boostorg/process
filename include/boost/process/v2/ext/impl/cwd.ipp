@@ -62,13 +62,7 @@ namespace ext {
 
 filesystem::path cwd(HANDLE proc, boost::system::error_code & ec)
 {
-    if (boost::process::v2::detail::ext::is_x86_process(GetCurrentProcess(), ec) !=
-	    boost::process::v2::detail::ext::is_x86_process(proc, ec)) {
-        ec.assign(ERROR_NOT_SUPPORTED, system::system_category());
-        return "";
-    } 
-
-    auto buffer = boost::process::v2::detail::ext::cwd_cmd_env_from_proc(proc, 2/*=MEMCWD*/, ec);
+    auto buffer = boost::process::v2::detail::ext::cwd_cmd_from_proc(proc, 1/*=MEMCWD*/, ec);
     if (!buffer.empty())
       return filesystem::canonical(buffer, ec);
     else 

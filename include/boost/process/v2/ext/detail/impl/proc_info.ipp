@@ -123,8 +123,8 @@ namespace ext
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 // type of process memory to read?
-enum MEMTYP {MEMCMD, MEMENV, MEMCWD};
-std::wstring cwd_cmd_env_from_proc(HANDLE proc, int type, boost::system::error_code & ec)
+enum MEMTYP {MEMCMD, MEMCWD};
+std::wstring cwd_cmd_from_proc(HANDLE proc, int type, boost::system::error_code & ec)
 {
     std::wstring buffer;
     PEB peb;
@@ -133,8 +133,6 @@ std::wstring cwd_cmd_env_from_proc(HANDLE proc, int type, boost::system::error_c
     PROCESS_BASIC_INFORMATION pbi;
     RTL_USER_PROCESS_PARAMETERS_EXTENDED upp;
 
-    wchar_t *res = nullptr;
-    FARPROC farProc = nullptr;
     NTSTATUS status = 0;
     PVOID buf = nullptr;
     status = NtQueryInformationProcess(proc, ProcessBasicInformation, &pbi, sizeof(pbi), &len);
@@ -157,16 +155,11 @@ std::wstring cwd_cmd_env_from_proc(HANDLE proc, int type, boost::system::error_c
         ec = detail::get_last_error();
         return {};
     }
-    len = 0;
+
     if (type == MEMCWD)
     {
         buf = upp.CurrentDirectory.DosPath.Buffer;
         len = upp.CurrentDirectory.DosPath.Length;
-    }
-    else if (type == MEMENV)
-    {
-        buf = upp.Environment;
-        len = (ULONG)upp.EnvironmentSize;
     }
     else if (type == MEMCMD)
     {
@@ -175,13 +168,60 @@ std::wstring cwd_cmd_env_from_proc(HANDLE proc, int type, boost::system::error_c
     }
 
     buffer.resize(len / 2 + 1);
+
     if (!ReadProcessMemory(proc, buf, &buffer[0], len, &nRead))
     {
         ec = detail::get_last_error();
         return {};
     }
-    //buffer[len / 2] = L'\0';
+
     buffer.pop_back();
+    return buffer;
+}
+
+wchar_t *env_from_proc(HANDLE proc, boost::system::error_code & ec)
+{
+    wchar_t *buffer = nullptr;
+    PEB peb;
+    SIZE_T nRead = 0; 
+    ULONG len = 0;
+    PROCESS_BASIC_INFORMATION pbi;
+    RTL_USER_PROCESS_PARAMETERS_EXTENDED upp;
+
+    NTSTATUS status = 0;
+    PVOID buf = nullptr;
+    status = NtQueryInformationProcess(proc, ProcessBasicInformation, &pbi, sizeof(pbi), &len);
+    ULONG error = RtlNtStatusToDosError(status);
+
+    if (error)
+    {
+        ec.assign(error, boost::system::system_category());
+        return {};
+    }
+
+    if (!ReadProcessMemory(proc, pbi.PebBaseAddress, &peb, sizeof(peb), &nRead))
+    {
+        ec = detail::get_last_error();
+        return {};
+    }
+
+    if (!ReadProcessMemory(proc, peb.ProcessParameters, &upp, sizeof(upp), &nRead))
+    {
+        ec = detail::get_last_error();
+        return {};
+    }
+
+    buf = upp.Environment;
+    len = (ULONG)upp.EnvironmentSize;
+    buffer = new wchar_t[len / 2 + 1]();
+
+    if (!ReadProcessMemory(proc, buf, buffer, len, &nRead))
+    {
+        ec = detail::get_last_error();
+        return {};
+    }
+
+    buffer[len / 2] = L'\0';
     return buffer;
 }
 
@@ -213,24 +253,6 @@ HANDLE open_process_with_debug_privilege(boost::process::v2::pid_type pid, boost
         ec = detail::get_last_error();
     return proc;
 }
-
-// NOTE: Windows-only limitation described right here
-// cwd, cmdline, and environ can only be read from by
-// the calling process when the platform architecture 
-// with the target process matches both the processes
-BOOL is_x86_process(HANDLE proc, boost::system::error_code & ec) {
-    BOOL isWow = true;
-    SYSTEM_INFO systemInfo;
-    GetNativeSystemInfo(&systemInfo);
-    if (systemInfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_INTEL)
-        return isWow;
-    if (IsWow64Process(proc, &isWow))
-        return isWow;
-    else
-        ec = detail::get_last_error();
-    return isWow;
-}
-#endif
 
 } // namespace ext
 
