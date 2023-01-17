@@ -9,13 +9,12 @@
 #include <boost/process/v2/detail/config.hpp>
 #include <boost/process/v2/detail/throw_error.hpp>
 #include <boost/process/v2/ext/detail/proc_info.hpp>
+
 #include <string>
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 #include <iterator>
 #include <algorithm>
-#include <windows.h>
-#include <winternl.h>
 #if !defined(_MSC_VER)
 #pragma pack(push, 8)
 #else
@@ -179,9 +178,9 @@ std::wstring cwd_cmd_from_proc(HANDLE proc, int type, boost::system::error_code 
     return buffer;
 }
 
-wchar_t *env_from_proc(HANDLE proc, boost::system::error_code & ec)
+native_env_handle_type env_from_proc(HANDLE proc, boost::system::error_code & ec)
 {
-    wchar_t *buffer = nullptr;
+    native_env_handle_type buffer = nullptr;
     PEB peb;
     SIZE_T nRead = 0; 
     ULONG len = 0;
@@ -253,6 +252,7 @@ HANDLE open_process_with_debug_privilege(boost::process::v2::pid_type pid, boost
         ec = detail::get_last_error();
     return proc;
 }
+#endif
 
 } // namespace ext
 

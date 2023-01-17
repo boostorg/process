@@ -87,7 +87,7 @@ filesystem::path exe(boost::process::v2::pid_type pid, boost::system::error_code
         wchar_t buffer[MAX_PATH];
         if (GetModuleFileNameW(nullptr, buffer, sizeof(buffer))) 
         {
-            return filesystem::canonical(buffer, ec)
+            return filesystem::canonical(buffer, ec);
         }
     } 
     else 

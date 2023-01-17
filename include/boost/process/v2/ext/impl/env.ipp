@@ -8,6 +8,7 @@
 #include <boost/process/v2/detail/config.hpp>
 #include <boost/process/v2/detail/last_error.hpp>
 #include <boost/process/v2/detail/throw_error.hpp>
+#include <boost/process/v2/ext/detail/proc_info.hpp>
 #include <boost/process/v2/ext/env.hpp>
 
 
@@ -65,10 +66,8 @@ namespace ext
 
 env_view env(HANDLE proc, boost::system::error_code & ec)
 {
-    std::unique_ptr<wchar_t, detail::ext::native_env_handle_deleter> buf{env_from_proc(proc, ec)};
-
     env_view ev;
-    ev.handle_ = buf.get();
+    ev.handle_ = detail::ext::env_from_proc(proc, ec);
     return ev;
 }
 
