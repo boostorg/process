@@ -38,8 +38,8 @@ BOOST_PROCESS_V2_DECL ULONG RtlNtStatusToDosError(NTSTATUS Status) {
   if (!hModule) return GetLastError();
   FARPROC farProc = GetProcAddress(hModule, "RtlNtStatusToDosError");
   if (!farProc) return GetLastError();
-  RNSTDE RtlNtStatusToDosError = reinterpret_cast<RNSTDE>(farProc);
-  ULONG Error = RtlNtStatusToDosError(Status);
+  RNSTDE RtlNtStatusToDosErrorFunc = reinterpret_cast<RNSTDE>(farProc);
+  ULONG Error = RtlNtStatusToDosErrorFunc(Status);
   return Error;
 }
 #endif
