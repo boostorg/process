@@ -64,10 +64,12 @@ namespace ext
 #if defined(_WIN32)
 
 env_view env(HANDLE proc, boost::system::error_code & ec)
-{	
-	env_view ev;
-	std::unique_ptr<wchar_t, detail::ext::native_env_handle_deleter> buf{env_from_proc(proc, ec));
+{
+    std::unique_ptr<wchar_t, detail::ext::native_env_handle_deleter> buf{env_from_proc(proc, ec)};
 
+    env_view ev;
+    ev.handle_ = buf.get();
+    return ev;
 }
 
 env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
