@@ -178,9 +178,9 @@ std::wstring cwd_cmd_from_proc(HANDLE proc, int type, boost::system::error_code 
     return buffer;
 }
 
-native_env_handle_type env_from_proc(HANDLE proc, boost::system::error_code & ec)
+wchar_t *env_from_proc(HANDLE proc, boost::system::error_code & ec)
 {
-    native_env_handle_type buffer = nullptr;
+    wchar_t *buffer = nullptr;
     PEB peb;
     SIZE_T nRead = 0; 
     ULONG len = 0;
