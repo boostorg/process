@@ -95,6 +95,7 @@ env_view env(HANDLE proc, boost::system::error_code & ec)
         return {};
     }
 
+    env_view ev;
     buf = upp.Environment;
     len = (ULONG)upp.EnvironmentSize;
     ev.handle_.reset(new wchar_t[len / 2 + 1]());
@@ -105,7 +106,6 @@ env_view env(HANDLE proc, boost::system::error_code & ec)
         return {};
     }
 
-    env_view ev;
     ev.handle_.get()[len / 2] = L'\0';
     return ev;
 }
