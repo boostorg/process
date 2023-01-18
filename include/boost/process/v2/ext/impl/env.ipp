@@ -134,6 +134,15 @@ env_view env(HANDLE proc, boost::system::error_code & ec)
     return ev;
 }
 
+env_view env(HANDLE handle)
+{
+    boost::system::error_code ec;
+    auto res = env(handle, ec);
+    if (ec)
+        detail::throw_error(ec, "env");
+    return res;
+}
+
 env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
     struct del
@@ -151,7 +160,6 @@ env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 
 	return {};
 }
-
 
 #elif (defined(__linux__) || defined(__ANDROID__))
 
