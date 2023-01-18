@@ -117,7 +117,6 @@ BOOST_AUTO_TEST_CASE(test_cwd_exe)
     bp2::filesystem::remove(tmp, ec);
 }
 
-/*
 BOOST_AUTO_TEST_CASE(test_env)
 {
     namespace bp2 = boost::process::v2;
@@ -170,6 +169,5 @@ BOOST_AUTO_TEST_CASE(test_env_exe)
         BOOST_CHECK_EQUAL(kp.value(), (*itr).value());
     }
 }
-*/
 
 BOOST_AUTO_TEST_SUITE_END()
