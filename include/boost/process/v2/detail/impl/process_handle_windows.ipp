@@ -128,7 +128,7 @@ void check_running_(HANDLE handle, error_code & ec, DWORD & exit_status)
 void suspend_(HANDLE handle, error_code & ec)
 {
     auto nt_err = NtSuspendProcess(handle);
-    ULONG dos_err = detail::ext::RtlNtStatusToDosError(nt_err);
+    ULONG dos_err = RtlNtStatusToDosError(nt_err);
     if (dos_err)
        ec = detail::get_last_error();
 }
@@ -136,7 +136,7 @@ void suspend_(HANDLE handle, error_code & ec)
 void resume_(HANDLE handle, error_code & ec)
 {
     auto nt_err = NtResumeProcess(handle);
-    ULONG dos_err = detail::ext::RtlNtStatusToDosError(nt_err);
+    ULONG dos_err = RtlNtStatusToDosError(nt_err);
     if (dos_err)
         ec = detail::get_last_error();
 }

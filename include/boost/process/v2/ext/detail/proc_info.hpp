@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <windows.h>
 #include <winternl.h>
+extern "C" ULONG NTAPI RtlNtStatusToDosError(NTSTATUS Status);
 #endif
 
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
@@ -107,16 +108,6 @@ typedef struct {
 BOOST_PROCESS_V2_DECL wchar_t *env_from_proc(HANDLE proc, boost::system::error_code & ec);
 BOOST_PROCESS_V2_DECL std::wstring cwd_cmd_from_proc(HANDLE proc, int type, boost::system::error_code & ec);
 BOOST_PROCESS_V2_DECL HANDLE open_process_with_debug_privilege(boost::process::v2::pid_type pid, boost::system::error_code & ec);
-BOOST_PROCESS_V2_DECL ULONG RtlNtStatusToDosError(NTSTATUS Status) {
-  typedef NTSTATUS (__stdcall *RNSTDE)(IN NTSTATUS Status);
-  HMODULE hModule = GetModuleHandleW(L"ntdll.dll");
-  if (!hModule) return GetLastError();
-  FARPROC farProc = GetProcAddress(hModule, "RtlNtStatusToDosError");
-  if (!farProc) return GetLastError();
-  RNSTDE RtlNtStatusToDosErrorFunc = reinterpret_cast<RNSTDE>(farProc);
-  ULONG Error = RtlNtStatusToDosErrorFunc(Status);
-  return Error;
-}
 #endif
 
 } // namespace ext

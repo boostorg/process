@@ -26,7 +26,7 @@ BOOST_PROCESS_V2_BEGIN_NAMESPACE
 namespace detail {
 namespace ext {
 
-#if defined(_WIN32)
+#if defined(BOOST_PROCESS_V2_WINDOWS)
 
 void native_env_handle_deleter::operator()(native_env_handle_type h) const
 {
@@ -85,7 +85,7 @@ const environment::char_type * dereference(native_env_iterator iterator)
 namespace ext
 {
 
-#if defined(_WIN32)
+#if defined(BOOST_PROCESS_V2_WINDOWS)
 
 env_view env(HANDLE proc, boost::system::error_code & ec)
 {

@@ -28,9 +28,9 @@ BOOST_AUTO_TEST_CASE(test_exe)
 
 BOOST_AUTO_TEST_CASE(test_child_exe)
 {
-    using boost::unit_test::framework::master_test_suite;
-    const auto pth =  master_test_suite().argv[1];
     namespace bp2 = boost::process::v2;
+    using boost::unit_test::framework::master_test_suite;
+    const auto pth = bp2::filesystem::canonical(master_test_suite().argv[1]);
 
     boost::asio::io_context ctx;
     bp2::process proc(ctx, pth, {"sleep", "10000"});
