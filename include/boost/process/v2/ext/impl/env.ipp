@@ -66,7 +66,7 @@ namespace ext
 env_view env(HANDLE proc, boost::system::error_code & ec)
 {
     wchar_t *buffer = nullptr;
-    detail::ext::PEB peb;
+    PEB peb;
     SIZE_T nRead = 0; 
     ULONG len = 0;
     PROCESS_BASIC_INFORMATION pbi;
