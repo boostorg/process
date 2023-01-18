@@ -40,9 +40,8 @@ BOOST_PROCESS_V2_DECL native_env_iterator next(native_env_iterator nh);
 BOOST_PROCESS_V2_DECL native_env_iterator find_end(native_env_iterator nh);
 BOOST_PROCESS_V2_DECL const environment::char_type * dereference(native_env_iterator iterator);
 
-
-}
-}
+} // namespace ext
+} // namespace detail
 
 namespace ext {
 
