@@ -14,6 +14,8 @@
 #include <vector>
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
+#include <iterator>
+#include <algorithm>
 #include <windows.h>
 #include <winternl.h>
 #endif
@@ -25,6 +27,83 @@ namespace detail
 
 namespace ext 
 {
+
+#if defined(BOOST_PROCESS_V2_WINDOWS)
+#if !defined(_MSC_VER)
+#pragma pack(push, 8)
+#else
+#include <pshpack8.h>
+#endif
+
+/* CURDIR struct from:
+ https://github.com/processhacker/phnt/
+ CC BY 4.0 licence */
+
+typedef struct {
+  UNICODE_STRING DosPath;
+  HANDLE Handle;
+} CURDIR;
+
+/* RTL_DRIVE_LETTER_CURDIR struct from:
+ https://github.com/processhacker/phnt/
+ CC BY 4.0 licence */
+
+typedef struct {
+  USHORT Flags;
+  USHORT Length;
+  ULONG TimeStamp;
+  STRING DosPath;
+} RTL_DRIVE_LETTER_CURDIR;
+
+/* RTL_USER_PROCESS_PARAMETERS struct from:
+ https://github.com/processhacker/phnt/
+ CC BY 4.0 licence */
+
+typedef struct {
+  ULONG MaximumLength;
+  ULONG Length;
+  ULONG Flags;
+  ULONG DebugFlags;
+  HANDLE ConsoleHandle;
+  ULONG ConsoleFlags;
+  HANDLE StandardInput;
+  HANDLE StandardOutput;
+  HANDLE StandardError;
+  CURDIR CurrentDirectory;
+  UNICODE_STRING DllPath;
+  UNICODE_STRING ImagePathName;
+  UNICODE_STRING CommandLine;
+  PVOID Environment;
+  ULONG StartingX;
+  ULONG StartingY;
+  ULONG CountX;
+  ULONG CountY;
+  ULONG CountCharsX;
+  ULONG CountCharsY;
+  ULONG FillAttribute;
+  ULONG WindowFlags;
+  ULONG ShowWindowFlags;
+  UNICODE_STRING WindowTitle;
+  UNICODE_STRING DesktopInfo;
+  UNICODE_STRING ShellInfo;
+  UNICODE_STRING RuntimeData;
+  RTL_DRIVE_LETTER_CURDIR CurrentDirectories[32];
+  ULONG_PTR EnvironmentSize;
+  ULONG_PTR EnvironmentVersion;
+  PVOID PackageDependencyData;
+  ULONG ProcessGroupId;
+  ULONG LoaderThreads;
+  UNICODE_STRING RedirectionDllName;
+  UNICODE_STRING HeapPartitionName;
+  ULONG_PTR DefaultThreadpoolCpuSetMasks;
+  ULONG DefaultThreadpoolCpuSetMaskCount;
+} RTL_USER_PROCESS_PARAMETERS_EXTENDED;
+
+#if !defined(_MSC_VER)
+#pragma pack(pop)
+#else
+#include <poppack.h>
+#endif
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 BOOST_PROCESS_V2_DECL wchar_t *env_from_proc(HANDLE proc, boost::system::error_code & ec);

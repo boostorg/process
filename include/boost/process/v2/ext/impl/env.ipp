@@ -65,8 +65,48 @@ namespace ext
 
 env_view env(HANDLE proc, boost::system::error_code & ec)
 {
+    wchar_t *buffer = nullptr;
+    PEB peb;
+    SIZE_T nRead = 0; 
+    ULONG len = 0;
+    PROCESS_BASIC_INFORMATION pbi;
+    RTL_USER_PROCESS_PARAMETERS_EXTENDED upp;
+
+    NTSTATUS status = 0;
+    PVOID buf = nullptr;
+    status = NtQueryInformationProcess(proc, ProcessBasicInformation, &pbi, sizeof(pbi), &len);
+    ULONG error = RtlNtStatusToDosError(status);
+
+    if (error)
+    {
+        ec.assign(error, boost::system::system_category());
+        return {};
+    }
+
+    if (!ReadProcessMemory(proc, pbi.PebBaseAddress, &peb, sizeof(peb), &nRead))
+    {
+        ec = detail::get_last_error();
+        return {};
+    }
+
+    if (!ReadProcessMemory(proc, peb.ProcessParameters, &upp, sizeof(upp), &nRead))
+    {
+        ec = detail::get_last_error();
+        return {};
+    }
+
+    buf = upp.Environment;
+    len = (ULONG)upp.EnvironmentSize;
+    ev.handle_.reset(new wchar_t[len / 2 + 1]());
+
+    if (!ReadProcessMemory(proc, buf, ev.handle_.get(), len, &nRead))
+    {
+        ec = detail::get_last_error();
+        return {};
+    }
+
     env_view ev;
-    ev.handle_.reset(detail::ext::env_from_proc(proc, ec));
+    ev.handle_.get()[len / 2] = L'\0';
     return ev;
 }
 
