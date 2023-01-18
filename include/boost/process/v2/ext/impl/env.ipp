@@ -66,7 +66,7 @@ namespace ext
 env_view env(HANDLE proc, boost::system::error_code & ec)
 {
     env_view ev;
-    ev.handle_ = detail::ext::env_from_proc(proc, ec);
+    ev.handle_.reset(detail::ext::env_from_proc(proc, ec));
     return ev;
 }
 
