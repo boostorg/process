@@ -66,11 +66,11 @@ namespace ext
 env_view env(HANDLE proc, boost::system::error_code & ec)
 {
     wchar_t *buffer = nullptr;
-    PEB peb;
+    detail::ext::PEB peb;
     SIZE_T nRead = 0; 
     ULONG len = 0;
     PROCESS_BASIC_INFORMATION pbi;
-    RTL_USER_PROCESS_PARAMETERS_EXTENDED upp;
+    detail::ext::RTL_USER_PROCESS_PARAMETERS_EXTENDED upp;
 
     NTSTATUS status = 0;
     PVOID buf = nullptr;
