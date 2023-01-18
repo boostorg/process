@@ -26,7 +26,32 @@ BOOST_PROCESS_V2_BEGIN_NAMESPACE
 namespace detail {
 namespace ext {
 
-#if (defined(__linux__) || defined(__ANDROID__))
+#if defined(_WIN32)
+
+void native_env_handle_deleter::operator()(native_env_handle_type h) const
+{
+    delete [] h;
+}
+
+native_env_iterator next(native_env_iterator nh)
+{
+    while (*nh != L'\0')
+        nh ++;
+    return ++nh ;
+}
+native_env_iterator find_end(native_env_iterator nh)
+{
+    while (*nh - 1 != L'\0' && *nh != L'\0')
+        nh ++;
+    return nh ;
+}
+
+const environment::char_type * dereference(native_env_iterator iterator)
+{
+    return iterator;
+}
+
+#elif (defined(__linux__) || defined(__ANDROID__))
 //linux stores this as a blob with an EOF at the end
 
 void native_env_handle_deleter::operator()(native_env_handle_type h) const
