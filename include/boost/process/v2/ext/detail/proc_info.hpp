@@ -8,8 +8,6 @@
 
 #include <boost/process/v2/detail/config.hpp>
 #include <boost/process/v2/detail/throw_error.hpp>
-
-#include <boost/process/v2/ext/env.hpp>
 #include <boost/process/v2/pid.hpp>
 
 #include <string>
