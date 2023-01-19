@@ -77,6 +77,26 @@ const environment::char_type * dereference(native_env_iterator iterator)
     return iterator;
 }
 
+#else
+
+void native_env_handle_deleter::operator()(native_env_handle_type h) const
+{
+    delete [] h;
+}
+
+native_env_iterator next(native_env_iterator nh)
+{
+    while (*nh != '\0')
+        nh ++;
+    return ++nh ;
+}
+native_env_iterator find_end(native_env_iterator nh)
+{
+    while (*nh - 1 != '\0' && *nh != '\0')
+        nh ++;
+    return nh ;
+}
+
 #endif
 
 }
@@ -159,6 +179,64 @@ env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 	    return env(proc.get(), ec);
 
 	return {};
+}
+
+#elif (defined(__APPLE___) || defined(__MACH__))
+
+env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
+{
+    int mib[3] = {CTL_KERN, KERN_ARGMAX, 0};
+    int argmax = 0;
+    auto size = sizeof(argmax);
+    if (sysctl(mib, 2, &argmax, &size, nullptr, 0) == -1)
+    {
+        ec = detail::get_last_error();
+        return {};
+    }
+
+    std::string procargs;
+    procargs.resize(argmax - 1);
+    mib[1] = KERN_PROCARGS2;
+    mib[2] = pid;
+
+    size = argmax;
+
+    if (sysctl(mib, 3, &*procargs.begin(), &size, nullptr, 0) != 0)
+    {
+        ec = detail::get_last_error();
+        return {};
+    }
+
+    memcpy(&nargs, &*procargs.begin(), sizeof(nargs));
+    char *cp = &*procargs.begin() + sizeof(nargs);
+
+    for (; cp < &&*procargs.begin()[size]; cp++) {
+        if (*cp == '\0') break;
+    }
+
+    if (cp == &procargs[s]) {
+        return {};
+    }
+
+    for (; cp < &&*procargs.begin()[size]; cp++) {
+        if (*cp != '\0') break;
+    }
+
+    if (cp == &&*procargs.begin()[size]) {
+        return {};
+    }
+
+    int i = 0;
+    char *sp = cp;
+    std::vector<char> vec;
+
+    while ((*sp != '\0' || i < nargs) && sp < &&*procargs.begin()[size]) {
+        if (i >= nargs) {
+            vec.push_back(*sp);
+        }
+        sp += 1;
+    }
+
 }
 
 #elif (defined(__linux__) || defined(__ANDROID__))

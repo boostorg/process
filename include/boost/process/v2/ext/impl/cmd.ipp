@@ -157,9 +157,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 
 shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
-    // attempt to do this here - @time-killer-games feel free to adjust, this wasn't compiled
-    // we use two ptrs
-    int mib[3] = {CTL_KERN, KERN_ARGMAG, 0};
+    int mib[3] = {CTL_KERN, KERN_ARGMAX, 0};
     int argmax = 0;
     auto size = sizeof(argmax);
     if (sysctl(mib, 2, &argmax, &size, nullptr, 0) == -1)
@@ -170,7 +168,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 
     std::string procargs;
     procargs.resize(argmax - 1);
-    mib[1] = KERN_PROCARGS2;
+    mib[1] = KERN_PROCARGS;
     mib[2] = pid;
 
     size = argmax;
