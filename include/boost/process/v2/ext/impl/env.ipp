@@ -236,7 +236,11 @@ env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
         }
         sp += 1;
     }
-
+    
+    env_view ev;
+    ev.handle_.reset(new char[vec.size()]());
+    std::copy(vec.begin(), vec.end(), ev.handle_.get());
+    return ev;
 }
 
 #elif (defined(__linux__) || defined(__ANDROID__))
