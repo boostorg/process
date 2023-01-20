@@ -26,7 +26,7 @@ namespace ext
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 using native_env_handle_type = wchar_t *;
 using native_env_iterator = wchar_t *;
-#elif (defined(__linux__) || defined(__ANDROID__))
+#else
 using native_env_handle_type = char *;
 using native_env_iterator = char *;
 #endif

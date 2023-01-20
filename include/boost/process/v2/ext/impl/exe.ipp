@@ -33,7 +33,9 @@
 #if (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__))
 #include <sys/types.h>
 #include <sys/sysctl.h>
+#if !defined(__FreeBSD__)
 #include <alloca.h>
+#endif
 #endif
 
 #if defined(__OpenBSD__)

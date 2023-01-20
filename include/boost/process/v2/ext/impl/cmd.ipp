@@ -264,14 +264,14 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 
 shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
-    struct cl_proc_state
+    struct cl_proc_stat
     {
-        void operator()(procstat *proc_stat)
+        void operator()(struct procstat *proc_stat)
         {
             procstat_close(proc_stat);
         }
     };
-    std::unique_ptr<procstat, cl_proc_stat> proc_stat{procstat_open_sysctl()};
+    std::unique_ptr<struct procstat, cl_proc_stat> proc_stat{procstat_open_sysctl()};
     if (!proc_stat)
     {
         ec = detail::get_last_error();
@@ -280,17 +280,17 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 
     struct proc_info_close
     {
-        procstat * proc_stat;
+        struct procstat * proc_stat;
 
-        void operator()(kinfo_proc & proc_info)
+        void operator()(struct kinfo_proc * proc_info)
         {
             procstat_freeprocs(proc_stat, proc_info);
         }
     };
 
-    int cntp;
-    std::unique_ptr<kinfo_proc, proc_info_close> proc_info{
-            procstat_getprocs(proc_stat, KERN_PROC_PID, pid, &cntp),
+    unsigned cntp;
+    std::unique_ptr<struct kinfo_proc, proc_info_close> proc_info{
+            procstat_getprocs(proc_stat.get(), KERN_PROC_PID, pid, &cntp),
             proc_info_close{proc_stat.get()}};
 
     if (!proc_info)
@@ -299,7 +299,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
         return {};
     }
 
-    char **cmd = procstat_getargv(proc_stat, proc_info, 0);
+    char **cmd = procstat_getargv(proc_stat.get(), proc_info.get(), 0);
     if (!cmd)
     {
         ec = detail::get_last_error();
@@ -307,15 +307,12 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     }
     struct free_argv
     {
-        procstat * proc_stat;
+        struct procstat * proc_stat;
         ~free_argv()
         {
             procstat_freeargv(proc_stat);
         }
     };
-
-
-    proc_info.get_deleter().has_cmd = true;
 
     return make_cmd_shell_::clone(cmd);
 }
