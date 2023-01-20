@@ -41,7 +41,7 @@ struct basic_process_handle_signal
     {
          native_handle_type() = delete;
          native_handle_type(const native_handle_type & ) = delete;
-        ~native_handle_type() = delete;
+        ~native_handle_type() = default;
     };
 
     typedef Executor executor_type;
