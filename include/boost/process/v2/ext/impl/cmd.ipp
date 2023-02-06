@@ -179,7 +179,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
         return {};
     }
 
-    int argc = *reinterpret_cast<int*>(procargs.data());
+    int argc = *reinterpret_cast<const int*>(procargs.data());
     auto itr = procargs.begin() + sizeof(argc);
 
     std::unique_ptr<char*[]> argv{new char*[argc + 1]};
