@@ -154,7 +154,8 @@ filesystem::path exe(boost::process::v2::pid_type pid, boost::system::error_code
         strbuff.resize(len);
         if (sysctl(mib, 4, &strbuff[0], &len, nullptr, 0) == 0)
         {
-             return filesystem::canonical(strbuff, ec);
+            strbuff.resize(len - 1);
+            return filesystem::canonical(strbuff, ec);
         }
     }
 

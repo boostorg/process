@@ -101,9 +101,8 @@ struct basic_process_handle_signal
         handle.pid_ = -1;
     }
 
-    pid_type id() const
-    { return pid_; }
-    native_handle_type native_handle() {return pid_;}
+    pid_type id() const { return pid_; }
+    native_handle_type native_handle() {return {};}
 
     void terminate_if_running(error_code &)
     {
