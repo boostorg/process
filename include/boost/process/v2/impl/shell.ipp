@@ -111,7 +111,7 @@ void shell::parse_()
 
 shell::~shell()
 {
-    if (argv_ != nullptr && free_argv_)
+    if (argv_ != nullptr && free_argv_ != nullptr)
         free_argv_(argc_, argv_);
 }
 

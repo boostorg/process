@@ -101,10 +101,10 @@ filesystem::path cwd(HANDLE proc)
 filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
     proc_vnodepathinfo vpi;
-    if (proc_pidinfo(pid, PROC_PIDVNODEPATHINFO, 0, &vpi, sizeof(vpi)) > 0) {
+    if (proc_pidinfo(pid, PROC_PIDVNODEPATHINFO, 0, &vpi, sizeof(vpi)) > 0)
         return filesystem::canonical(vpi.pvi_cdir.vip_path, ec);
-    }
-    ec = detail::get_last_error();   
+    else
+      ec = detail::get_last_error();
     return "";
 }
 

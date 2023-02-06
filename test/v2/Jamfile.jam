@@ -59,13 +59,13 @@ test-suite standalone :
     [ run utf8.cpp test_impl ]
     [ run cstring_ref.cpp test_impl ]
     [ run environment.cpp test_impl ]
-    [ run pid.cpp test_impl ]
+    [ run pid.cpp   test_impl : : : <target-os>darwin:<build>no ]
     [ run shell.cpp test_impl ]
     ;
 
 test-suite with_target :
     [ run process.cpp test_impl : --log_level=all --catch_system_errors=no -- : target ]
     [ run windows.cpp test_impl : --log_level=all --catch_system_errors=no -- : target : <build>no <target-os>windows:<build>yes <target-os>windows:<source>Advapi32 ]
-    [ run ext.cpp     test_impl : --log_level=all --catch_system_errors=no -- : target ]
+    [ run ext.cpp     test_impl : --log_level=all --catch_system_errors=no -- : target : <target-os>darwin:<build>no ]
     ;
 

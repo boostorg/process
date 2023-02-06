@@ -20,7 +20,8 @@ BOOST_PROCESS_V2_BEGIN_NAMESPACE
 
 namespace ext {
 
-/// Get the argument vector from a given pid
+/// @{
+/// Get the argument vector of another process
 BOOST_PROCESS_V2_DECL shell cmd(pid_type pid, error_code & ec);
 BOOST_PROCESS_V2_DECL shell cmd(pid_type pid);
 
@@ -32,14 +33,24 @@ BOOST_PROCESS_V2_DECL shell cmd(HANDLE handle);
 template<typename Executor>
 BOOST_PROCESS_V2_DECL shell cmd(basic_process_handle<Executor> & handle, error_code & ec)
 {
+#if defined(BOOST_PROCESS_V2_WINDOWS)
     return cmd(handle.native_handle(), ec);
+#else
+    return cmd(handle.id(), ec);
+#endif
 }
 
 template<typename Executor>
 BOOST_PROCESS_V2_DECL shell cmd(basic_process_handle<Executor> & handle)
 {
+#if defined(BOOST_PROCESS_V2_WINDOWS)
     return cmd(handle.native_handle());
+#else
+    return cmd(handle.id());
+#endif
 }
+
+/// @}
 
 } // namespace ext
 
