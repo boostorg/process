@@ -524,7 +524,7 @@ struct key
     ~key() = default;
 
     key& operator=( const key& p ) = default;
-    key& operator=( key&& p ) noexcept = default;
+    key& operator=( key&& p ) noexcept(std::is_nothrow_move_constructible<string_type>::value) = default;
     key& operator=( string_type&& source )
     {
         value_ = std::move(source);
@@ -742,7 +742,7 @@ struct value
     ~value() = default;
 
     value& operator=( const value& p ) = default;
-    value& operator=( value&& p ) noexcept = default;
+    value& operator=( value&& p ) noexcept(std::is_nothrow_move_constructible<string_type>::value) = default;
     value& operator=( string_type&& source )
     {
         value_ = std::move(source);
@@ -999,7 +999,7 @@ struct key_value_pair
     ~key_value_pair() = default;
 
     key_value_pair& operator=( const key_value_pair& p ) = default;
-    key_value_pair& operator=( key_value_pair&& p ) noexcept = default;
+    key_value_pair& operator=( key_value_pair&& p ) noexcept(std::is_nothrow_move_constructible<string_type>::value) = default;
     key_value_pair& operator=( string_type&& source )
     {
         value_ = std::move(source);
