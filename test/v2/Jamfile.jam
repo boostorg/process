@@ -21,7 +21,12 @@ project : requirements
   <toolset>msvc:<define>_CRT_SECURE_NO_DEPRECATE
   <toolset>msvc:<cxxflags>/bigobj
   <target-os>windows:<define>WIN32_LEAN_AND_MEAN
+  <target-os>windows:<define>_WIN32_WINNT=0x0601
   <target-os>linux:<linkflags>-lpthread
+  <target-os>freebsd:<linkflags>-lutil
+  <target-os>freebsd:<linkflags>-lkvm
+  <target-os>freebsd:<linkflags>-lprocstat
+  <target-os>bsd:<linkflags>-lkvm
   <os>NT,<toolset>cw:<library>ws2_32
   <os>NT,<toolset>gcc:<library>ws2_32
   <define>BOOST_PROCESS_V2_SEPARATE_COMPILATION=1
@@ -46,6 +51,8 @@ lib test_impl : test_impl.cpp filesystem :
         <link>static
         <target-os>windows:<source>shell32
         <target-os>windows:<source>user32
+        <target-os>windows:<source>Ntdll
+        <target-os>windows:<source>Advapi32
         ;
 
 test-suite standalone :
@@ -59,5 +66,6 @@ test-suite standalone :
 test-suite with_target :
     [ run process.cpp test_impl : --log_level=all --catch_system_errors=no -- : target ]
     [ run windows.cpp test_impl : --log_level=all --catch_system_errors=no -- : target : <build>no <target-os>windows:<build>yes <target-os>windows:<source>Advapi32 ]
+    [ run ext.cpp     test_impl : --log_level=all --catch_system_errors=no -- : target ]
     ;
 
