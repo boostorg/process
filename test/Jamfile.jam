@@ -111,7 +111,7 @@ test-suite with-valgrind :
     [ run system_test2.cpp filesystem system                  : [ test-options system_test2 ] : sparring_partner ]
     [ run spawn.cpp filesystem system                         : [ test-options spawn ] : sparring_partner ]
     [ run start_dir.cpp   filesystem system                   : [ test-options start_dir ] : sparring_partner ]
-    [ run terminate.cpp system filesystem                     : [ test-options terminate ] : sparring_partner ]
+    [ run terminate.cpp system filesystem                     : [ test-options terminate ] : sparring_partner : <target-os>freebsd:<build>no ]
     [ run throw_on_error.cpp system filesystem                : [ test-options throw_on_error ] : sparring_partner ]
     [ run wait.cpp system filesystem                          : [ test-options wait ] : sparring_partner ]
     [ run wait_for.cpp system filesystem                      : [ test-options wait_for ] : sparring_partner ]
