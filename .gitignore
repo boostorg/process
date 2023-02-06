@@ -31,4 +31,5 @@
 /notes.cpp
 /notes_p.txt
 .settings
+.DS_Store
 
