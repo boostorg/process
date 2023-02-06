@@ -12,7 +12,6 @@
 #include <boost/test/included/unit_test.hpp>
 #include <boost/process/error.hpp>
 #include <system_error>
-#include <boost/bind.hpp>
 #include <boost/ref.hpp>
 #include <boost/process/child.hpp>
 #include <boost/process/extend.hpp>
