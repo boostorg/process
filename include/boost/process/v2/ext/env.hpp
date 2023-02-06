@@ -26,6 +26,9 @@ namespace ext
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 using native_env_handle_type = wchar_t *;
 using native_env_iterator = wchar_t *;
+#elif defined(__FreeBSD__)
+using native_env_handle_type = char **;
+using native_env_iterator = char **;
 #else
 using native_env_handle_type = char *;
 using native_env_iterator = char *;
@@ -45,6 +48,7 @@ BOOST_PROCESS_V2_DECL const environment::char_type * dereference(native_env_iter
 
 namespace ext {
 
+/// The view of an environment
 struct env_view
 {
     using native_handle_type = detail::ext::native_env_handle_type;
@@ -105,26 +109,38 @@ struct env_view
             detail::ext::native_env_handle_deleter> handle_;
 };
 
-/// Get the argument vector from a given pid
+/// @{
+/// Get the environment of another process.
 BOOST_PROCESS_V2_DECL env_view env(pid_type pid, error_code & ec);
 BOOST_PROCESS_V2_DECL env_view env(pid_type pid);
+
+template<typename Executor>
+BOOST_PROCESS_V2_DECL env_view env(basic_process_handle<Executor> & handle, error_code & ec)
+{
+#if defined(BOOST_PROCESS_V2_WINDOWS)
+    return env(handle.native_handle(), ec);
+#else
+    return env(handle.id(), ec);
+#endif
+}
+
+template<typename Executor>
+BOOST_PROCESS_V2_DECL env_view env(basic_process_handle<Executor> & handle)
+{
+#if defined(BOOST_PROCESS_V2_WINDOWS)
+  return env(handle.native_handle());
+#else
+  return env(handle.id());
+#endif
+}
+
+/// @}
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 BOOST_PROCESS_V2_DECL env_view env(HANDLE handle, error_code & ec);
 BOOST_PROCESS_V2_DECL env_view env(HANDLE handle);
 #endif
 
-template<typename Executor>
-BOOST_PROCESS_V2_DECL env_view env(basic_process_handle<Executor> & handle, error_code & ec)
-{
-    return env(handle.native_handle(), ec);
-}
-
-template<typename Executor>
-BOOST_PROCESS_V2_DECL env_view env(basic_process_handle<Executor> & handle)
-{
-    return env(handle.native_handle());
-}
 
 } // namespace ext
 

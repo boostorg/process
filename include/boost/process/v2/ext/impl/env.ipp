@@ -77,7 +77,7 @@ const environment::char_type * dereference(native_env_iterator iterator)
     return iterator;
 }
 
-#else
+#elif (defined(__APPLE___) || defined(__MACH__))
 
 void native_env_handle_deleter::operator()(native_env_handle_type h) const
 {
@@ -95,6 +95,36 @@ native_env_iterator find_end(native_env_iterator nh)
     while (*nh - 1 != '\0' && *nh != '\0')
         nh ++;
     return nh ;
+}
+
+const environment::char_type * dereference(native_env_iterator iterator)
+{
+    return iterator;
+}
+
+
+#elif defined(__FreeBSD__)
+
+void native_env_handle_deleter::operator()(native_env_handle_type h) const
+{
+    delete [] h;
+}
+
+native_env_iterator next(native_env_iterator nh)
+{
+    return ++nh ;
+}
+native_env_iterator find_end(native_env_iterator nh)
+{
+    while (*nh != nullptr)
+      nh++;
+
+    return nh ;
+}
+
+const environment::char_type * dereference(native_env_iterator iterator)
+{
+    return *iterator;
 }
 
 #endif
@@ -206,34 +236,35 @@ env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
         ec = detail::get_last_error();
         return {};
     }
-
+    std::uint32_t nargs;
     memcpy(&nargs, &*procargs.begin(), sizeof(nargs));
     char *cp = &*procargs.begin() + sizeof(nargs);
 
-    for (; cp < &&*procargs.begin()[size]; cp++) {
-        if (*cp == '\0') break;
-    }
+    for (; cp < &*procargs.end(); cp++)
+        if (*cp == '\0')
+          break;
 
-    if (cp == &procargs[s]) {
+
+    if (cp == &procargs[size])
         return {};
-    }
 
-    for (; cp < &&*procargs.begin()[size]; cp++) {
+
+    for (; cp < &*procargs.end(); cp++)
         if (*cp != '\0') break;
-    }
 
-    if (cp == &&*procargs.begin()[size]) {
+
+    if (cp == &*procargs.end())
         return {};
-    }
+
 
     int i = 0;
     char *sp = cp;
     std::vector<char> vec;
 
-    while ((*sp != '\0' || i < nargs) && sp < &&*procargs.begin()[size]) {
-        if (i >= nargs) {
+    while ((*sp != '\0' || i < nargs) && sp < &*procargs.end()) {
+        if (i >= nargs)
             vec.push_back(*sp);
-        }
+
         sp += 1;
     }
     
@@ -277,6 +308,69 @@ env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     env_view ev;
     ev.handle_ = std::move(procargs);
     return ev;
+}
+
+#elif defined(__FreeBSD__)
+env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
+{
+  env_view ev;
+
+  unsigned cntp = 0;
+  procstat *proc_stat = procstat_open_sysctl();
+  if (proc_stat != nullptr)
+  {
+    kinfo_proc *proc_info = procstat_getprocs(proc_stat, KERN_PROC_PID, pid, &cntp);
+    if (proc_info != nullptr)
+    {
+      char **env = procstat_getenvv(proc_stat, proc_info, 0);
+      if (env != nullptr)
+      {
+        auto e = env;
+        std::size_t n = 0u, len = 0u;
+        while (e && *e != nullptr)
+        {
+          n ++;
+          len += std::strlen(*e);
+          e++;
+        }
+        std::size_t mem_needed =
+            // environ         -  nullptr       - strlen  + null terminators
+            (n * sizeof(char*)) + sizeof(char*) + len     + n;
+
+        char * out = new (std::nothrow) char[mem_needed];
+        if (out != nullptr)
+        {
+          auto eno = reinterpret_cast<char**>(out);
+          auto eeo = eno;
+            auto str = out +  (n * sizeof(char*)) + sizeof(char*);
+          e = env;
+          while (*e != nullptr)
+          {
+            auto len = std::strlen(*e) + 1u;
+            std::memcpy(str, *e, len);
+            *eno = str;
+            str += len;
+            eno ++;
+            e++;
+          }
+          *eno = nullptr;
+
+          ev.handle_.reset(eeo);
+        }
+        else
+            ec = detail::get_last_error();
+
+      }
+      procstat_freeprocs(proc_stat, proc_info);
+
+    }
+    else
+      ec = detail::get_last_error();
+    procstat_close(proc_stat);
+  }
+  else
+    ec = detail::get_last_error();
+  return ev;
 }
 
 #endif

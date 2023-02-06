@@ -92,13 +92,12 @@ struct make_cmd_shell_
             str_lengths += (std::strlen(*c) + 1);
         }
         // yes, not the greatest solution.
-        std::string buffer;
         res.buffer_.resize(str_lengths);
 
         res.argv_ = new char*[res.argc_ + 1];
         res.free_argv_ = +[](int argc, char ** argv) {delete[] argv;};
         res.argv_[res.argc_] = nullptr;
-        auto p = &buffer[sizeof(int) * (res.argc_) + 1];
+        auto p = &*res.buffer_.begin();
 
         for (int i = 0; i < res.argc_; i++)
         {
@@ -179,7 +178,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
         return {};
     }
 
-    int argc = *reinterpret_cast<int*>(procargs.data());
+    int argc = *reinterpret_cast<const int*>(procargs.data());
     auto itr = procargs.begin() + sizeof(argc);
 
     std::unique_ptr<char*[]> argv{new char*[argc + 1]};
@@ -305,16 +304,9 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
         ec = detail::get_last_error();
         return {};
     }
-    struct free_argv
-    {
-        struct procstat * proc_stat;
-        ~free_argv()
-        {
-            procstat_freeargv(proc_stat);
-        }
-    };
-
-    return make_cmd_shell_::clone(cmd);
+    auto res = make_cmd_shell_::clone(cmd);
+    procstat_freeargv(proc_stat.get());
+    return res;
 }
     
 #elif defined(__DragonFly__)
