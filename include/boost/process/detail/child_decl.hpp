@@ -128,7 +128,7 @@ public:
 #if !defined(BOOST_PROCESS_NO_DEPRECATED)
 
     template< class Rep, class Period >
-    BOOST_PROCESS_DEPRECATED("wait_for is unreliable")
+    BOOST_DEPRECATED("wait_for is unreliable")
     bool wait_for (const std::chrono::duration<Rep, Period>& rel_time)
     {
         std::error_code ec;
@@ -138,7 +138,7 @@ public:
     }
 
     template< class Clock, class Duration >
-    BOOST_PROCESS_DEPRECATED("wait_until is unreliable")
+    BOOST_DEPRECATED("wait_until is unreliable")
     bool wait_until(const std::chrono::time_point<Clock, Duration>& timeout_time )
     {
         std::error_code ec;
@@ -185,14 +185,14 @@ public:
 
 #if !defined(BOOST_PROCESS_NO_DEPRECATED)
     template< class Rep, class Period >
-    BOOST_PROCESS_DEPRECATED("wait_for is unreliable")
+    BOOST_DEPRECATED("wait_for is unreliable")
     bool wait_for (const std::chrono::duration<Rep, Period>& rel_time, std::error_code & ec) noexcept
     {
         return wait_until(std::chrono::steady_clock::now() + rel_time, ec);
     }
 
     template< class Clock, class Duration >
-    BOOST_PROCESS_DEPRECATED("wait_until is unreliable")
+    BOOST_DEPRECATED("wait_until is unreliable")
     bool wait_until(const std::chrono::time_point<Clock, Duration>& timeout_time, std::error_code & ec) noexcept
     {
         if (!_exited())
