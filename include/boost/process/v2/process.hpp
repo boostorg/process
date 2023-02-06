@@ -215,13 +215,13 @@ struct basic_process
     process_handle_.request_exit(ec);
   }
 
-  /// Send the process a signal requesting it to stop. This may rely on undocmented functions.
+  /// Send the process a signal requesting it to stop. This may rely on undocumented functions.
   void suspend(error_code &ec)
   {
     process_handle_.suspend(ec);
   }
 
-  /// Send the process a signal requesting it to stop. This may rely on undocmented functions.
+  /// Send the process a signal requesting it to stop. This may rely on undocumented functions.
   void suspend()
   {
     error_code ec;
@@ -231,13 +231,13 @@ struct basic_process
   }
 
 
-  /// Send the process a signal requesting it to resume. This may rely on undocmented functions.
+  /// Send the process a signal requesting it to resume. This may rely on undocumented functions.
   void resume(error_code &ec)
   {
     process_handle_.resume(ec);  
   }
 
-  /// Send the process a signal requesting it to resume. This may rely on undocmented functions.
+  /// Send the process a signal requesting it to resume. This may rely on undocumented functions.
   void resume()
   {
       error_code ec;

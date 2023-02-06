@@ -177,7 +177,7 @@ std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec)
 {
     std::vector<pid_type> vec;
     vec.reserve(proc_listpids(PROC_PPID_ONLY, (uint32_t)pid, nullptr, 0));
-    if (proc_listpids(PROC_PPID_ONLY, (uint32_t)pid, &proc_info[0], sizeof(pid_type) * cntp))
+    if (proc_listpids(PROC_PPID_ONLY, (uint32_t)pid, &vec[0], sizeof(pid_type) * vec.size()))
     {
         ec = detail::get_last_error();
         return {};

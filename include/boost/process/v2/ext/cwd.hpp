@@ -15,26 +15,38 @@ BOOST_PROCESS_V2_BEGIN_NAMESPACE
 
 namespace ext {
 
-/// Obtain the current path of a process
+/// @{
+/// Obtain the current path of another process
 BOOST_PROCESS_V2_DECL filesystem::path cwd(pid_type pid, error_code & ec);
 BOOST_PROCESS_V2_DECL filesystem::path cwd(pid_type pid);
+
+template<typename Executor>
+BOOST_PROCESS_V2_DECL filesystem::path cwd(basic_process_handle<Executor> & handle, error_code & ec)
+{
+#if defined(BOOST_PROCESS_V2_WINDOWS)
+    return cwd(handle.native_handle(), ec);
+#else
+    return cwd(handle.id(), ec);
+#endif
+}
+
+template<typename Executor>
+BOOST_PROCESS_V2_DECL filesystem::path cwd(basic_process_handle<Executor> & handle)
+{
+#if defined(BOOST_PROCESS_V2_WINDOWS)
+    return cwd(handle.native_handle());
+#else
+    return cwd(handle.id());
+#endif
+}
+
+/// @}
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 BOOST_PROCESS_V2_DECL filesystem::path cwd(HANDLE handle, error_code & ec);
 BOOST_PROCESS_V2_DECL filesystem::path cwd(HANDLE handle);
 #endif
 
-template<typename Executor>
-BOOST_PROCESS_V2_DECL filesystem::path cwd(basic_process_handle<Executor> & handle, error_code & ec)
-{
-    return cwd(handle.native_handle(), ec);
-}
-
-template<typename Executor>
-BOOST_PROCESS_V2_DECL filesystem::path cwd(basic_process_handle<Executor> & handle)
-{
-    return cwd(handle.native_handle());
-}
 
 } // namespace ext
 
