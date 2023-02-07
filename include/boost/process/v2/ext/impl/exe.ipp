@@ -77,7 +77,7 @@ filesystem::path exe(HANDLE proc, boost::system::error_code & ec)
         return filesystem::canonical(buffer, ec);
     }
     else
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
 
     return "";
 }
@@ -103,7 +103,7 @@ filesystem::path exe(boost::process::v2::pid_type pid, boost::system::error_code
         };
         std::unique_ptr<void, del> proc{detail::ext::open_process_with_debug_privilege(pid, ec)};
         if (proc == nullptr)
-            ec = detail::get_last_error();
+            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
         else
             return exe(proc.get(), ec);
     }
@@ -119,7 +119,7 @@ filesystem::path exe(boost::process::v2::pid_type pid, boost::system::error_code
     {
         return filesystem::canonical(buffer, ec);
     }
-    ec = detail::get_last_error();   
+    BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
     return "";
 }
 
@@ -159,7 +159,7 @@ filesystem::path exe(boost::process::v2::pid_type pid, boost::system::error_code
         }
     }
 
-    ec = detail::get_last_error();
+    BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
     return "";
 }
 
@@ -167,7 +167,7 @@ filesystem::path exe(boost::process::v2::pid_type pid, boost::system::error_code
 
 filesystem::path exe(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
-    ec.assign(ENOTSUP, boost::system::system_category());
+    BOOST_PROCESS_V2_ASSIGN_EC(ec, ENOTSUP, boost::system::system_category())
     return "";
 }
 
