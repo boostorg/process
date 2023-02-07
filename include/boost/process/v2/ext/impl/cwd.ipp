@@ -66,7 +66,7 @@ filesystem::path cwd(HANDLE proc, boost::system::error_code & ec)
     if (!buffer.empty())
       return filesystem::canonical(buffer, ec);
     else 
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
     return "";
 }
 
@@ -81,7 +81,7 @@ filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code
     };
     std::unique_ptr<void, del> proc{detail::ext::open_process_with_debug_privilege(pid, ec)};
     if (proc == nullptr)
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
     else
         return cwd(proc.get(), ec);
     return {};
@@ -104,7 +104,7 @@ filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code
     if (proc_pidinfo(pid, PROC_PIDVNODEPATHINFO, 0, &vpi, sizeof(vpi)) > 0)
         return filesystem::canonical(vpi.pvi_cdir.vip_path, ec);
     else
-      ec = detail::get_last_error();
+      BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
     return "";
 }
 
@@ -139,15 +139,15 @@ filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code
                 procstat_freefiles(proc_stat, head);
             }
             else
-                ec = detail::get_last_error();
+                BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
             procstat_freeprocs(proc_stat, proc_info);
         }
         else
-            ec = detail::get_last_error();
+            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
         procstat_close(proc_stat);
     }
     else
-         ec = detail::get_last_error();
+         BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
     return path;
 }
 
@@ -177,11 +177,11 @@ filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code
             path = filesystem::canonical(str.c_str(), ec);
         }
         else
-            ec = detail::get_last_error();
+            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
         pclose(fp);
     }
     else
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
     return path;
 }
 
@@ -207,7 +207,7 @@ filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code
             filesystem::canonical(strbuff, ec);
         }
         else
-            ec = detail::get_last_error();
+            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
     }
 
     return "";

@@ -19,7 +19,6 @@ BOOST_AUTO_TEST_CASE(test_pid)
     auto all = bp2::all_pids();
     auto itr = std::find(all.begin(), all.end(), bp2::current_pid());
 
-#if !defined(__APPLE___) && !defined(__MACH__)
     BOOST_CHECK_GT(all.size(), 0u);
     BOOST_CHECK(itr != all.end());
 
@@ -39,6 +38,5 @@ BOOST_AUTO_TEST_CASE(test_pid)
         return (!children.empty() || !grand_children.empty());
     };
     BOOST_CHECK_NE(grand_child_pids(bp2::root_pid, children, grand_children), false);
-#endif
 
 }
