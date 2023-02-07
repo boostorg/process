@@ -305,16 +305,10 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
         BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
         return {};
     }
-    struct free_argv
-    {
-        struct procstat * proc_stat;
-        ~free_argv()
-        {
-            procstat_freeargv(proc_stat);
-        }
-    };
-
-    return make_cmd_shell_::clone(cmd);
+    
+    auto res = make_cmd_shell_::clone(cmd);
+    procstat_freeargv(proc_stat);
+    return res;
 }
     
 #elif defined(__DragonFly__)
