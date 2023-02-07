@@ -69,7 +69,11 @@ struct process_io_binding
   {
     DWORD res;
     if (!::GetHandleInformation(h, &res))
-      detail::throw_last_error("get_flags");
+    {
+      error_code ec;
+      BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
+      throw system_error(ec, "get_flags");
+    }
     return res;
   }
 
@@ -176,7 +180,7 @@ struct process_io_binding
     fd = p[1];
     if (::fcntl(p[0], F_SETFD, FD_CLOEXEC) == -1)
     {
-      ec = detail::get_last_error();
+      BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
       return ;
     }
     fd_needs_closing = true;
@@ -195,7 +199,7 @@ struct process_io_binding
     fd = p[0];
     if (::fcntl(p[1], F_SETFD, FD_CLOEXEC) == -1)
     {
-      ec = detail::get_last_error();
+      BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
       return ;
     }
     fd_needs_closing = true;

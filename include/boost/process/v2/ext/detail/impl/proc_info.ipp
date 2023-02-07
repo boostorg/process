@@ -48,19 +48,19 @@ std::wstring cwd_cmd_from_proc(HANDLE proc, int type, boost::system::error_code 
 
     if (error)
     {
-        ec.assign(error, boost::system::system_category());
+        BOOST_PROCESS_V2_ASSIGN_EC(ec, error, boost::system::system_category())
         return {};
     }
 
     if (!ReadProcessMemory(proc, pbi.PebBaseAddress, &peb, sizeof(peb), &nRead))
     {
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
         return {};
     }
 
     if (!ReadProcessMemory(proc, peb.ProcessParameters, &upp, sizeof(upp), &nRead))
     {
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
         return {};
     }
 
@@ -79,7 +79,7 @@ std::wstring cwd_cmd_from_proc(HANDLE proc, int type, boost::system::error_code 
 
     if (!ReadProcessMemory(proc, buf, &buffer[0], len, &nRead))
     {
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
         return {};
     }
 
@@ -112,7 +112,7 @@ HANDLE open_process_with_debug_privilege(boost::process::v2::pid_type pid, boost
     if (!proc)
         proc = OpenProcess(PROCESS_ALL_ACCESS, false, pid);
     if (!proc)
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
     return proc;
 }
 #endif

@@ -146,7 +146,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     };
     std::unique_ptr<void, del> proc{detail::ext::open_process_with_debug_privilege(pid, ec)};
     if (proc == nullptr)
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
     else
         return cmd(proc.get(), ec);
 
@@ -161,7 +161,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     auto size = sizeof(argmax);
     if (sysctl(mib, 2, &argmax, &size, nullptr, 0) == -1)
     {
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
         return {};
     }
 
@@ -174,7 +174,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 
     if (sysctl(mib, 3, &*procargs.begin(), &size, nullptr, 0) != 0)
     {
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
         return {};
     }
 
@@ -191,7 +191,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
         auto e = std::find(itr, end, '\0');
         if (e == end && n < argc) // something off
         {
-            ec.assign(EINVAL, system_category());
+            BOOST_PROCESS_V2_ASSIGN_EC(ec, EINVAL, system_category())
             return {};
         }
         argv[n] = &*itr;
@@ -216,7 +216,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
         auto r = ::read(f, &*(procargs.end() - 4096), 4096);
         if (r < 0)
         {
-            ec = detail::get_last_error();
+            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
             ::close(f);
             return {};
         }
@@ -247,7 +247,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
         auto e = std::find(itr, end, '\0');
         if (e == end && n < argc) // something off
         {
-            ec.assign(EINVAL, system_category());
+            BOOST_PROCESS_V2_ASSIGN_EC(ec, EINVAL, system_category())
             return {};
         }
         argv[n] = &*itr;
@@ -273,7 +273,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     std::unique_ptr<struct procstat, cl_proc_stat> proc_stat{procstat_open_sysctl()};
     if (!proc_stat)
     {
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
         return {};
     }
 
@@ -294,14 +294,14 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 
     if (!proc_info)
     {
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
         return {};
     }
 
     char **cmd = procstat_getargv(proc_stat.get(), proc_info.get(), 0);
     if (!cmd)
     {
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
         return {};
     }
     auto res = make_cmd_shell_::clone(cmd);
@@ -326,17 +326,17 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     };
 
     std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr)};
-    if (!kd) {ec = detail::get_last_error(); return {};}
+    if (!kd) {BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec) return {};}
     if ((proc_info = kvm_getprocs(kd.get(), KERN_PROC_PID, pid, &cntp))) 
     {
         char **cmd = kvm_getargv(kd.get(), proc_info, 0);
         if (cmd)
             return make_cmd_shell_::clone(cmd);
         else
-            ec = detail::get_last_error();
+            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
     }
     else
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
     return {};
 }
     
@@ -358,17 +358,17 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 
     std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr)};
 
-    if (!kd) {ec = detail::get_last_error(); return vec;}
+    if (!kd) {BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec) return vec;}
     if ((proc_info = kvm_getproc2(kd.get(), KERN_PROC_PID, pid, sizeof(struct kinfo_proc2), &cntp))) 
     {
         char **cmd = kvm_getargv2(kd.get(), proc_info, 0);
         if (cmd)
             return make_cmd_shell_::clone(cmd);
         else
-            ec = detail::get_last_error();
+            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
     }
     else
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
     return vec;
 }
     
@@ -389,17 +389,17 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     };
 
     std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr)};
-    if (!kd) {ec = detail::get_last_error(); return vec;}
+    if (!kd) {BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec) return vec;}
     if ((proc_info = kvm_getprocs(kd.get(), KERN_PROC_PID, pid, sizeof(struct kinfo_proc), &cntp))) 
     {
         char **cmd = kvm_getargv(kd.get(), proc_info, 0);
         if (cmd)
             return make_cmd_shell_::clone(cmd);
         else
-            ec = detail::get_last_error();
+            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
     }
     else
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
     kvm_close(kd);
     return {};
 }
@@ -412,7 +412,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     proc *proc_info = nullptr;
     user *proc_user = nullptr;
     kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr);
-    if (!kd) {ec = detail::get_last_error(); return {};}
+    if (!kd) {BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec) return {};}
     if ((proc_info = kvm_getproc(kd, pid))) 
     {
         if ((proc_user = kvm_getu(kd, proc_info))) 
@@ -427,13 +427,13 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
                         +[](int, char ** argv) {::free(argv);})
             }
             else
-                ec = detail::get_last_error();
+                BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
         }
         else
-            ec = detail::get_last_error();
+            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
     }
     else
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
     
     kvm_close(kd);
     return {};

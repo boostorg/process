@@ -73,7 +73,7 @@ std::vector<pid_type> all_pids(boost::system::error_code & ec)
     HANDLE hp = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (!hp)
     {
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
         return vec;
     }
     PROCESSENTRY32 pe;
@@ -95,7 +95,7 @@ pid_type parent_pid(pid_type pid, boost::system::error_code & ec)
     HANDLE hp = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (!hp)
     {
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
         return ppid;
     }
     PROCESSENTRY32 pe;
@@ -122,7 +122,7 @@ std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec)
     HANDLE hp = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (!hp)
     {
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
         return vec;
     }
     PROCESSENTRY32 pe;
@@ -150,7 +150,7 @@ std::vector<pid_type> all_pids(boost::system::error_code & ec)
     vec.reserve(proc_listpids(PROC_ALL_PIDS, 0, nullptr, 0));
     if (proc_listpids(PROC_ALL_PIDS, 0, &vec[0], sizeof(pid_type) * vec.size()))
     {
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
         return {};
     }
     auto itr = std::partition(vec.begin(), vec.end(), [](pid_type pt) {return pt != 0;});
@@ -165,7 +165,7 @@ pid_type parent_pid(pid_type pid, boost::system::error_code & ec)
     proc_bsdinfo proc_info;
     if (proc_pidinfo(pid, PROC_PIDTBSDINFO, 0, &proc_info, sizeof(proc_info)) <= 0)
     {
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
         return ppid;
     }
     else
@@ -179,7 +179,7 @@ std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec)
     vec.reserve(proc_listpids(PROC_PPID_ONLY, (uint32_t)pid, nullptr, 0));
     if (proc_listpids(PROC_PPID_ONLY, (uint32_t)pid, &vec[0], sizeof(pid_type) * vec.size()))
     {
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
         return {};
     }
     auto itr = std::partition(vec.begin(), vec.end(), [](pid_type pt) {return pt != 0;});
@@ -196,7 +196,7 @@ std::vector<pid_type> all_pids(boost::system::error_code & ec)
     DIR *proc = opendir("/proc");
     if (!proc)
     {
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
         return vec;
     } 
     struct dirent *ent = nullptr;
@@ -218,7 +218,7 @@ pid_type parent_pid(pid_type pid, boost::system::error_code & ec)
     FILE *stat = fopen(buffer, "r");
     if (!stat)
     {
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
         return ppid;
     } 
     else
@@ -243,7 +243,7 @@ pid_type parent_pid(pid_type pid, boost::system::error_code & ec)
             if (!token)
             {
                 fclose(stat);
-                ec = detail::get_last_error();
+                BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
                 return ppid;
             }
         }
@@ -284,7 +284,7 @@ std::vector<pid_type> all_pids(boost::system::error_code & ec)
         free(proc_info);
     }
     else
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
     return vec;
 }
 
@@ -298,7 +298,7 @@ pid_type parent_pid(pid_type pid, boost::system::error_code & ec)
         free(proc_info);
     }
     else
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
     return ppid;
 }
 
@@ -320,7 +320,7 @@ std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec)
         free(proc_info);
     }
     else
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
     return vec;
 }
 
@@ -344,7 +344,7 @@ std::vector<pid_type> all_pids(boost::system::error_code & ec)
     std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr)};
     if (!kd) 
     {
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
         return vec;
     }
     if ((proc_info = kvm_getprocs(kd.get(), KERN_PROC_ALL, 0, &cntp))) 
@@ -355,7 +355,7 @@ std::vector<pid_type> all_pids(boost::system::error_code & ec)
                 vec.push_back(proc_info[i].kp_pid);
     }
     else
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
     return vec;
 }
 
@@ -377,7 +377,7 @@ pid_type parent_pid(pid_type pid, boost::system::error_code & ec)
     std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr)}; 
     if (!kd) 
     {
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
         return ppid;
     }
     if ((proc_info = kvm_getprocs(kd.get(), KERN_PROC_PID, pid, &cntp)))
@@ -388,7 +388,7 @@ pid_type parent_pid(pid_type pid, boost::system::error_code & ec)
         }
     }
     else
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
     return ppid;
 }
 
@@ -410,7 +410,7 @@ std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec)
     std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr)};
     if (!kd) 
     {
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
         return vec;
     }
     if ((proc_info = kvm_getprocs(kd.get(), KERN_PROC_ALL, 0, &cntp)))
@@ -425,7 +425,7 @@ std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec)
         }
     }
     else
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
     return vec;
 }
 
@@ -447,7 +447,7 @@ std::vector<pid_type> all_pids(boost::system::error_code & ec)
     std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr)};
     if (!kd)
     {
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
         return vec;
     } 
     if ((proc_info = kvm_getproc2(kd.get(), KERN_PROC_ALL, 0, sizeof(struct kinfo_proc2), &cntp)))
@@ -459,7 +459,7 @@ std::vector<pid_type> all_pids(boost::system::error_code & ec)
         }
     }
     else
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
     return vec;
 }
 
@@ -479,7 +479,7 @@ pid_type parent_pid(pid_type pid, boost::system::error_code & ec)
     std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr)};
     if (!kd) 
     {
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
         return ppid;
     }
     if ((proc_info = kvm_getproc2(kd.get(), KERN_PROC_PID, pid, sizeof(struct kinfo_proc2), &cntp)))
@@ -487,7 +487,7 @@ pid_type parent_pid(pid_type pid, boost::system::error_code & ec)
         ppid = proc_info->p_ppid;
     }
     else
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
     return ppid;
 }
 
@@ -507,7 +507,7 @@ std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec)
     std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr)};
     if (!kd) 
     {
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
         return vec;
     }
     if ((proc_info = kvm_getproc2(kd.get(), KERN_PROC_ALL, 0, sizeof(struct kinfo_proc2), &cntp)))
@@ -522,7 +522,7 @@ std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec)
         }
     }
     else
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
     return vec;
 }
 
@@ -544,7 +544,7 @@ std::vector<pid_type> all_pids(boost::system::error_code & ec)
     std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr)};
     if (!kd)
     {
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
         return vec;
     } 
     if ((proc_info = kvm_getprocs(kd.get(), KERN_PROC_ALL, 0, sizeof(struct kinfo_proc), &cntp)))
@@ -559,7 +559,7 @@ std::vector<pid_type> all_pids(boost::system::error_code & ec)
         }
     }
     else
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
     return vec;
 }
 
@@ -579,7 +579,7 @@ pid_type parent_pid(pid_type pid, boost::system::error_code & ec)
     std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr)};
     if (!kd)
     {
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
         return ppid;
     }
     if ((proc_info = kvm_getprocs(kd.get(), KERN_PROC_PID, pid, sizeof(struct kinfo_proc), &cntp)))
@@ -587,7 +587,7 @@ pid_type parent_pid(pid_type pid, boost::system::error_code & ec)
         ppid = proc_info->p_ppid;
     }
     else
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
     return ppid;
 }
 
@@ -607,7 +607,7 @@ std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec)
     std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr)}; 
     if (!kd) 
     {
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
         return vec;
     }
     if ((proc_info = kvm_getprocs(kd.get(), KERN_PROC_ALL, 0, sizeof(struct kinfo_proc), &cntp)))
@@ -622,7 +622,7 @@ std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec)
         }
     }
     else
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
     return vec;
 }
 
@@ -645,7 +645,7 @@ std::vector<pid_type> all_pids(boost::system::error_code & ec)
     std::unique_ptr<kvm_t, closer> kd{kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr)};
     if (!kd)
     {
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
         return vec;
     } 
     while ((proc_info = kvm_nextproc(kd)))
@@ -656,7 +656,7 @@ std::vector<pid_type> all_pids(boost::system::error_code & ec)
         }
         else
         {
-            ec = detail::get_last_error();
+            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
             break;
         }
     }
@@ -678,7 +678,7 @@ pid_type parent_pid(pid_type pid, boost::system::error_code & ec)
     std::unique_ptr<kvm_t, closer> kd{kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr)};
     if (!kd)
     {
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
         return ppid;
     }
     if ((proc_info = kvm_getproc(kd, pid)))
@@ -686,7 +686,7 @@ pid_type parent_pid(pid_type pid, boost::system::error_code & ec)
         ppid = proc_info->p_ppid;
     }
     else
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
     return ppid;
 }
 
@@ -706,7 +706,7 @@ std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec)
     std::unique_ptr<kvm_t, closer> kd{kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr);
     if (!kd)
     {
-        ec = detail::get_last_error();
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
         return vec;
     }
     while ((proc_info = kvm_nextproc(kd)))
@@ -719,7 +719,7 @@ std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec)
             }
             else
             {
-                ec = detail::get_last_error();
+                BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
                 break;
             }
         }

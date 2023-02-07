@@ -69,7 +69,11 @@ void shell::parse_()
 {
     argv_ = ::CommandLineToArgvW(input_.c_str(), &argc_);
     if (argv_ == nullptr)
-        detail::throw_last_error();
+    {
+        error_code ec;
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
+        throw system_error(ec, "shell::parse");
+    }
 }
 
 shell::~shell()
