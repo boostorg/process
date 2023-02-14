@@ -83,3 +83,24 @@ BOOST_AUTO_TEST_CASE(implicit)
         BOOST_TEST_MESSAGE(ec.message());
     BOOST_CHECK_EQUAL(ret, 21);
 }
+
+BOOST_AUTO_TEST_CASE(empty_cmd)
+{
+    using boost::unit_test::framework::master_test_suite;
+
+    std::error_code ec;
+
+    fs::path pth = master_test_suite().argv[1];
+    auto env = boost::this_process::environment();
+
+    auto itr = std::find_if(env.begin(), env.end(),
+    [](const bp::native_environment::entry_type & e){return boost::to_upper_copy(e.get_name()) == "PATH";});
+
+    BOOST_REQUIRE(itr != env.end());
+
+    (*itr) += fs::canonical(fs::absolute(pth.parent_path())).string();
+    BOOST_REQUIRE(itr != env.end());
+
+    bp::system("sparring_partner \"\" ", ec);
+}
+
