@@ -155,13 +155,15 @@ private:
 
 std::vector<char*> exe_cmd_init<char>::make_cmd()
 {
+    // any string must be writable.
+    static char empty_string[1] = "";
     std::vector<char*> vec;
     if (!exe.empty())
-        vec.push_back(&exe.front());
+        vec.push_back(exe.empty() ? empty_string : &exe.front());
 
     if (!args.empty()) {
         for (auto & v : args)
-            vec.push_back(&v.front());
+            vec.push_back(v.empty() ? empty_string : &v.front());
     }
 
     vec.push_back(nullptr);
