@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(cmd_exe)
     BOOST_CHECK_EQUAL(bp2::detail::conv_string<char>(ref.data(), ref.size()), pth);
 
     BOOST_REQUIRE_EQUAL(cm.argc(), args.size() + 1);
-    for (auto i = 0; i < args.size(); i++)
+    for (auto i = 0u; i < args.size(); i++)
     {
       ref = cm.argv()[i + 1];
 
