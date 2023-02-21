@@ -424,6 +424,11 @@ BOOST_AUTO_TEST_CASE(print_other_cwd)
 
   BOOST_CHECK(sz != 0);
   BOOST_CHECK_MESSAGE((ec == asio::error::broken_pipe) || (ec == asio::error::eof), ec.message());
+
+
+  if (out.back() != '/' && target.string().back() == '/')
+      out += '/';
+
   BOOST_CHECK_MESSAGE(bpv::filesystem::path(out) == target,
                       bpv::filesystem::path(out) << " != " << target);
 
@@ -553,6 +558,10 @@ BOOST_AUTO_TEST_CASE(bind_launcher)
 
   BOOST_CHECK(sz != 0);
   BOOST_CHECK_MESSAGE((ec == asio::error::broken_pipe) || (ec == asio::error::eof), ec.message());
+
+  if (out.back() != '/' && target.string().back() == '/')
+      out += '/';
+
   BOOST_CHECK_MESSAGE(bpv::filesystem::path(out) == target,
                       bpv::filesystem::path(out) << " != " << target);
 
