@@ -34,6 +34,7 @@ BOOST_AUTO_TEST_CASE(child_pid)
 
     using boost::unit_test::framework::master_test_suite;
     const auto pth = bp2::filesystem::absolute(master_test_suite().argv[1]);
+    std::this_thread::sleep_for(std::chrono::milliseconds(20));
 
     auto cs = bp2::child_pids(bp2::current_pid());
     boost::asio::io_context ctx;
