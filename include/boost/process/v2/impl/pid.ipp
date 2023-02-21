@@ -147,15 +147,14 @@ std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec)
 std::vector<pid_type> all_pids(boost::system::error_code & ec)
 {
     std::vector<pid_type> vec;
-    vec.reserve(proc_listpids(PROC_ALL_PIDS, 0, nullptr, 0));
-    if (proc_listpids(PROC_ALL_PIDS, 0, &vec[0], sizeof(pid_type) * vec.size()))
+    vec.resize(proc_listpids(PROC_ALL_PIDS, 0, nullptr, 0) / sizeof(pid_type));
+    const auto sz = proc_listpids(PROC_ALL_PIDS, 0, &vec[0], sizeof(pid_type) * vec.size());
+    if (sz < 0)
     {
         BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
         return {};
     }
-    auto itr = std::partition(vec.begin(), vec.end(), [](pid_type pt) {return pt != 0;});
-    vec.erase(itr, vec.end());
-    std::reverse(vec.begin(), vec.end());
+    vec.resize(sz);
     return vec;
 }
 
@@ -176,15 +175,14 @@ pid_type parent_pid(pid_type pid, boost::system::error_code & ec)
 std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec) 
 {
     std::vector<pid_type> vec;
-    vec.reserve(proc_listpids(PROC_PPID_ONLY, (uint32_t)pid, nullptr, 0));
-    if (proc_listpids(PROC_PPID_ONLY, (uint32_t)pid, &vec[0], sizeof(pid_type) * vec.size()))
+    vec.resize(proc_listpids(PROC_PPID_ONLY, (uint32_t)pid, nullptr, 0) / sizeof(pid_type));
+    const auto sz = proc_listpids(PROC_PPID_ONLY, (uint32_t)pid, &vec[0], sizeof(pid_type) * vec.size());
+    if (sz < 0)
     {
         BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
         return {};
     }
-    auto itr = std::partition(vec.begin(), vec.end(), [](pid_type pt) {return pt != 0;});
-    vec.erase(itr, vec.end());
-    std::reverse(vec.begin(), vec.end());
+    vec.resize(sz);
     return vec;
 }
 
