@@ -32,7 +32,7 @@ also returned from `.wait()`.
 ```
 
 The normal exit-code is what the subprocess returned from `main`;
-posix will however add addtional information about the process. 
+posix will however add additional information about the process.
 This is called the `native_exit_code`.
 
 
@@ -42,7 +42,7 @@ The `.running()` function can be used to detect if the process is still active.
 
 [section:signal Signalling the subprocess]
 
-The parent process can signal the subprocess demaning certain actions.
+The parent process can signal the subprocess demanding certain actions.
 
 `.terminate` will cause the subprocess to exit immediately (`SIGKILL` on posix).
 This is the only reliable & portable way to end a subprocess.
@@ -76,7 +76,7 @@ interpret as a signal to shutdown.
 
 [section:execute Execute functions]
 
-Process v2 provides  `execute` and `async_execute` functons that can be used for managed executions.
+Process v2 provides  `execute` and `async_execute` functions that can be used for managed executions.
 
 ```
  assert(execute(process("/bin/ls", {}) == 0));

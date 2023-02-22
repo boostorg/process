@@ -41,7 +41,7 @@ which means, that the named pipe behaves like a file.
 Windows does provide a facility called [@https://msdn.microsoft.com/en-us/library/windows/desktop/aa365150(v=vs.85).aspx named pipes],
 which also have file-like names, but are in a different scope than the actual file system.
 
-[note The main reason named pipes are part of this library, is because they need to be internally used for asynchrounous communication on windows.]
+[note The main reason named pipes are part of this library, is because they need to be internally used for asynchronous communication on windows.]
 
 [endsect]
 

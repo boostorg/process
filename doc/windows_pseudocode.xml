@@ -29,7 +29,7 @@ else
     for (auto &amp; s : seq)
         s.<methodname alt="boost::process::extend::handler::on_error">on_success</methodname>(*this);
 
-//now we check again, because a on_success handler might've errored.
+//now we check again, because an on_success handler might've errored.
 if (<methodname alt="boost::process::extend::windows_executor::error">error</methodname>())
 {
     for (auto &amp; s : seq)

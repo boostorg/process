@@ -128,7 +128,7 @@ inline int get_cont_octet_out_count_impl<4>(wchar_t word) {
 
     // Note that the following code will generate warnings on some platforms
     // where wchar_t is defined as UCS2.  The warnings are superfluous as the
-    // specialization is never instantitiated with such compilers, but this
+    // specialization is never instantiated with such compilers, but this
     // can cause problems if warnings are being treated as errors, so we guard
     // against that. Including <boost/detail/utf8_codecvt_facet.hpp> as we do
     // should be enough to get WCHAR_MAX defined.

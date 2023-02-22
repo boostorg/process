@@ -270,7 +270,7 @@ struct basic_process
       detail::throw_error(ec, "wait failed");
     return exit_code();
   }
-  /// Waits for the process to exit, store the exit code internall and return it.
+  /// Waits for the process to exit, store the exit code internally and return it.
   int wait(error_code & ec)
   {
     if (running(ec))

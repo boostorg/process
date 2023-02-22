@@ -27,8 +27,8 @@ static const error_category& shell_category = get_shell_category();
  * In v1, this was possible directly when starting a process,
  * but has been removed based on the security risks associated with this.
  * 
- * By making the shell parsing explicity, it is encouraged
- * that a user runs a sanity check on the executable before launching it.
+ * By making the shell parsing explicitly, it encourages
+ * a user to run a sanity check on the executable before launching it.
  * 
  * @par Example
  * @code {.cpp}

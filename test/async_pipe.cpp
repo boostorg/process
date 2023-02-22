@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE(move_pipe)
     }
 /*
     {
-        //copy an a closed pipe
+        //copy a closed pipe
         BOOST_TEST_CHECKPOINT("Copy assign");
         BOOST_TEST_CHECKPOINT("Fourth move, from closed");
         bp::async_pipe ap_inv{ios};
@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE(move_pipe)
     }
 
     {
-        //copy an a closed pipe
+        //copy a closed pipe
         BOOST_TEST_CHECKPOINT("Copy assign");
         BOOST_TEST_CHECKPOINT("Fourth move, from closed");
         bp::async_pipe ap_inv{ios};

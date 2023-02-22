@@ -164,7 +164,7 @@ struct limit_handles_ : handler_base_ext
     }
 
     template<typename Executor>
-    void on_sucess(Executor & exec) const
+    void on_success(Executor & exec) const
     {
         for (auto handle : handles_with_inherit_flag)
             ::boost::winapi::SetHandleInformation(handle, ::boost::winapi::HANDLE_FLAG_INHERIT_, ::boost::winapi::HANDLE_FLAG_INHERIT_);
