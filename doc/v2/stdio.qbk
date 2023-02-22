@@ -23,7 +23,7 @@ automatically connected and the other side will get assigned to the child proces
     proc.wait();
 ```
 
-readable pipes can be assigned to `out` an `err``, while writable_pipes can be assigned to `in`.
+readable pipes can be assigned to `out` an `err`, while writable_pipes can be assigned to `in`.
 
 [endsect]
 

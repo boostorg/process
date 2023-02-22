@@ -90,7 +90,7 @@ The async version supports cancellation and will forward cancellation types as f
 
 ```
     asio::io_context ctx;
-    asio::steady_timer timout{ctx, std::chrono::seconds(10)};
+    asio::steady_timer timeout{ctx, std::chrono::seconds(10)};
 
     asio::cancellation_signal sig;
     async_execute(process("/usr/bin/g++", {"hello_world.cpp"}), 
