@@ -61,7 +61,7 @@ struct bind_fd
      */
     bind_fd(int target, FILE * f) : bind_fd(target, fileno(f)) {}
     
-    /// Inherit a file descriptor with as a differnet value.
+    /// Inherit a file descriptor with as a different value.
     /**
      * This will pass 24 as 42 to the child process:
      * @code
@@ -79,7 +79,7 @@ struct bind_fd
      */
     bind_fd(int target, std::nullptr_t) : bind_fd(target, filesystem::path("/dev/null")) {}
 
-    /// Inherit a newly openedfile as a set descriptor.
+    /// Inherit a newly opened-file as a set descriptor.
     /**
      * This will pass 24 as 42 to the child process:
      * @code

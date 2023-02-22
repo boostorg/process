@@ -21,7 +21,7 @@ A launcher is invoked through the call operator.
 ```
     auto l = windows::as_user_launcher((HANDLE)0xDEADBEEF);
     asio::io_context ctx;
-    boost::system::eror_code ec;
+    boost::system::error_code ec;
     auto proc = l(ctx, ec, "C:\\User\\boost\\Downloads\\totally_not_a_virus.exe", {});
 ```
 
@@ -38,7 +38,7 @@ Alternatively, the `vfork_launcher` can report errors directly back to the paren
 Thus some calls to the initializers occur after forking from the child process.
 
 ```
-    struct custom_initalizer
+    struct custom_initializer
     {
         // functions called from the parent process:
 
@@ -47,7 +47,7 @@ Thus some calls to the initializers occur after forking from the child process.
         template<typename Launcher>
         error_code on_setup(Launcher & launcher, const filesystem::path &executable, const char * const * (&cmd_line));
 
-        // called for every initializer if an error occured during setup or process creation
+        // called for every initializer if an error occurred during setup or process creation
         template<typename Launcher>
         void on_error(Launcher & launcher, const filesystem::path &executable, const char * const * (&cmd_line),
                       const error_code & ec);
@@ -56,7 +56,7 @@ Thus some calls to the initializers occur after forking from the child process.
         template<typename Launcher>
         void on_success(Launcher & launcher, const filesystem::path &executable, const char * const * (&cmd_line));
 
-        // called for every initializer if an error occured when forking, in addtion to on_error.
+        // called for every initializer if an error occurred when forking, in addition to on_error.
         template<typename Launcher>
         void on_fork_error(Launcher & launcher, const filesystem::path &executable, const char * const * (&cmd_line),
                            const error_code & ec);
@@ -94,7 +94,7 @@ The launcher will close all non-whitelisted file descriptors after `on_exec_setu
 
 [section:windows Windows Launchers]
 
-Windows launchers are pretty streight forward, they will call the following functions on the initializer if present.
+Windows launchers are pretty straight forward, they will call the following functions on the initializer if present.
 
 ```
     struct custom_initializer
@@ -103,7 +103,7 @@ Windows launchers are pretty streight forward, they will call the following func
         template<typename Launcher>
         error_code on_setup(Launcher & launcher, const filesystem::path &executable, std::wstring &cmd_line);
 
-        // called for every initializer if an error occured during setup or process creation
+        // called for every initializer if an error occurred during setup or process creation
         template<typename Launcher>
         void on_error(Launcher & launcher, const filesystem::path &executable, std::wstring &cmd_line,
                       const error_code & ec);

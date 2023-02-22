@@ -39,10 +39,10 @@ inline std::string build_cmd_shell(const std::string & exe, std::vector<std::str
             //the first one is put directly onto the output,
             //because then I don't have to copy the whole string
             arg.insert(arg.begin(), '"' );
-            arg += '"'; //thats the post one.
+            arg += '"'; //that is the post one.
         }
 
-        if (!st.empty())//first one does not need a preceeding space
+        if (!st.empty())//first one does not need a preceding space
             st += ' ';
 
         st += arg;

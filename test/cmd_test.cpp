@@ -30,7 +30,7 @@ namespace bp = boost::process;
 namespace fs = boost::process::filesystem;
 
 
-BOOST_AUTO_TEST_CASE(excplicit)
+BOOST_AUTO_TEST_CASE(explicit_)
 {
     using boost::unit_test::framework::master_test_suite;
 

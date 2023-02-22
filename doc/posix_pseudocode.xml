@@ -31,7 +31,7 @@ else if (pid == 0) //child process
     for (auto &amp; s : seq)
         s.<methodname alt="boost::process::extend::handler::on_exec_error">on_exec_error</methodname>(*this);
 
-    <emphasis>unspecified();</emphasis>//here the error is send to the father process interally
+    <emphasis>unspecified();</emphasis>//here the error is sent to the father process internally
 
     <ulink url="http://en.cppreference.com/w/cpp/utility/program/exit">std::exit</ulink>(<ulink url="http://en.cppreference.com/w/c/program/EXIT_status">EXIT_FAILURE</ulink>);
     return <classname alt="boost::process::child">child</classname>(); //for C++ compliance
@@ -39,7 +39,7 @@ else if (pid == 0) //child process
 
 <classname alt="boost::process::child">child</classname> c(pid, exit_code);
 
-<emphasis>unspecified();</emphasis>//here, we read the the error from the child process
+<emphasis>unspecified();</emphasis>//here, we read the error from the child process
 
 if (<methodname alt="boost::process::extend::posix_executor::error">error</methodname>())
     for (auto &amp; s : seq)
@@ -48,7 +48,7 @@ else
     for (auto &amp; s : seq)
         s.<methodname alt="boost::process::extend::handler::on_error">on_success</methodname>(*this);
 
-//now we check again, because a on_success handler might've errored.
+//now we check again, because an on_success handler might've errored.
 if (<methodname alt="boost::process::extend::posix_executor::error">error</methodname>())
 {
     for (auto &amp; s : seq)

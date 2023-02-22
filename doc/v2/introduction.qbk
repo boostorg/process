@@ -27,7 +27,7 @@ For process v2, the interfaces is simple:
  extern asio::io_context ctx;
  process proc(ctx, "./test", {"--help"}, process_io{nullptr, {}, {}}, process_environment(my_env));
 
-Every initializer adresses one logical compoent (e.g. stdio) instead of multiple ones accumulating.
+Every initializer addresses one logical component (e.g. stdio) instead of multiple ones accumulating.
 Furthermore, every process has a path and arguments, instead of a confusing mixture of cmd-style and 
 exe-args that can be randomly spread out.
 
