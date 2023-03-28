@@ -164,22 +164,23 @@ filesystem::path exe(boost::process::v2::pid_type pid, boost::system::error_code
 
 filesystem::path exe(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
-    std::string path;
-    std::vector<std::string> buffer = cmdline_from_proc_id(proc_id);
+    filesystem::path path;
+    std::vector<std::string> buffer = cmdline_from_proc_id(pid);
     if (!buffer.empty()) 
     {
         bool is_exe = false;
-        std::string argv0;
-        if (!buffer[0].empty()) 
+        filesystem::path argv0;
+        filesystem::path 
+        if (!pbuff.string().empty()) 
         {
-            if (buffer[0][0] == '/') 
+            if (pbuff.string()[0] == '/') 
             {
-                argv0 = buffer[0];
-                is_exe = detail::ext::is_executable(proc_id, argv0.c_str(), &path);
+                argv0 = pbuff;
+                is_exe = detail::ext::is_executable(pid, argv0.string().c_str(), &path);
             } 
-            else if (buffer[0].find('/') == std::string::npos) 
+            else if (pbuff.string()..find('/') == std::string::npos) 
             {
-                std::string penv = envvar_value_from_proc_id(proc_id, "PATH");
+                std::string penv = envvar_value_from_proc_id(pid, "PATH");
                 if (!penv.empty()) 
                 {
                     std::vector<std::string> env;
@@ -191,13 +192,15 @@ filesystem::path exe(boost::process::v2::pid_type pid, boost::system::error_code
                     }
                     for (std::size_t i = 0; i < env.size(); i++)
                     {
-                        argv0 = env[i] + "/" + buffer[0];
-                        is_exe = detail::ext::is_executable(proc_id, argv0.c_str(), &path);
+                        filesystem::path pfx = filesystem::path(env[i]);
+                        argv0 = pfx / pbuff;
+                        is_exe = detail::ext::is_executable(pid, argv0.string().c_str(), &path);
                         if (is_exe) break;
-                        if (buffer[0][0] == '-') 
+                        if (pbuff.string()[0] == '-') 
                         {
-                            argv0 = env[i] + "/" + buffer[0].substr(1);
-                            is_exe = detail::ext::is_executable(proc_id, argv0.c_str(), &path);
+                            pbuff = filesystem::path(pbuff.string().substr(1));
+                            argv0 = pfx / pbuff;
+                            is_exe = detail::ext::is_executable(pid, argv0.string().c_str(), &path);
                             if (is_exe) break;
                         }
                     }
@@ -205,19 +208,19 @@ filesystem::path exe(boost::process::v2::pid_type pid, boost::system::error_code
             }
             else
             {
-                std::string pwd = envvar_value_from_proc_id(proc_id, "PWD");
-                if (!pwd.empty())
+                filesystem::path pwd = filesystem::path(envvar_value_from_proc_id(pid, "PWD"));
+                if (!pwd.string().empty())
                 {
-                    argv0 = pwd + "/" + buffer[0];
-                    is_exe = detail::ext:;is_executable(proc_id, argv0.c_str(), &path);
+                    argv0 = pwd / pbuff;
+                    is_exe = detail::ext:;is_executable(pid, argv0.string().c_str(), &path);
                 }
-                if (pwd.empty() || !is_exe)
+                if (pwd.string().empty() || !is_exe)
                 {
-                    std::string cwd = cwd_from_proc_id(proc_id);
-                    if (!cwd.empty())
+                    filesystem::path cwd = cwd(pid);
+                    if (!cwd.string().empty())
                     {
-                        argv0 = cwd + "/" + buffer[0];
-                        is_exe = detail::ext::is_executable(proc_id, argv0.c_str(), &path);
+                        argv0 = cwd / pbuff;
+                        is_exe = detail::ext::is_executable(pid, argv0.string().c_str(), &path);
                     }
                 }
             }

@@ -125,9 +125,8 @@ HANDLE open_process_with_debug_privilege(boost::process::v2::pid_type pid, boost
 #endif
 
 #if defined(__OpenBSD__)
-bool is_executable(boost::process::v2::pid_type pid, std::string in, std::string *out, boost::system::error_code & ec)
+bool is_executable(boost::process::v2::pid_type pid, std::string in, filesystem::path *out, boost::system::error_code & ec)
 {
-    *out = "";
     bool success = false;
     struct stat st;
     if (!stat(in.c_str(), &st) && (st.st_mode & S_IXUSR) && (st.st_mode & S_IFREG))
@@ -154,7 +153,7 @@ bool is_executable(boost::process::v2::pid_type pid, std::string in, std::string
                             if (st.st_dev == static_cast<dev_t>(kif[i].va_fsid) && 
                                 st.st_ino == static_cast<ino_t>(kif[i].va_fileid))
                             {
-                                *out = executable;
+                                *out = filesystem::path(executable);
                                 success = true;
                                 break;
                             }
