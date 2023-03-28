@@ -136,7 +136,7 @@ bool is_executable(boost::process::v2::pid_type pid, std::string in, filesystem:
         {
             int cntp = 0;
             kinfo_file *kif = nullptr;
-            kvm_t kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
+            kvm_t *kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
             if (!kd) 
             {
                 BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
