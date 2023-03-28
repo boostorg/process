@@ -175,7 +175,7 @@ filesystem::path exe(boost::process::v2::pid_type pid, boost::system::error_code
             if (buffer[0][0] == '/') 
             {
                 argv0 = buffer[0];
-                is_exe = is_executable(proc_id, argv0.c_str(), &path);
+                is_exe = detail::ext::is_executable(proc_id, argv0.c_str(), &path);
             } 
             else if (buffer[0].find('/') == std::string::npos) 
             {
@@ -192,12 +192,12 @@ filesystem::path exe(boost::process::v2::pid_type pid, boost::system::error_code
                     for (std::size_t i = 0; i < env.size(); i++)
                     {
                         argv0 = env[i] + "/" + buffer[0];
-                        is_exe = is_executable(proc_id, argv0.c_str(), &path);
+                        is_exe = detail::ext::is_executable(proc_id, argv0.c_str(), &path);
                         if (is_exe) break;
                         if (buffer[0][0] == '-') 
                         {
                             argv0 = env[i] + "/" + buffer[0].substr(1);
-                            is_exe = is_executable(proc_id, argv0.c_str(), &path);
+                            is_exe = detail::ext::is_executable(proc_id, argv0.c_str(), &path);
                             if (is_exe) break;
                         }
                     }
@@ -209,7 +209,7 @@ filesystem::path exe(boost::process::v2::pid_type pid, boost::system::error_code
                 if (!pwd.empty())
                 {
                     argv0 = pwd + "/" + buffer[0];
-                    is_exe = is_executable(proc_id, argv0.c_str(), &path);
+                    is_exe = detail::ext:;is_executable(proc_id, argv0.c_str(), &path);
                 }
                 if (pwd.empty() || !is_exe)
                 {
@@ -217,7 +217,7 @@ filesystem::path exe(boost::process::v2::pid_type pid, boost::system::error_code
                     if (!cwd.empty())
                     {
                         argv0 = cwd + "/" + buffer[0];
-                        is_exe = is_executable(proc_id, argv0.c_str(), &path);
+                        is_exe = detail::ext::is_executable(proc_id, argv0.c_str(), &path);
                     }
                 }
             }
