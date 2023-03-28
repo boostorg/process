@@ -109,6 +109,10 @@ BOOST_PROCESS_V2_DECL std::wstring cwd_cmd_from_proc(HANDLE proc, int type, boos
 BOOST_PROCESS_V2_DECL HANDLE open_process_with_debug_privilege(boost::process::v2::pid_type pid, boost::system::error_code & ec);
 #endif
 
+#if defined(__OpenBSD__)
+BOOST_PROCESS_V2_DECL bool is_executable(boost::process::v2::pid_type pid, std::string in, std::string *out, boost::system::error_code & ec);
+#endif
+
 } // namespace ext
 
 } // namespace detail

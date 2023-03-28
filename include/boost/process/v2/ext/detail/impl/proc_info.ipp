@@ -21,6 +21,13 @@
 #include <libproc.h>
 #endif
 
+#if defined(__OpenBSD__)
+#include <sys/types.h>
+#include <sys/param.h>
+#include <sys/sysctl.h>
+#include <kvm.h>
+#endif
+
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
 
 namespace detail
@@ -114,6 +121,52 @@ HANDLE open_process_with_debug_privilege(boost::process::v2::pid_type pid, boost
     if (!proc)
         BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
     return proc;
+}
+#endif
+
+#if defined(__OpenBSD__)
+bool is_executable(boost::process::v2::pid_type pid, std::string in, std::string *out, boost::system::error_code & ec)
+{
+    *out = "";
+    bool success = false;
+    struct stat st;
+    if (!stat(in.c_str(), &st) && (st.st_mode & S_IXUSR) && (st.st_mode & S_IFREG))
+    {
+        char executable[PATH_MAX];
+        if (realpath(in.c_str(), executable))
+        {
+            int cntp = 0;
+            kinfo_file *kif = nullptr;
+            kvm_t kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
+            if (!kd) 
+            {
+                BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+                return false;
+            }
+            if ((kif = kvm_getfiles(kd, KERN_FILE_BYPID, pid, sizeof(struct kinfo_file), &cntp)))
+            {
+                for (int i = 0; i < cntp; i++)
+                {
+                    if (kif[i].fd_fd == KERN_FILE_TEXT)
+                    {
+                        if (st.st_nlink == 1)
+                        {
+                            if (st.st_dev == (dev_t)kif[i].va_fsid || st.st_ino == (ino_t)kif[i].va_fileid)
+                            {
+                                *out = executable;
+                                success = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            } else {
+                BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+            }
+            kvm_close(kd);
+        }
+    }
+    return success;
 }
 #endif
 

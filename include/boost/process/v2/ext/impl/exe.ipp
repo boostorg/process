@@ -46,9 +46,6 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
 #include <sys/types.h>
-#include <sys/param.h>
-#include <sys/sysctl.h>
-#include <kvm.h>
 #endif
 
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
@@ -167,8 +164,66 @@ filesystem::path exe(boost::process::v2::pid_type pid, boost::system::error_code
 
 filesystem::path exe(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
-    BOOST_PROCESS_V2_ASSIGN_EC(ec, ENOTSUP, boost::system::system_category())
-    return "";
+    std::string path;
+    std::vector<std::string> buffer = cmdline_from_proc_id(proc_id);
+    if (!buffer.empty()) 
+    {
+        bool is_exe = false;
+        std::string argv0;
+        if (!buffer[0].empty()) 
+        {
+            if (buffer[0][0] == '/') 
+            {
+                argv0 = buffer[0];
+                is_exe = is_executable(proc_id, argv0.c_str(), &path);
+            } 
+            else if (buffer[0].find('/') == std::string::npos) 
+            {
+                std::string penv = envvar_value_from_proc_id(proc_id, "PATH");
+                if (!penv.empty()) 
+                {
+                    std::vector<std::string> env;
+                    std::string tmp;
+                    std::stringstream sstr(penv); 
+                    while (std::getline(sstr, tmp, ':'))
+                    {
+                        env.push_back(tmp);
+                    }
+                    for (std::size_t i = 0; i < env.size(); i++)
+                    {
+                        argv0 = env[i] + "/" + buffer[0];
+                        is_exe = is_executable(proc_id, argv0.c_str(), &path);
+                        if (is_exe) break;
+                        if (buffer[0][0] == '-') 
+                        {
+                            argv0 = env[i] + "/" + buffer[0].substr(1);
+                            is_exe = is_executable(proc_id, argv0.c_str(), &path);
+                            if (is_exe) break;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                std::string pwd = envvar_value_from_proc_id(proc_id, "PWD");
+                if (!pwd.empty())
+                {
+                    argv0 = pwd + "/" + buffer[0];
+                    is_exe = is_executable(proc_id, argv0.c_str(), &path);
+                }
+                if (pwd.empty() || !is_exe)
+                {
+                    std::string cwd = cwd_from_proc_id(proc_id);
+                    if (!cwd.empty())
+                    {
+                        argv0 = cwd + "/" + buffer[0];
+                        is_exe = is_executable(proc_id, argv0.c_str(), &path);
+                    }
+                }
+            }
+        }
+    }
+    return path;
 }
 
 #else
