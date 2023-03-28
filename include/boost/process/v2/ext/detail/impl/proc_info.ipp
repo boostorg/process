@@ -151,7 +151,8 @@ bool is_executable(boost::process::v2::pid_type pid, std::string in, std::string
                     {
                         if (st.st_nlink == 1)
                         {
-                            if (st.st_dev == (dev_t)kif[i].va_fsid || st.st_ino == (ino_t)kif[i].va_fileid)
+                            if (st.st_dev == static_cast<dev_t>(kif[i].va_fsid) && 
+                                st.st_ino == static_cast<ino_t>(kif[i].va_fileid))
                             {
                                 *out = executable;
                                 success = true;
