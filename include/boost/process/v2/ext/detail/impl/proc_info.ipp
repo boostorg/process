@@ -125,50 +125,48 @@ HANDLE open_process_with_debug_privilege(boost::process::v2::pid_type pid, boost
 #endif
 
 #if defined(__OpenBSD__)
-bool is_executable(boost::process::v2::pid_type pid, filesystem::path in, filesystem::path *out, boost::system::error_code & ec)
+filesystem::path get_executable(boost::process::v2::pid_type pid, filesystem::path in, boost::system::error_code & ec)
 {
-    bool success = false;
     struct stat st;
+	filesystem::path res;
+	
     if (!stat(in.string().c_str(), &st) && (st.st_mode & S_IXUSR) && (st.st_mode & S_IFREG))
     {
-        boost::system::error_code & ec;
         filesystem::path executable = filesystem::path(in);
         executable = filesystem::canonical(executable, ec);
         if (ec)
-        {
-            int cntp = 0;
-            kinfo_file *kif = nullptr;
-            kvm_t *kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
-            if (!kd) 
-            {
-                BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
-            }
-            else if ((kif = kvm_getfiles(kd, KERN_FILE_BYPID, pid, sizeof(struct kinfo_file), &cntp)))
-            {
-                for (int i = 0; i < cntp; i++)
-                {
-                    if (kif[i].fd_fd == KERN_FILE_TEXT)
-                    {
-                        if (st.st_nlink == 1)
-                        {
-                            if (st.st_dev == static_cast<dev_t>(kif[i].va_fsid) && 
-                                st.st_ino == static_cast<ino_t>(kif[i].va_fileid))
-                            {
-                                *out = executable;
-                                success = true;
-                                ec.clear();
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-            kvm_close(kd);
-        }
+            return res;
+        
+		int cntp = 0;
+		kinfo_file *kif = nullptr;
+		kvm_t *kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
+		if (!kd) 
+		{
+			BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+            return res;
+		}
+		else if ((kif = kvm_getfiles(kd, KERN_FILE_BYPID, pid, sizeof(struct kinfo_file), &cntp)))
+		{
+			for (int i = 0; i < cntp; i++)
+			{
+				if (kif[i].fd_fd == KERN_FILE_TEXT &&
+					st.st_nlink == 1 &&
+					st.st_dev == static_cast<dev_t>(kif[i].va_fsid) && 
+					st.st_ino == static_cast<ino_t>(kif[i].va_fileid))
+				{		
+					res = std::move(executable);
+					break;	
+				}
+			}
+		}
+		else
+			BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
+		kvm_close(kd);
+        
     }
-    if (!success)
-        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
-    return success;
+	else
+		BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
+	return res;
 }
 #endif
 
