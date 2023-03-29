@@ -125,14 +125,14 @@ HANDLE open_process_with_debug_privilege(boost::process::v2::pid_type pid, boost
 #endif
 
 #if defined(__OpenBSD__)
-bool is_executable(boost::process::v2::pid_type pid, std::string in, filesystem::path *out, boost::system::error_code & ec)
+bool is_executable(boost::process::v2::pid_type pid, filesystem::path in, filesystem::path *out, boost::system::error_code & ec)
 {
     bool success = false;
     struct stat st;
-    if (!stat(in.c_str(), &st) && (st.st_mode & S_IXUSR) && (st.st_mode & S_IFREG))
+    if (!stat(in.string().c_str(), &st) && (st.st_mode & S_IXUSR) && (st.st_mode & S_IFREG))
     {
         char executable[PATH_MAX];
-        if (realpath(in.c_str(), executable))
+        if (realpath(in.string().c_str(), executable))
         {
             int cntp = 0;
             kinfo_file *kif = nullptr;
