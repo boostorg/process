@@ -162,12 +162,12 @@ bool is_executable(boost::process::v2::pid_type pid, filesystem::path in, filesy
                         }
                     }
                 }
-            } else {
-                BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
             }
             kvm_close(kd);
         }
     }
+    if (!success)
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
     return success;
 }
 #endif
