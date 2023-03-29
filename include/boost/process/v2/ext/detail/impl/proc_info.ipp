@@ -142,9 +142,8 @@ bool is_executable(boost::process::v2::pid_type pid, filesystem::path in, filesy
             if (!kd) 
             {
                 BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
-                return false;
             }
-            if ((kif = kvm_getfiles(kd, KERN_FILE_BYPID, pid, sizeof(struct kinfo_file), &cntp)))
+            else if ((kif = kvm_getfiles(kd, KERN_FILE_BYPID, pid, sizeof(struct kinfo_file), &cntp)))
             {
                 for (int i = 0; i < cntp; i++)
                 {
@@ -157,6 +156,7 @@ bool is_executable(boost::process::v2::pid_type pid, filesystem::path in, filesy
                             {
                                 *out = executable;
                                 success = true;
+                                ec.clear();
                                 break;
                             }
                         }
