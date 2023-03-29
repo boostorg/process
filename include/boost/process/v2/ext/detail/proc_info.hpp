@@ -110,7 +110,7 @@ BOOST_PROCESS_V2_DECL HANDLE open_process_with_debug_privilege(boost::process::v
 #endif
 
 #if defined(__OpenBSD__)
-BOOST_PROCESS_V2_DECL bool is_executable(boost::process::v2::pid_type pid, std::string in, filesystem::path *out, boost::system::error_code & ec);
+BOOST_PROCESS_V2_DECL bool is_executable(boost::process::v2::pid_type pid, filesystem::path in, filesystem::path *out, boost::system::error_code & ec);
 #endif
 
 } // namespace ext
