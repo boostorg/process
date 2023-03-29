@@ -131,8 +131,10 @@ bool is_executable(boost::process::v2::pid_type pid, filesystem::path in, filesy
     struct stat st;
     if (!stat(in.string().c_str(), &st) && (st.st_mode & S_IXUSR) && (st.st_mode & S_IFREG))
     {
-        char executable[PATH_MAX];
-        if (realpath(in.string().c_str(), executable))
+        boost::system::error_code & ec
+        filesystem::path executable = filesystem::path(in);
+        executable = filesystem::canonical(executable, ec);
+        if (ec)
         {
             int cntp = 0;
             kinfo_file *kif = nullptr;
@@ -153,7 +155,7 @@ bool is_executable(boost::process::v2::pid_type pid, filesystem::path in, filesy
                             if (st.st_dev == static_cast<dev_t>(kif[i].va_fsid) && 
                                 st.st_ino == static_cast<ino_t>(kif[i].va_fileid))
                             {
-                                *out = filesystem::path(executable);
+                                *out = executable;
                                 success = true;
                                 break;
                             }
