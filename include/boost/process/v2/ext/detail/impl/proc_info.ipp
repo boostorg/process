@@ -131,7 +131,7 @@ bool is_executable(boost::process::v2::pid_type pid, filesystem::path in, filesy
     struct stat st;
     if (!stat(in.string().c_str(), &st) && (st.st_mode & S_IXUSR) && (st.st_mode & S_IFREG))
     {
-        boost::system::error_code & ec
+        boost::system::error_code & ec;
         filesystem::path executable = filesystem::path(in);
         executable = filesystem::canonical(executable, ec);
         if (ec)
