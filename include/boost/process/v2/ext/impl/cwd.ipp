@@ -118,7 +118,7 @@ filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code
             );
 #elif defined(__sun)
     return fileystem::canonical(
-            filesystem::path("/proc") / std::to_string(pid) / "path/cwd"
+            filesystem::path("/proc") / std::to_string(pid) / "path/cwd", ec
             );
 #endif
 }
