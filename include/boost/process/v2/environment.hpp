@@ -13,6 +13,7 @@
 #include <boost/process/v2/detail/config.hpp>
 #include <boost/process/v2/cstring_ref.hpp>
 #include <boost/process/v2/detail/utf8.hpp>
+#include <boost/type_traits.hpp>
 #include <functional>
 #include <memory>
 #include <numeric>
