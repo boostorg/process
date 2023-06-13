@@ -57,7 +57,7 @@ file-handles for the subprocess.
 
 Certain parts of boost.process were not as reliable as they should've been. 
 
-This concerns especially the `wait_for`` and `wait_until` functions on the process.
+This concerns especially the `wait_for` and `wait_until` functions on the process.
 The latter are easy to do on windows, but posix does not provide an API for this. 
 Thus the wait_for used signals or fork, which was all but safe. 
 Since process v2 is based on asio and thus supports cancellation, 
