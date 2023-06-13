@@ -72,7 +72,7 @@ struct with_logon_launcher : default_launcher
       auto proc =  (*this)(std::move(exec), ec, executable, std::forward<Args>(args), std::forward<Inits>(inits)...);
 
       if (ec)
-          asio::detail::throw_error(ec, "with_logon_launcher");
+          v2::detail::throw_error(ec, "with_logon_launcher");
 
       return proc;
   }
