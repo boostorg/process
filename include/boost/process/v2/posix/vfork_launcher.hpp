@@ -101,7 +101,6 @@ struct vfork_launcher :  default_launcher
         }
         else if (pid == 0)
         {
-            ctx.notify_fork(BOOST_PROCESS_V2_ASIO_NAMESPACE::execution_context::fork_child);
             ec = detail::on_exec_setup(*this, executable, argv, inits...);
             if (!ec)
                 close_all_fds(ec);
@@ -110,7 +109,7 @@ struct vfork_launcher :  default_launcher
 
             BOOST_PROCESS_V2_ASSIGN_EC(ec, errno, system_category())
             detail::on_exec_error(*this, executable, argv, ec, inits...);
-            ::exit(EXIT_FAILURE);
+            ::_exit(EXIT_FAILURE);
             return basic_process<Executor>{exec};
         }
         ctx.notify_fork(BOOST_PROCESS_V2_ASIO_NAMESPACE::execution_context::fork_parent);
