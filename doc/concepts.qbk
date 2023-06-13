@@ -35,7 +35,7 @@ In this library the following functions are used for the creation of unnamed pip
 As the name suggests, named pipes have a string identifier. This means that a 
 handle to them can be obtained with the identifier, too.
 
-The implementation on posix uses [@(http://pubs.opengroup.org/onlinepubs/009695399/functions/mkfifo.html fifos],
+The implementation on posix uses [@http://pubs.opengroup.org/onlinepubs/009695399/functions/mkfifo.html fifos],
 which means, that the named pipe behaves like a file.
 
 Windows does provide a facility called [@https://msdn.microsoft.com/en-us/library/windows/desktop/aa365150(v=vs.85).aspx named pipes],
