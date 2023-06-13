@@ -93,17 +93,7 @@ struct basic_process
       : basic_process(default_process_launcher()(std::move(executor), exe, args, std::forward<Inits>(inits)...))
   {
   }
-    /// Construct a child from a property list and launch it using the default launcher..
-  template<typename ... Inits>
-  explicit basic_process(
-      executor_type executor,
-      const filesystem::path& exe,
-      std::initializer_list<wstring_view> args,
-      Inits&&... inits)
-      : basic_process(default_process_launcher()(std::move(executor), exe, args, std::forward<Inits>(inits)...))
-  {
-  }
-
+  
   /// Construct a child from a property list and launch it using the default launcher..
   template<typename Args, typename ... Inits>
   explicit basic_process(
