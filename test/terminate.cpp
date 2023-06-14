@@ -45,8 +45,8 @@ BOOST_AUTO_TEST_CASE(terminate_set_on_error, *boost::unit_test::timeout(5))
     BOOST_CHECK(c.valid());
     BOOST_CHECK(c.running(ec));
 
-    BOOST_CHECK(!c.wait_for(std::chrono::milliseconds(100), ec));
-    BOOST_CHECK(c.running(ec));
+    BOOST_CHECK_MESSAGE(!c.wait_for(std::chrono::milliseconds(100), ec), ec.message());
+    BOOST_CHECK_MESSAGE(c.running(ec), ec.message());
     BOOST_CHECK(c.valid());
 
     c.terminate(ec);
