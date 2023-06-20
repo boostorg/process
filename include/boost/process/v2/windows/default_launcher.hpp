@@ -312,7 +312,6 @@ struct default_launcher
         &startup_info.StartupInfo,
         &process_information);
 
-    auto ec__ = detail::get_last_error();
     if (ok == 0)
     {
       BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)

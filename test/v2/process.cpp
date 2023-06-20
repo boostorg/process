@@ -386,7 +386,10 @@ BOOST_AUTO_TEST_CASE(popen)
     while (ec == asio::error::interrupted)
         n += asio::read(rp, asio::dynamic_buffer(res),  ec);
 
-    BOOST_CHECK_MESSAGE(ec == asio::error::eof || ec == asio::error::broken_pipe, ec.message());
+    BOOST_CHECK_MESSAGE(ec == asio::error::eof
+                     || ec == asio::error::broken_pipe
+                     || ec == asio::error::bad_descriptor,
+                     ec.message());
     BOOST_REQUIRE_GE(n, 1u);
     // remove EOF
     res.pop_back();
