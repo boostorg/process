@@ -20,7 +20,7 @@ namespace windows
 /// A windows launcher using CreateProcessWithLogon instead of CreateProcess
 struct with_logon_launcher : default_launcher
 {
-  std::wstring username, domain, password;
+  std::wstring username, password, domain;
   DWORD logon_flags{0u};
 
   with_logon_launcher(std::wstring username = L"",
