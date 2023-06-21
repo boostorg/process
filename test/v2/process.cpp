@@ -521,13 +521,34 @@ BOOST_AUTO_TEST_CASE(exit_code_as_error)
   
   proc3.terminate();
 
-  proc1.async_wait(bpv::code_as_error([&](bpv::error_code ec){called ++; BOOST_CHECK(!ec);}));
-  proc2.async_wait(bpv::code_as_error([&](bpv::error_code ec){called ++; BOOST_CHECK_MESSAGE(ec, ec.message());}));
-  proc3.async_wait(bpv::code_as_error([&](bpv::error_code ec){called ++; BOOST_CHECK_MESSAGE(ec, ec.message());}));
+
+  proc1.async_wait(
+      [&](bpv::error_code ec, int)
+      {
+        called ++;
+        bpv::check_exit_code(ec, proc1.native_exit_code());
+        BOOST_CHECK(!ec);
+      });
+
+  proc2.async_wait(
+      [&](bpv::error_code ec, int)
+      {
+        called ++;
+        bpv::check_exit_code(ec, proc2.native_exit_code());
+        BOOST_CHECK_MESSAGE(ec, ec.message());
+      });
+
+  proc3.async_wait(
+      [&](bpv::error_code ec, int)
+      {
+        called ++;
+        bpv::check_exit_code(ec, proc3.native_exit_code());
+        BOOST_CHECK_MESSAGE(ec, ec.message());
+      });
+
 
   ctx.run();
   BOOST_CHECK_EQUAL(called, 3);
-
 }
 
 BOOST_AUTO_TEST_CASE(bind_launcher)
