@@ -371,24 +371,22 @@ BOOST_AUTO_TEST_CASE(popen)
 
     asio::io_context ctx;
 
-    asio::readable_pipe rp{ctx};
-
 
     // default CWD
     bpv::popen proc(/*bpv::default_process_launcher(), */ctx, pth, {"echo"});
 
     BOOST_CHECK_EQUAL(asio::write(proc, asio::buffer("FOOBAR", 6)), 6);
+
     proc.get_stdin().close();
 
     std::string res;
     boost::system::error_code ec;
     std::size_t n = asio::read(proc, asio::dynamic_buffer(res), ec);
     while (ec == asio::error::interrupted)
-        n += asio::read(rp, asio::dynamic_buffer(res),  ec);
+        n += asio::read(proc, asio::dynamic_buffer(res),  ec);
 
     BOOST_CHECK_MESSAGE(ec == asio::error::eof
-                     || ec == asio::error::broken_pipe
-                     || ec == asio::error::bad_descriptor,
+                     || ec == asio::error::broken_pipe,
                      ec.message());
     BOOST_REQUIRE_GE(n, 1u);
     BOOST_CHECK_EQUAL(res, "FOOBAR");
