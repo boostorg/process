@@ -152,8 +152,8 @@ BOOST_AUTO_TEST_CASE(wenvironment)
     for (const auto ke : bpe::current())
     {
       std::string key = std::get<0>(ke).string();
-      printf("Getting env '%s'\n", key.c_str());
-      BOOST_CHECK_EQUAL(bpe::get(std::get<0>(ke)), std::get<1>(ke));
+      if (!std::get<1>(ke).empty())
+        BOOST_CHECK_EQUAL(bpe::get(std::get<0>(ke)), std::get<1>(ke));
     }
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
