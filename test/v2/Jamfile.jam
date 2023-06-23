@@ -13,6 +13,7 @@ if [ os.name ] = NT
   lib Advapi32 ;
   lib Ntdll ;
   lib user32 ;
+  lib Bcrypt ;
 }
 
 project : requirements
@@ -29,6 +30,7 @@ project : requirements
   <target-os>bsd:<linkflags>-lkvm
   <os>NT,<toolset>cw:<library>ws2_32
   <os>NT,<toolset>gcc:<library>ws2_32
+  <os>NT,<toolset>gcc:<library>Bcrypt
   <define>BOOST_PROCESS_V2_SEPARATE_COMPILATION=1
 ;
 
