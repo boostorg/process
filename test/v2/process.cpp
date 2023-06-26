@@ -167,7 +167,7 @@ BOOST_AUTO_TEST_CASE(request_exit)
   asio::writable_pipe wp{ctx};
   asio::connect_pipe(rp, wp);
 
-  bpv::process proc(ctx, sh, {}, bpv::process_stdio{wp}
+  bpv::process proc(ctx, sh, {}, bpv::process_stdio{rp}
 #if defined(ASIO_WINDOWS)
     , asio::windows::show_window_minimized_not_active
 #endif
@@ -557,17 +557,13 @@ BOOST_AUTO_TEST_CASE(bind_launcher)
   asio::io_context ctx;
 
   asio::readable_pipe rp{ctx};
-  asio::writable_pipe wp{ctx};
-  asio::connect_pipe(rp, wp);
 
   auto target = bpv::filesystem::canonical(bpv::filesystem::temp_directory_path());
 
   auto l = bpv::bind_default_launcher(bpv::process_start_dir(target));
-
   std::vector<std::string> args = {"print-cwd"};
   // default CWD
-  bpv::process proc = l(ctx, pth, args, bpv::process_stdio{/*.in=*/{}, /*.out=*/wp});
-  wp.close();
+  bpv::process proc = l(ctx, pth, args, bpv::process_stdio{/*.in=*/{}, /*.out=*/rp});
 
   std::string out;
   bpv::error_code ec;
@@ -576,8 +572,8 @@ BOOST_AUTO_TEST_CASE(bind_launcher)
   while (ec == asio::error::interrupted)
     sz += asio::read(rp, asio::dynamic_buffer(out),  ec);
 
-  BOOST_CHECK(sz != 0);
   BOOST_CHECK_MESSAGE((ec == asio::error::broken_pipe) || (ec == asio::error::eof), ec.message());
+  BOOST_REQUIRE(sz != 0);
 
   if (out.back() != '/' && target.string().back() == '/')
       out += '/';

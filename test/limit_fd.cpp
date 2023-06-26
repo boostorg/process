@@ -97,7 +97,8 @@ BOOST_AUTO_TEST_CASE(leak_test, *boost::unit_test::timeout(5))
 
 #if defined( BOOST_WINDOWS_API )
     std::thread thr([]{});
-    BOOST_CHECK(!bt::is_stream_handle(thr.native_handle(), ec)); BOOST_CHECK_MESSAGE(!ec, ec.message());
+    BOOST_CHECK(!bt::is_stream_handle(::GetCurrentProcess(), ec));
+    BOOST_CHECK_MESSAGE(!ec, ec.message());
     thr.join();
 #else
 # if defined(TFD_CLOEXEC) //check timer
