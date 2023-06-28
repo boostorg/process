@@ -293,7 +293,7 @@ public:
         while (*p != nullptr)
         {
             const std::size_t len = std::char_traits<Char>::length(*p);
-            if ((std::distance(st1.begin(), st1.end()) < 
+            if ((std::distance(st1.begin(), st1.end()) <
                  static_cast<typename string_type::iterator::difference_type>(len))
                 && std::equal(st1.begin(), st1.end(), *p))
                 return 1u;
