@@ -120,6 +120,28 @@ public:
         _source = -1;
         _sink   = -1;
     }
+
+    #if !(defined(__NetBSD__) || defined(__FreeBSD__) || defined(__APPLE__) || defined(__MACH__))
+        int_type set_pipe_capacity(int_type capacity) 
+    {
+        if (!is_open())
+        {
+            return -1;
+        }
+        int_type fd = _source != -1 ? _source : _sink;
+
+        int_type return_value;
+        while(((return_value = fcntl(fd, F_SETPIPE_SZ, capacity)) == -1))
+        {
+            //Try again if interrupted
+            auto err = errno;
+            if (err != EINTR)
+                ::boost::process::detail::throw_last_error();
+        }
+        
+        return return_value;
+    }
+    #endif
 };
 
 template<class CharT, class Traits>
