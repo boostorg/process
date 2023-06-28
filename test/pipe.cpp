@@ -370,5 +370,35 @@ BOOST_AUTO_TEST_CASE(stream_close_scope, *boost::unit_test::timeout(5))
     BOOST_CHECK_EQUAL(i, j);
 }
 
+#if !(defined(__NetBSD__) || defined(__FreeBSD__) || defined(__APPLE__) || defined(__MACH__))
+    
+    BOOST_AUTO_TEST_CASE(set_pipe_capacity_max, *boost::unit_test::timeout(5))
+    {
+        std::ifstream file("/proc/sys/fs/pipe-max-size");
+        std::string content;
+        std::getline(file, content);
+        file.close();
+        int max_capacity = std::stoi(content);
+
+        bp::pipe pipe;
+        int capacity = pipe.set_pipe_capacity_max();
+        BOOST_CHECK_EQUAL(capacity, max_capacity);
+    }
+
+    BOOST_AUTO_TEST_CASE(set_pipe_capacity, *boost::unit_test::timeout(5))
+    {
+        int min_capacity = 80000;
+        bp::pipe pipe;
+
+        int capacity = pipe.set_pipe_capacity(min_capacity);
+        BOOST_REQUIRE_NO_THROW(capacity >= min_capacity);
+
+        min_capacity = capacity + 10000;
+        capacity = pipe.set_pipe_capacity(min_capacity);
+        BOOST_REQUIRE_NO_THROW(capacity >= min_capacity);
+    }
+
+#endif
+
 
 BOOST_AUTO_TEST_SUITE_END();
