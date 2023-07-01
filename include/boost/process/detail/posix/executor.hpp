@@ -246,10 +246,14 @@ class executor
             //actually, this should block until it's read.
             auto err = errno;
             if ((err != EAGAIN ) && (err != EINTR))
-                set_error(std::error_code(err, std::system_category()), "Error read pipe");
+            {
+                _msg = "Error read pipe";
+                _ec = std::error_code(err, std::system_category());
+                return;
+            }
         }
         if (count == 0)
-            return  ;
+            return;
 
         std::error_code ec(data[0], std::system_category());
         std::string msg(data[1], ' ');
@@ -262,9 +266,16 @@ class executor
                 return;
                 //EAGAIN not yet forked, EINTR interrupted, i.e. try again
             else if ((err != EAGAIN ) && (err != EINTR))
-                set_error(std::error_code(err, std::system_category()), "Error read pipe");
+            {
+                _msg = "Error read pipe";
+                _ec = std::error_code(err, std::system_category());
+                return;
+            }
+                
         }
-        set_error(ec, std::move(msg));
+
+        _msg = std::move(msg);
+        _ec = ec;
     }
 
     std::string prepare_cmd_style_fn; //buffer
@@ -445,8 +456,13 @@ child executor<Sequence>::invoke(boost::mpl::false_, boost::mpl::false_)
     if (_ec)
     {
         //if an error occurred we need to reap the child process
-        ::waitpid(this->pid, nullptr, WNOHANG);
+        if(::waitpid(this->pid, nullptr, WNOHANG) == 0)
+        {
+            ::sleep(1);
+            ::waitpid(this->pid, nullptr, WNOHANG);
+        }
         boost::fusion::for_each(seq, call_on_error(*this, _ec));
+        set_error(_ec, _msg);
         return child();
     }
 
