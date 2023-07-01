@@ -167,7 +167,7 @@ BOOST_AUTO_TEST_CASE(request_exit)
   asio::writable_pipe wp{ctx};
   asio::connect_pipe(rp, wp);
 
-  bpv::process proc(ctx, sh, {}, bpv::process_stdio{wp}
+  bpv::process proc(ctx, sh, {}, bpv::process_stdio{rp}
 #if defined(ASIO_WINDOWS)
     , asio::windows::show_window_minimized_not_active
 #endif
@@ -371,27 +371,26 @@ BOOST_AUTO_TEST_CASE(popen)
 
     asio::io_context ctx;
 
-    asio::readable_pipe rp{ctx};
-
 
     // default CWD
     bpv::popen proc(/*bpv::default_process_launcher(), */ctx, pth, {"echo"});
 
-    asio::write(proc, asio::buffer("FOOBAR"));
+    BOOST_CHECK_EQUAL(asio::write(proc, asio::buffer("FOOBAR", 6)), 6);
+
     proc.get_stdin().close();
 
     std::string res;
     boost::system::error_code ec;
     std::size_t n = asio::read(proc, asio::dynamic_buffer(res), ec);
     while (ec == asio::error::interrupted)
-        n += asio::read(rp, asio::dynamic_buffer(res),  ec);
+        n += asio::read(proc, asio::dynamic_buffer(res),  ec);
 
-    BOOST_CHECK_MESSAGE(ec == asio::error::eof || ec == asio::error::broken_pipe, ec.message());
+    BOOST_CHECK_MESSAGE(ec == asio::error::eof
+                     || ec == asio::error::broken_pipe,
+                     ec.message());
     BOOST_REQUIRE_GE(n, 1u);
-    // remove EOF
-    res.pop_back();
     BOOST_CHECK_EQUAL(res, "FOOBAR");
-
+    proc.get_stdin().close();
     proc.wait();
     BOOST_CHECK_MESSAGE(proc.exit_code() == 0, proc.exit_code());
 }
@@ -520,13 +519,34 @@ BOOST_AUTO_TEST_CASE(exit_code_as_error)
   
   proc3.terminate();
 
-  proc1.async_wait(bpv::code_as_error([&](bpv::error_code ec){called ++; BOOST_CHECK(!ec);}));
-  proc2.async_wait(bpv::code_as_error([&](bpv::error_code ec){called ++; BOOST_CHECK_MESSAGE(ec, ec.message());}));
-  proc3.async_wait(bpv::code_as_error([&](bpv::error_code ec){called ++; BOOST_CHECK_MESSAGE(ec, ec.message());}));
+
+  proc1.async_wait(
+      [&](bpv::error_code ec, int)
+      {
+        called ++;
+        bpv::check_exit_code(ec, proc1.native_exit_code());
+        BOOST_CHECK(!ec);
+      });
+
+  proc2.async_wait(
+      [&](bpv::error_code ec, int)
+      {
+        called ++;
+        bpv::check_exit_code(ec, proc2.native_exit_code());
+        BOOST_CHECK_MESSAGE(ec, ec.message());
+      });
+
+  proc3.async_wait(
+      [&](bpv::error_code ec, int)
+      {
+        called ++;
+        bpv::check_exit_code(ec, proc3.native_exit_code());
+        BOOST_CHECK_MESSAGE(ec, ec.message());
+      });
+
 
   ctx.run();
   BOOST_CHECK_EQUAL(called, 3);
-
 }
 
 BOOST_AUTO_TEST_CASE(bind_launcher)
@@ -537,17 +557,13 @@ BOOST_AUTO_TEST_CASE(bind_launcher)
   asio::io_context ctx;
 
   asio::readable_pipe rp{ctx};
-  asio::writable_pipe wp{ctx};
-  asio::connect_pipe(rp, wp);
 
   auto target = bpv::filesystem::canonical(bpv::filesystem::temp_directory_path());
 
   auto l = bpv::bind_default_launcher(bpv::process_start_dir(target));
-
   std::vector<std::string> args = {"print-cwd"};
   // default CWD
-  bpv::process proc = l(ctx, pth, args, bpv::process_stdio{/*.in=*/{}, /*.out=*/wp});
-  wp.close();
+  bpv::process proc = l(ctx, pth, args, bpv::process_stdio{/*.in=*/{}, /*.out=*/rp});
 
   std::string out;
   bpv::error_code ec;
@@ -556,8 +572,8 @@ BOOST_AUTO_TEST_CASE(bind_launcher)
   while (ec == asio::error::interrupted)
     sz += asio::read(rp, asio::dynamic_buffer(out),  ec);
 
-  BOOST_CHECK(sz != 0);
   BOOST_CHECK_MESSAGE((ec == asio::error::broken_pipe) || (ec == asio::error::eof), ec.message());
+  BOOST_REQUIRE(sz != 0);
 
   if (out.back() != '/' && target.string().back() == '/')
       out += '/';

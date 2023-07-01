@@ -23,6 +23,7 @@
 #include <iterator>
 #include <iostream>
 #include <cstdlib>
+#include <thread>
 #if defined(BOOST_POSIX_API)
 #   include <boost/lexical_cast.hpp>
 #   include <boost/iostreams/device/file_descriptor.hpp>
@@ -148,7 +149,8 @@ int main(int argc, char *argv[])
     }
     else if (vm["loop"].as<bool>())
     {
-        while (true);
+        while (true)
+          std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
     else if (vm["abort"].as<bool>())
     {
