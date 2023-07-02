@@ -103,6 +103,20 @@ BOOST_AUTO_TEST_CASE(execve_throw_on_error, *boost::unit_test::timeout(2))
     }
 }
 
+BOOST_AUTO_TEST_CASE(execve_throw_on_error_no_zombie, *boost::unit_test::timeout(3000))
+{
+    while(waitpid(-1, nullptr, WNOHANG) > 0); // Clean possible zombies from other tests.
+
+    try 
+    {
+ 	 	boost::process::child("doesnt-exist");
+         BOOST_CHECK(false);
+ 	}
+    catch(...){}
+
+     BOOST_CHECK(waitpid(-1, nullptr, WNOHANG) <= 0);
+}
+
 BOOST_AUTO_TEST_CASE(leak_test, *boost::unit_test::timeout(5))
 {
     using boost::unit_test::framework::master_test_suite;
