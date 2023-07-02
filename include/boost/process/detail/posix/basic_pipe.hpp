@@ -19,12 +19,6 @@
 #include <fcntl.h>
 #include <memory>
 
-#if !(defined(__NetBSD__) || defined(__FreeBSD__) || defined(__APPLE__) || defined(__MACH__))
-#include <fstream>
-#include <string>
-#endif
-
-
 namespace boost { namespace process { namespace detail { namespace posix {
 
 
@@ -124,27 +118,8 @@ public:
         _sink   = -1;
     }
 
-#if !(defined(__NetBSD__) || defined(__FreeBSD__) || defined(__APPLE__) || defined(__MACH__))
-
-    int_type set_pipe_capacity_max() 
-    {
-        std::ifstream file("/proc/sys/fs/pipe-max-size");
-        std::string content;
-        if(file.is_open()) 
-        {
-            std::getline(file, content);
-            file.close();
-        } 
-        else
-        {
-            return -1;
-        }
-
-        int_type max_capacity = std::stoi(content);
-        return set_pipe_capacity(max_capacity);
-    }
-
-    int_type set_pipe_capacity(int_type capacity) 
+    #if !(defined(__NetBSD__) || defined(__FreeBSD__) || defined(__APPLE__) || defined(__MACH__))
+        int_type set_pipe_capacity(int_type capacity) 
     {
         if (!is_open())
         {
@@ -163,8 +138,7 @@ public:
         
         return return_value;
     }
-
-#endif
+    #endif
 };
 
 template<class CharT, class Traits>
