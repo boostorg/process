@@ -263,7 +263,7 @@ public:
         auto st1 = key + ::boost::process::detail::equal_sign<Char>();
         while (*p != nullptr)
         {
-            const std::size_t len = std::char_traits<Char>::length(*p);
+            const std::ptrdiff_t len = std::char_traits<Char>::length(*p);
             if ((std::distance(st1.begin(), st1.end()) < len)
                  && std::equal(st1.begin(), st1.end(), *p))
                 break;

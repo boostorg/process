@@ -30,6 +30,7 @@ BOOST_AUTO_TEST_CASE(empty,  *boost::unit_test::timeout(5))
     BOOST_CHECK(ev.empty());
     BOOST_CHECK_EQUAL(ev.size(), 0u);
     BOOST_CHECK_EQUAL(ev.end() - ev.begin(), 0);
+    auto nh = ev.native_handle();
     ev["Thingy"] = "My value";
 
     BOOST_CHECK(!ev.empty());

@@ -210,7 +210,7 @@ public:
 
     Char ** _env_impl = &*_env_arr.data();
 
-    native_handle_type native_handle() const {return &_data.front();}
+    native_handle_type native_handle() const {return _env_impl;}
 };
 
 
