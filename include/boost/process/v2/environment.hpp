@@ -1805,6 +1805,7 @@ struct process_environment
   }
 
 
+  BOOST_PROCESS_V2_DECL
   error_code on_setup(posix::default_launcher & launcher, 
                       const filesystem::path &, const char * const *);
 
@@ -1886,6 +1887,8 @@ struct hash<BOOST_PROCESS_V2_NAMESPACE::environment::key_value_pair>
 
 #if defined(BOOST_PROCESS_V2_HEADER_ONLY)
 
+
+#include <boost/process/v2/impl/environment.ipp>
 #include <boost/process/v2/detail/impl/environment.ipp>
 
 #endif
