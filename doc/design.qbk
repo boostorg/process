@@ -83,7 +83,7 @@ will be called on the respective events on process launching. The names are:
 As an example:
 
 ```
-child c("ls", on_setup([](){cout << "On Setup" << endl;});
+child c("ls", on_setup([](){cout << "On Setup" << endl;}));
 ```
 
 

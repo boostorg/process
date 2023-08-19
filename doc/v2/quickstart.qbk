@@ -114,7 +114,6 @@ The async version supports cancellation and will forward cancellation types as f
                     if (!ec)
                         sig.emit(asio::cancellation_type::terminal); 
                 });
-            );
         });
 
 ```

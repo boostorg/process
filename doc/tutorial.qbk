@@ -348,7 +348,7 @@ and use the following code, the `gcc` process will still run afterwards:
 
 ```
 bp::child c("make");
-if (!c.child_wait_for(std::chrono::seconds(10)) //give it 10 seconds
+if (!c.child_wait_for(std::chrono::seconds(10))) //give it 10 seconds
     c.child_terminate(); //then terminate
 ```
 
@@ -357,7 +357,7 @@ So in order to also terminate `gcc` we can use a group.
 ```
 bp::group g;
 bp::child c("make", g);
-if (!g.group_wait_for(std::chrono::seconds(10))
+if (!g.group_wait_for(std::chrono::seconds(10)))
     g.group_terminate();
     
 c.child_wait(); //to avoid a zombie process & get the exit code
