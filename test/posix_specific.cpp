@@ -166,3 +166,22 @@ BOOST_AUTO_TEST_CASE(leak_test, *boost::unit_test::timeout(5))
     BOOST_CHECK_EQUAL(fd_list.size(), fd_list_new.size());
 
 }
+
+BOOST_AUTO_TEST_CASE(wait_doesnt_ignore_zombie, *boost::unit_test::timeout(5))
+{
+    using boost::unit_test::framework::master_test_suite;
+
+    bp::child childProcess(
+        master_test_suite().argv[1],
+        bp::args+={"test", "--wait", "5"}
+    );
+    int pid = childProcess.id();
+    BOOST_CHECK(childProcess.running());
+
+    childProcess.terminate();
+    childProcess.wait();
+
+    BOOST_CHECK(!childProcess.running());
+    BOOST_CHECK_EQUAL(kill(pid, 0), -1);
+    BOOST_CHECK_EQUAL(errno, ESRCH); // Target Process doesn't exist.
+}
