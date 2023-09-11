@@ -29,9 +29,11 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/connect_pipe.hpp>
+#include <boost/asio/detached.hpp>
 #include <boost/asio/readable_pipe.hpp>
 #include <boost/asio/read.hpp>
 #include <boost/asio/streambuf.hpp>
+#include <boost/asio/steady_timer.hpp>
 #include <boost/asio/write.hpp>
 #include <boost/asio/writable_pipe.hpp>
 
@@ -184,7 +186,10 @@ BOOST_AUTO_TEST_CASE(interrupt)
 
   auto sh = interruptable();
   BOOST_CHECK_MESSAGE(!sh.empty(), sh);
-  bpv::process proc(ctx, sh, {}
+
+  asio::writable_pipe wp{ctx};
+
+  bpv::process proc(ctx, sh, {}, bpv::process_stdio{wp}
 #if defined(ASIO_WINDOWS)
   , asio::windows::create_new_process_group
 #endif
@@ -584,6 +589,59 @@ BOOST_AUTO_TEST_CASE(bind_launcher)
   proc.wait();
   BOOST_CHECK_MESSAGE(proc.exit_code() == 0, proc.exit_code() << " from " << proc.native_exit_code());
 }
+
+BOOST_AUTO_TEST_CASE(async_interrupt)
+{
+    asio::io_context ctx;
+
+    auto sh = interruptable();
+    BOOST_CHECK_MESSAGE(!sh.empty(), sh);
+    BOOST_CHECK_MESSAGE(!sh.empty(), sh);
+
+    asio::writable_pipe wp{ctx};
+    bpv::process proc(ctx, sh, {}, bpv::process_stdio{wp}
+#if defined(ASIO_WINDOWS)
+    , asio::windows::create_new_process_group
+#endif
+    );
+
+    asio::steady_timer tim{ctx, std::chrono::milliseconds(50)};
+    asio::cancellation_signal sig;
+
+    bpv::async_execute(std::move(proc),
+                       asio::bind_cancellation_slot(sig.slot(), asio::detached));
+
+    tim.async_wait([&](bpv::error_code ec) { sig.emit(asio::cancellation_type::total); });
+    ctx.run();
+}
+
+BOOST_AUTO_TEST_CASE(async_request_exit)
+{
+    asio::io_context ctx;
+
+    auto sh = closable();
+    BOOST_CHECK_MESSAGE(!sh.empty(), sh);
+
+    asio::readable_pipe rp{ctx};
+    asio::writable_pipe wp{ctx};
+    asio::connect_pipe(rp, wp);
+
+    bpv::process proc(ctx, sh, {}, bpv::process_stdio{rp}
+#if defined(ASIO_WINDOWS)
+    , asio::windows::show_window_minimized_not_active
+#endif
+    );
+
+    asio::steady_timer tim{ctx, std::chrono::milliseconds(50)};
+    asio::cancellation_signal sig;
+
+    bpv::async_execute(std::move(proc),
+        asio::bind_cancellation_slot(sig.slot(), asio::detached));
+
+    tim.async_wait([&](bpv::error_code ec) { sig.emit(asio::cancellation_type::partial); });
+    ctx.run();
+}
+
 
 BOOST_AUTO_TEST_SUITE_END();
 
