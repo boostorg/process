@@ -2,6 +2,7 @@
 #include <string>
 #include <thread>
 #include <boost/process/v2/environment.hpp>
+#include <boost/asio/steady_timer.hpp>
 
 extern char **environ;
 
@@ -78,6 +79,60 @@ int main(int argc, char * argv[])
         return static_cast<int>(si.dwFlags);
     }
 #endif
+    else if (mode == "sigterm")
+    {
+
+      static boost::asio::io_context ctx;
+      static boost::asio::steady_timer tim{ctx, std::chrono::seconds(10)};
+
+#if defined(BOOST_PROCESS_V2_WINDOWS)
+      BOOST_ASSERT(SetConsoleCtrlHandler(
+          [](DWORD kind)
+          {
+            if (kind == CTRL_CLOSE_EVENT)
+            {
+              tim.cancel();
+              return TRUE;
+            }
+            else
+              return FALSE;
+          }, TRUE) != 0);
+#else
+      signal(SIGTERM, [](int) { tim.cancel();});
+#endif
+
+      boost::system::error_code ec;
+      tim.async_wait([&](boost::system::error_code ec_) { ec = ec_; });
+      ctx.run();
+      return ec ? EXIT_SUCCESS : 32;
+    }
+    else if (mode == "sigint")
+    {
+      static boost::asio::io_context ctx;
+      static boost::asio::steady_timer tim{ctx, std::chrono::seconds(10)};
+
+#if defined(BOOST_PROCESS_V2_WINDOWS)
+      BOOST_ASSERT(
+          SetConsoleCtrlHandler(
+              [](DWORD kind)
+              {
+                if (kind == CTRL_C_EVENT)
+                {
+                  tim.cancel();
+                  return TRUE;
+                }
+                else
+                  return FALSE;
+              }, TRUE) != 0);
+#else
+      signal(SIGINT, [](int) { tim.cancel();});
+#endif
+
+      boost::system::error_code ec;
+      tim.async_wait([&](boost::system::error_code ec_) { ec = ec_; });
+      ctx.run();
+      return ec ? EXIT_SUCCESS : 33;
+    }
     else
         return 34;
         
