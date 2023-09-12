@@ -586,7 +586,7 @@ BOOST_AUTO_TEST_CASE(async_interrupt)
                             [](boost::system::error_code ec, int res)
                             {
                               BOOST_CHECK(!ec);
-                              BOOST_CHECK_EQUAL(res, 0);
+                              BOOST_CHECK_EQUAL(bpv::evaluate_exit_code(res), 0);
                             }));
 
     tim.async_wait([&](bpv::error_code ec) { sig.emit(asio::cancellation_type::total); });
@@ -614,7 +614,7 @@ BOOST_AUTO_TEST_CASE(async_request_exit)
             [](boost::system::error_code ec, int res)
             {
               BOOST_CHECK(!ec);
-              BOOST_CHECK_EQUAL(res, 0);
+              BOOST_CHECK_EQUAL(bpv::evaluate_exit_code(res), 0);
             }));
 
     tim.async_wait([&](bpv::error_code ec) { sig.emit(asio::cancellation_type::partial); });
