@@ -26,9 +26,7 @@ set B2_TARGETS=libs/!SELF!/test
 cd !BOOST_ROOT!
 call bootstrap.bat
 b2 headers
-b2 --debug-configuration variant=%VARIANT% cxxstd=%CXXSTD% define=%DEFINE% address-model=%ADDRESS_MODEL% toolset=%TOOLSET% --verbose-test libs/!SELF!/test -j3
-b2 --debug-configuration variant=%VARIANT% cxxstd=%CXXSTD% define=%DEFINE% address-model=%ADDRESS_MODEL% toolset=%TOOLSET% --verbose-test libs/!SELF!/example -j3
-
+b2 --debug-configuration variant=%VARIANT% cxxstd=%CXXSTD% define=%DEFINE% address-model=%ADDRESS_MODEL% toolset=%TOOLSET% --verbose-test libs/!SELF!/test libs/!SELF!/example -j3
 ) else if "%DRONE_JOB_BUILDTYPE%" == "standalone-windows" (
 
 REM not used
