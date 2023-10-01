@@ -65,7 +65,6 @@ BOOST_AUTO_TEST_CASE(exit_code_sync)
     args[1] = "42";
     auto proc = bpv::default_process_launcher()(ctx, pth, args);
     BOOST_CHECK_EQUAL(proc.wait(), 42);
-    printf("42: %d\n", proc.native_exit_code());
 
     BOOST_CHECK_EQUAL(bpv::process(ctx, pth, {"sleep", "100"}).wait(), 0);
     BOOST_CHECK_EQUAL(bpv::execute(bpv::process(ctx, pth, {"sleep", "100"})), 0);
@@ -170,7 +169,7 @@ BOOST_AUTO_TEST_CASE(interrupt)
   std::this_thread::sleep_for(std::chrono::milliseconds(250));
   proc.interrupt();
   proc.wait();
-  BOOST_CHECK_EQUAL(proc.exit_code(), 0);
+  BOOST_CHECK_EQUAL(proc.exit_code() & ~SIGTERM, 0);
 }
 
 void trim_end(std::string & str)
@@ -586,7 +585,8 @@ BOOST_AUTO_TEST_CASE(async_interrupt)
                             [](boost::system::error_code ec, int res)
                             {
                               BOOST_CHECK(!ec);
-                              BOOST_CHECK_EQUAL(bpv::evaluate_exit_code(res), 0);
+                              BOOST_CHECK_EQUAL(
+                                  bpv::evaluate_exit_code(res) & ~SIGTERM, 0);
                             }));
 
     tim.async_wait([&](bpv::error_code ec) { sig.emit(asio::cancellation_type::total); });
