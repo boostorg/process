@@ -72,12 +72,6 @@ int main(int argc, char * argv[])
         GetStartupInfo(&si);   
         return static_cast<int>(si.wShowWindow);
     }
-    else if (mode == "creation-flags")
-    {
-        STARTUPINFO si;
-        GetStartupInfo(&si);   
-        return static_cast<int>(si.dwFlags);
-    }
 #endif
     else if (mode == "sigterm")
     {
@@ -86,18 +80,20 @@ int main(int argc, char * argv[])
       static boost::asio::steady_timer * tim_p = &tim;
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
-      BOOST_ASSERT(SetConsoleCtrlHandler(
+      SetConsoleCtrlHandler(
           [](DWORD kind)
           {
             if (kind == CTRL_CLOSE_EVENT)
             {
+              // windows doesn't like us doing antyhing else
+              ::exit(0);
               if (tim_p != nullptr)
                 tim_p->cancel();
               return TRUE;
             }
             else
               return FALSE;
-          }, TRUE) != 0);
+          }, TRUE);
 #else
       signal(SIGTERM, [](int) { if (tim_p != nullptr) tim_p->cancel();});
 #endif
@@ -115,8 +111,8 @@ int main(int argc, char * argv[])
       static boost::asio::steady_timer * tim_p = &tim;
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
-      BOOST_ASSERT(
-          SetConsoleCtrlHandler(
+      SetConsoleCtrlHandler(NULL, FALSE);
+      auto res = SetConsoleCtrlHandler(
               [](DWORD kind)
               {
                 if (kind == CTRL_C_EVENT)
@@ -127,7 +123,8 @@ int main(int argc, char * argv[])
                 }
                 else
                   return FALSE;
-              }, TRUE) != 0);
+              }, TRUE);
+      BOOST_ASSERT(res != FALSE);
 #else
       signal(SIGINT, [](int) { if (tim_p != nullptr) tim_p->cancel();});
 #endif
