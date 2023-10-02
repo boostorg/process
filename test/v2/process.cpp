@@ -145,6 +145,7 @@ BOOST_AUTO_TEST_CASE(request_exit)
   bpv::process proc(ctx, pth, {"sigterm"}
 #if defined(BOOST_PROCESS_V2_WINDOWS)
     , bpv::windows::show_window_minimized_not_active
+    , bpv::windows::create_new_console
 #endif
     );
   BOOST_CHECK(proc.running());
@@ -570,9 +571,10 @@ BOOST_AUTO_TEST_CASE(async_interrupt)
     using boost::unit_test::framework::master_test_suite;
     const auto pth = bpv::filesystem::absolute(master_test_suite().argv[1]);
 
+
     bpv::process proc(ctx, pth, {"sigint"}
 #if defined(BOOST_PROCESS_V2_WINDOWS)
-    , bpv::windows::create_new_process_group
+   , bpv::windows::create_new_process_group
 #endif
     );
 
@@ -600,8 +602,9 @@ BOOST_AUTO_TEST_CASE(async_request_exit)
     const auto pth = bpv::filesystem::absolute(master_test_suite().argv[1]);
 
     bpv::process proc(ctx, pth, {"sigterm"}
-#if defined(ASIO_WINDOWS)
-    , asio::windows::show_window_minimized_not_active
+#if defined(BOOST_PROCESS_V2_WINDOWS)
+      , bpv::windows::show_window_minimized_not_active
+      , bpv::windows::create_new_console
 #endif
     );
 
