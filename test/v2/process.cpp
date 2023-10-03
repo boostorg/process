@@ -168,7 +168,9 @@ BOOST_AUTO_TEST_CASE(interrupt)
 #endif
   );
   std::this_thread::sleep_for(std::chrono::milliseconds(250));
-  proc.interrupt();
+  bpv::error_code ec;
+  proc.interrupt(ec);
+  BOOST_CHECK_MESSAGE(!ec, ec.what());
   proc.wait();
   BOOST_CHECK_EQUAL(proc.exit_code() & ~SIGTERM, 0);
 }
@@ -578,7 +580,7 @@ BOOST_AUTO_TEST_CASE(async_interrupt)
 #endif
     );
 
-    asio::steady_timer tim{ctx, std::chrono::milliseconds(50)};
+    asio::steady_timer tim{ctx, std::chrono::milliseconds(200)};
     asio::cancellation_signal sig;
 
     bpv::async_execute(std::move(proc),

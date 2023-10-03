@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(child_pid)
     auto cs = bp2::child_pids(bp2::current_pid());
     boost::asio::io_context ctx;
     bp2::process proc(ctx, pth, {"loop"});
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     auto c2 = bp2::child_pids(bp2::current_pid());
     BOOST_CHECK_LE(cs.size(), c2.size());
     BOOST_CHECK(std::find(cs.begin(), cs.end(), proc.id()) == cs.end());
