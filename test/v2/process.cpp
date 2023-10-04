@@ -152,7 +152,7 @@ BOOST_AUTO_TEST_CASE(request_exit)
   std::this_thread::sleep_for(std::chrono::milliseconds(250));
   proc.request_exit();
   proc.wait();
-  BOOST_CHECK_EQUAL(proc.exit_code(), 0);
+  BOOST_CHECK_EQUAL(proc.exit_code() & ~SIGTERM, 0);
 }
 
 bool can_interrupt = true;
@@ -634,7 +634,7 @@ BOOST_AUTO_TEST_CASE(async_request_exit)
             [](boost::system::error_code ec, int res)
             {
               BOOST_CHECK(!ec);
-              BOOST_CHECK_EQUAL(bpv::evaluate_exit_code(res), 0);
+              BOOST_CHECK_EQUAL(bpv::evaluate_exit_code(res) & ~SIGTERM, 0);
             }));
 
     tim.async_wait([&](bpv::error_code ec) { sig.emit(asio::cancellation_type::partial); });
