@@ -155,6 +155,8 @@ BOOST_AUTO_TEST_CASE(request_exit)
   BOOST_CHECK_EQUAL(proc.exit_code(), 0);
 }
 
+bool can_interrupt = true;
+
 BOOST_AUTO_TEST_CASE(interrupt)
 {
   asio::io_context ctx;
@@ -170,6 +172,16 @@ BOOST_AUTO_TEST_CASE(interrupt)
   std::this_thread::sleep_for(std::chrono::milliseconds(250));
   bpv::error_code ec;
   proc.interrupt(ec);
+
+#if defined(BOOST_PROCESS_V2_WINDOWS)
+  // the interrupt only works on console applications, so it may not work depending on the environment.
+  if (ec.value() == ERROR_INVALID_FUNCTION)
+  {
+    can_interrupt = false;
+    return;
+  }
+#endif
+
   BOOST_CHECK_MESSAGE(!ec, ec.what());
   proc.wait();
   BOOST_CHECK_EQUAL(proc.exit_code() & ~SIGTERM, 0);
@@ -569,6 +581,9 @@ BOOST_AUTO_TEST_CASE(bind_launcher)
 
 BOOST_AUTO_TEST_CASE(async_interrupt)
 {
+    if (!can_interrupt)
+      return;
+
     asio::io_context ctx;
     using boost::unit_test::framework::master_test_suite;
     const auto pth = bpv::filesystem::absolute(master_test_suite().argv[1]);
