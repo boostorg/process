@@ -21,7 +21,7 @@ process_standalone_test(pipe)
 
 function(process_sub_launch_test name )
     add_executable(boost_process_${name} ${name}.cpp)
-    target_link_libraries(boost_process_${name} Boost::process Boost::system Boost::filesystem Boost::thread Boost::unit_test_framework)
+    target_link_libraries(boost_process_${name} Boost::process Boost::system Boost::filesystem Boost::scope_exit Boost::thread Boost::unit_test_framework)
     add_test(NAME boost_process_${name} COMMAND $<TARGET_FILE:boost_process_${name}> $<TARGET_FILE:boost_process_sub_launch> )
 endfunction()
 
