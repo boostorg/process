@@ -262,7 +262,10 @@ class executor
                 return;
                 //EAGAIN not yet forked, EINTR interrupted, i.e. try again
             else if ((err != EAGAIN ) && (err != EINTR))
-                set_error(std::error_code(err, std::system_category()), "Error read pipe");
+            {
+              set_error(std::error_code(err, std::system_category()), "Error read pipe");
+              return;
+            }
         }
         set_error(ec, std::move(msg));
     }
@@ -324,6 +327,9 @@ public:
 
     void set_error(const std::error_code &ec, const char* msg)
     {
+        if (pid != 0 && pid != -1) // reap-zombie
+          ::waitpid(pid, nullptr, 0);
+
         internal_error_handle(ec, msg, has_error_handler(), has_ignore_error(), shall_use_vfork());
     }
     void set_error(const std::error_code &ec, const std::string &msg) {set_error(ec, msg.c_str());};
@@ -445,7 +451,6 @@ child executor<Sequence>::invoke(boost::mpl::false_, boost::mpl::false_)
     if (_ec)
     {
         //if an error occurred we need to reap the child process
-        ::waitpid(this->pid, nullptr, WNOHANG);
         boost::fusion::for_each(seq, call_on_error(*this, _ec));
         return child();
     }
