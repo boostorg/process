@@ -56,20 +56,18 @@ public:
     inline basic_pipe& operator=(const basic_pipe& );
     basic_pipe& operator=(basic_pipe&& lhs)
     {
+        close();
         _source = lhs._source;
-        _sink   = lhs._sink ;
-
+        _sink = lhs._sink;
+  
         lhs._source = -1;
-        lhs._sink   = -1;
-
+        lhs._sink = -1;
+  
         return *this;
     }
     ~basic_pipe()
     {
-        if (_sink   != -1)
-            ::close(_sink);
-        if (_source != -1)
-            ::close(_source);
+        close();
     }
     native_handle_type native_source() const {return _source;}
     native_handle_type native_sink  () const {return _sink;}
@@ -110,12 +108,15 @@ public:
 
     void close()
     {
-        if (_source != -1)
-            ::close(_source);
-        if (_sink != -1)
-            ::close(_sink);
-        _source = -1;
-        _sink   = -1;
+        if (_source != -1) {
+          ::close(_source);
+          _source = -1;
+        }
+  
+        if (_sink != -1) {
+          ::close(_sink);
+          _sink   = -1;
+        }
     }
 };
 
