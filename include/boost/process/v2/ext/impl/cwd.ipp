@@ -125,7 +125,6 @@ filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code
 
 #elif defined(__FreeBSD__)
 
-// FIXME: Add error handling.
 filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code & ec) 
 {
     filesystem::path path;
@@ -139,19 +138,23 @@ filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code
                 filestat *fst = nullptr;
                 STAILQ_FOREACH(fst, head, next) {
                     if (fst->fs_uflags & PS_FST_UFLAG_CDIR) 
-                    {
                         path = filesystem::canonical(fst->fs_path, ec);
-                    }
                 }
                 procstat_freefiles(proc_stat, head);
+                if (errno)
+                    BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
             }
             else
                 BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
             procstat_freeprocs(proc_stat, proc_info);
+            if (errno)
+                BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
         }
         else
             BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
         procstat_close(proc_stat);
+        if (errno)
+            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
     }
     else
          BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
@@ -160,7 +163,6 @@ filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code
 
 #elif defined(__DragonFly__)
 
-// FIXME: Add error handling.
 filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code & ec) 
 {
     filesystem::path path;
@@ -185,7 +187,8 @@ filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code
         }
         else
             BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
-        pclose(fp);
+        if (pclose(fp) == -1)
+            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
     }
     else
         BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
