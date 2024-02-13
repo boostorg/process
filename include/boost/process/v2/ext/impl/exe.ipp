@@ -209,7 +209,7 @@ filesystem::path exe(boost::process::v2::pid_type pid, boost::system::error_code
                 if (!pwd.string().empty())
                 {
                     path = pwd / argv0;
-                    path = detail::ext:;is_executable(pid, path, ec);
+                    path = detail::ext::is_executable(pid, path, ec);
                 }
                 if (pwd.string().empty() || !path.string.empty())
                 {
