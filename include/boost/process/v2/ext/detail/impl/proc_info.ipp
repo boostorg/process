@@ -21,6 +21,13 @@
 #include <libproc.h>
 #endif
 
+#if defined(__OpenBSD__)
+#include <sys/types.h>
+#include <sys/param.h>
+#include <sys/sysctl.h>
+#include <kvm.h>
+#endif
+
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
 
 namespace detail
@@ -117,6 +124,52 @@ HANDLE open_process_with_debug_privilege(boost::process::v2::pid_type pid, boost
 }
 #endif
 
+#if defined(__OpenBSD__)
+filesystem::path get_executable(boost::process::v2::pid_type pid, filesystem::path in, boost::system::error_code & ec)
+{
+    struct stat st;
+    filesystem::path res;
+    
+    if (!stat(in.string().c_str(), &st) && (st.st_mode & S_IXUSR) && (st.st_mode & S_IFREG))
+    {
+        filesystem::path executable = filesystem::path(in);
+        executable = filesystem::canonical(executable, ec);
+        if (ec)
+            return res;
+        
+        int cntp = 0;
+        kinfo_file *kif = nullptr;
+        kvm_t *kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
+        if (!kd) 
+        {
+            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+            return res;
+        }
+        else if ((kif = kvm_getfiles(kd, KERN_FILE_BYPID, pid, sizeof(struct kinfo_file), &cntp)))
+        {
+            for (int i = 0; i < cntp; i++)
+            {
+                if (kif[i].fd_fd == KERN_FILE_TEXT &&
+                    st.st_nlink == 1 &&
+                    st.st_dev == static_cast<dev_t>(kif[i].va_fsid) && 
+                    st.st_ino == static_cast<ino_t>(kif[i].va_fileid))
+                {        
+                    res = std::move(executable);
+                    break;    
+                }
+            }
+        }
+        else
+            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
+        kvm_close(kd);
+        
+    }
+    else
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
+    return res;
+}
+#endif
+
 } // namespace ext
 
 } // namespace detail
@@ -124,4 +177,3 @@ HANDLE open_process_with_debug_privilege(boost::process::v2::pid_type pid, boost
 BOOST_PROCESS_V2_END_NAMESPACE
 
 #endif // BOOST_PROCESS_V2_IMPL_DETAIL_PROC_INFO_IPP
-

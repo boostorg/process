@@ -46,9 +46,6 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
 #include <sys/types.h>
-#include <sys/param.h>
-#include <sys/sysctl.h>
-#include <kvm.h>
 #endif
 
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
@@ -167,8 +164,66 @@ filesystem::path exe(boost::process::v2::pid_type pid, boost::system::error_code
 
 filesystem::path exe(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
-    BOOST_PROCESS_V2_ASSIGN_EC(ec, ENOTSUP, boost::system::system_category())
-    return "";
+    filesystem::path path;
+    std::vector<std::string> buffer = cmdline_from_proc_id(pid);
+    if (!buffer.empty()) 
+    {
+        filesystem::path argv0 = filesystem::path(buffer[0]);
+        if (!argv0.string().empty())
+        {
+            if (argv0.string()[0] == '/') 
+            {
+                path = detail::ext::is_executable(pid, argv0, ec);
+            } 
+            else if (argv0.string().find('/') == std::string::npos)
+            {
+                std::string penv = envvar_value_from_proc_id(pid, "PATH");
+                if (!penv.empty()) 
+                {
+                    std::vector<std::string> env;
+                    std::string tmp;
+                    std::stringstream sstr(penv); 
+                    while (std::getline(sstr, tmp, ':'))
+                    {
+                        env.push_back(tmp);
+                    }
+                    for (std::size_t i = 0; i < env.size(); i++)
+                    {
+                        filesystem::path pfx = filesystem::path(env[i]);
+                        path = pfx / argv0;
+                        path = detail::ext::is_executable(pid, path, ec);
+                        if (path.string.empty()) break;
+                        if (argv0.string()[0] == '-') 
+                        {
+                            path = filesystem::path(argv0.string().substr(1));
+                            path = pfx / path;
+                            path = detail::ext::is_executable(pid, path, ec);
+                            if (path.string.empty()) break;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                filesystem::path pwd = filesystem::path(envvar_value_from_proc_id(pid, "PWD"));
+                if (!pwd.string().empty())
+                {
+                    path = pwd / argv0;
+                    path = detail::ext::is_executable(pid, path, ec);
+                }
+                if (pwd.string().empty() || !path.string.empty())
+                {
+                    filesystem::path cwd = cwd(pid);
+                    if (!cwd.string().empty())
+                    {
+                        path = cwd / argv0;
+                        path = detail::ext::is_executable(pid, path, ec);
+                    }
+                }
+            }
+        }
+    }
+    return path;
 }
 
 #else
