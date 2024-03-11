@@ -1,0 +1,42 @@
+# Copyright René Ferdinand Rivera Morell 2024
+# Distributed under the Boost Software License, Version 1.0.
+# (See accompanying file LICENSE_1_0.txt or copy at
+# http://www.boost.org/LICENSE_1_0.txt)
+
+import feature : feature ;
+
+feature boost.process.fs : boost std : optional propagated ;
+
+project /boost/process
+    : common-requirements
+        <boost.process.fs>std:<define>BOOST_PROCESS_USE_STD_FS=1
+        <boost.process.fs>boost:<source>/boost/filesystem//boost_filesystem
+        <source>/boost/algorithm//boost_algorithm
+        <source>/boost/asio//boost_asio
+        <source>/boost/assert//boost_assert
+        <source>/boost/config//boost_config
+        <source>/boost/core//boost_core
+        <source>/boost/fusion//boost_fusion
+        <source>/boost/io//boost_io
+        <source>/boost/iterator//boost_iterator
+        <source>/boost/move//boost_move
+        <source>/boost/optional//boost_optional
+        <source>/boost/system//boost_system
+        <source>/boost/throw_exception//boost_throw_exception
+        <source>/boost/tokenizer//boost_tokenizer
+        <source>/boost/type_index//boost_type_index
+        <source>/boost/type_traits//boost_type_traits
+        <source>/boost/utility//boost_utility
+        <source>/boost/winapi//boost_winapi
+        <include>include
+    : default-build
+        <boost.process.fs>boost
+    ;
+
+explicit
+    [ alias boost_process ]
+    [ alias all : boost_process example example/v2 test test//v2 ]
+    ;
+
+call-if : boost-library process
+    ;

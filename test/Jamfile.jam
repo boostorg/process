@@ -28,6 +28,8 @@ project : requirements
   <target-os>linux:<linkflags>-lpthread
   <os>NT,<toolset>cw:<library>ws2_32
   <os>NT,<toolset>gcc:<library>ws2_32
+  <source>/boost/test//boost_test
+  <link>static
 ;
 
 
@@ -35,24 +37,23 @@ project : requirements
 import testing ;
 
 
-alias program_options  : /boost//program_options : <link>static ;
-alias filesystem       : /boost//filesystem      ;
-alias iostreams        : /boost//iostreams       ;
-alias system           : /boost//system          ;
-alias thread           : /boost//thread          ;
-alias coroutine        : /boost//coroutine       : <link>static ;
+alias program_options  : /boost/program_options//boost_program_options ;
+alias iostreams        : /boost/iostreams//boost_iostreams ;
+alias thread           : /boost/thread//boost_thread ;
+alias coroutine        : /boost/coroutine//boost_coroutine ;
 
-lib multi_ref : multi_ref1.cpp multi_ref2.cpp system : <target-os>windows:<source>shell32 ;
+lib multi_ref : multi_ref1.cpp multi_ref2.cpp : <target-os>windows:<source>shell32 ;
 
-exe sparring_partner : sparring_partner.cpp program_options system filesystem iostreams :
+exe sparring_partner : sparring_partner.cpp program_options iostreams :
     <warnings>off <target-os>windows:<source>shell32 <target-os>windows:<source>Ntdll
+    <source>/boost/lambda//boost_lambda
     ;
 
 exe exit_argc : exit_argc.cpp :
     <warnings>off <target-os>windows:<source>shell32
     ;
 
-exe sub_launch : sub_launcher.cpp program_options iostreams system filesystem : <warnings>off <target-os>windows:<source>shell32 ;
+exe sub_launch : sub_launcher.cpp program_options iostreams : <warnings>off <target-os>windows:<source>shell32 ;
 
 rule test-options ( name )
 {
@@ -69,9 +70,9 @@ rule test-options ( name )
 
 
 test-suite bare :
-    [ run environment.cpp system filesystem : [ test-options environment ] ]
-    [ run async_pipe.cpp  system filesystem : [ test-options async_pipe ] : : <target-os>darwin:<build>no ]
-    [ run pipe.cpp        system filesystem : [ test-options pipe ] ]
+    [ run environment.cpp : [ test-options environment ] ]
+    [ run async_pipe.cpp  : [ test-options async_pipe ] : : <target-os>darwin:<build>no ]
+    [ run pipe.cpp        : [ test-options pipe ] ]
     [ compile no_ansi_apps.cpp ]
     [ compile-fail spawn_fail.cpp        ]
     [ compile-fail async_system_fail.cpp ]
@@ -79,56 +80,56 @@ test-suite bare :
     ;
 
 test-suite with-valgrind :
-    [ run async.cpp       system thread filesystem            : [ test-options async ] : sparring_partner ]
-    [ run async_fut.cpp   system thread filesystem            : [ test-options async_fut ] : sparring_partner ]
-    [ run args_handling.cpp  system thread filesystem         : [ test-options args_handling ] : exit_argc ]
-    [ run args_cmd.cpp    system filesystem                   : [ test-options args_cmd ] : sparring_partner ]
-    [ run wargs_cmd.cpp    system filesystem                  : [ test-options wargs_cmd ] : sparring_partner ]
-    [ run bind_stderr.cpp     filesystem                      : [ test-options bind_stderr ] : sparring_partner ]
-    [ run bind_stdin.cpp     system filesystem                : [ test-options bind_stdin ] : sparring_partner ]
-    [ run bind_stdin_stdout.cpp     system filesystem         : [ test-options bind_stdin_stdout ] : sparring_partner ]
-    [ run bind_stdout.cpp     system filesystem               : [ test-options bind_stdout ] : sparring_partner ]
-    [ run bind_stdout_stderr.cpp     system filesystem        : [ test-options bind_stdout_stderr ] : sparring_partner ]
-    [ run pipe_fwd.cpp         system filesystem              : [ test-options pipe_fwd ] : sparring_partner ]
-    [ run cmd_test.cpp         system filesystem              : [ test-options cmd_test ] : sparring_partner ]
-    [ run close_stderr.cpp     system filesystem              : [ test-options close_stderr ] : sparring_partner ]
-    [ run close_stdin.cpp      system filesystem              : [ test-options close_stdin ] : sparring_partner ]
-    [ run close_stdout.cpp     system filesystem              : [ test-options close_stdout ] : sparring_partner ]
-    [ run error.cpp            system filesystem              : [ test-options error ] : sparring_partner ]
-    [ run exit_code.cpp program_options system filesystem     : [ test-options exit_code ] : sparring_partner ]
-    [ run extensions.cpp system filesystem                    : [ test-options extensions ] : sparring_partner ]
-    [ run env.cpp     program_options system filesystem       : [ test-options env ] : sparring_partner ]
-    [ run group.cpp     system thread filesystem              : [ test-options group ] : sub_launch ]
-    [ run group.cpp          system thread filesystem         : [ test-options group ] : sub_launch : <build>no <target-os>windows:<build>yes <define>BOOST_USE_WINDOWS_H=1 : group-windows-h ]
-    [ run group_wait.cpp     system thread filesystem         : [ test-options group_wait ] : sparring_partner : <target-os>darwin:<build>no <target-os>freebsd:<build>no ]
-	[ run limit_fd.cpp     program_options system filesystem  : [ test-options limit_fd ] : sparring_partner : <target-os>freebsd:<build>no ]
-    [ run run_exe.cpp filesystem                              : : sparring_partner ]
-    [ run run_exe_path.cpp filesystem                         : [ test-options run_exe_path ] : sparring_partner ]
-    [ run search_path.cpp filesystem system                   : [ test-options search_path ] : : <target-os>windows:<source>shell32 ]
-    [ run shell.cpp filesystem system                         : [ test-options shell ] : sparring_partner : <target-os>darwin:<build>no ]
-    [ run shell_path.cpp  filesystem system                   : [ test-options shell_path ] ]
-    [ run system_test1.cpp filesystem system                  : [ test-options system_test1 ] : sparring_partner ]
-    [ run system_test2.cpp filesystem system                  : [ test-options system_test2 ] : sparring_partner ]
-    [ run spawn.cpp filesystem system                         : [ test-options spawn ] : sparring_partner ]
-    [ run start_dir.cpp   filesystem system                   : [ test-options start_dir ] : sparring_partner ]
-    [ run terminate.cpp system filesystem                     : [ test-options terminate ] : sparring_partner : <target-os>freebsd:<build>no ]
-    [ run throw_on_error.cpp system filesystem                : [ test-options throw_on_error ] : sparring_partner ]
-    [ run wait.cpp system filesystem                          : [ test-options wait ] : sparring_partner ]
-    [ run wait_for.cpp system filesystem                      : [ test-options wait_for ] : sparring_partner ]
-    [ run on_exit.cpp  system filesystem                      : [ test-options on_exit ] : sparring_partner ]
-    [ run on_exit2.cpp system filesystem                      : [ test-options on_exit2 ] : sparring_partner ]
-    [ run on_exit3.cpp system filesystem                      : [ test-options on_exit3 ] : sparring_partner ]
-    [ run posix_specific.cpp     system filesystem            : [ test-options posix_specific ] : sparring_partner : <build>no <target-os>linux:<build>yes   ]
-    [ run windows_specific.cpp filesystem system              : [ test-options windows_specific ] : sparring_partner : <build>no <target-os>windows:<build>yes   ]
+    [ run async.cpp       thread            : [ test-options async ] : sparring_partner ]
+    [ run async_fut.cpp   thread            : [ test-options async_fut ] : sparring_partner ]
+    [ run args_handling.cpp  thread         : [ test-options args_handling ] : exit_argc ]
+    [ run args_cmd.cpp                      : [ test-options args_cmd ] : sparring_partner ]
+    [ run wargs_cmd.cpp                     : [ test-options wargs_cmd ] : sparring_partner ]
+    [ run bind_stderr.cpp                          : [ test-options bind_stderr ] : sparring_partner : <boost.process.fs>boost ]
+    [ run bind_stdin.cpp                    : [ test-options bind_stdin ] : sparring_partner : <boost.process.fs>boost ]
+    [ run bind_stdin_stdout.cpp             : [ test-options bind_stdin_stdout ] : sparring_partner : <boost.process.fs>boost ]
+    [ run bind_stdout.cpp                   : [ test-options bind_stdout ] : sparring_partner : <boost.process.fs>boost ]
+    [ run bind_stdout_stderr.cpp            : [ test-options bind_stdout_stderr ] : sparring_partner : <boost.process.fs>boost ]
+    [ run pipe_fwd.cpp                      : [ test-options pipe_fwd ] : sparring_partner ]
+    [ run cmd_test.cpp                      : [ test-options cmd_test ] : sparring_partner : <boost.process.fs>boost ]
+    [ run close_stderr.cpp                  : [ test-options close_stderr ] : sparring_partner ]
+    [ run close_stdin.cpp                   : [ test-options close_stdin ] : sparring_partner ]
+    [ run close_stdout.cpp                  : [ test-options close_stdout ] : sparring_partner ]
+    [ run error.cpp                         : [ test-options error ] : sparring_partner ]
+    [ run exit_code.cpp program_options     : [ test-options exit_code ] : sparring_partner ]
+    [ run extensions.cpp                    : [ test-options extensions ] : sparring_partner ]
+    [ run env.cpp     program_options       : [ test-options env ] : sparring_partner ]
+    [ run group.cpp     thread              : [ test-options group ] : sub_launch ]
+    [ run group.cpp          thread         : [ test-options group ] : sub_launch : <build>no <target-os>windows:<build>yes <define>BOOST_USE_WINDOWS_H=1 : group-windows-h ]
+    [ run group_wait.cpp     thread         : [ test-options group_wait ] : sparring_partner : <target-os>darwin:<build>no <target-os>freebsd:<build>no <source>/boost/scope_exit//boost_scope_exit ]
+	[ run limit_fd.cpp     program_options  : [ test-options limit_fd ] : sparring_partner : <target-os>freebsd:<build>no ]
+    [ run run_exe.cpp                              : : sparring_partner ]
+    [ run run_exe_path.cpp                         : [ test-options run_exe_path ] : sparring_partner ]
+    [ run search_path.cpp                   : [ test-options search_path ] : : <target-os>windows:<source>shell32 ]
+    [ run shell.cpp                         : [ test-options shell ] : sparring_partner : <target-os>darwin:<build>no ]
+    [ run shell_path.cpp                    : [ test-options shell_path ] ]
+    [ run system_test1.cpp                  : [ test-options system_test1 ] : sparring_partner ]
+    [ run system_test2.cpp                  : [ test-options system_test2 ] : sparring_partner ]
+    [ run spawn.cpp                         : [ test-options spawn ] : sparring_partner ]
+    [ run start_dir.cpp                     : [ test-options start_dir ] : sparring_partner ]
+    [ run terminate.cpp                     : [ test-options terminate ] : sparring_partner : <target-os>freebsd:<build>no ]
+    [ run throw_on_error.cpp                : [ test-options throw_on_error ] : sparring_partner ]
+    [ run wait.cpp                          : [ test-options wait ] : sparring_partner ]
+    [ run wait_for.cpp                      : [ test-options wait_for ] : sparring_partner ]
+    [ run on_exit.cpp                       : [ test-options on_exit ] : sparring_partner ]
+    [ run on_exit2.cpp                      : [ test-options on_exit2 ] : sparring_partner ]
+    [ run on_exit3.cpp                      : [ test-options on_exit3 ] : sparring_partner ]
+    [ run posix_specific.cpp                : [ test-options posix_specific ] : sparring_partner : <build>no <target-os>linux:<build>yes   ]
+    [ run windows_specific.cpp              : [ test-options windows_specific ] : sparring_partner : <build>no <target-os>windows:<build>yes   ]
    : <dependency>bare ;
 
 test-suite without-valgrind :
-    [ run async_system_future.cpp filesystem system coroutine           : [ test-options async_system_future ] : sparring_partner : <link>static <toolset>msvc:<cxxflags>/bigobj ]
-    [ run async_system_stackful.cpp filesystem system coroutine         : [ test-options async_system_stackful ] : sparring_partner : <link>static <toolset>msvc:<cxxflags>/bigobj ]
-#   [ run async_system_stackful_error.cpp filesystem system coroutine   : [ test-options async_system_stackful_error ] : sparring_partner : <link>static <toolset>msvc:<cxxflags>/bigobj ]
-    [ run async_system_stackful_except.cpp filesystem system coroutine  : [ test-options async_system_stackful_except ] : sparring_partner : <link>static <toolset>msvc:<cxxflags>/bigobj ]
-    [ run async_system_stackless.cpp filesystem system coroutine        : [ test-options async_system_stackless ] : sparring_partner : <link>static <toolset>msvc:<cxxflags>/bigobj ]
-    [ run vfork.cpp     system filesystem                               : [ test-options vfork ] : sparring_partner : <build>no <target-os>linux:<build>yes ]
+    [ run async_system_future.cpp coroutine           : [ test-options async_system_future ] : sparring_partner : <link>static <toolset>msvc:<cxxflags>/bigobj ]
+    [ run async_system_stackful.cpp coroutine         : [ test-options async_system_stackful ] : sparring_partner : <link>static <toolset>msvc:<cxxflags>/bigobj ]
+#   [ run async_system_stackful_error.cpp coroutine   : [ test-options async_system_stackful_error ] : sparring_partner : <link>static <toolset>msvc:<cxxflags>/bigobj ]
+    [ run async_system_stackful_except.cpp coroutine  : [ test-options async_system_stackful_except ] : sparring_partner : <link>static <toolset>msvc:<cxxflags>/bigobj ]
+    [ run async_system_stackless.cpp coroutine        : [ test-options async_system_stackless ] : sparring_partner : <link>static <toolset>msvc:<cxxflags>/bigobj ]
+    [ run vfork.cpp                                   : [ test-options vfork ] : sparring_partner : <build>no <target-os>linux:<build>yes ]
     ;
 
 
