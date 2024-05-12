@@ -209,7 +209,7 @@ struct basic_process_handle_win
     void resume()
     {
         error_code ec;
-        suspend(ec);
+        resume(ec);
         if (ec)
             detail::throw_error(ec, "resume");
     }
