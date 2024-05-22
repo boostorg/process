@@ -23,16 +23,8 @@
 #include <cstdio>
 #endif
 
-#if defined(__FreeBSD__)
-#include <sys/socket.h>
-#include <sys/sysctl.h>
-#include <sys/param.h>
-#include <sys/queue.h>
-#include <sys/user.h>
-#include <libprocstat.h>
-#endif
-
-#if (defined(__DragonFly__) ||  defined(__OpenBSD__))
+#if (defined(__FreeBSD__) || defined(__DragonFly__) ||  defined(__OpenBSD__))
+#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/param.h>
 #include <sys/sysctl.h>
@@ -262,57 +254,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     return make_cmd_shell_::make(std::move(procargs), argc, argv.release(), fr_func);
 }
     
-#elif defined(__FreeBSD__)
-
-shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
-{
-    struct cl_proc_stat
-    {
-        void operator()(struct procstat *proc_stat)
-        {
-            procstat_close(proc_stat);
-        }
-    };
-    std::unique_ptr<struct procstat, cl_proc_stat> proc_stat{procstat_open_sysctl()};
-    if (!proc_stat)
-    {
-        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
-        return {};
-    }
-
-    struct proc_info_close
-    {
-        struct procstat * proc_stat;
-
-        void operator()(struct kinfo_proc * proc_info)
-        {
-            procstat_freeprocs(proc_stat, proc_info);
-        }
-    };
-
-    unsigned cntp;
-    std::unique_ptr<struct kinfo_proc, proc_info_close> proc_info{
-            procstat_getprocs(proc_stat.get(), KERN_PROC_PID, pid, &cntp),
-            proc_info_close{proc_stat.get()}};
-
-    if (!proc_info)
-    {
-        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
-        return {};
-    }
-
-    char **cmd = procstat_getargv(proc_stat.get(), proc_info.get(), 0);
-    if (!cmd)
-    {
-        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
-        return {};
-    }
-    auto res = make_cmd_shell_::clone(cmd);
-    procstat_freeargv(proc_stat.get());
-    return res;
-}
-    
-#elif defined(__DragonFly__)
+#elif (defined(__FreeBSD__) || defined(__DragonFly__))
 
 shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {

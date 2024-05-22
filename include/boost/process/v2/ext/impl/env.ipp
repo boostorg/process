@@ -21,6 +21,15 @@
 #include <cstdio>
 #endif
 
+#if defined(__FreeBSD__)
+#include <sys/socket.h>
+#include <sys/sysctl.h>
+#include <sys/param.h>
+#include <sys/queue.h>
+#include <sys/user.h>
+#include <libprocstat.h>
+#endif
+
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
 
 namespace detail {
