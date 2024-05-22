@@ -30,12 +30,11 @@
 #endif
 
 #if defined(__FreeBSD__)
-#include <sys/socket.h>
-#include <sys/sysctl.h>
+#include <cstring>
+#include <sys/types.h>
 #include <sys/param.h>
-#include <sys/queue.h>
+#include <sys/sysctl.h>
 #include <sys/user.h>
-#include <libprocstat.h>
 #endif
 
 #if (defined(__NetBSD__) || defined(__OpenBSD__))
@@ -128,30 +127,21 @@ filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code
 filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code & ec) 
 {
     filesystem::path path;
-    unsigned cntp = 0;
-    procstat *proc_stat = procstat_open_sysctl();
-    if (proc_stat) {
-        kinfo_proc *proc_info = procstat_getprocs(proc_stat, KERN_PROC_PID, pid, &cntp);
-        if (proc_info) {
-            filestat_list *head = procstat_getfiles(proc_stat, proc_info, 0);
-            if (head) {
-                filestat *fst = nullptr;
-                STAILQ_FOREACH(fst, head, next) {
-                    if (fst->fs_uflags & PS_FST_UFLAG_CDIR) 
-                        path = filesystem::canonical(fst->fs_path, ec);
-                }
-                procstat_freefiles(proc_stat, head);
-            }
-            else
-                BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
-            procstat_freeprocs(proc_stat, proc_info);
+    struct kinfo_file kif;
+    std::size_t sz = 4, len = sizeof(kif);
+    int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_CWD, pid};
+    if (sysctl(mib, sz, nullptr, &len, nullptr, 0) == 0) 
+    {
+        memset(&kif, 0, len);
+        if (sysctl(mib, sz, &kif, &len, nullptr, 0) == 0) 
+        {
+            path = filesystem::canonical(kif.kf_path, ec);
         }
         else
             BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
-        procstat_close(proc_stat);
     }
     else
-         BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
     return path;
 }
 
@@ -159,8 +149,30 @@ filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code
 
 filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code & ec) 
 {
+    /*
     filesystem::path path;
-    /* Probably the hackiest thing ever we are doing here, because the "official" API is broken OS-level. */
+    // Official API (broken OS-level) - including code from DragonFly's fstat(1) 
+    // command line interface utility currently requires way too much code FWIW.
+    std::size_t sz = 4, len = 0;
+    int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_CWD, pid};
+    if (sysctl(mib, sz, nullptr, &len, nullptr, 0) == 0)
+    {
+        std::vector<char> vecbuff;
+        vecbuff.resize(len);
+        if (sysctl(mib, sz, &vecbuff[0], &len, nullptr, 0) == 0)
+        {
+            path = filesystem::canonical(&vecbuff[0], ec);
+        }    
+        else
+            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+    }
+    else
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+    return path;
+    */
+
+    filesystem::path path;
+    /* Probably the hackiest thing ever we are doing here, because the official API is broken OS-level. */
     FILE *fp = popen(("pos=`ans=\\`/usr/bin/fstat -w -p " + std::to_string(pid) + " | /usr/bin/sed -n 1p\\`; " +
         "/usr/bin/awk -v ans=\"$ans\" 'BEGIN{print index(ans, \"INUM\")}'`; str=`/usr/bin/fstat -w -p " + 
         std::to_string(pid) + " | /usr/bin/sed -n 3p`; /usr/bin/awk -v str=\"$str\" -v pos=\"$pos\" " +
@@ -193,7 +205,7 @@ filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code
 
 filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
-    std::string path;
+    filesystem::path path;
 #if defined(__NetBSD__)
     int mib[4] = {CTL_KERN, KERN_PROC_ARGS, pid, KERN_PROC_CWD};
     const std::size_t sz = 4;
@@ -204,17 +216,18 @@ filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code
     std::size_t len = 0;
     if (sysctl(mib, sz, nullptr, &len, nullptr, 0) == 0) 
     {
-        std::string strbuff;
-        strbuff.resize(len);
-        if (sysctl(mib, 4, &strbuff[0], &len, nullptr, 0) == 0)
+        std::vector<char> vecbuff;
+        vecbuff.resize(len);
+        if (sysctl(mib, 4, &vecbuff[0], &len, nullptr, 0) == 0)
         {
-            filesystem::canonical(strbuff, ec);
+            path = filesystem::canonical(&vecbuff[0], ec);
         }
         else
             BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
     }
-
-    return "";
+    else
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+    return path;
 }
 
 #else
