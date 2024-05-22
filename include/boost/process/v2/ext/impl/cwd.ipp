@@ -151,8 +151,8 @@ filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code
 {
     /*
     filesystem::path path;
-    /* Official API (broken OS-level) - including code from DragonFly's fstat(1) 
-    command line interface utility currently requires way too much code FWIW. */
+    // Official API (broken OS-level) - including code from DragonFly's fstat(1) 
+    // command line interface utility currently requires way too much code FWIW.
     std::size_t sz = 4, len = 0;
     int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_CWD, pid};
     if (sysctl(mib, sz, nullptr, &len, nullptr, 0) == 0)
