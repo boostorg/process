@@ -30,9 +30,11 @@
 #endif
 
 #if defined(__FreeBSD__)
+#include <cstring>
 #include <sys/types.h>
-#include <sys/user.h>
+#include <sys/param.h>
 #include <sys/sysctl.h>
+#include <sys/user.h>
 #endif
 
 #if (defined(__NetBSD__) || defined(__OpenBSD__))
