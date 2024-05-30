@@ -45,7 +45,7 @@ int fdwalk(int (*func)(void *, int), void *cd);
 
 #include <linux/version.h>
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,11,0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,11,0) && defined(__GLIBC__)
 
 // https://man7.org/linux/man-pages/man2/close_range.2.html
 #include <linux/close_range.h>
