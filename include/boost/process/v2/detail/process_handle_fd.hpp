@@ -251,12 +251,8 @@ struct basic_process_handle_fd
         else if (res == 0)
             return true;
         else
-            ec.clear();
-
-        if (res == 0)
-            return true;
-        else
         {
+            ec.clear();
             exit_code = code;
             return false;
         }
