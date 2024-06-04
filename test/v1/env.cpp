@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE(modifided_env, *boost::unit_test::timeout(2))
 
     bp::ipstream st;
 
-    boost::process::environment env = boost::this_process::environment(); //empty env, that would fail.
+    boost::process::v1::environment env = boost::this_process::environment(); //empty env, that would fail.
     std::string value = "TestString";
     env["BOOST_PROCESS_TEST_2"] = value;
 

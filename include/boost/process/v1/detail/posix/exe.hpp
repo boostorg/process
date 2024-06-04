@@ -7,10 +7,13 @@
 #ifndef BOOST_PROCESS_DETAIL_POSIX_EXE_HPP_
 #define BOOST_PROCESS_DETAIL_POSIX_EXE_HPP_
 
+#include <boost/process/v1/detail/config.hpp>
 
 namespace boost
 {
 namespace process
+{
+BOOST_PROCESS_V1_INLINE namespace v1
 {
 namespace detail
 {
@@ -30,7 +33,7 @@ inline void apply_exe(const StringType & exe, Executor & e)
 }
 }
 }
-
+}
 
 
 #endif /* INCLUDE_BOOST_PROCESS_WINDOWS_ARGS_HPP_ */

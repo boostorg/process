@@ -11,7 +11,7 @@
 #include <boost/process/v1/filesystem.hpp>
 #include <boost/core/exchange.hpp>
 
-namespace boost { namespace process { namespace detail { namespace posix {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace posix {
 
 struct file_descriptor
 {
@@ -24,7 +24,7 @@ struct file_descriptor
 
 
     file_descriptor() = default;
-    explicit file_descriptor(const boost::process::filesystem::path& p, mode_t mode = read_write)
+    explicit file_descriptor(const boost::process::v1::filesystem::path& p, mode_t mode = read_write)
         : file_descriptor(p.native(), mode)
     {
     }
@@ -84,6 +84,6 @@ private:
     int _handle = -1;
 };
 
-}}}}
+}}}}}
 
 #endif /* BOOST_PROCESS_DETAIL_WINDOWS_FILE_DESCRIPTOR_HPP_ */

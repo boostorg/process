@@ -17,9 +17,9 @@
 #include <boost/process/v1/detail/used_handles.hpp>
 #include <array>
 
-namespace boost { namespace process { namespace detail { namespace posix {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace posix {
 
-struct null_in : handler_base_ext, ::boost::process::detail::uses_handles
+struct null_in : handler_base_ext, ::boost::process::v1::detail::uses_handles
 {
     file_descriptor source{"/dev/null", file_descriptor::read};
 
@@ -34,10 +34,10 @@ public:
     void on_exec_setup(Executor &e) const
     {
         if (::dup2(source.handle(), STDIN_FILENO) == -1)
-             e.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
+             e.set_error(::boost::process::v1::detail::get_last_error(), "dup2() failed");
     }
 };
 
-}}}}
+}}}}}
 
 #endif

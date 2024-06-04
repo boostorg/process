@@ -44,12 +44,12 @@
 \xmlonly
 <programlisting>
 namespace boost {
-  namespace process {
-    <emphasis>unspecified</emphasis> <globalname alt="boost::process::close">close</globalname>;
-    <emphasis>unspecified</emphasis> <globalname alt="boost::process::null">null</globalname>;
-    <emphasis>unspecified</emphasis> <globalname alt="boost::process::std_in">std_in</globalname>;
-    <emphasis>unspecified</emphasis> <globalname alt="boost::process::std_out">std_out</globalname>;
-    <emphasis>unspecified</emphasis> <globalname alt="boost::process::std_err">std_err</globalname>;
+  namespace process { BOOST_PROCESS_V1_INLINE namespace v1 {
+    <emphasis>unspecified</emphasis> <globalname alt="boost::process::v1::close">close</globalname>;
+    <emphasis>unspecified</emphasis> <globalname alt="boost::process::v1::null">null</globalname>;
+    <emphasis>unspecified</emphasis> <globalname alt="boost::process::v1::std_in">std_in</globalname>;
+    <emphasis>unspecified</emphasis> <globalname alt="boost::process::v1::std_out">std_out</globalname>;
+    <emphasis>unspecified</emphasis> <globalname alt="boost::process::v1::std_err">std_err</globalname>;
   }
 }
 </programlisting>
@@ -60,9 +60,9 @@ namespace boost {
 The library allows full redirection of streams to files as shown below.
 
 \code{.cpp}
-boost::process::filesystem::path log    = "my_log_file.txt";
-boost::process::filesystem::path input  = "input.txt";
-boost::process::filesystem::path output = "output.txt";
+boost::process::v1::filesystem::path log    = "my_log_file.txt";
+boost::process::v1::filesystem::path input  = "input.txt";
+boost::process::v1::filesystem::path output = "output.txt";
 system("my_prog", std_out>output, std_in<input, std_err>log);
 \endcode
 
@@ -120,7 +120,7 @@ system("b2", std_out > null);
  *
  */
 
-namespace boost { namespace process { namespace detail {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail {
 
 
 template<typename T> using is_streambuf    = typename std::is_same<T, boost::asio::streambuf>::type;
@@ -152,13 +152,13 @@ struct std_in_
     api::null_in operator=(const null_t &) const {return api::null_in();}
     api::null_in operator<(const null_t &) const {return api::null_in();}
 
-    api::file_in operator=(const boost::process::filesystem::path &p) const {return p;}
+    api::file_in operator=(const boost::process::v1::filesystem::path &p) const {return p;}
     api::file_in operator=(const std::string & p)            const {return p;}
     api::file_in operator=(const std::wstring &p)            const {return p;}
     api::file_in operator=(const char * p)                   const {return p;}
     api::file_in operator=(const wchar_t * p)                const {return p;}
 
-    api::file_in operator<(const boost::process::filesystem::path &p) const {return p;}
+    api::file_in operator<(const boost::process::v1::filesystem::path &p) const {return p;}
     api::file_in operator<(const std::string &p)             const {return p;}
     api::file_in operator<(const std::wstring &p)            const {return p;}
     api::file_in operator<(const char*p)                     const {return p;}
@@ -209,13 +209,13 @@ struct std_out_
     api::null_out<p1,p2> operator=(const null_t &) const {return api::null_out<p1,p2>();}
     api::null_out<p1,p2> operator>(const null_t &) const {return api::null_out<p1,p2>();}
 
-    api::file_out<p1,p2> operator=(const boost::process::filesystem::path &p) const {return api::file_out<p1,p2>(p);}
+    api::file_out<p1,p2> operator=(const boost::process::v1::filesystem::path &p) const {return api::file_out<p1,p2>(p);}
     api::file_out<p1,p2> operator=(const std::string &p)             const {return api::file_out<p1,p2>(p);}
     api::file_out<p1,p2> operator=(const std::wstring &p)            const {return api::file_out<p1,p2>(p);}
     api::file_out<p1,p2> operator=(const char * p)                   const {return api::file_out<p1,p2>(p);}
     api::file_out<p1,p2> operator=(const wchar_t * p)                const {return api::file_out<p1,p2>(p);}
 
-    api::file_out<p1,p2> operator>(const boost::process::filesystem::path &p) const {return api::file_out<p1,p2>(p);}
+    api::file_out<p1,p2> operator>(const boost::process::v1::filesystem::path &p) const {return api::file_out<p1,p2>(p);}
     api::file_out<p1,p2> operator>(const std::string &p)             const {return api::file_out<p1,p2>(p);}
     api::file_out<p1,p2> operator>(const std::wstring &p)            const {return api::file_out<p1,p2>(p);}
     api::file_out<p1,p2> operator>(const char * p)                   const {return api::file_out<p1,p2>(p);}
@@ -269,9 +269,9 @@ struct close_t
 
 }
 ///This constant is a utility to allow syntax like `std_out > close` for closing I/O streams.
-constexpr boost::process::detail::close_t close;
+constexpr boost::process::v1::detail::close_t close;
 ///This constant is a utility to redirect streams to the null-device.
-constexpr boost::process::detail::null_t  null;
+constexpr boost::process::v1::detail::null_t  null;
 
 /**
 This property allows to set the input stream for the child process.
@@ -282,7 +282,7 @@ This property allows to set the input stream for the child process.
 
 The file I/O simple redirects the stream to a file, for which the possible types are
 
- - `boost::process::filesystem::path`
+ - `boost::process::v1::filesystem::path`
  - `std::basic_string<char_type>`
  - `const char_type*`
  - `FILE*`
@@ -311,10 +311,10 @@ std_in = file;
 \subsection stdin_pipe Pipe Input
 
 As explained in the corresponding section, the boost.process library provides a
-@ref boost::process::async_pipe "async_pipe" class which can be
+@ref boost::process::v1::async_pipe "async_pipe" class which can be
 used to communicate with child processes.
 
-\note Technically the @ref boost::process::async_pipe "async_pipe"
+\note Technically the @ref boost::process::v1::async_pipe "async_pipe"
 works synchronous here, since no asio implementation is used by the library here.
 The async-operation will then however not end if the process is finished, since
 the pipe remains open. You can use the async_close function with on_exit to fix that.
@@ -409,12 +409,12 @@ std_in.null();
 
 */
 
-constexpr boost::process::detail::std_in_<void>   std_in;
+constexpr boost::process::v1::detail::std_in_<void>   std_in;
 
 /**
 This property allows to set the output stream for the child process.
 
-\note The Semantic is the same as for \xmlonly <globalname alt="boost::process::std_err">std_err</globalname> \endxmlonly
+\note The Semantic is the same as for \xmlonly <globalname alt="boost::process::v1::std_err">std_err</globalname> \endxmlonly
 
 \note `std_err` and `std_out` can be combined into one stream, with the `operator &`, i.e. `std_out & std_err`.
 
@@ -424,7 +424,7 @@ This property allows to set the output stream for the child process.
 
 The file I/O simple redirects the stream to a file, for which the possible types are
 
- - `boost::process::filesystem::path`
+ - `boost::process::v1::filesystem::path`
  - `std::basic_string<char_type>`
  - `const char_type*`
  - `FILE*`
@@ -453,10 +453,10 @@ std_out = file;
 \subsection stdout_pipe Pipe Output
 
 As explained in the corresponding section, the boost.process library provides a
-@ref boost::process::async_pipe "async_pipe" class which can be
+@ref boost::process::v1::async_pipe "async_pipe" class which can be
 used to communicate with child processes.
 
-\note Technically the @ref boost::process::async_pipe "async_pipe"
+\note Technically the @ref boost::process::v1::async_pipe "async_pipe"
 works like a synchronous pipe here, since no asio implementation is used by the library here.
 The asynchronous operation will then however not end if the process is finished, since
 the pipe remains open. You can use the async_close function with on_exit to fix that.
@@ -541,11 +541,12 @@ std_out.null();
 
 */
 
-constexpr boost::process::detail::std_out_<1> std_out;
+constexpr boost::process::v1::detail::std_out_<1> std_out;
 /**This property allows setting the `stderr` stream. The semantic and syntax is the same as for
- * \xmlonly <globalname alt="boost::process::std_out">std_out</globalname> \endxmlonly .
+ * \xmlonly <globalname alt="boost::process::v1::std_out">std_out</globalname> \endxmlonly .
  */
-constexpr boost::process::detail::std_out_<2> std_err;
+constexpr boost::process::v1::detail::std_out_<2> std_err;
 
-}}
+}}}
+
 #endif /* INCLUDE_BOOST_PROCESS_IO_HPP_ */

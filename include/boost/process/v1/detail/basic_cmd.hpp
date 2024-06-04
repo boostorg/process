@@ -26,7 +26,7 @@
 #include <iterator>
 
 
-namespace boost { namespace process { namespace detail {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail {
 
 template<typename Char>
 struct exe_setter_
@@ -47,7 +47,7 @@ struct char_converter<char, exe_setter_<wchar_t>>
 {
     static exe_setter_<char> conv(const exe_setter_<wchar_t> & in)
     {
-        return {::boost::process::detail::convert(in.exe_)};
+        return {::boost::process::v1::detail::convert(in.exe_)};
     }
 };
 
@@ -56,7 +56,7 @@ struct char_converter<wchar_t, exe_setter_<char>>
 {
     static exe_setter_<wchar_t> conv(const exe_setter_<char> & in)
     {
-        return {::boost::process::detail::convert(in.exe_)};
+        return {::boost::process::v1::detail::convert(in.exe_)};
     }
 };
 
@@ -105,7 +105,7 @@ struct char_converter<char, arg_setter_<wchar_t, true>>
         std::transform(in._args.begin(), in._args.end(), vec.begin(),
                 [](const std::wstring & ws)
                 {
-                    return ::boost::process::detail::convert(ws);
+                    return ::boost::process::v1::detail::convert(ws);
                 });
         return {vec};
     }
@@ -120,7 +120,7 @@ struct char_converter<wchar_t, arg_setter_<char, true>>
         std::transform(in._args.begin(), in._args.end(), vec.begin(),
                 [](const std::string & ws)
                 {
-                    return ::boost::process::detail::convert(ws);
+                    return ::boost::process::v1::detail::convert(ws);
                 });
 
         return {vec};
@@ -136,7 +136,7 @@ struct char_converter<char, arg_setter_<wchar_t, false>>
         std::transform(in._args.begin(), in._args.end(), vec.begin(),
                 [](const std::wstring & ws)
                 {
-                    return ::boost::process::detail::convert(ws);
+                    return ::boost::process::v1::detail::convert(ws);
                 });
         return {vec};    }
 };
@@ -150,7 +150,7 @@ struct char_converter<wchar_t, arg_setter_<char, false>>
         std::transform(in._args.begin(), in._args.end(), vec.begin(),
                 [](const std::string & ws)
                 {
-                    return ::boost::process::detail::convert(ws);
+                    return ::boost::process::v1::detail::convert(ws);
                 });
         return {vec};
     }
@@ -168,7 +168,7 @@ struct exe_builder
     string_type exe;
     std::vector<string_type> args;
 
-    void operator()(const boost::process::filesystem::path & data)
+    void operator()(const boost::process::v1::filesystem::path & data)
     {
         not_cmd = true;
         if (exe.empty())
@@ -285,7 +285,7 @@ struct initializer_builder<cmd_or_exe_tag<wchar_t>>
     typedef exe_builder<wchar_t> type;
 };
 
-}}}
+}}}}
 
 
 

@@ -30,7 +30,7 @@
 
 #include <boost/type_index.hpp>
 
-namespace boost { namespace process { namespace detail { namespace windows {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace windows {
 
 template<typename Executor>
 struct on_exit_handler_transformer
@@ -72,7 +72,7 @@ struct async_handler_collector
 };
 
 //Also set's up waiting for the exit, so it can close async stuff.
-struct io_context_ref : boost::process::detail::handler_base
+struct io_context_ref : boost::process::v1::detail::handler_base
 {
 
     io_context_ref(boost::asio::io_context & ios)
@@ -106,7 +106,7 @@ struct io_context_ref : boost::process::detail::handler_base
               static_cast<::boost::winapi::BOOL_>(true),
                ::boost::winapi::DUPLICATE_SAME_ACCESS_))
 
-        exec.set_error(::boost::process::detail::get_last_error(),
+        exec.set_error(::boost::process::v1::detail::get_last_error(),
                                  "Duplicate Pipe Failed");
 
 
@@ -167,6 +167,6 @@ private:
     boost::asio::io_context &ios;
 };
 
-}}}}
+}}}}}
 
 #endif /* BOOST_PROCESS_WINDOWS_IO_CONTEXT_REF_HPP_ */

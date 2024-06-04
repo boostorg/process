@@ -21,16 +21,16 @@
 
 namespace boost {
 
-namespace process {
+namespace process { BOOST_PROCESS_V1_INLINE namespace v1 {
 
 namespace detail {
 
 #if defined(BOOST_POSIX_API)
-using ::boost::process::detail::posix::is_async_handler;
-using ::boost::process::detail::posix::does_require_io_context;
+using ::boost::process::v1::detail::posix::is_async_handler;
+using ::boost::process::v1::detail::posix::does_require_io_context;
 #else
-using ::boost::process::detail::windows::is_async_handler;
-using ::boost::process::detail::windows::does_require_io_context;
+using ::boost::process::v1::detail::windows::is_async_handler;
+using ::boost::process::v1::detail::windows::does_require_io_context;
 #endif
 
 template<typename ...Args>
@@ -109,6 +109,7 @@ boost::asio::io_context &get_io_context_var(First&, Args&...args)
     return get_io_context_var(args...);
 }
 
+}
 }
 }
 }

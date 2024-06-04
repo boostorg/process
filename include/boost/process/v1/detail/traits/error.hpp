@@ -13,15 +13,13 @@
 
 
 
-namespace boost { namespace process { namespace detail {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail {
 
 struct error_tag;
 
 template<>
 struct initializer_tag<std::error_code>;
 
-}}}
-
-
+}}}}
 
 #endif /* BOOST_PROCESS_DETAIL_HANDLER_HPP_ */

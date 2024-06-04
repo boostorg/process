@@ -75,9 +75,9 @@ but the one of the launching process, not the one passed to the child process.]
 The simplest form to extend functionality is to provide another handler, which 
 will be called on the respective events on process launching. The names are:
 
-*`boost::process::on_setup`
-*`boost::process::on_error`
-*`boost::process::on_success`
+*`boost::process::v1::on_setup`
+*`boost::process::v1::on_error`
+*`boost::process::v1::on_success`
 
 
 As an example:

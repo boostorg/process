@@ -17,7 +17,7 @@
 #include <algorithm>
 #include <boost/process/v1/locale.hpp>
 
-namespace boost { namespace process { namespace detail { namespace windows {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace windows {
 
 template<typename Char>
 class native_environment_impl
@@ -87,7 +87,7 @@ inline auto native_environment_impl<Char>::get(const pointer_type id) -> string_
             if (size == buf_size) //buffer to small
                 buf_size *= 2;
             else if (size == 0)
-                ::boost::process::detail::throw_last_error("GetEnvironmentVariable() failed");
+                ::boost::process::v1::detail::throw_last_error("GetEnvironmentVariable() failed");
             else
                 return std::basic_string<Char>(
                         buf.data(), buf.data()+ size);
@@ -194,15 +194,15 @@ public:
     template<typename CharR>
     explicit inline  basic_environment_impl(
                 const basic_environment_impl<CharR>& rhs,
-                const ::boost::process::codecvt_type & cv = ::boost::process::codecvt())
-        : _data(::boost::process::detail::convert(rhs._data, cv))
+                const ::boost::process::v1::codecvt_type & cv = ::boost::process::v1::codecvt())
+        : _data(::boost::process::v1::detail::convert(rhs._data, cv))
     {
     }
 
     template<typename CharR>
     basic_environment_impl & operator=(const basic_environment_impl<CharR>& rhs)
     {
-        _data = ::boost::process::detail::convert(rhs._data);
+        _data = ::boost::process::v1::detail::convert(rhs._data);
         _env_arr = _load_var(&*_data.begin());
         _env_impl = &*_env_arr.begin();
         return *this;
@@ -349,7 +349,7 @@ typedef void* native_handle_t;
 }
 }
 }
-
+}
 
 
 

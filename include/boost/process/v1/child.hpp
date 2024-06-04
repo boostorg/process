@@ -28,15 +28,15 @@
 namespace boost {
 
 ///The main namespace of boost.process.
-namespace process {
+namespace process { BOOST_PROCESS_V1_INLINE namespace v1 {
 
 template<typename ...Args>
 child::child(Args&&...args)
-    : child(::boost::process::detail::execute_impl(std::forward<Args>(args)...)) {}
+    : child(::boost::process::v1::detail::execute_impl(std::forward<Args>(args)...)) {}
 
 
 ///Typedef for the type of an pid_t
-typedef ::boost::process::detail::api::pid_t pid_t;
+typedef ::boost::process::v1::detail::api::pid_t pid_t;
 
 #if defined(BOOST_PROCESS_DOXYGEN)
 /** The main class to hold a child process. It is simliar to [std::thread](http://en.cppreference.com/w/cpp/thread/thread),
@@ -149,6 +149,6 @@ class child
 
 #endif
 
-}}
+}}}
 #endif
 

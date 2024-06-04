@@ -7,6 +7,7 @@
 #ifndef BOOST_PROCESS_DETAIL_POSIX_BASIC_CMD_HPP_
 #define BOOST_PROCESS_DETAIL_POSIX_BASIC_CMD_HPP_
 
+#include <boost/process/v1/detail/config.hpp>
 #include <boost/process/v1/detail/posix/handler.hpp>
 #include <boost/process/v1/detail/posix/cmd.hpp>
 #include <boost/algorithm/string/replace.hpp>
@@ -20,11 +21,12 @@ namespace boost
 {
 namespace process
 {
+BOOST_PROCESS_V1_INLINE namespace v1
+{
 namespace detail
 {
 namespace posix
 {
-
 
 inline std::string build_cmd_shell(const std::string & exe, std::vector<std::string> && data)
 {
@@ -101,7 +103,7 @@ template<typename Char>
 struct exe_cmd_init;
 
 template<>
-struct exe_cmd_init<char> : boost::process::detail::api::handler_base_ext
+struct exe_cmd_init<char> : boost::process::v1::detail::api::handler_base_ext
 {
     exe_cmd_init(const exe_cmd_init & ) = delete;
     exe_cmd_init(exe_cmd_init && ) = default;
@@ -175,6 +177,6 @@ std::vector<char*> exe_cmd_init<char>::make_cmd()
 }
 
 
-}}}}
+}}}}}
 
 #endif

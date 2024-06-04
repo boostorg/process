@@ -18,7 +18,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-namespace boost { namespace process { namespace detail { namespace posix {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace posix {
 
 inline void wait(const group_handle &p, std::error_code &ec) noexcept
 {
@@ -40,7 +40,7 @@ inline void wait(const group_handle &p, std::error_code &ec) noexcept
     while ((ret != -1) || (errno != ECHILD));
    
     if (errno != ECHILD)
-        ec = boost::process::detail::get_last_error();
+        ec = boost::process::v1::detail::get_last_error();
     else
         ec.clear();
 }
@@ -49,7 +49,7 @@ inline void wait(const group_handle &p) noexcept
 {
     std::error_code ec;
     wait(p, ec);
-    boost::process::detail::throw_error(ec, "waitpid(2) failed in wait");
+    boost::process::v1::detail::throw_error(ec, "waitpid(2) failed in wait");
 }
 
 template< class Clock, class Duration >
@@ -79,7 +79,7 @@ inline bool wait_until(
                 ec.clear();
                 return true;
             }
-            ec = boost::process::detail::get_last_error();
+            ec = boost::process::v1::detail::get_last_error();
             return false;
         }
         //we can wait, because unlike in the wait_for_exit, we have no race condition regarding eh exit code.
@@ -95,7 +95,7 @@ inline bool wait_until(
 {
     std::error_code ec;
     bool b = wait_until(p, time_out, ec);
-    boost::process::detail::throw_error(ec, "waitpid(2) failed in wait_until");
+    boost::process::v1::detail::throw_error(ec, "waitpid(2) failed in wait_until");
     return b;
 }
 
@@ -115,10 +115,10 @@ inline bool wait_for(
 {
     std::error_code ec;
     bool b = wait_for(p, rel_time, ec);
-    boost::process::detail::throw_error(ec, "waitpid(2) failed in wait_for");
+    boost::process::v1::detail::throw_error(ec, "waitpid(2) failed in wait_for");
     return b;
 }
 
-}}}}
+}}}}}
 
 #endif

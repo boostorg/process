@@ -38,7 +38,7 @@ typedef basic_stream_descriptor<any_io_executor> stream_descriptor;
 } //posix
 } //asio
 
-namespace process { namespace detail { namespace posix {
+namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace posix {
 
 class async_pipe;
 
@@ -54,8 +54,9 @@ struct async_out_future;
 } // posix
 } // detail
 
-using ::boost::process::detail::posix::async_pipe;
+using ::boost::process::v1::detail::posix::async_pipe;
 
+} // v1
 } // process
 } // boost
 

@@ -14,9 +14,9 @@
 #include <boost/process/v1/detail/config.hpp>
 #include <boost/process/v1/detail/handler_base.hpp>
 
-namespace boost { namespace process { namespace detail {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail {
 
-struct throw_on_error_ : ::boost::process::detail::handler
+struct throw_on_error_ : ::boost::process::v1::detail::handler
 {
     template <class Executor>
     void on_error(Executor& exec, const std::error_code & ec) const
@@ -29,8 +29,8 @@ struct throw_on_error_ : ::boost::process::detail::handler
 
 }
 
-constexpr boost::process::detail::throw_on_error_ throw_on_error;
+constexpr boost::process::v1::detail::throw_on_error_ throw_on_error;
 
-}}
+}}}
 
 #endif

@@ -18,10 +18,10 @@
 #include <boost/system/error_code.hpp>
 
 
-namespace boost { namespace process { namespace detail { namespace windows {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace windows {
 
 template<int p1, int p2>
-struct pipe_out : public ::boost::process::detail::handler_base, ::boost::process::detail::uses_handles
+struct pipe_out : public ::boost::process::v1::detail::handler_base, ::boost::process::v1::detail::uses_handles
 {
     ::boost::winapi::HANDLE_ handle;
 
@@ -120,6 +120,6 @@ struct async_pipe_out : public pipe_out<p1, p2>
     }
 };
 
-}}}}
+}}}}}
 
 #endif

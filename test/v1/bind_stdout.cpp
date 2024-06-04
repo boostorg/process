@@ -41,7 +41,7 @@ typedef boost::asio::posix::stream_descriptor pipe_end;
 BOOST_AUTO_TEST_SUITE( bind_stdout );
 
 
-namespace fs = boost::process::filesystem;
+namespace fs = boost::process::v1::filesystem;
 namespace bp = boost::process;
 
 BOOST_AUTO_TEST_CASE(sync_io, *boost::unit_test::timeout(5))
@@ -165,7 +165,7 @@ BOOST_AUTO_TEST_CASE(file_io, *boost::unit_test::timeout(2))
         is >> s;
         BOOST_CHECK_EQUAL(s, "hello");
     }
-    boost::process::filesystem::remove(pth);
+    boost::process::v1::filesystem::remove(pth);
 
 }
 

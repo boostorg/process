@@ -22,6 +22,8 @@ namespace boost
 {
 namespace process
 {
+BOOST_PROCESS_V1_INLINE namespace v1
+{
 namespace detail
 {
 
@@ -59,7 +61,7 @@ public:
 ///Internally used error cateory for code conversion.
 inline const std::error_category& codecvt_category()
 {
-    static const ::boost::process::detail::codecvt_category_t cat;
+    static const ::boost::process::v1::detail::codecvt_category_t cat;
     return cat;
 }
 
@@ -70,7 +72,7 @@ inline std::locale default_locale()
 {
 # if defined(BOOST_WINDOWS_API)
     std::locale global_loc = std::locale();
-    return std::locale(global_loc, new boost::process::detail::windows::windows_file_codecvt);
+    return std::locale(global_loc, new boost::process::v1::detail::windows::windows_file_codecvt);
 # elif defined(macintosh) || defined(__APPLE__) || defined(__APPLE_CC__) \
 || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__HAIKU__)
     std::locale global_loc = std::locale();
@@ -114,8 +116,8 @@ namespace detail
 inline std::size_t convert(const char* from,
                     const char* from_end,
                     wchar_t* to, wchar_t* to_end,
-                    const ::boost::process::codecvt_type & cvt =
-                                 ::boost::process::codecvt())
+                    const ::boost::process::v1::codecvt_type & cvt =
+                                 ::boost::process::v1::codecvt())
 {
     std::mbstate_t state  = std::mbstate_t();  // perhaps unneeded, but cuts bug reports
     const char* from_next;
@@ -125,7 +127,7 @@ inline std::size_t convert(const char* from,
                  to, to_end, to_next);
 
     if (res != std::codecvt_base::ok)
-         throw process_error(res, ::boost::process::codecvt_category(),
+         throw process_error(res, ::boost::process::v1::codecvt_category(),
              "boost::process codecvt to wchar_t");
 
 
@@ -136,8 +138,8 @@ inline std::size_t convert(const char* from,
 inline std::size_t convert(const wchar_t* from,
                     const wchar_t* from_end,
                     char* to, char* to_end,
-                    const ::boost::process::codecvt_type & cvt =
-                                 ::boost::process::codecvt())
+                    const ::boost::process::v1::codecvt_type & cvt =
+                                 ::boost::process::v1::codecvt())
 {
     std::mbstate_t state  = std::mbstate_t();  // perhaps unneeded, but cuts bug reports
     const wchar_t* from_next;
@@ -147,15 +149,15 @@ inline std::size_t convert(const wchar_t* from,
 
     if ((res=cvt.out(state, from, from_end, from_next,
            to, to_end, to_next)) != std::codecvt_base::ok)
-               throw process_error(res, ::boost::process::codecvt_category(),
+               throw process_error(res, ::boost::process::v1::codecvt_category(),
                    "boost::process codecvt to char");
 
     return to_next - to;
 }
 
 inline std::wstring convert(const std::string & st,
-                            const ::boost::process::codecvt_type & cvt =
-                                ::boost::process::codecvt())
+                            const ::boost::process::v1::codecvt_type & cvt =
+                                ::boost::process::v1::codecvt())
 {
     std::wstring out(st.size() + 10, ' '); //just to be sure
     auto sz = convert(st.c_str(), st.c_str() + st.size(),
@@ -166,8 +168,8 @@ inline std::wstring convert(const std::string & st,
 }
 
 inline std::string convert(const std::wstring & st,
-                           const ::boost::process::codecvt_type & cvt =
-                                ::boost::process::codecvt())
+                           const ::boost::process::v1::codecvt_type & cvt =
+                                ::boost::process::v1::codecvt())
 {
     std::string out(st.size() * 2, ' '); //just to be sure
     auto sz = convert(st.c_str(), st.c_str() + st.size(),
@@ -178,8 +180,8 @@ inline std::string convert(const std::wstring & st,
 }
 
 inline std::vector<wchar_t> convert(const std::vector<char> & st,
-                                    const ::boost::process::codecvt_type & cvt =
-                                        ::boost::process::codecvt())
+                                    const ::boost::process::v1::codecvt_type & cvt =
+                                        ::boost::process::v1::codecvt())
 {
     std::vector<wchar_t> out(st.size() + 10); //just to be sure
     auto sz = convert(st.data(), st.data() + st.size(),
@@ -190,8 +192,8 @@ inline std::vector<wchar_t> convert(const std::vector<char> & st,
 }
 
 inline std::vector<char> convert(const std::vector<wchar_t> & st,
-                                 const ::boost::process::codecvt_type & cvt =
-                                     ::boost::process::codecvt())
+                                 const ::boost::process::v1::codecvt_type & cvt =
+                                     ::boost::process::v1::codecvt())
 {
     std::vector<char> out(st.size() * 2); //just to be sure
     auto sz = convert(st.data(), st.data() + st.size(),
@@ -203,8 +205,8 @@ inline std::vector<char> convert(const std::vector<wchar_t> & st,
 
 
 inline std::wstring convert(const char *begin, const char* end,
-                            const ::boost::process::codecvt_type & cvt =
-                                ::boost::process::codecvt())
+                            const ::boost::process::v1::codecvt_type & cvt =
+                                ::boost::process::v1::codecvt())
 {
     auto size = end-begin;
     std::wstring out(size + 10, ' '); //just to be sure
@@ -216,8 +218,8 @@ inline std::wstring convert(const char *begin, const char* end,
 }
 
 inline std::string convert(const wchar_t  * begin, const wchar_t *end,
-                           const ::boost::process::codecvt_type & cvt =
-                                ::boost::process::codecvt())
+                           const ::boost::process::v1::codecvt_type & cvt =
+                                ::boost::process::v1::codecvt())
 {
     auto size = end-begin;
 
@@ -236,10 +238,6 @@ inline std::string convert(const wchar_t  * begin, const wchar_t *end,
 
 
 
-}
-}
-
-
-
+}}}
 
 #endif /* BOOST_PROCESS_LOCALE_HPP_ */

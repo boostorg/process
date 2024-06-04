@@ -12,7 +12,7 @@
 
 
 
-namespace boost { namespace process {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 {
 
 struct group;
 
@@ -25,12 +25,12 @@ template<>
 struct make_initializer_t<group_tag>;
 
 
-template<> struct initializer_tag_t<::boost::process::group> { typedef group_tag type;};
+template<> struct initializer_tag_t<::boost::process::v1::group> { typedef group_tag type;};
 
 
 
 
-}}}
+}}}}
 
 
 

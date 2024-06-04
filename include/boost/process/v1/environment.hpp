@@ -19,7 +19,7 @@
 #include <boost/process/v1/detail/windows/environment.hpp>
 #endif
 
-namespace boost { namespace process {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 {
 
 namespace detail {
 
@@ -260,7 +260,7 @@ public:
     iterator        find( const string_type& key )
     {
         auto p = this->_env_impl;
-        auto st1 = key + ::boost::process::detail::equal_sign<Char>();
+        auto st1 = key + ::boost::process::v1::detail::equal_sign<Char>();
         while (*p != nullptr)
         {
             const std::size_t len = std::char_traits<Char>::length(*p);
@@ -274,7 +274,7 @@ public:
     const_iterator  find( const string_type& key ) const
     {
         auto p = this->_env_impl;
-        auto st1 = key + ::boost::process::detail::equal_sign<Char>();
+        auto st1 = key + ::boost::process::v1::detail::equal_sign<Char>();
         while (*p != nullptr)
         {
             const std::size_t len = std::char_traits<Char>::length(*p);
@@ -289,7 +289,7 @@ public:
     std::size_t count(const string_type & st) const
     {
         auto p = this->_env_impl;
-        auto st1 = st + ::boost::process::detail::equal_sign<Char>();
+        auto st1 = st + ::boost::process::v1::detail::equal_sign<Char>();
         while (*p != nullptr)
         {
             const std::size_t len = std::char_traits<Char>::length(*p);
@@ -652,55 +652,55 @@ typedef basic_environment<char>     environment;
 ///Type definition to hold a seperate environment.
 typedef basic_environment<wchar_t> wenvironment;
 
-}
+}}
 
 ///Namespace containing information of the calling process.
 namespace this_process
 {
 
 ///Definition of the native handle type.
-typedef ::boost::process::detail::api::native_handle_t native_handle_type;
+typedef ::boost::process::v1::detail::api::native_handle_t native_handle_type;
 
 #if !defined(BOOST_NO_ANSI_APIS)
 ///Definition of the environment for this process.
-using ::boost::process::native_environment;
+using ::boost::process::v1::native_environment;
 #endif
 ///Definition of the environment for this process.
-using ::boost::process::wnative_environment;
+using ::boost::process::v1::wnative_environment;
 
 ///Get the process id of the current process.
-inline int get_id()                     { return ::boost::process::detail::api::get_id();}
+inline int get_id()                     { return ::boost::process::v1::detail::api::get_id();}
 ///Get the native handle of the current process.
-inline native_handle_type native_handle()  { return ::boost::process::detail::api::native_handle();}
+inline native_handle_type native_handle()  { return ::boost::process::v1::detail::api::native_handle();}
 #if !defined(BOOST_NO_ANSI_APIS)
 ///Get the enviroment of the current process.
-inline native_environment   environment() { return ::boost::process:: native_environment(); }
+inline native_environment   environment() { return ::boost::process::v1:: native_environment(); }
 #endif
 ///Get the enviroment of the current process.
-inline wnative_environment wenvironment() { return ::boost::process::wnative_environment(); }
+inline wnative_environment wenvironment() { return ::boost::process::v1::wnative_environment(); }
 ///Get the path environment variable of the current process runs.
-inline std::vector<boost::process::filesystem::path> path()
+inline std::vector<boost::process::v1::filesystem::path> path()
 {
 #if defined(BOOST_WINDOWS_API)
-    const ::boost::process::wnative_environment ne{};
-    typedef typename ::boost::process::wnative_environment::const_entry_type value_type;
+    const ::boost::process::v1::wnative_environment ne{};
+    typedef typename ::boost::process::v1::wnative_environment::const_entry_type value_type;
     static constexpr auto id = L"PATH";
 #else
-    const ::boost::process::native_environment ne{};
-    typedef typename ::boost::process::native_environment::const_entry_type value_type;
+    const ::boost::process::v1::native_environment ne{};
+    typedef typename ::boost::process::v1::native_environment::const_entry_type value_type;
     static constexpr auto id = "PATH";
 #endif
 
     auto itr = std::find_if(ne.cbegin(), ne.cend(),
             [&](const value_type & e)
-             {return id == ::boost::to_upper_copy(e.get_name(), ::boost::process::detail::process_locale());});
+             {return id == ::boost::to_upper_copy(e.get_name(), ::boost::process::v1::detail::process_locale());});
 
     if (itr == ne.cend())
         return {};
 
     auto vec = itr->to_vector();
 
-    std::vector<boost::process::filesystem::path> val;
+    std::vector<boost::process::v1::filesystem::path> val;
     val.resize(vec.size());
 
     std::copy(vec.begin(), vec.end(), val.begin());

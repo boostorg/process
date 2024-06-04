@@ -13,13 +13,15 @@ namespace boost
 {
 namespace process
 {
+BOOST_PROCESS_V1_INLINE namespace v1
+{
 namespace detail
 {
 namespace windows
 {
 
 template<typename CharType>
-struct cmd_setter_ : ::boost::process::detail::handler_base
+struct cmd_setter_ : ::boost::process::v1::detail::handler_base
 {
     typedef CharType value_type;
     typedef std::basic_string<value_type> string_type;
@@ -43,7 +45,7 @@ private:
 }
 }
 }
-
+}
 
 
 #endif /* INCLUDE_BOOST_PROCESS_WINDOWS_ARGS_HPP_ */

@@ -16,14 +16,14 @@
 #include <boost/winapi/process.hpp>
 #include <boost/winapi/get_last_error.hpp>
 
-namespace boost { namespace process { namespace detail { namespace windows {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace windows {
 
 struct child_handle;
 
 inline void terminate(child_handle &p, std::error_code &ec) noexcept
 {
     if (!::boost::winapi::TerminateProcess(p.process_handle(), EXIT_FAILURE))
-        ec = boost::process::detail::get_last_error();
+        ec = boost::process::v1::detail::get_last_error();
     else
     {
         ec.clear();
@@ -36,9 +36,9 @@ inline void terminate(child_handle &p)
 {
     std::error_code ec;
     terminate(p, ec);
-    boost::process::detail::throw_error(ec, "TerminateProcess() failed in terminate");
+    boost::process::v1::detail::throw_error(ec, "TerminateProcess() failed in terminate");
 }
 
-}}}}
+}}}}}
 
 #endif

@@ -15,7 +15,7 @@
 #include <cstdlib>
 #include <boost/process/v1/detail/posix/handler.hpp>
 
-namespace boost { namespace process { namespace detail { namespace posix {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace posix {
 
 
 using native_handle_type = int;
@@ -27,7 +27,7 @@ inline std::vector<native_handle_type> get_handles(std::error_code & ec)
     std::unique_ptr<DIR, void(*)(DIR*)> dir{::opendir("/dev/fd"), +[](DIR* p){::closedir(p);}};
     if (!dir)
     {
-        ec = ::boost::process::detail::get_last_error();
+        ec = ::boost::process::v1::detail::get_last_error();
         return {};
     }
     else
@@ -60,7 +60,7 @@ inline std::vector<native_handle_type> get_handles()
 
     auto res = get_handles(ec);
     if (ec)
-        boost::process::detail::throw_error(ec, "open_dir(\"/dev/fd\") failed");
+        boost::process::v1::detail::throw_error(ec, "open_dir(\"/dev/fd\") failed");
 
     return res;
 }
@@ -72,7 +72,7 @@ inline bool is_stream_handle(native_handle_type handle, std::error_code & ec)
 
     if (::fstat(handle, &stat_) != 0)
     {
-        ec = ::boost::process::detail::get_last_error();
+        ec = ::boost::process::v1::detail::get_last_error();
     }
     else
         ec.clear();
@@ -90,7 +90,7 @@ inline bool is_stream_handle(native_handle_type handle)
     std::error_code ec;
     auto res = is_stream_handle(handle, ec);
     if (ec)
-        boost::process::detail::throw_error(ec, "fstat() failed");
+        boost::process::v1::detail::throw_error(ec, "fstat() failed");
 
     return res;
 }
@@ -113,7 +113,7 @@ struct limit_handles_ : handler_base_ext
         auto dir = ::opendir("/dev/fd");
         if (!dir)
         {
-            exec.set_error(::boost::process::detail::get_last_error(), "opendir(\"/dev/fd\")");
+            exec.set_error(::boost::process::v1::detail::get_last_error(), "opendir(\"/dev/fd\")");
             return;
         }
 
@@ -135,7 +135,7 @@ struct limit_handles_ : handler_base_ext
 
             if (::close(conv) != 0)
             {
-                exec.set_error(::boost::process::detail::get_last_error(), "close() failed");
+                exec.set_error(::boost::process::v1::detail::get_last_error(), "close() failed");
                 return;
             }
         }
@@ -143,6 +143,6 @@ struct limit_handles_ : handler_base_ext
     }
 };
 
-}}}}
+}}}}}
 
 #endif //PROCESS_HANDLES_HPP

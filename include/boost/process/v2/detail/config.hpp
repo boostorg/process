@@ -79,7 +79,18 @@
 #include <boost/filesystem/operations.hpp>
 #endif
 
+
+#if !defined(BOOST_PROCESS_VERSION)
+#define  BOOST_PROCESS_VERSION 1
+#endif
+
+
+#if BOOST_PROCESS_VERSION == 2
 #define BOOST_PROCESS_V2_BEGIN_NAMESPACE namespace boost { namespace process { namespace v2 {
+#else
+#define BOOST_PROCESS_V2_BEGIN_NAMESPACE namespace boost { namespace process { inline namespace v2 {
+#endif
+
 #define BOOST_PROCESS_V2_END_NAMESPACE  } } }
 #define BOOST_PROCESS_V2_NAMESPACE boost::process::v2
 
@@ -176,5 +187,12 @@ BOOST_PROCESS_V2_END_NAMESPACE
 #else
 #define BOOST_PROCESS_V2_HAS_PROCESS_HANDLE 1
 #endif
+
+#if BOOST_PROCESS_VERSION == 2
+#define BOOST_PROCESS_V2_INLINE inline
+#else
+#define BOOST_PROCESS_V2_INLINE
+#endif
+
 
 #endif //BOOST_PROCESS_V2_DETAIL_CONFIG_HPP

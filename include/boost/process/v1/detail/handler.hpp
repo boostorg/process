@@ -16,7 +16,7 @@
 #endif
 
 
-namespace boost { namespace process { namespace detail {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail {
 
 //extended handler base.
 typedef api::handler_base_ext handler;
@@ -68,8 +68,6 @@ private:
 
 
 
-}}
-
-
+}}}
 
 #endif /* BOOST_PROCESS_DETAIL_HANDLER_HPP_ */

@@ -14,7 +14,7 @@
 #include <boost/process/v1/detail/posix/handler.hpp>
 #include <array>
 
-namespace boost { namespace process { namespace detail { namespace posix {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace posix {
 
 template<int p1, int p2>
 struct close_out : handler_base_ext
@@ -30,7 +30,7 @@ template<typename Executor>
 void close_out<1,-1>::on_exec_setup(Executor &e) const
 {
     if (::close(STDOUT_FILENO) == -1)
-        e.set_error(::boost::process::detail::get_last_error(), "close() failed");
+        e.set_error(::boost::process::v1::detail::get_last_error(), "close() failed");
 
 }
 
@@ -39,7 +39,7 @@ template<typename Executor>
 void close_out<2,-1>::on_exec_setup(Executor &e) const
 {
     if (::close(STDERR_FILENO) == -1)
-        e.set_error(::boost::process::detail::get_last_error(), "close() failed");
+        e.set_error(::boost::process::v1::detail::get_last_error(), "close() failed");
 }
 
 template<>
@@ -47,12 +47,12 @@ template<typename Executor>
 void close_out<1,2>::on_exec_setup(Executor &e) const
 {
     if (::close(STDOUT_FILENO) == -1)
-        e.set_error(::boost::process::detail::get_last_error(), "close() failed");
+        e.set_error(::boost::process::v1::detail::get_last_error(), "close() failed");
 
     if (::close(STDERR_FILENO) == -1)
-        e.set_error(::boost::process::detail::get_last_error(), "close() failed");
+        e.set_error(::boost::process::v1::detail::get_last_error(), "close() failed");
 }
 
-}}}}
+}}}}}
 
 #endif

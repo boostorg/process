@@ -42,7 +42,7 @@ typedef boost::asio::posix::stream_descriptor pipe_end;
 #endif
 
 
-namespace fs = boost::process::filesystem;
+namespace fs = boost::process::v1::filesystem;
 namespace bp = boost::process;
 
 BOOST_AUTO_TEST_CASE(sync_io, *boost::unit_test::timeout(10))
@@ -178,7 +178,7 @@ BOOST_AUTO_TEST_CASE(file_io, *boost::unit_test::timeout(2))
     bp::ipstream is;
 
     {
-        boost::process::filesystem::ofstream fs(pth);
+        boost::process::v1::filesystem::ofstream fs(pth);
         fs << 321 << std::endl;
         fs << 1.2345 << std::endl;
         fs << "some_string" << std::endl;
@@ -206,7 +206,7 @@ BOOST_AUTO_TEST_CASE(file_io, *boost::unit_test::timeout(2))
     BOOST_CHECK_EQUAL(s, "abcsome_string");
 
     c.wait();
-    boost::process::filesystem::remove(pth);
+    boost::process::v1::filesystem::remove(pth);
 }
 
 BOOST_AUTO_TEST_CASE(file_io_C, *boost::unit_test::timeout(2))
@@ -221,7 +221,7 @@ BOOST_AUTO_TEST_CASE(file_io_C, *boost::unit_test::timeout(2))
     bp::ipstream is;
 
     {
-        boost::process::filesystem::ofstream fs(pth);
+        boost::process::v1::filesystem::ofstream fs(pth);
         fs << 321 << std::endl;
         fs << 1.2345 << std::endl;
         fs << "some_string" << std::endl;
@@ -255,7 +255,7 @@ BOOST_AUTO_TEST_CASE(file_io_C, *boost::unit_test::timeout(2))
     BOOST_CHECK_EQUAL(s, "abcsome_string");
 
     c.wait();
-    boost::process::filesystem::remove(pth);
+    boost::process::v1::filesystem::remove(pth);
 }
 
 BOOST_AUTO_TEST_SUITE_END();

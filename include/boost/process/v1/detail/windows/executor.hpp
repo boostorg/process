@@ -24,7 +24,7 @@
 #include <atomic>
 #include <cstring>
 
-namespace boost { namespace process {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 {
 
 namespace detail { namespace windows {
 
@@ -160,8 +160,8 @@ class executor : public startup_info_impl<Char>
         }
     };
 
-    typedef typename ::boost::process::detail::has_error_handler<Sequence>::type has_error_handler;
-    typedef typename ::boost::process::detail::has_ignore_error <Sequence>::type has_ignore_error;
+    typedef typename ::boost::process::v1::detail::has_error_handler<Sequence>::type has_error_handler;
+    typedef typename ::boost::process::v1::detail::has_ignore_error <Sequence>::type has_ignore_error;
 
     std::error_code _ec{0, std::system_category()};
 
@@ -207,7 +207,7 @@ public:
             boost::fusion::for_each(seq, on_success_fn);
         }
         else
-            set_error(::boost::process::detail::get_last_error(),
+            set_error(::boost::process::v1::detail::get_last_error(),
                     " CreateProcess failed");
 
         if ( _ec)
@@ -254,6 +254,6 @@ executor<Char, Tup> make_executor(Tup & tup)
 }
 
 
-}}}}
+}}}}}
 
 #endif

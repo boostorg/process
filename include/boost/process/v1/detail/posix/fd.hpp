@@ -15,10 +15,10 @@
 #include <boost/process/v1/detail/used_handles.hpp>
 #include <array>
 
-namespace boost { namespace process { namespace detail { namespace posix {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace posix {
 
 
-struct close_fd_ : handler_base_ext, ::boost::process::detail::uses_handles
+struct close_fd_ : handler_base_ext, ::boost::process::v1::detail::uses_handles
 {
     close_fd_(int fd) : fd_(fd) {}
 
@@ -26,7 +26,7 @@ struct close_fd_ : handler_base_ext, ::boost::process::detail::uses_handles
     void on_exec_setup(PosixExecutor& e) const
     {
         if (::close(fd_) == -1)
-            e.set_error(::boost::process::detail::get_last_error(), "close() failed");
+            e.set_error(::boost::process::v1::detail::get_last_error(), "close() failed");
     }
 
     int get_used_handles() {return fd_;}
@@ -37,7 +37,7 @@ private:
 };
 
 template <class Range>
-struct close_fds_ : handler_base_ext, ::boost::process::detail::uses_handles
+struct close_fds_ : handler_base_ext, ::boost::process::v1::detail::uses_handles
 {
 public:
     close_fds_(const Range &fds) : fds_(fds) {}
@@ -48,7 +48,7 @@ public:
         for (auto & fd_ : fds_)
             if (::close(fd_) == -1)
             {
-                 e.set_error(::boost::process::detail::get_last_error(), "close() failed");
+                 e.set_error(::boost::process::v1::detail::get_last_error(), "close() failed");
                  break;
             }
     }
@@ -62,7 +62,7 @@ private:
 
 
 template <class FileDescriptor>
-struct bind_fd_ : handler_base_ext, ::boost::process::detail::uses_handles
+struct bind_fd_ : handler_base_ext, ::boost::process::v1::detail::uses_handles
 {
 public:
     bind_fd_(int id, const FileDescriptor &fd) : id_(id), fd_(fd) {}
@@ -71,7 +71,7 @@ public:
     void on_exec_setup(PosixExecutor& e) const
     {
         if (::dup2(fd_, id_) == -1)
-             e.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
+             e.set_error(::boost::process::v1::detail::get_last_error(), "dup2() failed");
     }
 
     std::array<int, 2> get_used_handles() {return {id_, fd_};}
@@ -97,6 +97,6 @@ struct fd_
 };
 
 
-}}}}
+}}}}}
 
 #endif

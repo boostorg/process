@@ -25,7 +25,7 @@
 #include <future>
 
 
-namespace boost { namespace process { namespace detail { namespace windows {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace windows {
 
 
 template <typename Executor>
@@ -67,12 +67,12 @@ inline void apply_out_handles(Executor &e, void* handle, std::integral_constant<
 }
 
 template<int p1, int p2, typename Buffer>
-struct async_out_buffer : ::boost::process::detail::windows::handler_base_ext,
-                          ::boost::process::detail::windows::require_io_context
+struct async_out_buffer : ::boost::process::v1::detail::windows::handler_base_ext,
+                          ::boost::process::v1::detail::windows::require_io_context
 {
     Buffer & buf;
 
-    std::shared_ptr<boost::process::async_pipe> pipe;
+    std::shared_ptr<boost::process::v1::async_pipe> pipe;
 
 
     async_out_buffer(Buffer & buf) : buf(buf)
@@ -99,7 +99,7 @@ struct async_out_buffer : ::boost::process::detail::windows::handler_base_ext,
     void on_setup(WindowsExecutor &exec)
     {
         if (!pipe)
-            pipe = std::make_shared<boost::process::async_pipe>(get_io_context(exec.seq));
+            pipe = std::make_shared<boost::process::v1::async_pipe>(get_io_context(exec.seq));
         apply_out_handles(exec, std::move(*pipe).sink().native_handle(),
                 std::integral_constant<int, p1>(), std::integral_constant<int, p2>());
     }
@@ -108,11 +108,11 @@ struct async_out_buffer : ::boost::process::detail::windows::handler_base_ext,
 
 
 template<int p1, int p2, typename Type>
-struct async_out_future : ::boost::process::detail::windows::handler_base_ext,
-                          ::boost::process::detail::windows::require_io_context,
-                          ::boost::process::detail::uses_handles
+struct async_out_future : ::boost::process::v1::detail::windows::handler_base_ext,
+                          ::boost::process::v1::detail::windows::require_io_context,
+                          ::boost::process::v1::detail::uses_handles
 {
-    std::shared_ptr<boost::process::async_pipe> pipe;
+    std::shared_ptr<boost::process::v1::async_pipe> pipe;
     std::shared_ptr<std::promise<Type>> promise = std::make_shared<std::promise<Type>>();
     std::shared_ptr<boost::asio::streambuf> buffer = std::make_shared<boost::asio::streambuf>();
 
@@ -173,7 +173,7 @@ struct async_out_future : ::boost::process::detail::windows::handler_base_ext,
     void on_setup(WindowsExecutor &exec)
     {
         if (!pipe)
-            pipe = std::make_shared<boost::process::async_pipe>(get_io_context(exec.seq));
+            pipe = std::make_shared<boost::process::v1::async_pipe>(get_io_context(exec.seq));
 
         apply_out_handles(exec, std::move(*pipe).sink().native_handle(),
                 std::integral_constant<int, p1>(), std::integral_constant<int, p2>());
@@ -181,6 +181,6 @@ struct async_out_future : ::boost::process::detail::windows::handler_base_ext,
 };
 
 
-}}}}
+}}}}}
 
 #endif

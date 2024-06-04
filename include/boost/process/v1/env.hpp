@@ -24,8 +24,8 @@
  *  \xmlonly
 <programlisting>
 namespace boost {
-  namespace process {
-    <emphasis>unspecified</emphasis> <globalname alt="boost::process::env">env</globalname>;
+  namespace process { BOOST_PROCESS_V1_INLINE namespace v1 {
+    <emphasis>unspecified</emphasis> <globalname alt="boost::process::v1::env">env</globalname>;
   }
 }
 </programlisting>
@@ -41,7 +41,7 @@ namespace boost {
 
 namespace boost {
 
-namespace process { namespace detail {
+namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail {
 
 
 template<typename Char>
@@ -116,8 +116,8 @@ struct char_converter<char, env_set<wchar_t>>
 {
     static env_set<char> conv(const env_set<wchar_t> & in)
     {
-        return {::boost::process::detail::convert(in.key),
-                ::boost::process::detail::convert(in.value)};
+        return {::boost::process::v1::detail::convert(in.key),
+                ::boost::process::v1::detail::convert(in.value)};
     }
 };
 
@@ -126,8 +126,8 @@ struct char_converter<wchar_t, env_set<char>>
 {
     static env_set<wchar_t> conv(const env_set<char> & in)
     {
-        return {::boost::process::detail::convert(in.key),
-                ::boost::process::detail::convert(in.value)};
+        return {::boost::process::v1::detail::convert(in.key),
+                ::boost::process::v1::detail::convert(in.value)};
     }
 };
 
@@ -136,8 +136,8 @@ struct char_converter<char, env_append<wchar_t>>
 {
     static env_append<char> conv(const env_append<wchar_t> & in)
     {
-        return {::boost::process::detail::convert(in.key),
-                ::boost::process::detail::convert(in.value)};
+        return {::boost::process::v1::detail::convert(in.key),
+                ::boost::process::v1::detail::convert(in.value)};
     }
 };
 
@@ -146,8 +146,8 @@ struct char_converter<wchar_t, env_append<char>>
 {
     static env_append<wchar_t> conv(const env_append<char> & in)
     {
-        return {::boost::process::detail::convert(in.key),
-                ::boost::process::detail::convert(in.value)};
+        return {::boost::process::v1::detail::convert(in.key),
+                ::boost::process::v1::detail::convert(in.value)};
     }
 };
 
@@ -156,7 +156,7 @@ struct char_converter<char, env_reset<wchar_t>>
 {
     static env_reset<char> conv(const env_reset<wchar_t> & in)
     {
-        return {::boost::process::detail::convert(in.key)};
+        return {::boost::process::v1::detail::convert(in.key)};
     }
 };
 
@@ -165,7 +165,7 @@ struct char_converter<wchar_t, env_reset<char>>
 {
     static env_reset<wchar_t> conv(const env_reset<char> & in)
     {
-        return {::boost::process::detail::convert(in.key)};
+        return {::boost::process::v1::detail::convert(in.key)};
     }
 };
 
@@ -456,7 +456,7 @@ The following lists contain possible value types, with `char_type` being either 
 \subsubsection env_init Initialize the environment
 
 The whole environment can be initialized from an object of type
-\xmlonly <classname>boost::process::environment</classname> \endxmlonly
+\xmlonly <classname>boost::process::v1::environment</classname> \endxmlonly
 
 \code{.cpp}
 env=env;
@@ -472,7 +472,7 @@ env(env);
 
 \paragraph env_init_var_value value
 
- - `boost::process::basic_environment<char_type>`
+ - `boost::process::v1::basic_environment<char_type>`
 
 \subsection env_example Example
 
@@ -481,7 +481,7 @@ spawn("b2", env["PATH"]+="F:/boost", env["SOME_VAR"]=boost::none, env["NEW_VAR"]
 \endcode
 
 If the overload style should be done by passing an instance of
-\xmlonly <classname>boost::process::environment</classname> \endxmlonly
+\xmlonly <classname>boost::process::v1::environment</classname> \endxmlonly
 the above example would look like this.
 
 \code{.cpp}
@@ -495,9 +495,9 @@ spawn("b2", e);
 \warning Passing an empty environment will cause undefined behaviour.
 
  */
-constexpr boost::process::detail::env_ env{};
+constexpr boost::process::v1::detail::env_ env{};
 
 
-}}
+}}}
 
 #endif /* INCLUDE_BOOST_PROCESS_DETAIL_ENV_HPP_ */

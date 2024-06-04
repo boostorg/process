@@ -7,6 +7,7 @@
 #ifndef BOOST_PROCESS_DETAIL_WINDOWS_LOCALE_HPP_
 #define BOOST_PROCESS_DETAIL_WINDOWS_LOCALE_HPP_
 
+#include <boost/process/v1/detail/config.hpp>
 #include <locale>
 #include <boost/core/ignore_unused.hpp>
 #include <boost/winapi/file_management.hpp>
@@ -15,6 +16,8 @@
 namespace boost
 {
 namespace process
+{
+BOOST_PROCESS_V1_INLINE namespace v1
 {
 namespace detail
 {
@@ -105,7 +108,7 @@ class windows_file_codecvt
 }
 }
 }
-
+}
 
 
 #endif /* BOOST_PROCESS_LOCALE_HPP_ */

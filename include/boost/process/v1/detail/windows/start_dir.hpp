@@ -13,7 +13,7 @@
 #include <string>
 #include <boost/process/v1/detail/windows/handler.hpp>
 
-namespace boost { namespace process { namespace detail { namespace windows {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace windows {
 
 template<typename Char>
 struct start_dir_init : handler_base_ext
@@ -31,6 +31,6 @@ private:
     std::basic_string<Char> s_;
 };
 
-}}}}
+}}}}}
 
 #endif

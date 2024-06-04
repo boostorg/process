@@ -15,7 +15,7 @@
 #include <unistd.h>
 #include <boost/core/ignore_unused.hpp>
 
-namespace boost { namespace process { namespace detail { namespace posix {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace posix {
 
 template<typename Char>
 struct start_dir_init : handler_base_ext
@@ -34,6 +34,6 @@ private:
     string_type s_;
 };
 
-}}}}
+}}}}}
 
 #endif

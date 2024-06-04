@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(extensions)
 }
 
 
-namespace ex = boost::process::extend;
+namespace ex = boost::process::v1::extend;
 
 
 std::string st = "not called";

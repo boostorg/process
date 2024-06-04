@@ -172,7 +172,7 @@ int main(int argc, char *argv[])
     }
     else if (vm["pwd"].as<bool>())
     {
-        std::cout << boost::process::filesystem::current_path().string() << std::endl;
+        std::cout << boost::process::v1::filesystem::current_path().string() << std::endl;
     }
     else if (vm.count("query"))
     {

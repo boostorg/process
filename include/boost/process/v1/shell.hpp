@@ -28,8 +28,8 @@
 \xmlonly
 <programlisting>
 namespace boost {
-  namespace process {
-    <emphasis>unspecified</emphasis> <globalname alt="boost::process::shell">shell</globalname>;
+  namespace process { BOOST_PROCESS_V1_INLINE namespace v1 {
+    <emphasis>unspecified</emphasis> <globalname alt="boost::process::v1::shell">shell</globalname>;
   }
 }
 </programlisting>
@@ -37,25 +37,25 @@ namespace boost {
 
  */
 
-namespace boost { namespace process { namespace detail {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail {
 
 
 struct shell_
 {
     constexpr shell_() {}
 
-    boost::process::filesystem::path operator()() const
+    boost::process::v1::filesystem::path operator()() const
     {
-        return boost::process::detail::api::shell_path();
+        return boost::process::v1::detail::api::shell_path();
     }
-    boost::process::filesystem::path operator()(std::error_code & ec) const noexcept
+    boost::process::v1::filesystem::path operator()(std::error_code & ec) const noexcept
     {
-        return boost::process::detail::api::shell_path(ec);
+        return boost::process::v1::detail::api::shell_path(ec);
     }
 };
 
 template<>
-struct is_wchar_t<shell_> : is_wchar_t<boost::process::filesystem::path>
+struct is_wchar_t<shell_> : is_wchar_t<boost::process::v1::filesystem::path>
 {
 };
 
@@ -83,10 +83,8 @@ you will get an error via the return code.
 \attention Executing shell commands that incorporate unsanitized input from an untrusted source makes a program vulnerable to shell injection, a serious security flaw which can result in arbitrary command execution. For this reason, the use of `shell` is strongly discouraged in cases where the command string is constructed from external input:
 
 */
-constexpr ::boost::process::detail::shell_ shell;
+constexpr ::boost::process::v1::detail::shell_ shell;
 
-}}
-
-
+}}}
 
 #endif

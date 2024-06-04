@@ -25,20 +25,20 @@
 
 /** \file boost/process/cmd.hpp
  *
- *    This header provides the \xmlonly <globalname alt="boost::process::cmd">cmd</globalname>\endxmlonly property.
+ *    This header provides the \xmlonly <globalname alt="boost::process::v1::cmd">cmd</globalname>\endxmlonly property.
  *
 \xmlonly
 <programlisting>
 namespace boost {
-  namespace process {
-    <emphasis>unspecified</emphasis> <globalname alt="boost::process::cmd">cmd</globalname>;
+  namespace process { BOOST_PROCESS_V1_INLINE namespace v1 {
+    <emphasis>unspecified</emphasis> <globalname alt="boost::process::v1::cmd">cmd</globalname>;
   }
 }
 </programlisting>
 \endxmlonly
 */
 
-namespace boost { namespace process { namespace detail {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail {
 
 
 struct cmd_
@@ -47,8 +47,7 @@ struct cmd_
 
     template<typename Char>
     inline api::cmd_setter_<Char> operator()(const Char *s) const
-    {
-        return api::cmd_setter_<Char>(s);
+    {        return api::cmd_setter_<Char>(s);
     }
     template<typename Char>
     inline api::cmd_setter_<Char> operator= (const Char *s) const
@@ -77,7 +76,7 @@ struct char_converter<char, api::cmd_setter_<wchar_t>>
 {
     static api::cmd_setter_<char> conv(const api::cmd_setter_<wchar_t> & in)
     {
-        return { ::boost::process::detail::convert(in.str()) };
+        return { ::boost::process::v1::detail::convert(in.str()) };
     }
 };
 
@@ -86,7 +85,7 @@ struct char_converter<wchar_t, api::cmd_setter_<char>>
 {
     static api::cmd_setter_<wchar_t> conv(const api::cmd_setter_<char> & in)
     {
-        return { ::boost::process::detail::convert(in.str()) };
+        return { ::boost::process::v1::detail::convert(in.str()) };
     }
 };
 
@@ -115,8 +114,8 @@ The property can only be used for assignments.
 
 
  */
-constexpr static ::boost::process::detail::cmd_ cmd;
+constexpr static ::boost::process::v1::detail::cmd_ cmd;
 
-}}
+}}}
 
 #endif

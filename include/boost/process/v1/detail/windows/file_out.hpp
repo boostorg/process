@@ -17,11 +17,11 @@
 #include <boost/process/v1/detail/used_handles.hpp>
 #include <boost/process/v1/detail/windows/file_descriptor.hpp>
 
-namespace boost { namespace process { namespace detail { namespace windows {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace windows {
 
 template<int p1, int p2>
-struct file_out : public ::boost::process::detail::handler_base,
-                         ::boost::process::detail::uses_handles
+struct file_out : public ::boost::process::v1::detail::handler_base,
+                         ::boost::process::v1::detail::uses_handles
 {
     file_descriptor file;
     ::boost::winapi::HANDLE_ handle = file.handle();
@@ -77,6 +77,6 @@ void file_out<1,2>::on_setup(WindowsExecutor &e) const
     e.inherit_handles = true;
 }
 
-}}}}
+}}}}}
 
 #endif

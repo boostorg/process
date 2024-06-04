@@ -17,12 +17,12 @@
 #include <sys/wait.h>
 
 
-namespace boost { namespace process { namespace detail { namespace posix {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace posix {
 
 inline void terminate(const child_handle &p, std::error_code &ec) noexcept
 {
     if (::kill(p.pid, SIGKILL) == -1)
-        ec = boost::process::detail::get_last_error();
+        ec = boost::process::v1::detail::get_last_error();
     else
         ec.clear();
 
@@ -34,9 +34,9 @@ inline void terminate(const child_handle &p)
 {
     std::error_code ec;
     terminate(p, ec);
-    boost::process::detail::throw_error(ec, "kill(2) failed");
+    boost::process::v1::detail::throw_error(ec, "kill(2) failed");
 }
 
-}}}}
+}}}}}
 
 #endif

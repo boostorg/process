@@ -24,8 +24,8 @@ struct test_dir
 {
     std::string s_;
     test_dir(const std::string &s) : s_(s)
-    { BOOST_REQUIRE_NO_THROW(boost::process::filesystem::create_directory(s)); }
-    ~test_dir() { boost::process::filesystem::remove(s_); }
+    { BOOST_REQUIRE_NO_THROW(boost::process::v1::filesystem::create_directory(s)); }
+    ~test_dir() { boost::process::v1::filesystem::remove(s_); }
 };
 
 BOOST_AUTO_TEST_CASE(start_in_dir)
@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(start_in_dir)
 
     std::error_code ec;
     bp::child c(
-        bp::exe=boost::process::filesystem::absolute(master_test_suite().argv[1]).string(),
+        bp::exe=boost::process::v1::filesystem::absolute(master_test_suite().argv[1]).string(),
         bp::args +={"test", "--pwd"},
         bp::start_dir = dir.s_,
         bp::std_out>is,
@@ -49,8 +49,8 @@ BOOST_AUTO_TEST_CASE(start_in_dir)
 
     std::string s;
     std::getline(is, s);
-    auto path_read = boost::process::filesystem::absolute(boost::process::filesystem::path(s)).string();
-    auto path_set  = boost::process::filesystem::absolute(dir.s_).string();
+    auto path_read = boost::process::v1::filesystem::absolute(boost::process::v1::filesystem::path(s)).string();
+    auto path_set  = boost::process::v1::filesystem::absolute(dir.s_).string();
 
     if (path_read.size() > path_set.size())
         path_read.resize(path_set.size());

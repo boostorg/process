@@ -15,7 +15,7 @@ namespace boost { namespace asio {
 class io_context;
 }}
 
-namespace boost { namespace process { namespace detail {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail {
 
 struct async_tag {};
 
@@ -27,8 +27,6 @@ template<> struct initializer_tag<::boost::asio::io_context> { typedef async_tag
 
 
 
-}}}
-
-
+}}}}
 
 #endif /* BOOST_PROCESS_DETAIL_HANDLER_HPP_ */

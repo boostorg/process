@@ -7,10 +7,11 @@
 #ifndef BOOST_PROCESS_WINDOWS_ASYNC_HANDLER_HPP_
 #define BOOST_PROCESS_WINDOWS_ASYNC_HANDLER_HPP_
 
+#include <boost/process/v1/detail/config.hpp>
 #include <boost/process/v1/detail/windows/handler.hpp>
 #include <type_traits>
 
-namespace boost { namespace process { namespace detail { namespace windows {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace windows {
 
 struct require_io_context {};
 
@@ -35,6 +36,6 @@ template<typename T>
 struct does_require_io_context<const T&> : std::is_base_of<require_io_context, T> {};
 
 
-}}}}
+}}}}}
 
 #endif /* BOOST_PROCESS_WINDOWS_ASYNC_HANDLER_HPP_ */

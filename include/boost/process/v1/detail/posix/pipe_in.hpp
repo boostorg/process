@@ -16,9 +16,9 @@
 #include <boost/process/v1/detail/used_handles.hpp>
 #include <array>
 
-namespace boost { namespace process { namespace detail { namespace posix {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace posix {
 
-struct pipe_in : handler_base_ext, ::boost::process::detail::uses_handles
+struct pipe_in : handler_base_ext, ::boost::process::v1::detail::uses_handles
 {
     int source;
     int sink; //opposite end
@@ -53,7 +53,7 @@ struct pipe_in : handler_base_ext, ::boost::process::detail::uses_handles
     void on_exec_setup(Executor &e) const
     {
         if (::dup2(source, STDIN_FILENO) == -1)
-             e.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
+             e.set_error(::boost::process::v1::detail::get_last_error(), "dup2() failed");
         if (source != STDIN_FILENO)
             ::close(source);
 
@@ -93,6 +93,6 @@ struct async_pipe_in : public pipe_in
     }
 };
 
-}}}}
+}}}}}
 
 #endif

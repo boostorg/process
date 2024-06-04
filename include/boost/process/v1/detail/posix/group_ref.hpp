@@ -12,7 +12,7 @@
 #include <unistd.h>
 
 
-namespace boost { namespace process {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 {
 
 namespace detail { namespace posix {
 
@@ -46,7 +46,7 @@ struct group_ref : handler_base_ext
 
 };
 
-}}}}
+}}}}}
 
 
 #endif /* BOOST_PROCESS_DETAIL_POSIX_GROUP_REF_HPP_ */

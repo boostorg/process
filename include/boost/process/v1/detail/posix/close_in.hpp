@@ -14,21 +14,21 @@
 #include <boost/process/v1/detail/posix/handler.hpp>
 #include <boost/process/v1/detail/used_handles.hpp>
 
-namespace boost { namespace process { namespace detail { namespace posix {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace posix {
 
-struct close_in : handler_base_ext, ::boost::process::detail::uses_handles
+struct close_in : handler_base_ext, ::boost::process::v1::detail::uses_handles
 {
     template <class Executor>
     void on_exec_setup(Executor &e) const
     {
         if (::close(STDIN_FILENO) == -1)
-            e.set_error(::boost::process::detail::get_last_error(), "close() failed");
+            e.set_error(::boost::process::v1::detail::get_last_error(), "close() failed");
     }
 
     int get_used_handles() {return STDIN_FILENO;}
 
 };
 
-}}}}
+}}}}}
 
 #endif

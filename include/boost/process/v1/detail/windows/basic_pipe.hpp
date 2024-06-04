@@ -19,7 +19,7 @@
 #include <string>
 
 
-namespace boost { namespace process { namespace detail { namespace windows {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace windows {
 
 template<class CharT, class Traits = std::char_traits<CharT>>
 class basic_pipe
@@ -72,7 +72,7 @@ public:
                 _sink, data, count * sizeof(char_type), &write_len, nullptr
                 ))
         {
-            auto ec = ::boost::process::detail::get_last_error();
+            auto ec = ::boost::process::v1::detail::get_last_error();
             if ((ec.value() == ::boost::winapi::ERROR_BROKEN_PIPE_) ||
                 (ec.value() == ::boost::winapi::ERROR_NO_DATA_))
                 return 0;
@@ -88,7 +88,7 @@ public:
                 _source, data, count * sizeof(char_type), &read_len, nullptr
                 ))
         {
-            auto ec = ::boost::process::detail::get_last_error();
+            auto ec = ::boost::process::v1::detail::get_last_error();
             if ((ec.value() == ::boost::winapi::ERROR_BROKEN_PIPE_) ||
                 (ec.value() == ::boost::winapi::ERROR_NO_DATA_))
                 return 0;
@@ -144,7 +144,7 @@ basic_pipe<Char, Traits>::basic_pipe(const std::string & name)
     //static constexpr int FILE_ATTRIBUTE_NORMAL_ = 0x00000080; //temporary
 
 #if BOOST_NO_ANSI_APIS
-    std::wstring name_ = boost::process::detail::convert(name);
+    std::wstring name_ = boost::process::v1::detail::convert(name);
 #else
     auto &name_ = name;
 #endif
@@ -155,7 +155,7 @@ basic_pipe<Char, Traits>::basic_pipe(const std::string & name)
             0, ::boost::winapi::PIPE_UNLIMITED_INSTANCES_, 8192, 8192, 0, nullptr);
 
     if (source == boost::winapi::INVALID_HANDLE_VALUE_)
-        ::boost::process::detail::throw_last_error("create_named_pipe() failed");
+        ::boost::process::v1::detail::throw_last_error("create_named_pipe() failed");
 
     ::boost::winapi::HANDLE_ sink = boost::winapi::create_file(
             name_.c_str(),
@@ -165,7 +165,7 @@ basic_pipe<Char, Traits>::basic_pipe(const std::string & name)
             nullptr);
 
     if (sink == ::boost::winapi::INVALID_HANDLE_VALUE_)
-        ::boost::process::detail::throw_last_error("create_file() failed");
+        ::boost::process::v1::detail::throw_last_error("create_file() failed");
 
     _source = source;
     _sink   = sink;
@@ -225,6 +225,6 @@ inline bool operator!=(const basic_pipe<Char, Traits> & lhs, const basic_pipe<Ch
            !compare_handles(lhs.native_sink(),   rhs.native_sink());
 }
 
-}}}}
+}}}}}
 
 #endif

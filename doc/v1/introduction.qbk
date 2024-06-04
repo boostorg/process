@@ -10,10 +10,10 @@ Boost.Process is a library to manage system processes. It can be used to:
 
 Here's a simple example of how to start a program with Boost.Process:
 
-[def ipstream  [classref boost::process::ipstream ipstream]]
-[def system [funcref boost::process::system system]]
-[def std_out [globalref boost::process::std_out std_out]]
-[def child [globalref boost::process::child child]]
+[def ipstream  [classref boost::process::v1::ipstream ipstream]]
+[def system [funcref boost::process::v1::system system]]
+[def std_out [globalref boost::process::v1::std_out std_out]]
+[def child [globalref boost::process::v1::child child]]
 [def boost/process.hpp [headerref boost/process.hpp boost/process.hpp]]
 [def std::string [@http://en.cppreference.com/w/cpp/string/basic_string std::string]]
 [def std::getline [@http://en.cppreference.com/w/cpp/string/basic_string/getline std::getline]]

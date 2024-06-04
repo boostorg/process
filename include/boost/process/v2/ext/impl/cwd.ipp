@@ -124,7 +124,7 @@ filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code
 
 #elif defined(__FreeBSD__)
 
-filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code & ec) 
+filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
     filesystem::path path;
     struct kinfo_file kif;
@@ -147,7 +147,7 @@ filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code
 
 #elif defined(__DragonFly__)
 
-filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code & ec) 
+filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
     /*
     filesystem::path path;

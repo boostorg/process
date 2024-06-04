@@ -14,14 +14,14 @@
 #include <system_error>
 #include <functional>
 
-namespace boost { namespace process { namespace detail {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail {
 
 template<typename Tuple>
 inline asio::io_context& get_io_context(const Tuple & tup);
 
 namespace posix {
 
-struct on_exit_ : boost::process::detail::posix::async_handler
+struct on_exit_ : boost::process::v1::detail::posix::async_handler
 {
     std::function<void(int, const std::error_code&)> handler;
     on_exit_(const std::function<void(int, const std::error_code&)> & handler) : handler(handler)
@@ -31,7 +31,7 @@ struct on_exit_ : boost::process::detail::posix::async_handler
     template<typename Executor>
     std::function<void(int, const std::error_code&)> on_exit_handler(Executor& exec)
     {
-        auto v = boost::asio::prefer(boost::process::detail::get_io_context(exec.seq).get_executor(),
+        auto v = boost::asio::prefer(boost::process::v1::detail::get_io_context(exec.seq).get_executor(),
                                      boost::asio::execution::outstanding_work.tracked);
         auto handler_ = this->handler;
         return
@@ -44,5 +44,5 @@ struct on_exit_ : boost::process::detail::posix::async_handler
 };
 
 
-}}}}
+}}}}}
 #endif /* BOOST_PROCESS_POSIX_ON_EXIT_HPP_ */

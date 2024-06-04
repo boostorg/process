@@ -17,9 +17,9 @@
 #include <boost/process/v1/detail/used_handles.hpp>
 #include <boost/process/v1/detail/windows/file_descriptor.hpp>
 
-namespace boost { namespace process { namespace detail { namespace windows {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace windows {
 
-struct null_in : public ::boost::process::detail::handler_base, ::boost::process::detail::uses_handles
+struct null_in : public ::boost::process::v1::detail::handler_base, ::boost::process::v1::detail::uses_handles
 {
     file_descriptor source{"NUL", file_descriptor::read};
 
@@ -40,6 +40,6 @@ public:
     }
 };
 
-}}}}
+}}}}}
 
 #endif
