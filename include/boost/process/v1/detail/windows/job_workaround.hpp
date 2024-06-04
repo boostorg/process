@@ -6,6 +6,7 @@
 #ifndef BOOST_PROCESS_DETAIL_WINDOWS_JOB_WORKAROUND_HPP_
 #define BOOST_PROCESS_DETAIL_WINDOWS_JOB_WORKAROUND_HPP_
 
+#include <boost/process/v1/detail/config.hpp>
 #include <boost/winapi/config.hpp>
 #include <boost/winapi/basic_types.hpp>
 #include <boost/winapi/dll.hpp>
@@ -33,7 +34,7 @@ BOOST_SYMBOL_IMPORT ::boost::winapi::BOOL_ BOOST_WINAPI_WINAPI_CC GetQueuedCompl
 
 }
 #endif
-namespace boost { namespace process { namespace detail { namespace windows { namespace workaround {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace windows { namespace workaround {
 
 extern "C"
 {
@@ -256,6 +257,6 @@ inline ::boost::winapi::BOOL_ set_information_job_object(
 
 constexpr static ::boost::winapi::DWORD_ JOB_OBJECT_LIMIT_BREAKAWAY_OK_ = 0x00000800;
 
-}}}}}
+}}}}}}
 
 #endif /* BOOST_PROCESS_DETAIL_WINDOWS_JOB_WORKAROUND_HPP_ */

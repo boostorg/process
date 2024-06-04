@@ -6,11 +6,10 @@
 #ifndef BOOST_PROCESS_DETAIL_TRAITS_ENV_HPP_
 #define BOOST_PROCESS_DETAIL_TRAITS_ENV_HPP_
 
-
+#include <boost/process/v1/detail/config.hpp>
 #include <boost/process/v1/detail/traits/decl.hpp>
 
-
-namespace boost { namespace process {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 {
 
 template<typename Char>
 class basic_environment;
@@ -22,9 +21,6 @@ namespace detail {
 
 template<typename Char>
 struct env_tag {};
-
-
-
 
 template<typename Char> struct env_set;
 template<typename Char> struct env_append;
@@ -39,8 +35,8 @@ template<typename Char> struct initializer_tag<env_append<Char>> { typedef env_t
 template<typename Char> struct initializer_tag<env_reset<Char>> { typedef env_tag<Char> type;};
 template<typename Char> struct initializer_tag<env_init <Char>> { typedef env_tag<Char> type;};
 
-template<typename Char>  struct initializer_tag<::boost::process::basic_environment<Char>>           { typedef env_tag<Char> type; };
-template<typename Char>  struct initializer_tag<::boost::process::basic_native_environment<Char>> { typedef env_tag<Char> type; };
+template<typename Char>  struct initializer_tag<::boost::process::v1::basic_environment<Char>>        { typedef env_tag<Char> type; };
+template<typename Char>  struct initializer_tag<::boost::process::v1::basic_native_environment<Char>> { typedef env_tag<Char> type; };
 
 template<> struct initializer_builder<env_tag<char>>;
 template<> struct initializer_builder<env_tag<wchar_t>>;
@@ -48,6 +44,5 @@ template<> struct initializer_builder<env_tag<wchar_t>>;
 }
 
 
-}}
-
+}}}
 #endif /* INCLUDE_BOOST_PROCESS_DETAIL_ENV_HPP_ */

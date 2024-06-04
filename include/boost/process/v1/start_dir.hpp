@@ -32,8 +32,8 @@ the process shall be started in.
 \xmlonly
 <programlisting>
 namespace boost {
-  namespace process {
-    <emphasis>unspecified</emphasis> <globalname alt="boost::process::start_dir">start_dir</globalname>;
+  namespace process { BOOST_PROCESS_V1_INLINE namespace v1 {
+    <emphasis>unspecified</emphasis> <globalname alt="boost::process::v1::start_dir">start_dir</globalname>;
   }
 }
 </programlisting>
@@ -41,7 +41,7 @@ namespace boost {
 
  */
 
-namespace boost { namespace process { namespace detail {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail {
 
 struct start_dir_
 {
@@ -53,8 +53,8 @@ struct start_dir_
     api::start_dir_init<Char> operator()(std::basic_string<Char> && s) const {return {std::move(s)}; }
     template<typename Char>
     api::start_dir_init<Char> operator()(const Char* s)                const {return {s}; }
-    api::start_dir_init<typename boost::process::filesystem::path::value_type>
-                              operator()(const boost::process::filesystem::path & st) const {return {st.native()}; }
+    api::start_dir_init<typename boost::process::v1::filesystem::path::value_type>
+                              operator()(const boost::process::v1::filesystem::path & st) const {return {st.native()}; }
 
     template<typename Char>
     api::start_dir_init<Char> operator= (const std::basic_string<Char> & st) const {return {st}; }
@@ -62,8 +62,8 @@ struct start_dir_
     api::start_dir_init<Char> operator= (std::basic_string<Char> && s) const {return {std::move(s)}; }
     template<typename Char>
     api::start_dir_init<Char> operator= (const Char* s)                const {return {s}; }
-    api::start_dir_init<typename boost::process::filesystem::path::value_type>
-                              operator= (const boost::process::filesystem::path & st) const {return {st.native()}; }
+    api::start_dir_init<typename boost::process::v1::filesystem::path::value_type>
+                              operator= (const boost::process::v1::filesystem::path & st) const {return {st.native()}; }
 
 };
 
@@ -74,7 +74,7 @@ struct char_converter<char, api::start_dir_init<wchar_t>>
 {
     static api::start_dir_init<char> conv(const api::start_dir_init<wchar_t> & in)
     {
-        return api::start_dir_init<char>{::boost::process::detail::convert(in.str())};
+        return api::start_dir_init<char>{::boost::process::v1::detail::convert(in.str())};
     }
 };
 
@@ -83,7 +83,7 @@ struct char_converter<wchar_t, api::start_dir_init<char>>
 {
     static api::start_dir_init<wchar_t> conv(const api::start_dir_init<char> & in)
     {
-        return api::start_dir_init<wchar_t>{::boost::process::detail::convert(in.str())};
+        return api::start_dir_init<wchar_t>{::boost::process::v1::detail::convert(in.str())};
     }
 };
 
@@ -100,12 +100,12 @@ start_dir=path
 start_dir(path)
 \endcode
 
-It can be used with `std::string`, `std::wstring` and `boost::process::filesystem::path`.
+It can be used with `std::string`, `std::wstring` and `boost::process::v1::filesystem::path`.
 
 
  */
-constexpr ::boost::process::detail::start_dir_ start_dir;
+constexpr ::boost::process::v1::detail::start_dir_ start_dir;
 
-}}
+}}}
 
 #endif

@@ -14,7 +14,7 @@
 #include <boost/process/v1/detail/posix/handler.hpp>
 #include <signal.h>
 
-namespace boost { namespace process { namespace detail { namespace posix {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace posix {
 
 #if defined(__GLIBC__)
     using sighandler_t = ::sighandler_t;
@@ -55,16 +55,16 @@ struct sig_init_ : handler_base_ext
     }
 private:
     bool _reset = false;
-    ::boost::process::detail::posix::sighandler_t _old{0};
-    ::boost::process::detail::posix::sighandler_t _handler{0};
+    ::boost::process::v1::detail::posix::sighandler_t _old{0};
+    ::boost::process::v1::detail::posix::sighandler_t _handler{0};
 };
 
 struct sig_
 {
     constexpr sig_() {}
 
-    sig_init_ operator()(::boost::process::detail::posix::sighandler_t h) const {return h;}
-    sig_init_ operator= (::boost::process::detail::posix::sighandler_t h) const {return h;}
+    sig_init_ operator()(::boost::process::v1::detail::posix::sighandler_t h) const {return h;}
+    sig_init_ operator= (::boost::process::v1::detail::posix::sighandler_t h) const {return h;}
     sig_init_ dfl() const {return SIG_DFL;}
     sig_init_ ign() const {return SIG_IGN;}
 
@@ -74,6 +74,6 @@ struct sig_
 
 
 
-}}}}
+}}}}}
 
 #endif

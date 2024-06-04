@@ -17,7 +17,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-namespace boost { namespace process { namespace detail { namespace posix {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace posix {
 
 inline void wait(const child_handle &p, int & exit_code, std::error_code &ec) noexcept
 {
@@ -32,7 +32,7 @@ inline void wait(const child_handle &p, int & exit_code, std::error_code &ec) no
            (ret != -1 && !WIFEXITED(status) && !WIFSIGNALED(status)));
 
     if (ret == -1)
-        ec = boost::process::detail::get_last_error();
+        ec = boost::process::v1::detail::get_last_error();
     else
     {
         ec.clear();
@@ -44,7 +44,7 @@ inline void wait(const child_handle &p, int & exit_code) noexcept
 {
     std::error_code ec;
     wait(p, exit_code, ec);
-    boost::process::detail::throw_error(ec, "waitpid(2) failed in wait");
+    boost::process::v1::detail::throw_error(ec, "waitpid(2) failed in wait");
 }
 
 template< class Clock, class Duration >
@@ -131,7 +131,7 @@ inline bool wait_until(
     pid_t timeout_pid = ::fork();
     if (timeout_pid  == -1)
     {
-        ec = boost::process::detail::get_last_error();
+        ec = boost::process::v1::detail::get_last_error();
         return true;
     }
     else if (timeout_pid == 0)
@@ -192,7 +192,7 @@ inline bool wait_until(
 #endif
 
     if (ret == -1)
-        ec = boost::process::detail::get_last_error();
+        ec = boost::process::v1::detail::get_last_error();
     else
     {
         ec.clear();
@@ -210,7 +210,7 @@ inline bool wait_until(
 {
     std::error_code ec;
     bool b = wait_until(p, exit_code, time_out, ec);
-    boost::process::detail::throw_error(ec, "waitpid(2) failed in wait_until");
+    boost::process::v1::detail::throw_error(ec, "waitpid(2) failed in wait_until");
     return b;
 }
 
@@ -232,10 +232,10 @@ inline bool wait_for(
 {
     std::error_code ec;
     bool b = wait_for(p, exit_code, rel_time, ec);
-    boost::process::detail::throw_error(ec, "waitpid(2) failed in wait_for");
+    boost::process::v1::detail::throw_error(ec, "waitpid(2) failed in wait_for");
     return b;
 }
 
-}}}}
+}}}}}
 
 #endif

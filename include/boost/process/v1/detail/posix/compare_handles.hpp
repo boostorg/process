@@ -12,7 +12,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-namespace boost { namespace process { namespace detail { namespace posix {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace posix {
 
 
 inline bool compare_handles(int lhs, int rhs)
@@ -25,8 +25,8 @@ inline bool compare_handles(int lhs, int rhs)
         return true;
 
     struct stat stat1, stat2;
-    if(fstat(lhs, &stat1) < 0) ::boost::process::detail::throw_last_error("fstat() failed");
-    if(fstat(rhs, &stat2) < 0) ::boost::process::detail::throw_last_error("fstat() failed");
+    if(fstat(lhs, &stat1) < 0) ::boost::process::v1::detail::throw_last_error("fstat() failed");
+    if(fstat(rhs, &stat2) < 0) ::boost::process::v1::detail::throw_last_error("fstat() failed");
     
     return (stat1.st_dev == stat2.st_dev) && (stat1.st_ino == stat2.st_ino);   
 }
@@ -35,7 +35,7 @@ inline bool compare_handles(int lhs, int rhs)
 
 
 
-}}}}
+}}}}}
 
 
 

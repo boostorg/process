@@ -14,7 +14,7 @@
 #include <boost/winapi/handles.hpp>
 #include <boost/winapi/handle_info.hpp>
 
-namespace boost { namespace process { namespace detail {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail {
 
 
 template<typename Executor, typename Function>
@@ -50,7 +50,7 @@ inline std::vector<native_handle_type> get_handles(std::error_code & ec)
 
     if (nt_status < 0 || nt_status > 0x7FFFFFFF)
     {
-        ec = ::boost::process::detail::get_last_error();
+        ec = ::boost::process::v1::detail::get_last_error();
         return {};
     }
     else
@@ -72,7 +72,7 @@ inline std::vector<native_handle_type> get_handles()
 
     auto res = get_handles(ec);
     if (ec)
-        boost::process::detail::throw_error(ec, "NtQuerySystemInformation failed");
+        boost::process::v1::detail::throw_error(ec, "NtQuerySystemInformation failed");
 
     return res;
 }
@@ -99,7 +99,7 @@ inline bool is_stream_handle(native_handle_type handle, std::error_code & ec)
 
     if (nt_status < 0 || nt_status > 0x7FFFFFFF)
     {
-        ec = ::boost::process::detail::get_last_error();
+        ec = ::boost::process::v1::detail::get_last_error();
         return false;
     }
     else
@@ -120,7 +120,7 @@ inline bool is_stream_handle(native_handle_type handle)
     std::error_code ec;
     auto res = is_stream_handle(handle, ec);
     if (ec)
-        boost::process::detail::throw_error(ec, "NtQueryObject failed");
+        boost::process::v1::detail::throw_error(ec, "NtQueryObject failed");
 
     return res;
 }
@@ -173,6 +173,6 @@ struct limit_handles_ : handler_base_ext
 };
 
 
-}}}}
+}}}}}
 
 #endif //PROCESS_HANDLES_HPP

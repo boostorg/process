@@ -13,7 +13,9 @@
 #include <initializer_list>
 #include <boost/process/v1/filesystem.hpp>
 #include <boost/process/v1/detail/traits/decl.hpp>
-namespace boost { namespace process { namespace detail {
+
+
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail {
 
 template<typename Char>
 struct cmd_or_exe_tag {};
@@ -53,12 +55,12 @@ template<> struct initializer_tag<std::initializer_list<const wchar_t *>> { type
 
 template<> struct initializer_tag<shell_>
 {
-    typedef cmd_or_exe_tag<typename boost::process::filesystem::path::value_type> type;
+    typedef cmd_or_exe_tag<typename boost::process::v1::filesystem::path::value_type> type;
 };
 
-template<> struct initializer_tag<boost::process::filesystem::path>
+template<> struct initializer_tag<boost::process::v1::filesystem::path>
 {
-    typedef cmd_or_exe_tag<typename boost::process::filesystem::path::value_type> type;
+    typedef cmd_or_exe_tag<typename boost::process::v1::filesystem::path::value_type> type;
 };
 
 template <typename Char>
@@ -78,8 +80,6 @@ template<>
 struct initializer_builder<cmd_or_exe_tag<wchar_t>>;
 
 
-}}}
-
-
+}}}}
 
 #endif /* BOOST_PROCESS_DETAIL_STRING_TRAITS_HPP_ */

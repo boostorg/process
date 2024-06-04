@@ -24,9 +24,9 @@
 #include <boost/process/v1/detail/windows/basic_pipe.hpp>
 #endif
 
-namespace boost { namespace process {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 {
 
-using ::boost::process::detail::api::basic_pipe;
+using ::boost::process::v1::detail::api::basic_pipe;
 
 #if defined(BOOST_PROCESS_DOXYGEN)
 /** Class implementation of a pipe.
@@ -624,8 +624,6 @@ typedef basic_pstream<wchar_t> wpstream;
 
 
 
-}}
-
-
+}}}
 
 #endif

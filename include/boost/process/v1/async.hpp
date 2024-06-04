@@ -17,8 +17,10 @@ into the boost::process namespace for convenience.
 <programlisting>
 namespace boost {
   namespace process {
-    <emphasis>unspecified</emphasis> <ulink url="http://www.boost.org/doc/libs/1_61_0/doc/html/boost_asio/reference/buffer.html">buffer</ulink>;
-    <emphasis>unspecified</emphasis> <globalname alt="boost::process::on_exit">on_exit</globalname>;
+    namespace v1 {
+      <emphasis>unspecified</emphasis> <ulink url="http://www.boost.org/doc/libs/1_61_0/doc/html/boost_asio/reference/buffer.html">buffer</ulink>;
+      <emphasis>unspecified</emphasis> <globalname alt="boost::process::v1::on_exit">on_exit</globalname>;
+    }
   }
 }
 </programlisting>
@@ -51,7 +53,7 @@ namespace boost {
 #include <boost/process/v1/detail/windows/on_exit.hpp>
 #endif
 
-namespace boost { namespace process { namespace detail {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail {
 
 struct async_tag;
 
@@ -122,10 +124,10 @@ chlid c2("ls", ios, on_exit=exit_code);
 same restrictions as that class (do not register a handler for `SIGCHLD` except by using
 `boost::asio::signal_set`).
  */
-constexpr static ::boost::process::detail::on_exit_ on_exit{};
+constexpr static ::boost::process::v1::detail::on_exit_ on_exit{};
 #endif
 
-}}
+}}}
 
 
 

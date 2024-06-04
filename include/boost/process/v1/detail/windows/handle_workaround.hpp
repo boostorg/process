@@ -6,6 +6,8 @@
 #ifndef BOOST_PROCESS_DETAIL_WINDOWS_HANDLE_WORKAROUND_HPP_
 #define BOOST_PROCESS_DETAIL_WINDOWS_HANDLE_WORKAROUND_HPP_
 
+#include <boost/process/v1/detail/config.hpp>
+
 #include <boost/winapi/basic_types.hpp>
 #include <boost/winapi/dll.hpp>
 #include <boost/winapi/access_rights.hpp>
@@ -16,7 +18,7 @@
 #endif
 
 
-namespace boost { namespace process { namespace detail { namespace windows { namespace workaround
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace windows { namespace workaround
 {
 
 
@@ -257,6 +259,6 @@ inline ::boost::winapi::BOOL_ nt_query_object(
 
 #endif
 
-}}}}}
+}}}}}}
 
 #endif /* BOOST_PROCESS_DETAIL_WINDOWS_JOB_WORKAROUND_HPP_ */

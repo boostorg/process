@@ -18,7 +18,7 @@
 #endif
 
 
-namespace boost { namespace process { namespace detail {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail {
 
 
 template<typename T>
@@ -69,8 +69,6 @@ struct valid_argument_list
 
 
 
-}}}
-
-
+}}}}
 
 #endif /* BOOST_PROCESS_DETAIL_HANDLER_HPP_ */

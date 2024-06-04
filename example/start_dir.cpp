@@ -19,9 +19,9 @@ int main()
         bp::start_dir="../foo"
     );
 
-    boost::process::filesystem::path exe = "test.exe";
+    boost::process::v1::filesystem::path exe = "test.exe";
     bp::system(
-        boost::process::filesystem::absolute(exe),
+        boost::process::v1::filesystem::absolute(exe),
         bp::start_dir="../foo"
     );
 }

@@ -13,7 +13,7 @@
 #include <boost/fusion/sequence/intrinsic/has_key.hpp>
 #include <boost/fusion/container/set/convert.hpp>
 
-namespace boost { namespace process { namespace detail { namespace posix {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace posix {
 
 struct use_vfork_ : handler_base_ext
 {
@@ -28,6 +28,6 @@ struct shall_use_vfork
 };
 
 
-}}}}
+}}}}}
 
 #endif /* BOOST_PROCESS_DETAIL_POSIX_USE_VFORK_HPP_ */

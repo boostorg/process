@@ -26,7 +26,7 @@ BOOST_AUTO_TEST_CASE(implicit_args_fs_path)
 {
     using boost::unit_test::framework::master_test_suite;
 
-    boost::process::filesystem::path exe = master_test_suite().argv[1];
+    boost::process::v1::filesystem::path exe = master_test_suite().argv[1];
 
     std::error_code ec;
     bp::child c(
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(explicit_args_fs_path)
 {
     using boost::unit_test::framework::master_test_suite;
 
-    boost::process::filesystem::path exe = master_test_suite().argv[1];
+    boost::process::v1::filesystem::path exe = master_test_suite().argv[1];
 
     std::error_code ec;
     bp::child c(

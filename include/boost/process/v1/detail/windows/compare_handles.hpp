@@ -10,7 +10,7 @@
 #include <boost/winapi/file_management.hpp>
 #include <boost/process/v1/detail/config.hpp>
 
-namespace boost { namespace process { namespace detail { namespace windows {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace windows {
 
 inline bool compare_handles(boost::winapi::HANDLE_ lhs, boost::winapi::HANDLE_ rhs)
 {
@@ -25,16 +25,16 @@ inline bool compare_handles(boost::winapi::HANDLE_ lhs, boost::winapi::HANDLE_ r
     ::boost::winapi::BY_HANDLE_FILE_INFORMATION_ rhs_info{0,{0,0},{0,0},{0,0},0,0,0,0,0,0};
 
     if (!::boost::winapi::GetFileInformationByHandle(lhs, &lhs_info))
-        ::boost::process::detail::throw_last_error("GetFileInformationByHandle");
+        ::boost::process::v1::detail::throw_last_error("GetFileInformationByHandle");
 
     if (!::boost::winapi::GetFileInformationByHandle(rhs, &rhs_info))
-        ::boost::process::detail::throw_last_error("GetFileInformationByHandle");
+        ::boost::process::v1::detail::throw_last_error("GetFileInformationByHandle");
 
     return     (lhs_info.nFileIndexHigh == rhs_info.nFileIndexHigh)
             && (lhs_info.nFileIndexLow  == rhs_info.nFileIndexLow);
 }
 
-}}}}
+}}}}}
 
 
 

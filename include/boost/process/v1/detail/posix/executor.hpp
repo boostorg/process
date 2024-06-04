@@ -28,7 +28,7 @@
 
 #include <boost/core/ignore_unused.hpp>
 
-namespace boost { namespace process { namespace detail { namespace posix {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace posix {
 
 template<typename Executor>
 struct on_setup_t
@@ -204,9 +204,9 @@ class executor
             throw process_error(_ec, _msg);
     }
 
-    typedef typename ::boost::process::detail::has_error_handler<Sequence>::type has_error_handler;
-    typedef typename ::boost::process::detail::has_ignore_error <Sequence>::type has_ignore_error;
-    typedef typename ::boost::process::detail::posix::shall_use_vfork<Sequence>::type shall_use_vfork;
+    typedef typename ::boost::process::v1::detail::has_error_handler<Sequence>::type has_error_handler;
+    typedef typename ::boost::process::v1::detail::has_ignore_error <Sequence>::type has_ignore_error;
+    typedef typename ::boost::process::v1::detail::posix::shall_use_vfork<Sequence>::type shall_use_vfork;
 
     inline child invoke(boost::mpl::true_ , boost::mpl::true_ );
     inline child invoke(boost::mpl::false_, boost::mpl::true_ );
@@ -349,7 +349,7 @@ child executor<Sequence>::invoke(boost::mpl::true_, boost::mpl::false_) //ignore
     this->pid = ::fork();
     if (pid == -1)
     {
-        auto ec = boost::process::detail::get_last_error();
+        auto ec = boost::process::v1::detail::get_last_error();
         boost::fusion::for_each(seq, call_on_fork_error(*this, ec));
         return child();
     }
@@ -357,7 +357,7 @@ child executor<Sequence>::invoke(boost::mpl::true_, boost::mpl::false_) //ignore
     {
         boost::fusion::for_each(seq, call_on_exec_setup(*this));
         ::execve(exe, cmd_line, env);
-        auto ec = boost::process::detail::get_last_error();
+        auto ec = boost::process::v1::detail::get_last_error();
         boost::fusion::for_each(seq, call_on_exec_error(*this, ec));
         _exit(EXIT_FAILURE);
     }
@@ -389,12 +389,12 @@ child executor<Sequence>::invoke(boost::mpl::false_, boost::mpl::false_)
 
         if (::pipe(p.p) == -1)
         {
-            set_error(::boost::process::detail::get_last_error(), "pipe(2) failed");
+            set_error(::boost::process::v1::detail::get_last_error(), "pipe(2) failed");
             return child();
         }
         if (::fcntl(p.p[1], F_SETFD, FD_CLOEXEC) == -1)
         {
-            auto err = ::boost::process::detail::get_last_error();
+            auto err = ::boost::process::v1::detail::get_last_error();
             set_error(err, "fcntl(2) failed");//this might throw, so we need to be sure our pipe is safe.
             return child();
         }
@@ -417,7 +417,7 @@ child executor<Sequence>::invoke(boost::mpl::false_, boost::mpl::false_)
         this->pid = ::fork();
         if (pid == -1)
         {
-            _ec = boost::process::detail::get_last_error();
+            _ec = boost::process::v1::detail::get_last_error();
             _msg = "fork() failed";
             boost::fusion::for_each(seq, call_on_fork_error(*this, _ec));
             boost::fusion::for_each(seq, call_on_error(*this, _ec));
@@ -430,7 +430,7 @@ child executor<Sequence>::invoke(boost::mpl::false_, boost::mpl::false_)
 
             boost::fusion::for_each(seq, call_on_exec_setup(*this));
             ::execve(exe, cmd_line, env);
-            _ec = boost::process::detail::get_last_error();
+            _ec = boost::process::v1::detail::get_last_error();
             _msg = "execve failed";
             boost::fusion::for_each(seq, call_on_exec_error(*this, _ec));
 
@@ -480,7 +480,7 @@ child executor<Sequence>::invoke(boost::mpl::true_, boost::mpl::true_) //ignore 
     this->pid = ::vfork();
     if (pid == -1)
     {
-        auto ec = boost::process::detail::get_last_error();
+        auto ec = boost::process::v1::detail::get_last_error();
         boost::fusion::for_each(seq, call_on_fork_error(*this, ec));
         return child();
     }
@@ -488,7 +488,7 @@ child executor<Sequence>::invoke(boost::mpl::true_, boost::mpl::true_) //ignore 
     {
         boost::fusion::for_each(seq, call_on_exec_setup(*this));
         ::execve(exe, cmd_line, env);
-        auto ec = boost::process::detail::get_last_error();
+        auto ec = boost::process::v1::detail::get_last_error();
         boost::fusion::for_each(seq, call_on_exec_error(*this, ec));
         _exit(EXIT_FAILURE);
     }
@@ -516,7 +516,7 @@ child executor<Sequence>::invoke(boost::mpl::false_, boost::mpl::true_)
     this->pid = ::vfork();
     if (pid == -1)
     {
-        _ec = boost::process::detail::get_last_error();
+        _ec = boost::process::v1::detail::get_last_error();
         _msg = "fork() failed";
         boost::fusion::for_each(seq, call_on_fork_error(*this, _ec));
         boost::fusion::for_each(seq, call_on_error(*this, _ec));
@@ -529,7 +529,7 @@ child executor<Sequence>::invoke(boost::mpl::false_, boost::mpl::true_)
 
         ::execve(exe, cmd_line, env);
 
-        _ec = boost::process::detail::get_last_error();
+        _ec = boost::process::v1::detail::get_last_error();
         _msg = "execve failed";
         boost::fusion::for_each(seq, call_on_exec_error(*this, _ec));
 
@@ -568,6 +568,6 @@ inline executor<Tup> make_executor(Tup & tup)
     return executor<Tup>(tup);
 }
 
-}}}}
+}}}}}
 
 #endif

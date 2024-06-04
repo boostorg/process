@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE(attached, *boost::unit_test::timeout(5))
 #else
     bool still_runs = sub_c.running();
 #endif
-    BOOST_CHECK_MESSAGE(!still_runs, boost::process::detail::get_last_error().message());
+    BOOST_CHECK_MESSAGE(!still_runs, boost::process::v1::detail::get_last_error().message());
 
     if (still_runs)
         sub_c.terminate();

@@ -15,15 +15,15 @@
 #include <boost/process/v1/detail/handler_base.hpp>
 #include <boost/process/v1/environment.hpp>
 
-namespace boost { namespace process { namespace detail { namespace windows {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace windows {
 
 template<typename Char>
-struct env_init : public ::boost::process::detail::handler_base
+struct env_init : public ::boost::process::v1::detail::handler_base
 {
-    boost::process::basic_environment<Char> env;
+    boost::process::v1::basic_environment<Char> env;
 
-    env_init(boost::process::basic_environment<Char> && env) : env(std::move(env)) {};
-    env_init(const boost::process::basic_environment<Char> & env) : env(env) {};
+    env_init(boost::process::v1::basic_environment<Char> && env) : env(std::move(env)) {};
+    env_init(const boost::process::v1::basic_environment<Char> & env) : env(env) {};
 
     constexpr static ::boost::winapi::DWORD_ creation_flag(char)    {return 0u;}
     constexpr static ::boost::winapi::DWORD_ creation_flag(wchar_t)
@@ -47,7 +47,7 @@ struct env_init : public ::boost::process::detail::handler_base
 
 };
 
-}}}}
+}}}}}
 
 
 

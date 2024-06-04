@@ -20,7 +20,7 @@
 #include <sys/wait.h>
 #include <list>
 
-namespace boost { namespace process { namespace detail { namespace posix {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace posix {
 
 class sigchld_service : public boost::asio::detail::service_base<sigchld_service>
 {
@@ -145,7 +145,7 @@ void sigchld_service::_handle_signal(const boost::system::error_code & ec)
 }
 }
 }
-
+}
 
 
 

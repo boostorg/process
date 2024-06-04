@@ -10,14 +10,15 @@
 #ifndef BOOST_PROCESS_WINDOWS_INITIALIZERS_CLOSE_OUT_HPP
 #define BOOST_PROCESS_WINDOWS_INITIALIZERS_CLOSE_OUT_HPP
 
+#include <boost/process/v1/detail/config.hpp>
+#include <boost/process/v1/detail/handler_base.hpp>
 #include <boost/winapi/process.hpp>
 #include <boost/winapi/handles.hpp>
-#include <boost/process/v1/detail/handler_base.hpp>
 
-namespace boost { namespace process { namespace detail { namespace windows {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace windows {
 
 template<int p1, int p2>
-struct close_out : public ::boost::process::detail::handler_base
+struct close_out : public ::boost::process::v1::detail::handler_base
 {
     template <class WindowsExecutor>
     inline void on_setup(WindowsExecutor &e) const;
@@ -48,6 +49,6 @@ void close_out<1,2>::on_setup(WindowsExecutor &e) const
     e.startup_info.dwFlags   |= ::boost::winapi::STARTF_USESTDHANDLES_;
 }
 
-}}}}
+}}}}}
 
 #endif

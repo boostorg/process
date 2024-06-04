@@ -40,12 +40,12 @@
 \xmlonly
 <programlisting>
 namespace boost {
-  namespace process {
-    <emphasis>unspecified</emphasis> <globalname alt="boost::process::ignore_error">ignore_error</globalname>;
-    <emphasis>unspecified</emphasis> <globalname alt="boost::process::throw_on_error">throw_on_error</globalname>;
-    <emphasis>unspecified</emphasis> <globalname alt="boost::process::error">error</globalname>;
-    <emphasis>unspecified</emphasis> <globalname alt="boost::process::error_ref">error_ref</globalname>;
-    <emphasis>unspecified</emphasis> <globalname alt="boost::process::error_code">error_code</globalname>;
+  namespace process { BOOST_PROCESS_V1_INLINE namespace v1 {
+    <emphasis>unspecified</emphasis> <globalname alt="boost::process::v1::ignore_error">ignore_error</globalname>;
+    <emphasis>unspecified</emphasis> <globalname alt="boost::process::v1::throw_on_error">throw_on_error</globalname>;
+    <emphasis>unspecified</emphasis> <globalname alt="boost::process::v1::error">error</globalname>;
+    <emphasis>unspecified</emphasis> <globalname alt="boost::process::v1::error_ref">error_ref</globalname>;
+    <emphasis>unspecified</emphasis> <globalname alt="boost::process::v1::error_code">error_code</globalname>;
   }
 }
 </programlisting>
@@ -53,11 +53,11 @@ namespace boost {
  *     For error there are two aliases: error_ref and error_code
  */
 
-namespace boost { namespace process {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 {
 
 namespace detail {
 
-struct throw_on_error_ : ::boost::process::detail::api::handler_base_ext
+struct throw_on_error_ : ::boost::process::v1::detail::api::handler_base_ext
 {
     constexpr throw_on_error_() = default;
 
@@ -70,12 +70,12 @@ struct throw_on_error_ : ::boost::process::detail::api::handler_base_ext
     const throw_on_error_ &operator()() const {return *this;}
 };
 
-struct ignore_error_ : ::boost::process::detail::api::handler_base_ext
+struct ignore_error_ : ::boost::process::v1::detail::api::handler_base_ext
 {
     constexpr ignore_error_() = default;
 };
 
-struct set_on_error : ::boost::process::detail::api::handler_base_ext
+struct set_on_error : ::boost::process::v1::detail::api::handler_base_ext
 {
     set_on_error(const set_on_error&) = default;
     explicit set_on_error(std::error_code &ec) : ec_(ec) {}
@@ -174,10 +174,10 @@ struct initializer_builder<error_tag>
 }
 /**The ignore_error property will disable any error handling. This can be useful
 on linux, where error handling will require a pipe.*/
-constexpr boost::process::detail::ignore_error_ ignore_error;
+constexpr boost::process::v1::detail::ignore_error_ ignore_error;
 /**The throw_on_error property will enable the exception when launching a process.
 It is unnecessary by default, but may be used, when an additional error_code is provided.*/
-constexpr boost::process::detail::throw_on_error_ throw_on_error;
+constexpr boost::process::v1::detail::throw_on_error_ throw_on_error;
 /**
 The error property will set the executor to handle any errors by setting an
 [std::error_code](http://en.cppreference.com/w/cpp/error/error_code).
@@ -199,13 +199,13 @@ The overload version is achieved by just passing an object of
 
 
  */
-constexpr boost::process::detail::error_ error;
-///Alias for \xmlonly <globalname alt="boost::process::error">error</globalname> \endxmlonly .
-constexpr boost::process::detail::error_ error_ref;
-///Alias for \xmlonly <globalname alt="boost::process::error">error</globalname> \endxmlonly .
-constexpr boost::process::detail::error_ error_code;
+constexpr boost::process::v1::detail::error_ error;
+///Alias for \xmlonly <globalname alt="boost::process::v1::error">error</globalname> \endxmlonly .
+constexpr boost::process::v1::detail::error_ error_ref;
+///Alias for \xmlonly <globalname alt="boost::process::v1::error">error</globalname> \endxmlonly .
+constexpr boost::process::v1::detail::error_ error_code;
 
 
-}}
+}}}
 
 #endif

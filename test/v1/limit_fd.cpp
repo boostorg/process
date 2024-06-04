@@ -32,7 +32,7 @@
 #include <dirent.h>
 #endif
 
-namespace fs = boost::process::filesystem;
+namespace fs = boost::process::v1::filesystem;
 namespace bp = boost::process;
 namespace bt = boost::this_process;
 
@@ -196,6 +196,6 @@ BOOST_AUTO_TEST_CASE(limit_fd, *boost::unit_test::timeout(5))
 
 BOOST_AUTO_TEST_CASE(limit_fd_does_not_break_error_reporting, *boost::unit_test::timeout(5))
 {
-    BOOST_CHECK_THROW(boost::process::system("/does/not/exist"), boost::process::process_error);
-    BOOST_CHECK_THROW(boost::process::system("/does/not/exist", boost::process::limit_handles), boost::process::process_error);
+    BOOST_CHECK_THROW(boost::process::v1::system("/does/not/exist"), boost::process::v1::process_error);
+    BOOST_CHECK_THROW(boost::process::v1::system("/does/not/exist", boost::process::v1::limit_handles), boost::process::v1::process_error);
 }

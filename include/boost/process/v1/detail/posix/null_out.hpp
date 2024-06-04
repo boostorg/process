@@ -17,10 +17,10 @@
 #include <unistd.h>
 #include <array>
 
-namespace boost { namespace process { namespace detail { namespace posix {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace posix {
 
 template<int p1, int p2>
-struct null_out : handler_base_ext, ::boost::process::detail::uses_handles
+struct null_out : handler_base_ext, ::boost::process::v1::detail::uses_handles
 {
     file_descriptor sink{"/dev/null", file_descriptor::write};
     
@@ -41,7 +41,7 @@ template<typename Executor>
 void null_out<1,-1>::on_exec_setup(Executor &e) const
 {
     if (::dup2(sink.handle(), STDOUT_FILENO) == -1)
-         e.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
+         e.set_error(::boost::process::v1::detail::get_last_error(), "dup2() failed");
 }
 
 template<>
@@ -49,7 +49,7 @@ template<typename Executor>
 void null_out<2,-1>::on_exec_setup(Executor &e) const
 {
     if (::dup2(sink.handle(), STDERR_FILENO) == -1)
-         e.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
+         e.set_error(::boost::process::v1::detail::get_last_error(), "dup2() failed");
 }
 
 template<>
@@ -57,12 +57,12 @@ template<typename Executor>
 void null_out<1,2>::on_exec_setup(Executor &e) const
 {
     if (::dup2(sink.handle(), STDOUT_FILENO) == -1)
-         e.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
+         e.set_error(::boost::process::v1::detail::get_last_error(), "dup2() failed");
 
     if (::dup2(sink.handle(), STDERR_FILENO) == -1)
-         e.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
+         e.set_error(::boost::process::v1::detail::get_last_error(), "dup2() failed");
 }
 
-}}}}
+}}}}}
 
 #endif

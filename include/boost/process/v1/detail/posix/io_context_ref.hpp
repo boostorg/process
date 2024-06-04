@@ -26,7 +26,7 @@
 #include <vector>
 #include <sys/wait.h>
 
-namespace boost { namespace process { namespace detail { namespace posix {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace posix {
 
 template<typename Executor>
 struct on_exit_handler_transformer
@@ -100,7 +100,7 @@ struct io_context_ref : handler_base_ext
                 {
                     es->store(val);
                     for (auto & func : funcs)
-                        func(::boost::process::detail::posix::eval_exit_status(val), ec);
+                        func(::boost::process::v1::detail::posix::eval_exit_status(val), ec);
                 };
 
         sigchld_service.async_wait(exec.pid, std::move(wh));
@@ -117,9 +117,9 @@ struct io_context_ref : handler_base_ext
 
 private:
     boost::asio::io_context &ios;
-    boost::process::detail::posix::sigchld_service &sigchld_service = boost::asio::use_service<boost::process::detail::posix::sigchld_service>(ios);
+    boost::process::v1::detail::posix::sigchld_service &sigchld_service = boost::asio::use_service<boost::process::v1::detail::posix::sigchld_service>(ios);
 };
 
-}}}}
+}}}}}
 
 #endif /* BOOST_PROCESS_WINDOWS_IO_CONTEXT_REF_HPP_ */

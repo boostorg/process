@@ -6,8 +6,9 @@
 #ifndef BOOST_PROCESS_DETAIL_WINDOWS_ASIO_FWD_HPP_
 #define BOOST_PROCESS_DETAIL_WINDOWS_ASIO_FWD_HPP_
 
-#include <memory>
+#include <boost/process/v1/detail/config.hpp>
 #include <boost/asio/ts/netfwd.hpp>
+#include <memory>
 
 namespace boost { namespace asio {
 
@@ -37,7 +38,7 @@ typedef basic_object_handle<any_io_executor> object_handle;
 } //windows
 } //asio
 
-namespace process { namespace detail { namespace windows {
+namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace windows {
 
 class async_pipe;
 
@@ -53,8 +54,9 @@ struct async_out_future;
 } // windows
 } // detail
 
-using ::boost::process::detail::windows::async_pipe;
+using ::boost::process::v1::detail::windows::async_pipe;
 
+} // v1
 } // process
 } // boost
 

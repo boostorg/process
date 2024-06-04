@@ -16,6 +16,8 @@ namespace boost
 {
 namespace process
 {
+BOOST_PROCESS_V1_INLINE namespace v1
+{
 namespace detail
 {
 namespace posix
@@ -99,6 +101,6 @@ std::vector<Char*> cmd_setter_<Char>::make_cmd(std::vector<std::basic_string<Cha
     return vec;
 }
 
-}}}}
+}}}}}
 
 #endif

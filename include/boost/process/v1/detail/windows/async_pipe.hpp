@@ -20,7 +20,7 @@
 #include <system_error>
 #include <string>
 
-namespace boost { namespace process { namespace detail { namespace windows {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace windows {
 
 inline std::string make_pipe_name()
 {
@@ -290,7 +290,7 @@ async_pipe::async_pipe(boost::asio::io_context & ios_source,
 
     ::boost::winapi::HANDLE_ source = ::boost::winapi::create_named_pipe(
 #if defined(BOOST_NO_ANSI_APIS)
-            ::boost::process::detail::convert(name).c_str(),
+            ::boost::process::v1::detail::convert(name).c_str(),
 #else
             name.c_str(),
 #endif
@@ -300,13 +300,13 @@ async_pipe::async_pipe(boost::asio::io_context & ios_source,
 
 
     if (source == boost::winapi::INVALID_HANDLE_VALUE_)
-        ::boost::process::detail::throw_last_error("create_named_pipe(" + name + ") failed");
+        ::boost::process::v1::detail::throw_last_error("create_named_pipe(" + name + ") failed");
 
     _source.assign(source);
 
     ::boost::winapi::HANDLE_ sink = boost::winapi::create_file(
 #if defined(BOOST_NO_ANSI_APIS)
-            ::boost::process::detail::convert(name).c_str(),
+            ::boost::process::v1::detail::convert(name).c_str(),
 #else
             name.c_str(),
 #endif
@@ -316,7 +316,7 @@ async_pipe::async_pipe(boost::asio::io_context & ios_source,
             nullptr);
 
     if (sink == ::boost::winapi::INVALID_HANDLE_VALUE_)
-        ::boost::process::detail::throw_last_error("create_file() failed");
+        ::boost::process::v1::detail::throw_last_error("create_file() failed");
 
     _sink.assign(sink);
 }
@@ -480,6 +480,6 @@ inline bool operator!=(const basic_pipe<Char, Traits> & lhs, const async_pipe & 
            !compare_handles(lhs.native_sink(),   rhs.native_sink());
 }
 
-}}}}
+}}}}}
 
 #endif /* INCLUDE_BOOST_PIPE_DETAIL_WINDOWS_ASYNC_PIPE_HPP_ */

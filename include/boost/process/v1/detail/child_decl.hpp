@@ -38,23 +38,23 @@
 #endif
 namespace boost {
 
-namespace process {
+namespace process { BOOST_PROCESS_V1_INLINE namespace v1 {
 
-using ::boost::process::detail::api::pid_t;
+using ::boost::process::v1::detail::api::pid_t;
 
 class child
 {
-    ::boost::process::detail::api::child_handle _child_handle;
-    std::shared_ptr<std::atomic<int>> _exit_status = std::make_shared<std::atomic<int>>(::boost::process::detail::api::still_active);
+    ::boost::process::v1::detail::api::child_handle _child_handle;
+    std::shared_ptr<std::atomic<int>> _exit_status = std::make_shared<std::atomic<int>>(::boost::process::v1::detail::api::still_active);
     bool _attached = true;
     bool _terminated = false;
 
     bool _exited()
     {
-        return _terminated || !::boost::process::detail::api::is_running(_exit_status->load());
+        return _terminated || !::boost::process::v1::detail::api::is_running(_exit_status->load());
     };
 public:
-    typedef ::boost::process::detail::api::child_handle child_handle;
+    typedef ::boost::process::v1::detail::api::child_handle child_handle;
     typedef child_handle::process_handle_t native_handle_t;
     explicit child(child_handle &&ch, std::shared_ptr<std::atomic<int>> &ptr) : _child_handle(std::move(ch)), _exit_status(ptr) {}
     explicit child(child_handle &&ch, const std::shared_ptr<std::atomic<int>> &ptr) : _child_handle(std::move(ch)), _exit_status(ptr) {}
@@ -98,7 +98,7 @@ public:
     native_handle_t native_handle() const { return _child_handle.process_handle(); }
 
 
-    int exit_code() const {return ::boost::process::detail::api::eval_exit_status(_exit_status->load());}
+    int exit_code() const {return ::boost::process::v1::detail::api::eval_exit_status(_exit_status->load());}
     pid_t id()      const {return _child_handle.id(); }
 
     int native_exit_code() const {return _exit_status->load();}
@@ -107,7 +107,7 @@ public:
     {
         std::error_code ec;
         bool b = running(ec);
-        boost::process::detail::throw_error(ec, "running error");
+        boost::process::v1::detail::throw_error(ec, "running error");
         return b;
     }
 
@@ -115,14 +115,14 @@ public:
     {
         std::error_code ec;
         terminate(ec);
-        boost::process::detail::throw_error(ec, "terminate error");
+        boost::process::v1::detail::throw_error(ec, "terminate error");
     }
 
     void wait()
     {
         std::error_code ec;
         wait(ec);
-        boost::process::detail::throw_error(ec, "wait error");
+        boost::process::v1::detail::throw_error(ec, "wait error");
     }
 
 #if !defined(BOOST_PROCESS_NO_DEPRECATED)
@@ -133,7 +133,7 @@ public:
     {
         std::error_code ec;
         bool b = wait_for(rel_time, ec);
-        boost::process::detail::throw_error(ec, "wait_for error");
+        boost::process::v1::detail::throw_error(ec, "wait_for error");
         return b;
     }
 
@@ -143,7 +143,7 @@ public:
     {
         std::error_code ec;
         bool b = wait_until(timeout_time, ec);
-        boost::process::detail::throw_error(ec, "wait_until error");
+        boost::process::v1::detail::throw_error(ec, "wait_until error");
         return b;
     }
 #endif
@@ -154,7 +154,7 @@ public:
         if (valid() && !_exited() && !ec)
         {
             int exit_code = 0;
-            auto res = boost::process::detail::api::is_running(_child_handle, exit_code, ec);
+            auto res = boost::process::v1::detail::api::is_running(_child_handle, exit_code, ec);
             if (!ec && !res && !_exited())
                 _exit_status->store(exit_code);
 
@@ -166,7 +166,7 @@ public:
     void terminate(std::error_code & ec) noexcept
     {
         if (valid() && running(ec) && !ec)
-            boost::process::detail::api::terminate(_child_handle, ec);
+            boost::process::v1::detail::api::terminate(_child_handle, ec);
 
         if (!ec)
             _terminated = true;
@@ -177,7 +177,7 @@ public:
         if (!_exited() && valid())
         {
             int exit_code = 0;
-            boost::process::detail::api::wait(_child_handle, exit_code, ec);
+            boost::process::v1::detail::api::wait(_child_handle, exit_code, ec);
             if (!ec)
                 _exit_status->store(exit_code);
         }
@@ -198,7 +198,7 @@ public:
         if (!_exited())
         {
             int exit_code = 0;
-            auto b = boost::process::detail::api::wait_until(_child_handle, exit_code, timeout_time, ec);
+            auto b = boost::process::v1::detail::api::wait_until(_child_handle, exit_code, timeout_time, ec);
             if (!b || ec)
                 return false;
             _exit_status->store(exit_code);
@@ -225,6 +225,7 @@ public:
 
 
 
-}}
+}}}
+
 #endif
 

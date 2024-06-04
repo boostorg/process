@@ -15,7 +15,7 @@
 #include <boost/process/v1/locale.hpp>
 
 
-namespace boost { namespace process { namespace detail { namespace posix {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace posix {
 
 template<typename Char>
 class native_environment_impl
@@ -27,7 +27,7 @@ class native_environment_impl
         while (*p != nullptr)
         {
             std::string str = *p;
-            val.push_back(::boost::process::detail::convert(str));
+            val.push_back(::boost::process::v1::detail::convert(str));
             p++;
         }
         return val;
@@ -68,24 +68,24 @@ public:
 
     string_type get(const string_type & id)
     {
-        std::string id_c = ::boost::process::detail::convert(id);
+        std::string id_c = ::boost::process::v1::detail::convert(id);
         std::string g = ::getenv(id_c.c_str());
-        return ::boost::process::detail::convert(g.c_str());
+        return ::boost::process::v1::detail::convert(g.c_str());
     }
     void        set(const string_type & id, const string_type & value)
     {
-        std::string id_c    = ::boost::process::detail::convert(id.c_str());
-        std::string value_c = ::boost::process::detail::convert(value.c_str());
+        std::string id_c    = ::boost::process::v1::detail::convert(id.c_str());
+        std::string value_c = ::boost::process::v1::detail::convert(value.c_str());
         auto res = ::setenv(id_c.c_str(), value_c.c_str(), true);
         if (res != 0)
-            boost::process::detail::throw_last_error();
+            boost::process::v1::detail::throw_last_error();
     }
     void      reset(const string_type & id)
     {
-        std::string id_c = ::boost::process::detail::convert(id.c_str());
+        std::string id_c = ::boost::process::v1::detail::convert(id.c_str());
         auto res = ::unsetenv(id_c.c_str());
         if (res != 0)
-            ::boost::process::detail::throw_last_error();
+            ::boost::process::v1::detail::throw_last_error();
     }
 
     native_environment_impl() = default;
@@ -114,14 +114,14 @@ public:
     {
         auto res = ::setenv(id, value, 1);
         if (res != 0)
-            boost::process::detail::throw_last_error();
+            boost::process::v1::detail::throw_last_error();
         reload();
     }
     void      reset(const pointer_type id)
     {
         auto res = ::unsetenv(id);
         if (res != 0)
-            boost::process::detail::throw_last_error();
+            boost::process::v1::detail::throw_last_error();
         reload();
     }
 
@@ -186,13 +186,13 @@ public:
     template<typename CharR>
     explicit inline  basic_environment_impl(
                 const basic_environment_impl<CharR>& rhs,
-                const ::boost::process::codecvt_type & cv = ::boost::process::codecvt())
+                const ::boost::process::v1::codecvt_type & cv = ::boost::process::v1::codecvt())
         : _data(rhs._data.size())
     {
         std::transform(rhs._data.begin(), rhs._data.end(), _data.begin(),
                 [&](const std::basic_string<CharR> & st)
                 {
-                    return ::boost::process::detail::convert(st, cv);
+                    return ::boost::process::v1::detail::convert(st, cv);
                 }
 
             );
@@ -202,7 +202,7 @@ public:
     template<typename CharR>
     basic_environment_impl & operator=(const basic_environment_impl<CharR>& rhs)
     {
-        _data = ::boost::process::detail::convert(rhs._data);
+        _data = ::boost::process::v1::detail::convert(rhs._data);
         _env_arr = _load_var(&*_data.begin());
         _env_impl = &*_env_arr.begin();
         return *this;
@@ -230,7 +230,7 @@ basic_environment_impl<Char>::basic_environment_impl(const native_environment_im
 template<typename Char>
 inline auto basic_environment_impl<Char>::get(const string_type &id) -> string_type
 {
-    auto itr = std::find_if(_data.begin(), _data.end(), 
+    auto itr = std::find_if(_data.begin(), _data.end(),
             [&](const string_type & st) -> bool
             {
                 if (st.size() <= id.size())
@@ -250,7 +250,7 @@ inline auto basic_environment_impl<Char>::get(const string_type &id) -> string_t
 template<typename Char>
 inline void basic_environment_impl<Char>::set(const string_type &id, const string_type &value)
 {
-    auto itr = std::find_if(_data.begin(), _data.end(), 
+    auto itr = std::find_if(_data.begin(), _data.end(),
         [&](const string_type & st) -> bool
         {
             if (st.size() <= id.size())
@@ -261,7 +261,7 @@ inline void basic_environment_impl<Char>::set(const string_type &id, const strin
 
     if (itr != _data.end())
         *itr = id + equal_sign<Char>() + value;
-    else 
+    else
         _data.push_back(id + equal_sign<Char>() + value);
 
     reload();
@@ -270,7 +270,7 @@ inline void basic_environment_impl<Char>::set(const string_type &id, const strin
 template<typename Char>
 inline void  basic_environment_impl<Char>::reset(const string_type &id)
 {
-    auto itr = std::find_if(_data.begin(), _data.end(), 
+    auto itr = std::find_if(_data.begin(), _data.end(),
         [&](const string_type & st) -> bool
         {
             if (st.size() <= id.size())
@@ -280,9 +280,9 @@ inline void  basic_environment_impl<Char>::reset(const string_type &id)
     );
     if (itr != _data.end())
     {
-        _data.erase(itr);//and remove it    
+        _data.erase(itr);//and remove it
     }
-    
+
     reload();
 
 
@@ -320,7 +320,7 @@ inline int native_handle()  {return getpid(); }
 }
 }
 }
-
+}
 
 
 

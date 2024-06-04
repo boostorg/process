@@ -12,7 +12,7 @@
 #include <boost/process/v1/detail/posix/handler.hpp>
 #include <boost/process/v1/environment.hpp>
 
-namespace boost { namespace process { namespace detail { namespace posix {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace posix {
 
 template<typename Char>
 struct env_init;
@@ -20,10 +20,10 @@ struct env_init;
 template<>
 struct env_init<char> : handler_base_ext
 {
-    boost::process::environment env;
+    boost::process::v1::environment env;
 
-    env_init(boost::process::environment && env) : env(std::move(env)) {};
-    env_init(const boost::process::environment & env) : env(env) {};
+    env_init(boost::process::v1::environment && env) : env(std::move(env)) {};
+    env_init(const boost::process::v1::environment & env) : env(env) {};
 
 
     template <class Executor>
@@ -34,7 +34,7 @@ struct env_init<char> : handler_base_ext
 
 };
 
-}}}}
+}}}}}
 
 
 

@@ -34,12 +34,12 @@
 #endif
 
 namespace boost {
-namespace process {
+namespace process { BOOST_PROCESS_V1_INLINE namespace v1 {
 namespace detail
 {
 
 template<typename Handler>
-struct async_system_handler : ::boost::process::detail::api::async_handler
+struct async_system_handler : ::boost::process::v1::detail::api::async_handler
 {
     boost::asio::io_context & ios;
     Handler handler;
@@ -108,7 +108,7 @@ the return value (from the second parameter, `exit_handler`).
 */
 #if defined(BOOST_PROCESS_DOXYGEN)
 template<typename ExitHandler, typename ...Args>
-inline boost::process::detail::dummy
+inline boost::process::v1::detail::dummy
     async_system(boost::asio::io_context & ios, ExitHandler && exit_handler, Args && ...args);
 #endif
 
@@ -134,7 +134,7 @@ inline BOOST_ASIO_INITFN_RESULT_TYPE(ExitHandler, void (boost::system::error_cod
     async_system(boost::asio::io_context & ios, ExitHandler && exit_handler, Args && ...args)
 {
     
-    typedef typename ::boost::process::detail::has_error_handler<boost::fusion::tuple<Args...>>::type
+    typedef typename ::boost::process::v1::detail::has_error_handler<boost::fusion::tuple<Args...>>::type
             has_err_handling;
 
     static_assert(!has_err_handling::value, "async_system cannot have custom error handling");
@@ -146,6 +146,6 @@ inline BOOST_ASIO_INITFN_RESULT_TYPE(ExitHandler, void (boost::system::error_cod
 
 
 
-}}
-#endif
+}}}
 
+#endif

@@ -12,13 +12,13 @@
 #include <boost/process/v1/detail/used_handles.hpp>
 #include <boost/process/v1/detail/windows/handler.hpp>
 
-namespace boost { namespace process {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 {
 
 namespace detail { namespace windows {
 
 
 
-struct group_ref : handler_base_ext, ::boost::process::detail::uses_handles
+struct group_ref : handler_base_ext, ::boost::process::v1::detail::uses_handles
 {
     ::boost::winapi::HANDLE_ handle;
 
@@ -41,14 +41,14 @@ struct group_ref : handler_base_ext, ::boost::process::detail::uses_handles
     void on_success(Executor& exec) const
     {
         if (!::boost::winapi::AssignProcessToJobObject(handle, exec.proc_info.hProcess))
-            exec.set_error(::boost::process::detail::get_last_error(),
+            exec.set_error(::boost::process::v1::detail::get_last_error(),
                            "AssignProcessToJobObject() failed.");
 
     }
 
 };
 
-}}}}
+}}}}}
 
 
 #endif /* BOOST_PROCESS_DETAIL_WINDOWS_GROUP_HPP_ */

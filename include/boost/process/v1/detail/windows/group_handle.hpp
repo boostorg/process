@@ -12,7 +12,7 @@
 #include <boost/process/v1/detail/windows/job_workaround.hpp>
 #include <system_error>
 
-namespace boost { namespace process { namespace detail { namespace windows {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace windows {
 
 inline bool break_away_enabled(::boost::winapi::HANDLE_ h)
 {
@@ -184,13 +184,13 @@ struct group_handle
 inline void terminate(const group_handle &p)
 {
     if (!::boost::winapi::TerminateJobObject(p.handle(), EXIT_FAILURE))
-        boost::process::detail::throw_last_error("TerminateJobObject() failed");
+        boost::process::v1::detail::throw_last_error("TerminateJobObject() failed");
 }
 
 inline void terminate(const group_handle &p, std::error_code &ec) noexcept
 {
     if (!::boost::winapi::TerminateJobObject(p.handle(), EXIT_FAILURE))
-        ec = boost::process::detail::get_last_error();
+        ec = boost::process::v1::detail::get_last_error();
     else
         ec.clear();
 }
@@ -206,7 +206,7 @@ inline bool in_group()
 
 
 
-}}}}
+}}}}}
 
 
 #endif /* BOOST_PROCESS_DETAIL_WINDOWS_GROUP_HPP_ */

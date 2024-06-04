@@ -13,16 +13,16 @@
 
 /** \file boost/process/args.hpp
  *
- *    This header provides the \xmlonly <globalname alt="boost::process::args">args</globalname>\endxmlonly property. It also provides the
- *    alternative name \xmlonly <globalname alt="boost::process::argv">argv</globalname>\endxmlonly .
+ *    This header provides the \xmlonly <globalname alt="boost::process::v1::args">args</globalname>\endxmlonly property. It also provides the
+ *    alternative name \xmlonly <globalname alt="boost::process::v1::argv">argv</globalname>\endxmlonly .
  *
  *
 \xmlonly
 <programlisting>
 namespace boost {
-  namespace process {
-    <emphasis>unspecified</emphasis> <globalname alt="boost::process::args">args</globalname>;
-    <emphasis>unspecified</emphasis> <globalname alt="boost::process::argv">argv</globalname>;
+  namespace process { BOOST_PROCESS_V1_INLINE namespace v1 {
+    <emphasis>unspecified</emphasis> <globalname alt="boost::process::v1::args">args</globalname>;
+    <emphasis>unspecified</emphasis> <globalname alt="boost::process::v1::argv">argv</globalname>;
   }
 }
 </programlisting>
@@ -33,7 +33,7 @@ namespace boost {
 #include <boost/process/v1/detail/basic_cmd.hpp>
 #include <iterator>
 
-namespace boost { namespace process { namespace detail {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail {
 
 struct args_
 {
@@ -268,12 +268,12 @@ spawn("gcc", args+={"--version"});
 
 
  */
-constexpr boost::process::detail::args_ args{};
+constexpr boost::process::v1::detail::args_ args{};
 
-///Alias for \xmlonly <globalname alt="boost::process::args">args</globalname> \endxmlonly .
-constexpr boost::process::detail::args_ argv{};
+///Alias for \xmlonly <globalname alt="boost::process::v1::args">args</globalname> \endxmlonly .
+constexpr boost::process::v1::detail::args_ argv{};
 
 
-}}
+}}}
 
 #endif

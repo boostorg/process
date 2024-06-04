@@ -21,6 +21,16 @@
 #include <system_error>
 #include <boost/system/api_config.hpp>
 
+#if !defined(BOOST_PROCESS_VERSION)
+#define  BOOST_PROCESS_VERSION 1
+#endif
+
+#if BOOST_PROCESS_VERSION == 1
+#define BOOST_PROCESS_V1_INLINE inline
+#else
+#define BOOST_PROCESS_V1_INLINE
+#endif
+
 #include <boost/throw_exception.hpp>
 #include <boost/process/v1/exception.hpp>
 #include <boost/assert/source_location.hpp>
@@ -38,7 +48,9 @@ extern char **environ;
 #error "System API not supported by boost.process"
 #endif
 
-namespace boost { namespace process { namespace detail
+
+
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail
 {
 
 #if !defined(BOOST_PROCESS_PIPE_SIZE)
@@ -121,5 +133,7 @@ template<> constexpr wchar_t  space_sign<wchar_t> () {return L' '; }
 }
 }
 }
+}
+
 
 #endif

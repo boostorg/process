@@ -31,57 +31,63 @@
  */
 
 
-namespace boost {
-namespace process {
-namespace detail {
+namespace boost
+{
+namespace process
+{
+BOOST_PROCESS_V1_INLINE namespace v1
+{
+namespace detail
+{
 template<typename Tuple>
-inline asio::io_context& get_io_context(const Tuple & tup);
+inline asio::io_context &get_io_context(const Tuple &tup);
 }
 
 
 ///Namespace for extensions \attention This is experimental.
-namespace extend {
+namespace extend
+{
 
 #if defined(BOOST_WINDOWS_API)
 
 template<typename Char, typename Sequence>
-using windows_executor = ::boost::process::detail::windows::executor<Char, Sequence>;
+using windows_executor = ::boost::process::v1::detail::windows::executor<Char, Sequence>;
 template<typename Sequence>
 struct posix_executor;
 
 #elif defined(BOOST_POSIX_API)
 
 template<typename Sequence>
-using posix_executor = ::boost::process::detail::posix::executor<Sequence>;
+using posix_executor = ::boost::process::v1::detail::posix::executor<Sequence>;
 template<typename Char, typename Sequence>
 struct windows_executor;
 
 #endif
 
-using ::boost::process::detail::handler;
-using ::boost::process::detail::api::require_io_context;
-using ::boost::process::detail::api::async_handler;
-using ::boost::process::detail::get_io_context;
-using ::boost::process::detail::get_last_error;
-using ::boost::process::detail::throw_last_error;
-using ::boost::process::detail::uses_handles;
-using ::boost::process::detail::foreach_used_handle;
-using ::boost::process::detail::get_used_handles;
+using ::boost::process::v1::detail::handler;
+using ::boost::process::v1::detail::api::require_io_context;
+using ::boost::process::v1::detail::api::async_handler;
+using ::boost::process::v1::detail::get_io_context;
+using ::boost::process::v1::detail::get_last_error;
+using ::boost::process::v1::detail::throw_last_error;
+using ::boost::process::v1::detail::uses_handles;
+using ::boost::process::v1::detail::foreach_used_handle;
+using ::boost::process::v1::detail::get_used_handles;
 
 ///This handler is invoked before the process in launched, to setup parameters. The required signature is `void(Exec &)`, where `Exec` is a template parameter.
-constexpr boost::process::detail::make_handler_t<boost::process::detail::on_setup_>   on_setup;
+constexpr boost::process::v1::detail::make_handler_t<boost::process::v1::detail::on_setup_> on_setup;
 ///This handler is invoked if an error occurred. The required signature is `void(auto & exec, const std::error_code&)`, where `Exec` is a template parameter.
-constexpr boost::process::detail::make_handler_t<boost::process::detail::on_error_>   on_error;
+constexpr boost::process::v1::detail::make_handler_t<boost::process::v1::detail::on_error_> on_error;
 ///This handler is invoked if launching the process has succeeded. The required signature is `void(auto & exec)`, where `Exec` is a template parameter.
-constexpr boost::process::detail::make_handler_t<boost::process::detail::on_success_> on_success;
+constexpr boost::process::v1::detail::make_handler_t<boost::process::v1::detail::on_success_> on_success;
 
 #if defined(BOOST_POSIX_API) || defined(BOOST_PROCESS_DOXYGEN)
 ///This handler is invoked if the fork failed. The required signature is `void(auto & exec)`, where `Exec` is a template parameter. \note Only available on posix.
-constexpr ::boost::process::detail::make_handler_t<::boost::process::detail::posix::on_fork_error_  >   on_fork_error;
+constexpr ::boost::process::v1::detail::make_handler_t<::boost::process::v1::detail::posix::on_fork_error_> on_fork_error;
 ///This handler is invoked if the fork succeeded. The required signature is `void(Exec &)`, where `Exec` is a template parameter. \note Only available on posix.
-constexpr ::boost::process::detail::make_handler_t<::boost::process::detail::posix::on_exec_setup_  >   on_exec_setup;
+constexpr ::boost::process::v1::detail::make_handler_t<::boost::process::v1::detail::posix::on_exec_setup_> on_exec_setup;
 ///This handler is invoked if the exec call errored. The required signature is `void(auto & exec)`, where `Exec` is a template parameter. \note Only available on posix.
-constexpr ::boost::process::detail::make_handler_t<::boost::process::detail::posix::on_exec_error_  >   on_exec_error;
+constexpr ::boost::process::v1::detail::make_handler_t<::boost::process::v1::detail::posix::on_exec_error_> on_exec_error;
 #endif
 
 #if defined(BOOST_PROCESS_DOXYGEN)
@@ -89,7 +95,7 @@ constexpr ::boost::process::detail::make_handler_t<::boost::process::detail::pos
 inline std::error_code get_last_error();
 
 ///Helper function to get and throw the last system error.
-/// \throws boost::process::process_error
+/// \throws boost::process::v1::process_error
 /// \param msg A message to add to the error code.
 inline void throw_last_error(const std::string & msg);
 ///\overload void throw_last_error(const std::string & msg)
@@ -182,7 +188,7 @@ std::function<void(int, const std::error_code&)> on_exit_handler(Executor & exec
  invoked when the process exits.
 
  *
- * \warning Cannot be used with \ref boost::process::spawn
+ * \warning Cannot be used with \ref boost::process::v1::spawn
  */
 struct async_handler : handler, require_io_context
 {
@@ -340,5 +346,5 @@ struct windows_executor
 }
 }
 }
-
+}
 #endif

@@ -19,7 +19,7 @@
 #include <fcntl.h>
 #include <memory>
 
-namespace boost { namespace process { namespace detail { namespace posix {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace posix {
 
 
 template<class CharT, class Traits = std::char_traits<CharT>>
@@ -41,7 +41,7 @@ public:
     {
         int fds[2];
         if (::pipe(fds) == -1)
-            boost::process::detail::throw_last_error("pipe(2) failed");
+            boost::process::v1::detail::throw_last_error("pipe(2) failed");
 
         _source = fds[0];
         _sink   = fds[1];
@@ -85,7 +85,7 @@ public:
             //Try again if interrupted
             auto err = errno;
             if (err != EINTR)
-                ::boost::process::detail::throw_last_error();
+                ::boost::process::v1::detail::throw_last_error();
         }
         return static_cast<int_type>(write_len);
     }
@@ -97,7 +97,7 @@ public:
             //Try again if interrupted
             auto err = errno;
             if (err != EINTR)
-                ::boost::process::detail::throw_last_error();
+                ::boost::process::v1::detail::throw_last_error();
         }
         return static_cast<int_type>(read_len);
     }
@@ -126,13 +126,13 @@ basic_pipe<CharT, Traits>::basic_pipe(const basic_pipe & rhs)
        {
            _source = ::dup(rhs._source);
            if (_source == -1)
-               ::boost::process::detail::throw_last_error("dup() failed");
+               ::boost::process::v1::detail::throw_last_error("dup() failed");
        }
     if (rhs._sink != -1)
     {
         _sink = ::dup(rhs._sink);
         if (_sink == -1)
-            ::boost::process::detail::throw_last_error("dup() failed");
+            ::boost::process::v1::detail::throw_last_error("dup() failed");
 
     }
 }
@@ -144,13 +144,13 @@ basic_pipe<CharT, Traits> &basic_pipe<CharT, Traits>::operator=(const basic_pipe
        {
            _source = ::dup(rhs._source);
            if (_source == -1)
-               ::boost::process::detail::throw_last_error("dup() failed");
+               ::boost::process::v1::detail::throw_last_error("dup() failed");
        }
     if (rhs._sink != -1)
     {
         _sink = ::dup(rhs._sink);
         if (_sink == -1)
-            ::boost::process::detail::throw_last_error("dup() failed");
+            ::boost::process::v1::detail::throw_last_error("dup() failed");
 
     }
     return *this;
@@ -163,18 +163,18 @@ basic_pipe<CharT, Traits>::basic_pipe(const std::string & name)
     auto fifo = mkfifo(name.c_str(), 0666 );
             
     if (fifo != 0) 
-        boost::process::detail::throw_last_error("mkfifo() failed");
+        boost::process::v1::detail::throw_last_error("mkfifo() failed");
 
     
     int  read_fd = open(name.c_str(), O_RDWR);
         
     if (read_fd == -1)
-        boost::process::detail::throw_last_error();
+        boost::process::v1::detail::throw_last_error();
     
     int write_fd = dup(read_fd);
     
     if (write_fd == -1)
-        boost::process::detail::throw_last_error();
+        boost::process::v1::detail::throw_last_error();
 
     _sink = write_fd;
     _source = read_fd;
@@ -195,6 +195,6 @@ inline bool operator!=(const basic_pipe<Char, Traits> & lhs, const basic_pipe<Ch
            !compare_handles(lhs.native_sink(),   rhs.native_sink());
 }
 
-}}}}
+}}}}}
 
 #endif

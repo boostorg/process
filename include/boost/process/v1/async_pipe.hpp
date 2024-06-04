@@ -20,7 +20,7 @@
 #include <boost/process/v1/detail/windows/async_pipe.hpp>
 #endif
 
-namespace boost { namespace process {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 {
 
 
 #if defined(BOOST_PROCESS_DOXYGEN)
@@ -206,11 +206,11 @@ public:
 };
 
 #else
-using ::boost::process::detail::api::async_pipe;
+using ::boost::process::v1::detail::api::async_pipe;
 #endif
 
 
-}}
+}}}
 
 
 

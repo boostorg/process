@@ -21,6 +21,8 @@ namespace boost
 {
 namespace process
 {
+BOOST_PROCESS_V1_INLINE namespace v1
+{
 namespace detail
 {
 namespace windows
@@ -197,7 +199,7 @@ private:
 }
 }
 }
-
+}
 
 
 #endif /* INCLUDE_BOOST_PROCESS_WINDOWS_ARGS_HPP_ */

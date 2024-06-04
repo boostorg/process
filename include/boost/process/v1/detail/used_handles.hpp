@@ -18,7 +18,7 @@
 #include <boost/process/v1/detail/windows/asio_fwd.hpp>
 #endif
 
-namespace boost { namespace process { namespace detail {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail {
 
 struct uses_handles
 {
@@ -52,7 +52,7 @@ struct foreach_handle_invocator
             func(handle_);
 
     }
-    void invoke(::boost::process::detail::api::native_handle_type handle) const {func(handle);};
+    void invoke(::boost::process::v1::detail::api::native_handle_type handle) const {func(handle);};
 
     template<typename T>
     void operator()(T & val) const {invoke(val.get_used_handles());}
@@ -66,16 +66,16 @@ void foreach_used_handle(Executor &exec, Function &&func)
 }
 
 template<typename Executor>
-std::vector<::boost::process::detail::api::native_handle_type>
+std::vector<::boost::process::v1::detail::api::native_handle_type>
         get_used_handles(Executor &exec)
 {
-    std::vector<::boost::process::detail::api::native_handle_type> res = exec.get_used_handles();
-    foreach_used_handle(exec, [&](::boost::process::detail::api::native_handle_type handle){res.push_back(handle);});
+    std::vector<::boost::process::v1::detail::api::native_handle_type> res = exec.get_used_handles();
+    foreach_used_handle(exec, [&](::boost::process::v1::detail::api::native_handle_type handle){res.push_back(handle);});
     return res;
 }
 
 
 
-}}}
+}}}}
 
 #endif /* BOOST_PROCESS_DETAIL_USED_HANDLES_HPP_ */

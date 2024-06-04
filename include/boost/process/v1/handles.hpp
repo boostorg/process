@@ -23,11 +23,13 @@
 #include <boost/process/v1/detail/used_handles.hpp>
 
 
-namespace boost { namespace this_process
+namespace boost
+{
+namespace this_process
 {
 
 ///The native type for handles
-using native_handle_type = ::boost::process::detail::api::native_handle_type;
+using native_handle_type = ::boost::process::v1::detail::api::native_handle_type;
 
 /**
  * Get a snapshot of all handles of the process (i.e. file descriptors on posix and handles on windows) of the current process.
@@ -40,16 +42,16 @@ using native_handle_type = ::boost::process::detail::api::native_handle_type;
  *
  * \return The list of all open handles of the current process
  */
-inline std::vector<native_handle_type> get_handles()
+inline std::vector <native_handle_type> get_handles()
 {
-    return ::boost::process::detail::api::get_handles();
+  return ::boost::process::v1::detail::api::get_handles();
 }
 
 
 /** \overload std::vector<native_handle_type> get_handles() */
-inline std::vector<native_handle_type> get_handles(std::error_code &ec)
+inline std::vector <native_handle_type> get_handles(std::error_code &ec)
 {
-    return ::boost::process::detail::api::get_handles(ec);
+  return ::boost::process::v1::detail::api::get_handles(ec);
 }
 
 /** Determines if a given handle is a a stream-handle, i.e. any handle that can be used with read and write functions.
@@ -59,24 +61,27 @@ inline std::vector<native_handle_type> get_handles(std::error_code &ec)
  */
 inline bool is_stream_handle(native_handle_type handle)
 {
-    return ::boost::process::detail::api::is_stream_handle(handle);
+  return ::boost::process::v1::detail::api::is_stream_handle(handle);
 }
 
 
 /** \overload bool is_stream_handle(native_handle_type handle) */
 inline bool is_stream_handle(native_handle_type handle, std::error_code &ec)
 {
-    return ::boost::process::detail::api::is_stream_handle(handle, ec);
+  return ::boost::process::v1::detail::api::is_stream_handle(handle, ec);
 }
 
 }
 namespace process
 {
+BOOST_PROCESS_V1_INLINE
+namespace v1
+{
 
 namespace detail
 {
 
-using limit_handles_ = ::boost::process::detail::api::limit_handles_;
+using limit_handles_ = ::boost::process::v1::detail::api::limit_handles_;
 
 
 }
@@ -98,9 +103,10 @@ using limit_handles_ = ::boost::process::detail::api::limit_handles_;
  * \endcode
  *
 */
-const static ::boost::process::detail::api::limit_handles_ limit_handles;
+const static ::boost::process::v1::detail::api::limit_handles_ limit_handles;
 
 
+}
 }
 }
 

@@ -11,9 +11,10 @@
 #ifndef BOOST_PROCESS_DETAIL_HANDLER_BASE_HPP
 #define BOOST_PROCESS_DETAIL_HANDLER_BASE_HPP
 
+#include <boost/process/v1/detail/config.hpp>
 #include <system_error>
 
-namespace boost { namespace process { namespace detail {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail {
 
 template<template <class> class Template>
 struct make_handler_t
@@ -44,6 +45,6 @@ struct handler_base
 };
 
 
-}}}
+}}}}
 
 #endif

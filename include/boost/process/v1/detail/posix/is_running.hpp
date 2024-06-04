@@ -11,7 +11,7 @@
 #include <system_error>
 #include <sys/wait.h>
 
-namespace boost { namespace process { namespace detail { namespace posix {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace posix {
 
 // Use the "stopped" state (WIFSTOPPED) to indicate "not terminated".
 // This bit arrangement of status codes is not guaranteed by POSIX, but (according to comments in
@@ -35,7 +35,7 @@ inline bool is_running(const child_handle &p, int & exit_code, std::error_code &
     if (ret == -1)
     {
         if (errno != ECHILD) //because it no child is running, then this one isn't either, obviously.
-            ec = ::boost::process::detail::get_last_error();
+            ec = ::boost::process::v1::detail::get_last_error();
         return false;
     }
     else if (ret == 0)
@@ -55,7 +55,7 @@ inline bool is_running(const child_handle &p, int & exit_code)
 {
     std::error_code ec;
     bool b = is_running(p, exit_code, ec);
-    boost::process::detail::throw_error(ec, "waitpid(2) failed in is_running");
+    boost::process::v1::detail::throw_error(ec, "waitpid(2) failed in is_running");
     return b;
 }
 
@@ -75,6 +75,6 @@ inline int eval_exit_status(int code)
     }
 }
 
-}}}}
+}}}}}
 
 #endif

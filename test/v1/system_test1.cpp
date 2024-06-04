@@ -43,7 +43,7 @@ typedef boost::asio::windows::stream_handle pipe_end;
 typedef boost::asio::posix::stream_descriptor pipe_end;
 #endif
 
-namespace fs = boost::process::filesystem;
+namespace fs = boost::process::v1::filesystem;
 namespace bp = boost::process;
 
 BOOST_AUTO_TEST_CASE(system_exit_code, *boost::unit_test::timeout(5))

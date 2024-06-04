@@ -17,10 +17,10 @@
 #include <array>
 #include <boost/process/v1/detail/used_handles.hpp>
 
-namespace boost { namespace process { namespace detail { namespace posix {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace posix {
 
 template<int p1, int p2>
-struct pipe_out : handler_base_ext, ::boost::process::detail::uses_handles
+struct pipe_out : handler_base_ext, ::boost::process::v1::detail::uses_handles
 {
     int sink;
     int source; //opposite end
@@ -62,7 +62,7 @@ template<typename Executor>
 void pipe_out<1,-1>::on_exec_setup(Executor &e) const
 {
     if (::dup2(sink, STDOUT_FILENO) == -1)
-         e.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
+         e.set_error(::boost::process::v1::detail::get_last_error(), "dup2() failed");
 
     if (sink != STDOUT_FILENO)
         ::close(sink);
@@ -74,7 +74,7 @@ template<typename Executor>
 void pipe_out<2,-1>::on_exec_setup(Executor &e) const
 {
     if (::dup2(sink, STDERR_FILENO) == -1)
-         e.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
+         e.set_error(::boost::process::v1::detail::get_last_error(), "dup2() failed");
 
     if (sink != STDOUT_FILENO)
         ::close(sink);
@@ -86,9 +86,9 @@ template<typename Executor>
 void pipe_out<1,2>::on_exec_setup(Executor &e) const
 {
     if (::dup2(sink, STDOUT_FILENO) == -1)
-         e.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
+         e.set_error(::boost::process::v1::detail::get_last_error(), "dup2() failed");
     if (::dup2(sink, STDERR_FILENO) == -1)
-         e.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
+         e.set_error(::boost::process::v1::detail::get_last_error(), "dup2() failed");
     if ((sink != STDOUT_FILENO) && (sink != STDERR_FILENO))
         ::close(sink);
     ::close(source);
@@ -126,6 +126,6 @@ struct async_pipe_out : public pipe_out<p1, p2>
 };
 
 
-}}}}
+}}}}}
 
 #endif

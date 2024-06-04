@@ -14,13 +14,13 @@
 #include <boost/process/v1/detail/traits/env.hpp>
 #include <boost/process/v1/locale.hpp>
 
-namespace boost { namespace process { namespace detail {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail {
 
 //template
 
 template<typename T> struct is_wchar_t : std::false_type {};
 
-template<> struct is_wchar_t<boost::process::filesystem::path> : std::is_same<typename boost::process::filesystem::path::value_type, wchar_t>
+template<> struct is_wchar_t<boost::process::v1::filesystem::path> : std::is_same<typename boost::process::v1::filesystem::path::value_type, wchar_t>
 {
 };
 
@@ -68,7 +68,7 @@ struct char_converter<char, const wchar_t*>
     {
         std::size_t size = 0;
         while (in[size] != L'\0') size++;
-        return ::boost::process::detail::convert(in, in + size);
+        return ::boost::process::v1::detail::convert(in, in + size);
     }
 };
 
@@ -79,7 +79,7 @@ struct char_converter<char, wchar_t*>
     {
         std::size_t size = 0;
         while (in[size] != L'\0') size++;
-        return ::boost::process::detail::convert(in, in + size);
+        return ::boost::process::v1::detail::convert(in, in + size);
     }
 };
 
@@ -88,7 +88,7 @@ struct char_converter<char, wchar_t[Size]>
 {
     static std::string conv(const wchar_t(&in)[Size])
     {
-        return ::boost::process::detail::convert(in, in + Size -1);
+        return ::boost::process::v1::detail::convert(in, in + Size -1);
     }
 };
 
@@ -99,7 +99,7 @@ struct char_converter<wchar_t, const char*>
     {
         std::size_t size = 0;
         while (in[size] != '\0') size++;
-        return ::boost::process::detail::convert(in, in + size);
+        return ::boost::process::v1::detail::convert(in, in + size);
     }
 };
 
@@ -110,7 +110,7 @@ struct char_converter<wchar_t, char*>
     {
         std::size_t size = 0;
         while (in[size] != '\0') size++;
-        return ::boost::process::detail::convert(in, in + size);
+        return ::boost::process::v1::detail::convert(in, in + size);
     }
 };
 
@@ -120,7 +120,7 @@ struct char_converter<wchar_t, char[Size]>
 {
     static std::wstring conv(const char(&in)[Size])
     {
-        return ::boost::process::detail::convert(in, in + Size -1);
+        return ::boost::process::v1::detail::convert(in, in + Size -1);
     }
 };
 
@@ -130,7 +130,7 @@ struct char_converter<wchar_t, std::string>
 {
     static std::wstring conv(const std::string & in)
     {
-        return ::boost::process::detail::convert(in);
+        return ::boost::process::v1::detail::convert(in);
     }
 };
 
@@ -139,7 +139,7 @@ struct char_converter<char, std::wstring>
 {
     static std::string conv(const std::wstring & in)
     {
-        return ::boost::process::detail::convert(in);
+        return ::boost::process::v1::detail::convert(in);
     }
 };
 
@@ -272,5 +272,5 @@ struct char_converter<char, std::initializer_list<wchar_t * >>
 };
 
 
-}}}
+}}}}
 #endif /* BOOST_PROCESS_DETAIL_TRAITS_WCHAR_T_HPP_ */

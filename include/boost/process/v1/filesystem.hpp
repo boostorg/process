@@ -5,6 +5,8 @@
 #ifndef BOOST_PROCESS_FILESYSTEM_HPP
 #define BOOST_PROCESS_FILESYSTEM_HPP
 
+#include <boost/process/v1/detail/config.hpp>
+
 #ifdef BOOST_PROCESS_USE_STD_FS
 #include <filesystem>
 #else
@@ -16,12 +18,16 @@ namespace boost
 {
 namespace process
 {
+BOOST_PROCESS_V1_INLINE namespace v1
+{
+
 #ifdef BOOST_PROCESS_USE_STD_FS
 namespace filesystem = std::filesystem;
 #else
 namespace filesystem = boost::filesystem;
 #endif
 
+}
 }
 }
 

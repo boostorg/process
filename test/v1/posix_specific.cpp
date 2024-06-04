@@ -28,7 +28,7 @@
 #include <sys/wait.h>
 #include <errno.h>
 
-namespace fs = boost::process::filesystem;
+namespace fs = boost::process::v1::filesystem;
 namespace bp = boost::process;
 
 BOOST_AUTO_TEST_CASE(bind_fd, *boost::unit_test::timeout(2))

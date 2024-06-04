@@ -28,7 +28,7 @@
 
 namespace boost {
 
-namespace process {
+namespace process { BOOST_PROCESS_V1_INLINE namespace v1 {
 
 namespace detail {
 
@@ -48,7 +48,7 @@ It will fail to compile if a reference to `boost::asio::io_context` is passed.
 template<typename ...Args>
 inline void spawn(Args && ...args)
 {
-    typedef typename ::boost::process::detail::has_async_handler<Args...>::type
+    typedef typename ::boost::process::v1::detail::has_async_handler<Args...>::type
             has_async;
 
 
@@ -56,14 +56,14 @@ inline void spawn(Args && ...args)
             !has_async::value,
             "Spawn cannot wait for exit, so async properties cannot be used");
 
-    auto c = ::boost::process::detail::execute_impl(
+    auto c = ::boost::process::v1::detail::execute_impl(
 #if defined(BOOST_POSIX_API)
-            ::boost::process::posix::sig.ign(),
+            ::boost::process::v1::posix::sig.ign(),
 #endif
              std::forward<Args>(args)...);
     c.detach();
 }
 
-}}
-#endif
+}}}
 
+#endif

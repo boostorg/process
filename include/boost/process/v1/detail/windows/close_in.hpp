@@ -10,13 +10,14 @@
 #ifndef BOOST_PROCESS_WINDOWS_INITIALIZERS_CLOSE_IN_HPP
 #define BOOST_PROCESS_WINDOWS_INITIALIZERS_CLOSE_IN_HPP
 
+#include <boost/process/v1/detail/config.hpp>
+#include <boost/process/v1/detail/handler_base.hpp>
 #include <boost/winapi/process.hpp>
 #include <boost/winapi/handles.hpp>
-#include <boost/process/v1/detail/handler_base.hpp>
 
-namespace boost { namespace process { namespace detail { namespace windows {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace windows {
 
-struct close_in : public ::boost::process::detail::handler_base
+struct close_in : public ::boost::process::v1::detail::handler_base
 {
     template <class WindowsExecutor>
     void on_setup(WindowsExecutor &e) const
@@ -26,6 +27,6 @@ struct close_in : public ::boost::process::detail::handler_base
     }
 };
 
-}}}}
+}}}}}
 
 #endif

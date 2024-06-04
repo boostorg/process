@@ -1,14 +1,14 @@
-[def __on_exit__ [globalref boost::process::on_exit on_exit]]
-[def __on_success__ [globalref boost::process::extend::on_success ex::on_success]]
-[def __child__ [classref boost::process::child child]]
-[def __handler__ [classref boost::process::extend::handler handler]]
-[def __on_success__ [memberref boost::process::extend::handler::on_success on_success]]
-[def __posix_executor__ [classref boost::process::extend::posix_executor ex::posix_executor]]
-[def __windows_executor__ [classref boost::process::extend::windows_executor ex::windows_executor]]
+[def __on_exit__ [globalref boost::process::v1::on_exit on_exit]]
+[def __on_success__ [globalref boost::process::v1::extend::on_success ex::on_success]]
+[def __child__ [classref boost::process::v1::child child]]
+[def __handler__ [classref boost::process::v1::extend::handler handler]]
+[def __on_success__ [memberref boost::process::v1::extend::handler::on_success on_success]]
+[def __posix_executor__ [classref boost::process::v1::extend::posix_executor ex::posix_executor]]
+[def __windows_executor__ [classref boost::process::v1::extend::windows_executor ex::windows_executor]]
 [def __io_context__  [@http://www.boost.org/doc/libs/release/doc/html/boost_asio/reference/io_context.html boost::asio::io_context]]
-[def __require_io_context__ [classref boost::process::extend::require_io_context ex::require_io_context]]
-[def __async_handler__ [classref boost::process::extend::async_handler ex::async_handler]]
-[def __get_io_context__ [funcref boost::process::extend::get_io_context ex::get_io_context]]
+[def __require_io_context__ [classref boost::process::v1::extend::require_io_context ex::require_io_context]]
+[def __async_handler__ [classref boost::process::v1::extend::async_handler ex::async_handler]]
+[def __get_io_context__ [funcref boost::process::v1::extend::get_io_context ex::get_io_context]]
 
 [section:extend Extensions]
 To extend the library, the header [headerref boost/process/extend.hpp extend] is provided.
@@ -16,7 +16,7 @@ To extend the library, the header [headerref boost/process/extend.hpp extend] is
 It only provides the explicit style for custom properties, but no implicit style.
 
 What this means is, that a custom initializer can be implemented, a reference which can be passed to one of the launching functions.
-If a class inherits [classref boost::process::extend::handler] it will be regarded as an initializer and thus directly put into the sequence 
+If a class inherits [classref boost::process::v1::extend::handler] it will be regarded as an initializer and thus directly put into the sequence
 the executor gets passed.
 
 [section:structure Structure]
@@ -24,9 +24,9 @@ the executor gets passed.
 The executor calls different handlers of the initializers during the process launch. 
 The basic structure consists of three functions, as given below:
 
-* [globalref boost::process::extend::on_setup on_setup]
-* [globalref boost::process::extend::on_error on_error]
-* [globalref boost::process::extend::on_success on_success]
+* [globalref boost::process::v1::extend::on_setup on_setup]
+* [globalref boost::process::v1::extend::on_error on_error]
+* [globalref boost::process::v1::extend::on_success on_success]
 
 '''
 <imagedata fileref="boost_process/windows_exec.svg"/>
@@ -34,11 +34,11 @@ The basic structure consists of three functions, as given below:
 
 Additionally posix provides three more handlers, listed below:
 
-* [globalref boost::process::extend::on_fork_error on_fork_error]
-* [globalref boost::process::extend::on_exec_setup on_exec_setup]
-* [globalref boost::process::extend::on_exec_error on_exec_error] 
+* [globalref boost::process::v1::extend::on_fork_error on_fork_error]
+* [globalref boost::process::v1::extend::on_exec_setup on_exec_setup]
+* [globalref boost::process::v1::extend::on_exec_error on_exec_error]
 
-For more information see the reference of [classref boost::process::extend::posix_executor posix_executor]. 
+For more information see the reference of [classref boost::process::v1::extend::posix_executor posix_executor].
 
 [endsect]
 [section:simple Simple extensions]
@@ -55,8 +55,8 @@ __child__ c("foo", __on_success__=[](auto & exec) {std::cout << "hello world" <<
 
 Considering that lambdas can also capture values, data can easily be shared between handlers. 
 
-To see which members the executor has, refer to [classref boost::process::extend::windows_executor windows_executor]
-and [classref boost::process::extend::posix_executor posix_executor].
+To see which members the executor has, refer to [classref boost::process::v1::extend::windows_executor windows_executor]
+and [classref boost::process::v1::extend::posix_executor posix_executor].
 
 [note Combined with __on_exit__ this can also handle the process exit.]
 
@@ -67,7 +67,7 @@ and [classref boost::process::extend::posix_executor posix_executor].
 [section:handler Handler Types]
 
 Since the previous example is in a functional style, it is not very reusable. 
-To solve that problem, the [classref boost::process::extend::handler handler] has an alias in the `boost::process::extend` namespace, to be inherited.
+To solve that problem, the [classref boost::process::v1::extend::handler handler] has an alias in the `boost::process::v1::extend` namespace, to be inherited.
 So let's implement the hello world example in a class.
 
 ```
@@ -86,7 +86,7 @@ __child__ c("foo", hello_world());
 
 [note The implementation is done via overloading, not overriding.]
 
-Every handler not implemented defaults to [classref boost::process::extend::handler handler], where an empty handler is defined for each event.
+Every handler not implemented defaults to [classref boost::process::v1::extend::handler handler], where an empty handler is defined for each event.
 
 [endsect]
 
@@ -108,11 +108,11 @@ struct async_foo : __handler__, __require_io_context__
     }
 };
 ```
-[note Inheriting [globalref boost::process::extend::require_io_context require_io_context] is necessary, so [funcref boost::process::system system] provides one.]
+[note Inheriting [globalref boost::process::v1::extend::require_io_context require_io_context] is necessary, so [funcref boost::process::v1::system system] provides one.]
 
 Additionally the handler can provide a function that is invoked when the child process exits. This is done through __async_handler__.
 
-[note [globalref boost::process::extend::async_handler async_handler] implies [globalref boost::process::extend::require_io_context require_io_context] .]
+[note [globalref boost::process::v1::extend::async_handler async_handler] implies [globalref boost::process::v1::extend::require_io_context require_io_context] .]
 
 ```
 struct async_bar : __handler, __async_handler__
@@ -131,7 +131,7 @@ struct async_bar : __handler, __async_handler__
 ```
 
 
-[caution `on_exit_handler` does not default and is always required when [classref boost::process::extend::async_handler async_handler] is inherited. ]
+[caution `on_exit_handler` does not default and is always required when [classref boost::process::v1::extend::async_handler async_handler] is inherited. ]
 
 [caution `on_exit_handler` uses `boost::asio::signal_set` to listen for SIGCHLD on posix. The application must not also register a signal handler for SIGCHLD using functions such as `signal()` or `sigaction()` (but using `boost::asio::signal_set` is fine). ]
 
@@ -156,7 +156,7 @@ auto set_error = [](auto & exec)
 __child__ c("foo", on_setup=set_error);
 ```
 
-Since we do not specify the error-handling mode in this example, this will throw [classref boost::process::process_error process_error]. 
+Since we do not specify the error-handling mode in this example, this will throw [classref boost::process::v1::process_error process_error].
 
 [endsect]
 

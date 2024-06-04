@@ -33,7 +33,7 @@
 
 namespace boost {
 
-namespace process {
+namespace process { BOOST_PROCESS_V1_INLINE namespace v1 {
 
 namespace detail
 {
@@ -52,7 +52,7 @@ inline int system_impl(
         std::true_type, /*has io_context*/
         Args && ...args)
 {
-    IoService & ios = ::boost::process::detail::get_io_context_var(args...);
+    IoService & ios = ::boost::process::v1::detail::get_io_context_var(args...);
 
     system_impl_success_check check;
 
@@ -60,7 +60,7 @@ inline int system_impl(
 
     child c(std::forward<Args>(args)...,
             check,
-            ::boost::process::on_exit(
+            ::boost::process::v1::on_exit(
                 [&](int, const std::error_code&)
                 {
                     boost::asio::post(ios.get_executor(), [&]{exited.store(true);});
@@ -113,7 +113,7 @@ inline int system_impl(
 {
     child c(std::forward<Args>(args)...
 #if defined(BOOST_POSIX_API)
-            ,::boost::process::posix::sig.dfl()
+            ,::boost::process::v1::posix::sig.dfl()
 #endif
             );
     if (!c.valid())
@@ -142,16 +142,17 @@ the system function will check if it is active, and call the io_context::run fun
 template<typename ...Args>
 inline int system(Args && ...args)
 {
-    typedef typename ::boost::process::detail::needs_io_context<Args...>::type
+    typedef typename ::boost::process::v1::detail::needs_io_context<Args...>::type
             need_ios;
-    typedef typename ::boost::process::detail::has_io_context<Args...>::type
+    typedef typename ::boost::process::v1::detail::has_io_context<Args...>::type
             has_ios;
-    return ::boost::process::detail::system_impl<boost::asio::io_context>(
+    return ::boost::process::v1::detail::system_impl<boost::asio::io_context>(
             need_ios(), has_ios(),
             std::forward<Args>(args)...);
 }
 
 
-}}
+}}}
+
 #endif
 

@@ -18,7 +18,7 @@
 #include <boost/process/v1/detail/windows/child_handle.hpp>
 #include <chrono>
 
-namespace boost { namespace process { namespace detail { namespace windows {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace windows {
 
 inline void wait(child_handle &p, int & exit_code, std::error_code &ec) noexcept
 {
@@ -45,7 +45,7 @@ inline void wait(child_handle &p, int & exit_code)
 {
     std::error_code ec;
     wait(p, exit_code, ec);
-    boost::process::detail::throw_error(ec, "wait error");
+    boost::process::v1::detail::throw_error(ec, "wait error");
 }
 
 template< class Clock, class Duration >
@@ -92,7 +92,7 @@ inline bool wait_until(
 {
     std::error_code ec;
     bool b = wait_until(p, exit_code, timeout_time, ec);
-    boost::process::detail::throw_error(ec, "wait_until error");
+    boost::process::v1::detail::throw_error(ec, "wait_until error");
     return b;
 }
 
@@ -114,10 +114,10 @@ inline bool wait_for(
 {
     std::error_code ec;
     bool b = wait_for(p, exit_code, rel_time, ec);
-    boost::process::detail::throw_error(ec, "wait_for error");
+    boost::process::v1::detail::throw_error(ec, "wait_for error");
     return b;
 }
 
-}}}}
+}}}}}
 
 #endif

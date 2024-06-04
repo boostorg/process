@@ -19,13 +19,13 @@
 #include <boost/process/v1/detail/used_handles.hpp>
 #include <array>
 
-namespace boost { namespace process { namespace detail { namespace posix {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace posix {
 
 
 template<typename Buffer>
-struct async_in_buffer : ::boost::process::detail::posix::handler_base_ext,
-                         ::boost::process::detail::posix::require_io_context,
-                         ::boost::process::detail::uses_handles
+struct async_in_buffer : ::boost::process::v1::detail::posix::handler_base_ext,
+                         ::boost::process::v1::detail::posix::require_io_context,
+                         ::boost::process::v1::detail::uses_handles
 {
     Buffer & buf;
 
@@ -37,7 +37,7 @@ struct async_in_buffer : ::boost::process::detail::posix::handler_base_ext,
     }
 
 
-    std::shared_ptr<boost::process::async_pipe> pipe;
+    std::shared_ptr<boost::process::v1::async_pipe> pipe;
 
     async_in_buffer(Buffer & buf) : buf(buf)
     {
@@ -81,7 +81,7 @@ struct async_in_buffer : ::boost::process::detail::posix::handler_base_ext,
     void on_setup(Executor & exec)
     {
         if (!pipe)
-            pipe = std::make_shared<boost::process::async_pipe>(get_io_context(exec.seq));
+            pipe = std::make_shared<boost::process::v1::async_pipe>(get_io_context(exec.seq));
     }
 
     std::array<int, 3> get_used_handles()
@@ -97,7 +97,7 @@ struct async_in_buffer : ::boost::process::detail::posix::handler_base_ext,
     void on_exec_setup(Executor &exec)
     {
         if (::dup2(pipe->native_source(), STDIN_FILENO) == -1)
-            exec.set_error(::boost::process::detail::get_last_error(), "dup2() failed");
+            exec.set_error(::boost::process::v1::detail::get_last_error(), "dup2() failed");
 
         if (pipe->native_source() != STDIN_FILENO)
             ::close(pipe->native_source());
@@ -106,6 +106,6 @@ struct async_in_buffer : ::boost::process::detail::posix::handler_base_ext,
 };
 
 
-}}}}
+}}}}}
 
 #endif

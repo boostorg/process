@@ -10,12 +10,13 @@
 #ifndef BOOST_PROCESS_WINDOWS_CHILD_HPP
 #define BOOST_PROCESS_WINDOWS_CHILD_HPP
 
+#include <boost/process/v1/detail/config.hpp>
 #include <boost/move/move.hpp>
 #include <boost/winapi/handles.hpp>
 #include <boost/winapi/process.hpp>
 #include <boost/winapi/jobs.hpp>
 
-namespace boost { namespace process { namespace detail { namespace windows {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace windows {
 
 typedef ::boost::winapi::DWORD_ pid_t;
 
@@ -93,6 +94,6 @@ struct child_handle
     }
 };
 
-}}}}
+}}}}}
 
 #endif

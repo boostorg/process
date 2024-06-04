@@ -13,7 +13,7 @@
 #include <utility>
 #include <system_error>
 
-namespace boost { namespace process { namespace detail { namespace posix {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace posix {
 
 typedef ::pid_t pid_t;
 
@@ -55,6 +55,6 @@ struct child_handle
     }
 };
 
-}}}}
+}}}}}
 
 #endif

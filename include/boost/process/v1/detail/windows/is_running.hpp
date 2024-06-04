@@ -12,7 +12,7 @@
 #include <cstdlib>
 #include <boost/winapi/process.hpp>
 
-namespace boost { namespace process { namespace detail { namespace windows {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace windows {
 
 constexpr static ::boost::winapi::DWORD_ still_active = 259;
 
@@ -24,7 +24,7 @@ inline bool is_running(const child_handle &p, int & exit_code, std::error_code &
     ::boost::winapi::DWORD_ code;
     //single value, not needed in the winapi.
     if (!::boost::winapi::GetExitCodeProcess(p.process_handle(), &code))
-        ec = ::boost::process::detail::get_last_error();
+        ec = ::boost::process::v1::detail::get_last_error();
     else
         ec.clear();
 
@@ -41,7 +41,7 @@ inline bool is_running(const child_handle &p, int & exit_code)
 {
     std::error_code ec;
     bool b = is_running(p, exit_code, ec);
-    boost::process::detail::throw_error(ec, "GetExitCodeProcess() failed in is_running");
+    boost::process::v1::detail::throw_error(ec, "GetExitCodeProcess() failed in is_running");
     return b;
 }
 
@@ -52,6 +52,6 @@ inline bool is_running(int code)
 
 inline int eval_exit_status(int in ) {return in;}
 
-}}}}
+}}}}}
 
 #endif

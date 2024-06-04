@@ -17,11 +17,11 @@
 \xmlonly
 <programlisting>
 namespace boost {
-  namespace process {
+  namespace process { BOOST_PROCESS_V1_INLINE namespace v1 {
     namespace posix {
-      <emphasis>unspecified</emphasis> <globalname alt="boost::process::posix::fd">fd</globalname>;
-      <emphasis>unspecified</emphasis> <globalname alt="boost::process::posix::sig">sig</globalname>;
-      <emphasis>unspecified</emphasis> <globalname alt="boost::process::posix::use_vfork">use_vfork</globalname>;
+      <emphasis>unspecified</emphasis> <globalname alt="boost::process::v1::posix::fd">fd</globalname>;
+      <emphasis>unspecified</emphasis> <globalname alt="boost::process::v1::posix::sig">sig</globalname>;
+      <emphasis>unspecified</emphasis> <globalname alt="boost::process::v1::posix::use_vfork">use_vfork</globalname>;
     }
   }
 }
@@ -33,7 +33,7 @@ namespace boost {
  *
  */
 
-namespace boost { namespace process {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 {
 
 ///Namespace containing the posix extensions.
 namespace posix {
@@ -46,7 +46,7 @@ namespace posix {
  * Close can also be called with a range of file-descriptors to be closed.
  *
  */
-constexpr ::boost::process::detail::posix::fd_ fd;
+constexpr ::boost::process::v1::detail::posix::fd_ fd;
 
 /** This property lets you modify the handling of `SIGCHLD` for this call. It will be reset afterwards.
 
@@ -60,16 +60,16 @@ sig(handler);
 
 \warning @ref spawn will automatically use `sig.ign()`, which will override if you pass a custom handler.
  */
-constexpr ::boost::process::detail::posix::sig_       sig;
+constexpr ::boost::process::v1::detail::posix::sig_       sig;
 /** This property will replace the usage of [fork](http://pubs.opengroup.org/onlinepubs/9699919799/functions/fork.html) by [vfork](http://pubs.opengroup.org/onlinepubs/009695399/functions/vfork.html).
  \note `vfork` is no longer an official part of the posix standard.
 
  */
-constexpr ::boost::process::detail::posix::use_vfork_ use_vfork;
+constexpr ::boost::process::v1::detail::posix::use_vfork_ use_vfork;
 
 
-using ::boost::process::detail::posix::sighandler_t;
+using ::boost::process::v1::detail::posix::sighandler_t;
 
-}}}
+}}}}
 
 #endif /* BOOST_PROCESS_POSIX_HPP_ */

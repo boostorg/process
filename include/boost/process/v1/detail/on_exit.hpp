@@ -17,7 +17,7 @@
 #include <future>
 #include <memory>
 
-namespace boost { namespace process { namespace detail {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail {
 
 inline std::function<void(int, const std::error_code &)> on_exit_from_future(std::future<int> &f)
 {
@@ -46,8 +46,9 @@ struct on_exit_
 
 }
 
-constexpr static ::boost::process::detail::on_exit_ on_exit{};
+constexpr static ::boost::process::v1::detail::on_exit_ on_exit{};
 
 
-}}
+}}}
+
 #endif /* INCLUDE_BOOST_PROCESS_WINDOWS_ON_EXIT_HPP_ */

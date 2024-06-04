@@ -40,7 +40,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace boost { namespace process {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 {
 
 class child;
 
@@ -228,7 +228,7 @@ inline child basic_execute_impl(Args && ... args)
     boost::fusion::tuple<typename std::remove_reference<Args>::type&...> tup(args...);
 
     auto inits = boost::fusion::filter_if<
-                boost::process::detail::is_initializer<
+                boost::process::v1::detail::is_initializer<
                     typename std::remove_reference<
                         boost::mpl::_
                         >::type
@@ -237,7 +237,7 @@ inline child basic_execute_impl(Args && ... args)
 
     auto others = boost::fusion::filter_if<
                 boost::mpl::not_<
-                    boost::process::detail::is_initializer<
+                    boost::process::v1::detail::is_initializer<
                      typename std::remove_reference<
                             boost::mpl::_
                             >::type
@@ -250,20 +250,20 @@ inline child basic_execute_impl(Args && ... args)
     //typedef typename boost::fusion::result_of::as_vector<decltype(inits)>::type  inits_t;
     typedef typename boost::fusion::result_of::as_vector<decltype(others)>::type others_t;
     //  typedef decltype(others) others_t;
-    typedef typename ::boost::process::detail::make_builders_from_view<
+    typedef typename ::boost::process::v1::detail::make_builders_from_view<
             typename boost::fusion::result_of::begin<others_t>::type,
             typename boost::fusion::result_of::end  <others_t>::type>::type builder_t;
 
     builder_t builders;
-    ::boost::process::detail::builder_ref<builder_t> builder_ref(builders);
+    ::boost::process::v1::detail::builder_ref<builder_t> builder_ref(builders);
 
     boost::fusion::for_each(others, builder_ref);
-    auto other_inits = ::boost::process::detail::get_initializers(builders);
+    auto other_inits = ::boost::process::v1::detail::get_initializers(builders);
 
 
     boost::fusion::joint_view<decltype(other_inits), decltype(inits)> complete_inits(other_inits, inits);
 
-    auto exec = boost::process::detail::api::make_executor<Char>(complete_inits);
+    auto exec = boost::process::v1::detail::api::make_executor<Char>(complete_inits);
     return exec();
 }
 
@@ -273,12 +273,11 @@ inline child execute_impl(Args&& ... args)
     typedef required_char_type_t<Args...> req_char_type;
 
     return basic_execute_impl<req_char_type>(
-        boost::process::detail::char_converter_t<req_char_type, Args>::conv(
+        boost::process::v1::detail::char_converter_t<req_char_type, Args>::conv(
                 std::forward<Args>(args))...
             );
 }
 
-}}}
-
+}}}}
 
 #endif

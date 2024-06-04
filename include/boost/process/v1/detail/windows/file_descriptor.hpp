@@ -13,7 +13,7 @@
 #include <boost/process/v1/filesystem.hpp>
 #include <boost/core/exchange.hpp>
 
-namespace boost { namespace process { namespace detail { namespace windows {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace windows {
 
 struct file_descriptor
 {
@@ -40,14 +40,14 @@ struct file_descriptor
     }
 
     file_descriptor() = default;
-    file_descriptor(const boost::process::filesystem::path& p, mode_t mode = read_write)
+    file_descriptor(const boost::process::v1::filesystem::path& p, mode_t mode = read_write)
         : file_descriptor(p.native(), mode)
     {
     }
 
     file_descriptor(const std::string & path , mode_t mode = read_write)
 #if defined(BOOST_NO_ANSI_APIS)
-        : file_descriptor(::boost::process::detail::convert(path), mode)
+        : file_descriptor(::boost::process::v1::detail::convert(path), mode)
 #else
         : file_descriptor(path.c_str(), mode)
 #endif
@@ -117,6 +117,6 @@ private:
     ::boost::winapi::HANDLE_ _handle = ::boost::winapi::INVALID_HANDLE_VALUE_;
 };
 
-}}}}
+}}}}}
 
 #endif /* BOOST_PROCESS_DETAIL_WINDOWS_FILE_DESCRIPTOR_HPP_ */

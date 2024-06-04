@@ -14,7 +14,7 @@
 #include <string>
 #include <utility>
 
-namespace boost { namespace process { namespace detail { namespace posix {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace posix {
 
 class async_pipe
 {
@@ -37,7 +37,7 @@ public:
     {
         int fds[2];
         if (::pipe(fds) == -1)
-            boost::process::detail::throw_last_error("pipe(2) failed");
+            boost::process::v1::detail::throw_last_error("pipe(2) failed");
 
         _source.assign(fds[0]);
         _sink  .assign(fds[1]);
@@ -205,18 +205,18 @@ async_pipe::async_pipe(boost::asio::io_context & ios_source,
     auto fifo = mkfifo(name.c_str(), 0666 );
 
     if (fifo != 0)
-        boost::process::detail::throw_last_error("mkfifo() failed");
+        boost::process::v1::detail::throw_last_error("mkfifo() failed");
 
 
     int  read_fd = open(name.c_str(), O_RDWR);
 
     if (read_fd == -1)
-        boost::process::detail::throw_last_error();
+        boost::process::v1::detail::throw_last_error();
 
     int write_fd = dup(read_fd);
 
     if (write_fd == -1)
-        boost::process::detail::throw_last_error();
+        boost::process::v1::detail::throw_last_error();
 
     _source.assign(read_fd);
     _sink  .assign(write_fd);
@@ -236,7 +236,7 @@ async_pipe::async_pipe(const async_pipe & p) :
     {
         _source.assign(::dup(source_in));
         if (_source.native_handle()== -1)
-            ::boost::process::detail::throw_last_error("dup()");
+            ::boost::process::v1::detail::throw_last_error("dup()");
     }
 
     if (sink_in   == -1)
@@ -245,7 +245,7 @@ async_pipe::async_pipe(const async_pipe & p) :
     {
         _sink.assign(::dup(sink_in));
         if (_sink.native_handle() == -1)
-            ::boost::process::detail::throw_last_error("dup()");
+            ::boost::process::v1::detail::throw_last_error("dup()");
     }
 }
 
@@ -263,7 +263,7 @@ async_pipe& async_pipe::operator=(const async_pipe & p)
     {
         source = ::dup(source_in);
         if (source == -1)
-            ::boost::process::detail::throw_last_error("dup()");
+            ::boost::process::v1::detail::throw_last_error("dup()");
     }
 
     if (sink_in   == -1)
@@ -272,7 +272,7 @@ async_pipe& async_pipe::operator=(const async_pipe & p)
     {
         sink  = ::dup(sink_in);
         if (sink == -1)
-            ::boost::process::detail::throw_last_error("dup()");
+            ::boost::process::v1::detail::throw_last_error("dup()");
     }
     _source.assign(source);
     _sink.  assign(sink);
@@ -304,7 +304,7 @@ async_pipe::operator basic_pipe<CharT, Traits>() const
     {
         source = ::dup(source_in);
         if (source == -1)
-            ::boost::process::detail::throw_last_error("dup()");
+            ::boost::process::v1::detail::throw_last_error("dup()");
     }
 
     if (sink_in   == -1)
@@ -313,7 +313,7 @@ async_pipe::operator basic_pipe<CharT, Traits>() const
     {
         sink = ::dup(sink_in);
         if (sink == -1)
-            ::boost::process::detail::throw_last_error("dup()");
+            ::boost::process::v1::detail::throw_last_error("dup()");
     }
 
     return basic_pipe<CharT, Traits>{source, sink};
@@ -360,6 +360,6 @@ inline bool operator!=(const basic_pipe<Char, Traits> & lhs, const async_pipe & 
            !compare_handles(lhs.native_sink(),   rhs.native_sink());
 }
 
-}}}}
+}}}}}
 
 #endif /* INCLUDE_BOOST_PIPE_DETAIL_WINDOWS_ASYNC_PIPE_HPP_ */

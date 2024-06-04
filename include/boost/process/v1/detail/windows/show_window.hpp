@@ -11,15 +11,16 @@
 #ifndef BOOST_PROCESS_WINDOWS_SHOW_WINDOW_HPP
 #define BOOST_PROCESS_WINDOWS_SHOW_WINDOW_HPP
 
+#include <boost/process/v1/detail/config.hpp>
 #include <boost/winapi/process.hpp>
 #include <boost/winapi/show_window.hpp>
 #include <boost/process/v1/detail/handler_base.hpp>
 
 
-namespace boost { namespace process { namespace detail { namespace windows {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace windows {
 
 template<::boost::winapi::WORD_ Flags>
-struct show_window : ::boost::process::detail::handler_base
+struct show_window : ::boost::process::v1::detail::handler_base
 {
     template <class WindowsExecutor>
     void on_setup(WindowsExecutor &e) const
@@ -29,7 +30,7 @@ struct show_window : ::boost::process::detail::handler_base
     }
 };
 
-struct create_no_window_ : public ::boost::process::detail::handler_base
+struct create_no_window_ : public ::boost::process::v1::detail::handler_base
 {
     template <class Executor>
     void on_setup(Executor &exec) const
@@ -39,7 +40,7 @@ struct create_no_window_ : public ::boost::process::detail::handler_base
 };
 
 
-}}}}
+}}}}}
 
 #endif
 

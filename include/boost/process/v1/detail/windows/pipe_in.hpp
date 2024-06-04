@@ -17,9 +17,9 @@
 #include <boost/system/error_code.hpp>
 
 
-namespace boost { namespace process { namespace detail { namespace windows {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace windows {
 
-struct pipe_in : public ::boost::process::detail::handler_base, ::boost::process::detail::uses_handles
+struct pipe_in : public ::boost::process::v1::detail::handler_base, ::boost::process::v1::detail::uses_handles
 {
     ::boost::winapi::HANDLE_ handle;
 
@@ -89,6 +89,6 @@ struct async_pipe_in : public pipe_in
 };
 
 
-}}}}
+}}}}}
 
 #endif

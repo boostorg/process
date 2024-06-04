@@ -11,7 +11,7 @@
 #include <system_error>
 #include <unistd.h>
 
-namespace boost { namespace process { namespace detail { namespace posix {
+namespace boost { namespace process { BOOST_PROCESS_V1_INLINE namespace v1 { namespace detail { namespace posix {
 
 struct group_handle
 {
@@ -70,7 +70,7 @@ struct group_handle
 inline  void terminate(group_handle &p, std::error_code &ec) noexcept
 {
     if (::killpg(p.grp, SIGKILL) == -1)
-        ec = boost::process::detail::get_last_error();
+        ec = boost::process::v1::detail::get_last_error();
     else
         ec.clear();
 
@@ -81,7 +81,7 @@ inline void terminate(group_handle &p)
 {
     std::error_code ec;
     terminate(p, ec);
-    boost::process::detail::throw_error(ec, "killpg(2) failed in terminate");
+    boost::process::v1::detail::throw_error(ec, "killpg(2) failed in terminate");
 }
 
 inline bool in_group()
@@ -89,6 +89,6 @@ inline bool in_group()
     return true;
 }
 
-}}}}
+}}}}}
 
 #endif /* BOOST_PROCESS_DETAIL_WINDOWS_GROUP_HPP_ */
