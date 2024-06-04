@@ -3,8 +3,6 @@
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-#ifndef BOOST_PROCESS_V2_IMPL_CMD_IPP
-#define BOOST_PROCESS_V2_IMPL_CMD_IPP
 
 #include <boost/process/v2/detail/config.hpp>
 #include <boost/process/v2/detail/last_error.hpp>
@@ -17,6 +15,12 @@
 #include <shellapi.h>
 #else
 #include <cstdlib>
+#endif
+
+#if (defined(__APPLE__) && defined(__MACH__))
+#include <sys/proc_info.h>
+#include <sys/sysctl.h>
+#include <libproc.h>
 #endif
 
 #if (defined(__linux__) || defined(__ANDROID__))
@@ -400,6 +404,3 @@ shell cmd(boost::process::v2::pid_type pid)
 } // namespace ext
 
 BOOST_PROCESS_V2_END_NAMESPACE
-
-#endif // BOOST_PROCESS_V2_IMPL_CMD_IPP
-

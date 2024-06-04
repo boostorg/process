@@ -2,10 +2,11 @@
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-#ifndef BOOST_PROCESS_V2_DETAIL_IMPL_PROCESS_HANDLE_WINDOWS_IPP
-#define BOOST_PROCESS_V2_DETAIL_IMPL_PROCESS_HANDLE_WINDOWS_IPP
 
 #include <boost/process/v2/detail/config.hpp>
+
+#if defined(BOOST_PROCESS_V2_WINDOWS)
+
 #include <boost/process/v2/detail/last_error.hpp>
 #include <boost/process/v2/detail/throw_error.hpp>
 #include <boost/process/v2/detail/process_handle_windows.hpp>
@@ -157,13 +158,11 @@ void resume_(HANDLE handle, error_code & ec)
 }
 #endif
 
-#if !defined(BOOST_PROCESS_V2_HEADER_ONLY)
 template struct basic_process_handle_win<>;
-#endif
 
 }
 
 
 BOOST_PROCESS_V2_END_NAMESPACE
 
-#endif //BOOST_PROCESS_V2_DETAIL_IMPL_PROCESS_HANDLE_WINDOWS_IPP
+#endif

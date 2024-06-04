@@ -3,8 +3,6 @@
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-#ifndef BOOST_PROCESS_V2_IMPL_EXE_IPP
-#define BOOST_PROCESS_V2_IMPL_EXE_IPP
 
 #include <boost/process/v2/detail/config.hpp>
 #include <boost/process/v2/detail/last_error.hpp>
@@ -188,6 +186,3 @@ filesystem::path exe(boost::process::v2::pid_type pid)
 } // namespace ext
 
 BOOST_PROCESS_V2_END_NAMESPACE
-
-#endif // BOOST_PROCESS_V2_IMPL_EXE_IPP
-

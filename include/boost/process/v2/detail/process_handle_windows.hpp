@@ -303,9 +303,7 @@ struct basic_process_handle_win
     };
 };
 
-#if !defined(BOOST_PROCESS_V2_HEADER_ONLY)
 extern template struct basic_process_handle_win<>;
-#endif
 
 }
 
