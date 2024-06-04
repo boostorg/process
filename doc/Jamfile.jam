@@ -32,7 +32,10 @@ doxygen reference_v1
   [ glob $(INCLUDES)/boost/process/v1/*.hpp ]
   :
   <doxygen:param>EXCLUDE_SYMBOLS=BOOST_ASIO_INITFN_RESULT_TYPE
-  <doxygen:param>PREDEFINED=BOOST_PROCESS_DOXYGEN
+  <doxygen:param>"PREDEFINED=\\
+  BOOST_PROCESS_DOXYGEN=1 \\
+  BOOST_PROCESS_V1_INLINE=
+  "
   <doxygen:param>HIDE_UNDOC_CLASSES=YES
   <doxygen:param>HIDE_UNDOC_MEMBERS=YES
   <doxygen:param>EXAMPLE_PATH=.
@@ -67,6 +70,7 @@ doxygen reference_v2
     BOOST_ASIO_DEFAULT_COMPLETION_TOKEN=DEFAULT \\ 
     BOOST_CONSTEXPR=constexpr \\
     BOOST_CXX14_CONSTEXPR=constexpr \\
+    BOOST_PROCESS_V2_INLINE= \\
     BOOST_ATTRIBUTE_NODISCARD=[[nodiscard]]
     "
   <doxygen.doxproc.id>reference_v2

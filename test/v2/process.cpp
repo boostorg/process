@@ -129,8 +129,9 @@ BOOST_AUTO_TEST_CASE(terminate)
   bpv::process proc(ctx, pth, {"sleep", "10"});
   proc.suspend();
   proc.resume();
-  proc.terminate();
-  proc.wait();
+  boost::system::error_code ec;
+  proc.terminate(ec);
+  proc.wait(ec);
   BOOST_CHECK_NE(proc.exit_code(), 0);
 }
 

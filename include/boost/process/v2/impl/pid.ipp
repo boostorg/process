@@ -216,7 +216,10 @@ pid_type parent_pid(pid_type pid, boost::system::error_code & ec)
     FILE *stat = fopen(buffer, "r");
     if (!stat)
     {
-        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+        if (errno == ENOENT)
+            BOOST_PROCESS_V2_ASSIGN_EC(ec, ESRCH, system_category())
+        else
+            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
         return ppid;
     } 
     else
@@ -260,9 +263,9 @@ std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec)
     {
         pid_type ppid = parent_pid(pids[i], ec);
         if (ppid != -1 && ppid == pid)
-        {
             vec.push_back(pids[i]);
-        }
+        else if (ec.value() == ESRCH)
+           ec.clear();
     }
     return vec;
 }
