@@ -398,12 +398,16 @@ child executor<Sequence>::invoke(boost::mpl::false_, boost::mpl::false_)
             set_error(err, "fcntl(2) failed");//this might throw, so we need to be sure our pipe is safe.
             return child();
         }
+
+        _pipe_sink = p.p[1];
+
         _ec.clear();
         boost::fusion::for_each(seq, call_on_setup(*this));
 
         if (_ec)
         {
             boost::fusion::for_each(seq, call_on_error(*this, _ec));
+            _pipe_sink = -1;
             return child();
         }
 
@@ -417,11 +421,11 @@ child executor<Sequence>::invoke(boost::mpl::false_, boost::mpl::false_)
             _msg = "fork() failed";
             boost::fusion::for_each(seq, call_on_fork_error(*this, _ec));
             boost::fusion::for_each(seq, call_on_error(*this, _ec));
+            _pipe_sink = -1;
             return child();
         }
         else if (pid == 0)
         {
-            _pipe_sink = p.p[1];
             ::close(p.p[0]);
 
             boost::fusion::for_each(seq, call_on_exec_setup(*this));
@@ -439,6 +443,7 @@ child executor<Sequence>::invoke(boost::mpl::false_, boost::mpl::false_)
 
         ::close(p.p[1]);
         p.p[1] = -1;
+        _pipe_sink = -1;
         _read_error(p.p[0]);
 
     }

@@ -171,3 +171,46 @@ BOOST_AUTO_TEST_CASE(leak_test, *boost::unit_test::timeout(5))
     BOOST_CHECK_EQUAL(fd_list.size(), fd_list_new.size());
 
 }
+
+BOOST_AUTO_TEST_CASE(pipe_fd_is_not_leaked, *boost::unit_test::timeout(5))
+{
+    const std::string partner = boost::unit_test::framework::master_test_suite().argv[1];
+
+    #define test(parent_closes_source, fd_to_check, expected_exitcode, call_args...) \
+        do { \
+            boost::asio::io_context ioctx; \
+            bp::async_pipe pipe(ioctx); \
+            BOOST_CHECK_NE(pipe.native_source(), -1); \
+            BOOST_CHECK_NE(pipe.native_sink(), -1); \
+            BOOST_CHECK_EQUAL(bp::system(partner, "--has-handle", std::to_string(fd_to_check), call_args), expected_exitcode); \
+            if (parent_closes_source) { \
+                BOOST_CHECK_EQUAL(pipe.native_source(), -1); \
+                BOOST_CHECK_NE(pipe.native_sink(), -1); \
+            } else { \
+                BOOST_CHECK_NE(pipe.native_source(), -1); \
+                BOOST_CHECK_EQUAL(pipe.native_sink(), -1); \
+            } \
+        } while (0)
+
+    // Both parent and child processes must close the end of the pipe which they don't use,
+    // and pipe_in/pipe_out must close the original source/sink fd after redirecting in the child process,
+    // so that they don't keep the pipe open unnecessarily.
+    test(true, STDIN_FILENO        , EXIT_SUCCESS, bp::std_in < pipe);
+    test(true, pipe.native_source(), EXIT_FAILURE, bp::std_in < pipe);
+    test(true, pipe.native_sink()  , EXIT_FAILURE, bp::std_in < pipe);
+
+    test(false, STDOUT_FILENO       , EXIT_SUCCESS, bp::std_out > pipe);
+    test(false, pipe.native_source(), EXIT_FAILURE, bp::std_out > pipe);
+    test(false, pipe.native_sink()  , EXIT_FAILURE, bp::std_out > pipe);
+
+    test(false, STDERR_FILENO       , EXIT_SUCCESS, bp::std_err > pipe);
+    test(false, pipe.native_source(), EXIT_FAILURE, bp::std_err > pipe);
+    test(false, pipe.native_sink()  , EXIT_FAILURE, bp::std_err > pipe);
+
+    test(false, STDOUT_FILENO       , EXIT_SUCCESS, (bp::std_out & bp::std_err) > pipe);
+    test(false, STDERR_FILENO       , EXIT_SUCCESS, (bp::std_out & bp::std_err) > pipe);
+    test(false, pipe.native_source(), EXIT_FAILURE, (bp::std_out & bp::std_err) > pipe);
+    test(false, pipe.native_sink()  , EXIT_FAILURE, (bp::std_out & bp::std_err) > pipe);
+
+    #undef test
+}

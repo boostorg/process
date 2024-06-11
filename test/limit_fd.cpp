@@ -193,3 +193,9 @@ BOOST_AUTO_TEST_CASE(limit_fd, *boost::unit_test::timeout(5))
 
     fclose(p);
 }
+
+BOOST_AUTO_TEST_CASE(limit_fd_does_not_break_error_reporting, *boost::unit_test::timeout(5))
+{
+    BOOST_CHECK_THROW(boost::process::system("/does/not/exist"), boost::process::process_error);
+    BOOST_CHECK_THROW(boost::process::system("/does/not/exist", boost::process::limit_handles), boost::process::process_error);
+}
