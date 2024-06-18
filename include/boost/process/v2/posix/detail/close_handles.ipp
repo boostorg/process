@@ -45,12 +45,26 @@ int fdwalk(int (*func)(void *, int), void *cd);
 
 #include <linux/version.h>
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,11,0)
+#ifdef __GLIBC__
 
+#include <gnu/libc-version.h>
+
+#if __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 34
+// on glibc we also must have ::close_range() wrapper around system call
+// if we're building on system with new kernel, BUT without this wrapper (old glibc) the build will be failed
+#define BOOST_PROCESS_V2_HAS_CLOSE_RANGE 1
+#endif // if __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 34
+
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(5,11,0) // if no __GLIBC__ defined
+// we're not on glibc, so just check the version code
+#define BOOST_PROCESS_V2_HAS_CLOSE_RANGE 1
+
+#endif // ifdef __GLIBC__
+
+#ifdef BOOST_PROCESS_V2_HAS_CLOSE_RANGE
 // https://man7.org/linux/man-pages/man2/close_range.2.html
 #include <linux/close_range.h>
-#define BOOST_PROCESS_V2_HAS_CLOSE_RANGE 1 
-#else 
+#else
 
 #include <dirent.h>
 
