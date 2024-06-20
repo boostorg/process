@@ -45,7 +45,9 @@ int fdwalk(int (*func)(void *, int), void *cd);
 
 #elif defined(__linux__) // elif defined(__sun)
 
-#include <linux/version.h>
+// define BOOST_PROCESS_V2_POSIX_FORCE_DISABLE_CLOSE_RANGE to force disable any usage of ::close_range()
+
+#include <sys/syscall.h>
 
 // All checks here are intended to check whether target system has ::close_range()
 // Note that this checks only valid on glibc. MUSL doens't have ::close_range() anyway. So we don't care about any
@@ -55,7 +57,7 @@ int fdwalk(int (*func)(void *, int), void *cd);
 // On glibc we also must have ::close_range() wrapper around system call.
 // If we're building on system with new kernel, BUT without this wrapper (old glibc) the build will be failed
 #include <gnu/libc-version.h>
-#if __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 34
+#if (__GLIBC__ >= 2 && __GLIBC_MINOR__ >= 34) && !defined(BOOST_PROCESS_V2_POSIX_FORCE_DISABLE_CLOSE_RANGE)
 #define BOOST_PROCESS_V2_HAS_CLOSE_RANGE 1
 #endif // __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 34
 
@@ -63,7 +65,7 @@ int fdwalk(int (*func)(void *, int), void *cd);
 
 // glibc version doesn't meet version requirements or we're building with MUSL.
 // Just try to check linux version code. If system call is supported we'll use raw system call
-#if !defined(BOOST_PROCESS_V2_HAS_CLOSE_RANGE) && LINUX_VERSION_CODE >= KERNEL_VERSION(5,9,0)
+#if !defined(BOOST_PROCESS_V2_HAS_CLOSE_RANGE) && defined(SYS_close_range) && !defined(BOOST_PROCESS_V2_POSIX_FORCE_DISABLE_CLOSE_RANGE)
 #define BOOST_PROCESS_V2_HAS_CLOSE_RANGE_SYSCALL 1
 #endif // if !defined(BOOST_PROCESS_V2_HAS_CLOSE_RANGE) && LINUX_VERSION_CODE >= KERNEL_VERSION(5,9,0)
 
