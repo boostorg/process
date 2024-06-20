@@ -47,6 +47,7 @@ int fdwalk(int (*func)(void *, int), void *cd);
 
 // define BOOST_PROCESS_V2_POSIX_FORCE_DISABLE_CLOSE_RANGE to force disable any usage of ::close_range()
 
+
 #include <sys/syscall.h>
 
 // All checks here are intended to check whether target system has ::close_range()
@@ -68,6 +69,7 @@ int fdwalk(int (*func)(void *, int), void *cd);
 #if !defined(BOOST_PROCESS_V2_HAS_CLOSE_RANGE) && defined(SYS_close_range) && !defined(BOOST_PROCESS_V2_POSIX_FORCE_DISABLE_CLOSE_RANGE)
 #define BOOST_PROCESS_V2_HAS_CLOSE_RANGE_SYSCALL 1
 #endif // if !defined(BOOST_PROCESS_V2_HAS_CLOSE_RANGE) && LINUX_VERSION_CODE >= KERNEL_VERSION(5,9,0)
+
 
 // https://man7.org/linux/man-pages/man2/close_range.2.html
 #if defined(BOOST_PROCESS_V2_HAS_CLOSE_RANGE) || defined(BOOST_PROCESS_V2_HAS_CLOSE_RANGE_SYSCALL)
