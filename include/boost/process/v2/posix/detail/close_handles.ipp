@@ -73,6 +73,7 @@ int fdwalk(int (*func)(void *, int), void *cd);
 
 // https://man7.org/linux/man-pages/man2/close_range.2.html
 #if defined(BOOST_PROCESS_V2_HAS_CLOSE_RANGE) || defined(BOOST_PROCESS_V2_HAS_CLOSE_RANGE_SYSCALL)
+#define BOOST_PROCESS_V2_HAS_ANY_CLOSE_RANGE
 #include <linux/close_range.h>
 #include <sys/syscall.h>
 
@@ -93,6 +94,21 @@ namespace posix
 
 namespace detail
 {
+
+#if defined(BOOST_PROCESS_V2_HAS_ANY_CLOSE_RANGE)
+
+/*!
+ * Just a convenient wrapper around raw system call or glibc function if present
+ */
+int close_range_wrapper(unsigned int first, unsigned int last, unsigned int flags) {
+#if defined(BOOST_PROCESS_V2_HAS_CLOSE_RANGE)
+    return ::close_range(first, last, flags);
+#elif defined(BOOST_PROCESS_V2_HAS_CLOSE_RANGE_SYSCALL)
+    return ::syscall(SYS_close_range, first, last, flags);
+#endif
+}
+
+#endif
 
 #if defined(BOOST_PROCESS_V2_HAS_PDFORK)
 
@@ -138,7 +154,7 @@ void close_all(const std::vector<int> & whitelist, error_code & ec)
         ::closefrom(0);
 }
 
-#elif defined(BOOST_PROCESS_V2_HAS_CLOSE_RANGE)
+#elif defined(BOOST_PROCESS_V2_HAS_ANY_CLOSE_RANGE)
 
 
 // linux impl - whitelist must be ordered
@@ -149,7 +165,7 @@ void close_all(const std::vector<int> & whitelist, error_code & ec)
     if (!whitelist.empty())
     {
         if (whitelist.front() != 0)
-            ::close_range(0, whitelist.front() - 1, CLOSE_RANGE_UNSHARE);
+            close_range_wrapper(0, whitelist.front() - 1, CLOSE_RANGE_UNSHARE);
 
         for (std::size_t idx = 0u; 
              idx < (whitelist.size() - 1u);
@@ -159,44 +175,14 @@ void close_all(const std::vector<int> & whitelist, error_code & ec)
             const auto next = whitelist[idx + 1];
             if ((mine + 1) != next && (mine != next))
             {
-                ::close_range(mine + 1, next - 1, CLOSE_RANGE_UNSHARE);
+                close_range_wrapper(mine + 1, next - 1, CLOSE_RANGE_UNSHARE);
             }
         }
 
-        ::close_range(whitelist.back() + 1, std::numeric_limits<int>::max(), CLOSE_RANGE_UNSHARE);
+        close_range_wrapper(whitelist.back() + 1, std::numeric_limits<int>::max(), CLOSE_RANGE_UNSHARE);
     }
     else
-        ::close_range(0, std::numeric_limits<int>::max(), CLOSE_RANGE_UNSHARE);
-}
-
-#elif defined(BOOST_PROCESS_V2_HAS_CLOSE_RANGE_SYSCALL)
-
-// linux impl - whitelist must be ordered
-void close_all(const std::vector<int> & whitelist, error_code & ec)
-{
-    // https://patchwork.kernel.org/project/linux-fsdevel/cover/20200602204219.186620-1-christian.brauner@ubuntu.com/
-    //the most common scenario is whitelist = {0,1,2}
-    if (!whitelist.empty())
-    {
-        if (whitelist.front() != 0)
-            ::syscall(SYS_close_range, 0, whitelist.front() - 1, CLOSE_RANGE_UNSHARE);
-
-        for (std::size_t idx = 0u;
-             idx < (whitelist.size() - 1u);
-             idx++)
-        {
-            const auto mine = whitelist[idx];
-            const auto next = whitelist[idx + 1];
-            if ((mine + 1) != next && (mine != next))
-            {
-                ::syscall(SYS_close_range, mine + 1, next - 1, CLOSE_RANGE_UNSHARE);
-            }
-        }
-
-        ::syscall(SYS_close_range, whitelist.back() + 1, std::numeric_limits<int>::max(), CLOSE_RANGE_UNSHARE);
-    }
-    else
-        ::syscall(SYS_close_range, 0, std::numeric_limits<int>::max(), CLOSE_RANGE_UNSHARE);
+        close_range_wrapper(0, std::numeric_limits<int>::max(), CLOSE_RANGE_UNSHARE);
 }
 
 #else
