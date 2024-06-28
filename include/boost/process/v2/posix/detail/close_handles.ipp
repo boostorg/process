@@ -100,7 +100,7 @@ namespace detail
 /*!
  * Just a convenient wrapper around raw system call or glibc function if present
  */
-int close_range_wrapper(unsigned int first, unsigned int last, unsigned int flags) {
+inline int close_range_wrapper(unsigned int first, unsigned int last, unsigned int flags) {
 #if defined(BOOST_PROCESS_V2_HAS_CLOSE_RANGE)
     return ::close_range(first, last, flags);
 #elif defined(BOOST_PROCESS_V2_HAS_CLOSE_RANGE_SYSCALL)
