@@ -154,6 +154,6 @@ BOOST_AUTO_TEST_CASE(async_nowait)
             io_context
     );
     BOOST_REQUIRE(!ec);
-    io_context.run();
+    io_context.run_for(std::chrono::milliseconds(100));
     BOOST_CHECK_EQUAL(221, c.exit_code());
 }
