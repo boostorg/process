@@ -370,7 +370,7 @@ BOOST_AUTO_TEST_CASE(popen)
     // default CWD
     bpv::popen proc(/*bpv::default_process_launcher(), */ctx, pth, {"echo"});
 
-    BOOST_CHECK_EQUAL(asio::write(proc, asio::buffer("FOOBAR", 6)), 6);
+    BOOST_CHECK_EQUAL(asio::write(proc, asio::buffer("FOOBAR", 6)), 6u);
 
     proc.get_stdin().close();
 
