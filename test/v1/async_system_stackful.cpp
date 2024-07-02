@@ -14,6 +14,7 @@
 #include <boost/process/v1/async_system.hpp>
 
 #include <string>
+#include <boost/asio/detached.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/post.hpp>
 #include <boost/asio/spawn.hpp>
@@ -48,7 +49,7 @@ BOOST_AUTO_TEST_CASE(stackful, *boost::unit_test::timeout(15))
             };
 
     boost::asio::io_context::strand str{ios};
-    boost::asio::post(str, [&]{boost::asio::spawn(ios, stackful);});
+    boost::asio::post(str, [&]{boost::asio::spawn(ios, stackful, boost::asio::detached);});
     boost::asio::post(str, [&]{did_something_else = true;});
 
     ios.run();
