@@ -46,7 +46,10 @@ BOOST_AUTO_TEST_CASE(stackless, *boost::unit_test::timeout(15))
                 boost::system::error_code ec = boost::system::error_code(),
                 std::size_t exit_code = 0)
         {
-            if (!ec) reenter (this)
+            if (ec)
+              return;
+
+            reenter (this)
             {
                 yield bp::async_system(
                         ios, *this,
