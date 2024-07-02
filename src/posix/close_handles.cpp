@@ -12,6 +12,7 @@
 #include <boost/process/v2/posix/detail/close_handles.hpp>
 
 #include <algorithm>
+#include <memory>
 
 // linux has close_range since 5.19
 
@@ -44,11 +45,35 @@ int fdwalk(int (*func)(void *, int), void *cd);
 
 #include <linux/version.h>
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,11,0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,11,0) // kernel has close_range
 
+#include <gnu/libc-version.h>
+#if (__GLIBC__ >= 2 && __GLIBC_MINOR__ >= 34) // glibc is compiled with close_range support
 // https://man7.org/linux/man-pages/man2/close_range.2.html
+
 #include <linux/close_range.h>
-#define BOOST_PROCESS_V2_HAS_CLOSE_RANGE 1 
+#define BOOST_PROCESS_V2_HAS_CLOSE_RANGE 1
+#else
+
+#include <sys/syscall.h>
+
+#if defined(SYS_close_range)
+
+#define BOOST_PROCESS_V2_HAS_CLOSE_RANGE 1
+int close_range(unsigned int first, unsigned int last, int flags)
+{
+  return ::syscall(SYS_close_range, first, last, flags);
+}
+
+#else
+
+#include <dirent.h>
+
+#endif
+
+#endif
+
+
 #else 
 
 #include <dirent.h>
@@ -56,10 +81,10 @@ int fdwalk(int (*func)(void *, int), void *cd);
 #endif
 
 #else
-
 #include <dirent.h>
 
 #endif
+
 
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
 
