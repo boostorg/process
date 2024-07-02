@@ -28,7 +28,7 @@ typedef boost::asio::posix::stream_descriptor pipe_end;
 
 namespace bp = boost::process;
 
-BOOST_AUTO_TEST_CASE(sync_wait)
+BOOST_AUTO_TEST_CASE(sync_wait, *boost::unit_test::timeout(10))
 {
     using boost::unit_test::framework::master_test_suite;
 
@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(sync_wait)
     c.wait();
 }
 
-BOOST_AUTO_TEST_CASE(sync_wait_abort)
+BOOST_AUTO_TEST_CASE(sync_wait_abort, *boost::unit_test::timeout(10))
 {
     using boost::unit_test::framework::master_test_suite;
 
@@ -103,7 +103,7 @@ struct wait_handler
 };
 #endif
 
-BOOST_AUTO_TEST_CASE(async_wait)
+BOOST_AUTO_TEST_CASE(async_wait, *boost::unit_test::timeout(10))
 {
     using boost::unit_test::framework::master_test_suite;
     using namespace boost::asio;
@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE(async_wait)
 
 
 
-BOOST_AUTO_TEST_CASE(async_nowait)
+BOOST_AUTO_TEST_CASE(async_nowait, *boost::unit_test::timeout(10))
 {
     // No need to call wait when passing an io_context
     using boost::unit_test::framework::master_test_suite;
