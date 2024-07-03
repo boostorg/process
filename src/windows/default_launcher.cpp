@@ -7,6 +7,11 @@
 #include <boost/process/v2/detail/config.hpp>
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
+#include <boost/asio/windows/basic_object_handle.hpp>
+#endif
+
+
+#if defined(BOOST_PROCESS_V2_WINDOWS)
 
 #include <boost/process/v2/windows/default_launcher.hpp>
 

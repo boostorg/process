@@ -5,6 +5,11 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include <boost/process/v2/detail/config.hpp>
+
+#if defined(BOOST_PROCESS_V2_WINDOWS)
+#include <boost/asio/windows/basic_object_handle.hpp>
+#endif
+
 #include <boost/process/v2/detail/last_error.hpp>
 #include <boost/process/v2/detail/throw_error.hpp>
 #include <boost/process/v2/ext/detail/proc_info.hpp>
