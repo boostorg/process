@@ -50,6 +50,12 @@ target_compile_definitions(boost_process
         PRIVATE BOOST_PROCESS_SOURCE=1
 )
 
+if (BOOST_PROCESS_USE_STD_FS)
+  target_compile_definitions(boost_process PUBLIC BOOST_PROCESS_USE_STD_FS=1 )
+else()
+  target_link_libraries(boost_process PUBLIC Boost::filesystem)
+endif()
+
 if(BUILD_SHARED_LIBS)
   target_compile_definitions(boost_process PUBLIC BOOST_PROCESS_DYN_LINK)
 else()
@@ -57,8 +63,6 @@ else()
 endif()
 
 if(BUILD_TESTING AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/test/CMakeLists.txt")
-
   add_subdirectory(test)
-
 endif()
 
