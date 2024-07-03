@@ -56,6 +56,10 @@ else()
   target_link_libraries(boost_process PUBLIC Boost::filesystem)
 endif()
 
+if (WIN32)
+  target_link_libraries(boost_process PUBLIC ntdll)
+endif()
+
 if(BUILD_SHARED_LIBS)
   target_compile_definitions(boost_process PUBLIC BOOST_PROCESS_DYN_LINK)
 else()
