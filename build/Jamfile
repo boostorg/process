@@ -40,11 +40,23 @@ alias process_sources
      shell.cpp
    ;
 
+if [ os.name ] = NT
+{
+  lib shell32 ;
+  lib Advapi32 ;
+  lib Ntdll ;
+  lib user32 ;
+}
+
 lib boost_process
    : process_sources
    : requirements <define>BOOST_PROCESS_SOURCE=1
      <link>shared:<define>BOOST_PROCESS_DYN_LINK=1
      <boost.process.fs>boost:<library>/boost//filesystem
+     <target-os>windows:<library>shell32
+     <target-os>windows:<library>user32
+     <target-os>windows:<library>Ntdll
+     <target-os>windows:<library>Advapi32
    : usage-requirements
      <link>shared:<define>BOOST_PROCESS_DYN_LINK=1
      <boost.process.fs>boost:<library>/boost//filesystem
