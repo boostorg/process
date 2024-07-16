@@ -247,10 +247,9 @@ struct basic_process_handle_win
         if (process_is_running(code))
             return true;
         else
-        {
             exit_code = code;
-            return false;
-        }
+
+        return false;
     }
 
     bool running(native_exit_code_type &exit_code)
@@ -303,9 +302,7 @@ struct basic_process_handle_win
     };
 };
 
-#if !defined(BOOST_PROCESS_V2_HEADER_ONLY)
 extern template struct basic_process_handle_win<>;
-#endif
 
 }
 

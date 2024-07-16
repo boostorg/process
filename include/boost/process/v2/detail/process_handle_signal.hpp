@@ -248,10 +248,8 @@ struct basic_process_handle_signal
         if (res == 0)
             return true;
         else
-        {
             exit_code = code;
-            return false;
-        }
+        return false;
     }
 
     bool running(native_exit_code_type &exit_code)

@@ -36,9 +36,10 @@ project /boost/process
     ;
 
 explicit
-    [ alias boost_process ]
-    [ alias all : boost_process example example/v2 test test//v2 ]
+    [ alias boost_process : build//boost_process ]
+    [ alias all : boost_process example example/v2 test ]
     ;
 
 call-if : boost-library process
+    : install boost_process
     ;

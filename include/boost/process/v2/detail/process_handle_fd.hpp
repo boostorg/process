@@ -251,15 +251,11 @@ struct basic_process_handle_fd
         else if (res == 0)
             return true;
         else
-            ec.clear();
-
-        if (res == 0)
-            return true;
-        else
         {
+            ec.clear();
             exit_code = code;
-            return false;
         }
+      return false;
     }
 
     bool running(native_exit_code_type &exit_code)
