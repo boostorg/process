@@ -18,9 +18,6 @@ project : requirements
   : source-location ../src
 ;
 
-feature.feature boost.process.fs : boost std : propagated composite ;
-feature.compose <boost.process.fs>std : <define>BOOST_PROCESS_USE_STD_FS=1 ;
-
 alias process_sources
    : detail/environment_posix.cpp
      detail/environment_win.cpp
@@ -50,12 +47,10 @@ lib boost_process
    : process_sources
    : requirements <define>BOOST_PROCESS_SOURCE=1
      <link>shared:<define>BOOST_PROCESS_DYN_LINK=1
-     <boost.process.fs>boost:<library>/boost//filesystem
      <target-os>windows:<library>shell32
      <target-os>windows:<library>user32
      <target-os>windows:<library>Ntdll
      <target-os>windows:<library>Advapi32
    : usage-requirements
      <link>shared:<define>BOOST_PROCESS_DYN_LINK=1
-     <boost.process.fs>boost:<library>/boost//filesystem
   ;
