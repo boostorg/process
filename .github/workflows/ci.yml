@@ -147,7 +147,7 @@ jobs:
       image: alpine:3.20.1
     steps:
       - name: Install packages
-        run: apk add g++ git python3
+        run: apk add g++ git python3 linux-headers
 
       - uses: actions/checkout@v4
 
