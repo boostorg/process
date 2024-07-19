@@ -60,6 +60,10 @@ int fdwalk(int (*func)(void *, int), void *cd);
 #if defined(SYS_close_range)
 
 #define BOOST_PROCESS_V2_HAS_CLOSE_RANGE 1
+#if !defined(CLOSE_RANGE_UNSHARE)
+#define CLOSE_RANGE_UNSHARE 2
+#endif
+
 int close_range(unsigned int first, unsigned int last, int flags)
 {
   return ::syscall(SYS_close_range, first, last, flags);
