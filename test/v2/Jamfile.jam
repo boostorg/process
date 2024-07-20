@@ -28,6 +28,7 @@ project : requirements
   <os>NT,<toolset>gcc:<library>Bcrypt
   <define>BOOST_PROCESS_V2_SEPARATE_COMPILATION=1
   <link>static
+  <library>/boost/test//boost_test
 ;
 
 import testing ;
