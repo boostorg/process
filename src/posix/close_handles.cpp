@@ -47,7 +47,7 @@ int fdwalk(int (*func)(void *, int), void *cd);
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5,11,0) // kernel has close_range
 
-#include <gnu/libc-version.h>
+// version is included by stdlib.h #include <gnu/libc-version.h>
 #if (__GLIBC__ >= 2 && __GLIBC_MINOR__ >= 34) // glibc is compiled with close_range support
 // https://man7.org/linux/man-pages/man2/close_range.2.html
 
@@ -60,6 +60,10 @@ int fdwalk(int (*func)(void *, int), void *cd);
 #if defined(SYS_close_range)
 
 #define BOOST_PROCESS_V2_HAS_CLOSE_RANGE 1
+#if !defined(CLOSE_RANGE_UNSHARE)
+#define CLOSE_RANGE_UNSHARE 2
+#endif
+
 int close_range(unsigned int first, unsigned int last, int flags)
 {
   return ::syscall(SYS_close_range, first, last, flags);
