@@ -40,8 +40,8 @@ alias process_sources
    ;
 
 lib shell32 ;
-lib Advapi32 ;
-lib Ntdll ;
+lib advapi32 ;
+lib ntdll ;
 lib user32 ;
 
 lib boost_process
@@ -50,8 +50,8 @@ lib boost_process
      <link>shared:<define>BOOST_PROCESS_DYN_LINK=1
      <target-os>windows:<library>shell32
      <target-os>windows:<library>user32
-     <target-os>windows:<library>Ntdll
-     <target-os>windows:<library>Advapi32
+     <target-os>windows:<library>ntdll
+     <target-os>windows:<library>advapi32
    : usage-requirements
      <link>shared:<define>BOOST_PROCESS_DYN_LINK=1
   ;
