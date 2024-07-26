@@ -23,7 +23,7 @@ project : requirements
   <target-os>linux:<linkflags>-lpthread
   <os>NT,<toolset>cw:<library>ws2_32
   <os>NT,<toolset>gcc:<library>ws2_32
-  <library>/boost/test//boost_test
+  <library>/boost/test//included
 ;
 
 
