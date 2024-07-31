@@ -353,7 +353,7 @@ struct default_launcher
               basic_string_view<wchar_t> args)
   {
       std::size_t req_size = std::accumulate(
-          std::begin(argv), std::end(argv),  escaped_argv_length(pt.native()),
+          std::begin(argv), std::end(argv), pt.empty() ? 0 : escaped_argv_length(pt.native()),
           [](std::size_t sz, basic_string_view<wchar_t> arg) -> std::size_t
           {
               return sz + 1u + escaped_argv_length(arg);
@@ -363,12 +363,24 @@ struct default_launcher
       res.resize(req_size, L' ');
       
       wchar_t * itr = &res.front();
-      itr += escape_argv_string(itr, res.size(), pt.native());
+      
+      if (!pt.empty())
+      {
+          itr += escape_argv_string(itr, res.size(), pt.native());
+      }
+
       for (const auto & a : argv)
       {
         itr++;
         itr += escape_argv_string(itr, std::distance(itr, &res.back() + 1), a);
       }
+      
+      // skip the first space
+      if(pt.empty() && res.size() > 1)
+      {
+        return res.substr(1);
+      }
+
       return res;
   }
 
