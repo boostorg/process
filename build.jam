@@ -30,8 +30,6 @@ constant boost_dependencies :
 
 project /boost/process
     : common-requirements
-        <boost.process.fs>std:<define>BOOST_PROCESS_USE_STD_FS=1
-        <boost.process.fs>boost:<library>/boost/filesystem//boost_filesystem
         <include>include
     : default-build
         <boost.process.fs>boost
