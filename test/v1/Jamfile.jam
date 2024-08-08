@@ -32,15 +32,15 @@ project : requirements
 import testing ;
 
 
-alias program_options  : /boost/program_options//boost_program_options : <link>static ;
-alias filesystem       : /boost/filesystem//boost_filesystem ;
-alias iostreams        : /boost/iostreams//boost_iostreams ;
-alias system           : /boost/system//boost_system ;
-alias thread           : /boost/thread//boost_thread ;
-alias coroutine        : /boost/coroutine//boost_coroutine : <link>static ;
-alias scope_exit       : /boost/scope_exit//boost_scope_exit ;
-alias lambda           : /boost/lambda//boost_lambda ;
-alias chrono           : /boost/chrono//boost_chrono ;
+alias program_options  : usage-requirements <library>/boost/program_options//boost_program_options ;
+alias filesystem       : usage-requirements <library>/boost/filesystem//boost_filesystem ;
+alias iostreams        : usage-requirements <library>/boost/iostreams//boost_iostreams ;
+alias system           : usage-requirements <library>/boost/system//boost_system ;
+alias thread           : usage-requirements <library>/boost/thread//boost_thread ;
+alias coroutine        : usage-requirements <library>/boost/coroutine//boost_coroutine ;
+alias scope_exit       : usage-requirements <library>/boost/scope_exit//boost_scope_exit ;
+alias lambda           : usage-requirements <library>/boost/lambda//boost_lambda ;
+alias chrono           : usage-requirements <library>/boost/chrono//boost_chrono ;
 
 lib multi_ref : multi_ref1.cpp multi_ref2.cpp system : <target-os>windows:<source>shell32 ;
 
