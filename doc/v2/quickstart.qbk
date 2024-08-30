@@ -68,7 +68,7 @@ interpret as a signal to shutdown.
 
 ```
     process proc("/usr/bin/addr2line", {});
-    proc.request_exit();
+    proc.interrupt();
     proc.wait();
 ```
 
