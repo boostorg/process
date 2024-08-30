@@ -78,7 +78,7 @@ Additionally, process v2 provides a `popen` class.
 It starts a process and connects pipes for stdin and stdout, so that the popen object can be used as a stream.
 
 ```
-   popen proc(executor, "/usr/bin/addr2line, {argv[0]});
+   popen proc(executor, "/usr/bin/addr2line", {argv[0]});
    asio::write(proc, asio::buffer("main\n"));
    std::string line;
    asio::read_until(proc, asio::dynamic_buffer(line), '\n');
