@@ -45,6 +45,7 @@ lib shell32 ;
 lib advapi32 ;
 lib ntdll ;
 lib user32 ;
+lib ws2_32 ;
 
 lib boost_process
    : process_sources
@@ -55,6 +56,7 @@ lib boost_process
      <target-os>windows:<library>user32
      <target-os>windows:<library>ntdll
      <target-os>windows:<library>advapi32
+     <target-os>windows:<library>ws2_32
    : usage-requirements
      <link>shared:<define>BOOST_PROCESS_DYN_LINK=1
      <boost.process.fs>boost:<library>/boost/filesystem//boost_filesystem
