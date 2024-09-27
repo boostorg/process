@@ -4,19 +4,15 @@
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 
-import os ;
-
-if [ os.name ] = NT
-{
-  lib ws2_32 ;
-  lib shell32 ;
-  lib Advapi32 ;
-  lib Ntdll ;
-  lib user32 ;
-  lib Bcrypt ;
-}
+lib ws2_32 ;
+lib shell32 ;
+lib Advapi32 ;
+lib Ntdll ;
+lib user32 ;
+lib Bcrypt ;
 
 project : requirements
+  <library>/boost/process//boost_process
   <define>BOOST_ASIO_NO_DEPRECATED
   <toolset>msvc:<define>_SCL_SECURE_NO_WARNINGS
   <toolset>msvc:<define>_CRT_SECURE_NO_DEPRECATE
@@ -32,21 +28,19 @@ project : requirements
   <os>NT,<toolset>gcc:<library>ws2_32
   <os>NT,<toolset>gcc:<library>Bcrypt
   <define>BOOST_PROCESS_V2_SEPARATE_COMPILATION=1
+  <library>/boost/test//included
 ;
 
 import testing ;
-
-alias filesystem   : /boost//filesystem : <link>static ;
 
 exe target : target.cpp :
     <warnings>off <target-os>windows:<source>shell32
                   <target-os>windows:<source>Ntdll
     ;
 
-lib test_impl : test_impl.cpp filesystem /boost//process :
+lib test_impl : test_impl.cpp /boost/process//boost_process :
         <define>BOOST_PROCESS_V2_SEPARATE_COMPILATION=1
         <define>BOOST_TEST_IGNORE_SIGCHLD=1
-        <link>static
         ;
 
 test-suite standalone :
