@@ -24,6 +24,9 @@ project : requirements
   <target-os>freebsd:<linkflags>-lkvm
   <target-os>freebsd:<linkflags>-lprocstat
   <target-os>bsd:<linkflags>-lkvm
+  <target-os>netbsd:<linkflags>-lkvm
+  <target-os>openbsd:<linkflags>-lkvm
+  <target-os>solaris:<linkflags>-lkvm
   <os>NT,<toolset>cw:<library>ws2_32
   <os>NT,<toolset>gcc:<library>ws2_32
   <os>NT,<toolset>gcc:<library>Bcrypt
