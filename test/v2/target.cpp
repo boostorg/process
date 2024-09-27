@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <thread>
+#include <boost/asio/steady_timer.hpp>
 #include <boost/process/v2/environment.hpp>
 
 extern char **environ;
@@ -71,15 +72,71 @@ int main(int argc, char * argv[])
         GetStartupInfo(&si);   
         return static_cast<int>(si.wShowWindow);
     }
-    else if (mode == "creation-flags")
-    {
-        STARTUPINFO si;
-        GetStartupInfo(&si);   
-        return static_cast<int>(si.dwFlags);
-    }
 #endif
+    else if (mode == "sigterm")
+    {
+      boost::asio::io_context ctx;
+      boost::asio::steady_timer tim{ctx, std::chrono::seconds(10)};
+      static boost::asio::steady_timer * tim_p = &tim;
+
+#if defined(BOOST_PROCESS_V2_WINDOWS)
+      SetConsoleCtrlHandler(
+          [](DWORD kind)
+          {
+            if (kind == CTRL_CLOSE_EVENT)
+            {
+              // windows doesn't like us doing antyhing else
+              ::exit(0);
+              if (tim_p != nullptr)
+                tim_p->cancel();
+              return TRUE;
+            }
+            else
+              return FALSE;
+          }, TRUE);
+#else
+      signal(SIGTERM, [](int) { if (tim_p != nullptr) tim_p->cancel();});
+#endif
+
+      boost::system::error_code ec;
+      tim.async_wait([&](boost::system::error_code ec_) { ec = ec_; });
+      ctx.run();
+      tim_p = nullptr;
+      return ec ? EXIT_SUCCESS : 32;
+    }
+    else if (mode == "sigint")
+    {
+      boost::asio::io_context ctx;
+      boost::asio::steady_timer tim{ctx, std::chrono::seconds(10)};
+      static boost::asio::steady_timer * tim_p = &tim;
+
+#if defined(BOOST_PROCESS_V2_WINDOWS)
+      SetConsoleCtrlHandler(NULL, FALSE);
+      auto res = SetConsoleCtrlHandler(
+              [](DWORD kind)
+              {
+                if (kind == CTRL_C_EVENT)
+                {
+                  if (tim_p != nullptr)
+                    tim_p->cancel();
+                  return TRUE;
+                }
+                else
+                  return FALSE;
+              }, TRUE);
+      BOOST_ASSERT(res != FALSE);
+#else
+      signal(SIGINT, [](int) { if (tim_p != nullptr) tim_p->cancel();});
+#endif
+
+      boost::system::error_code ec;
+      tim.async_wait([&](boost::system::error_code ec_) { ec = ec_; });
+      ctx.run();
+      tim_p = nullptr;
+      return ec ? EXIT_SUCCESS : 33;
+    }
     else
         return 34;
-        
+
     return 0;
 }

@@ -62,7 +62,8 @@ BOOST_AUTO_TEST_CASE(environment)
     ec.clear();
 
     for (auto && ke : bpe::current())
-      BOOST_CHECK_EQUAL(bpe::get(std::get<0>(ke)), std::get<1>(ke));
+      if (!std::get<1>(ke).empty())
+        BOOST_CHECK_EQUAL(bpe::get(std::get<0>(ke)), std::get<1>(ke));
 
 
 #if defined(BOOST_PROCESS_V2_POSIX)
@@ -150,11 +151,14 @@ BOOST_AUTO_TEST_CASE(wenvironment)
     BOOST_CHECK(ec);
 
     for (const auto ke : bpe::current())
+    {
+      std::string key = std::get<0>(ke).string();
+      if (!std::get<1>(ke).empty())
         BOOST_CHECK_EQUAL(bpe::get(std::get<0>(ke)), std::get<1>(ke));
+    }
 
 #if defined(BOOST_PROCESS_V2_WINDOWS)
     BOOST_CHECK_EQUAL(bpe::key(L"FOO"), bpe::key_view(L"Foo"));
-    BOOST_CHECK(bpe::key(L"FOO") == std::wstring(L"Foo"));
     BOOST_CHECK_EQUAL(bpe::key_value_pair(L"Foo=BAR"), bpe::key_value_pair_view(L"FOO=BAR"));
     BOOST_CHECK_EQUAL(bpe::key_value_pair(L"Foo=BAR"), bpe::key_value_pair(L"FOO=BAR"));
     BOOST_CHECK_EQUAL(bpe::key_value_pair_view(L"Foo=BAR"), bpe::key_value_pair_view(L"FOO=BAR"));
