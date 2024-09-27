@@ -19,7 +19,7 @@
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 #include <windows.h>
 #include <shellapi.h>
-#else
+#elif defined(__OpenBSD__)
 #include <wordexp.h>
 #endif
 
@@ -30,7 +30,7 @@ BOOST_PROCESS_V2_DECL const error_category& get_shell_category()
 {
     return system_category();
 }
-#else
+#elif defined(__OpenBSD__)
 
 struct shell_category_t final : public error_category
 {
@@ -92,7 +92,7 @@ auto shell::args() const-> args_type
     return input_.c_str();
 }
 
-#else
+#elif defined(__OpenBSD__)
 
 void shell::parse_()
 {

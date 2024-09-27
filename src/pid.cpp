@@ -551,9 +551,9 @@ std::vector<pid_type> all_pids(boost::system::error_code & ec)
         vec.reserve(cntp);
         for (int i = cntp - 1; i >= 0; i--)
         {
-            if (proc_info[i].kp_pid >= 0) 
+            if (proc_info[i].p_pid >= 0) 
             {
-                vec.push_back(proc_info[i].kp_pid);
+                vec.push_back(proc_info[i].p_pid);
             }
         }
     }
