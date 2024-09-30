@@ -343,7 +343,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     };
 
     std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr)};
-    if (!kd) {BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec) return vec;}
+    if (!kd.get()) {BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec) return {};}
     if ((proc_info = kvm_getprocs(kd.get(), KERN_PROC_PID, pid, sizeof(struct kinfo_proc), &cntp))) 
     {
         char **cmd = kvm_getargv(kd.get(), proc_info, 0);
@@ -354,7 +354,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     }
     else
         BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
-    kvm_close(kd);
+    kvm_close(kd.get());
     return {};
 }
     
