@@ -31,7 +31,7 @@ struct vfork_launcher :  default_launcher
         auto proc =  (*this)(context, ec, executable, std::forward<Args>(args), std::forward<Inits>(inits)...);
 
         if (ec)
-            asio::detail::throw_error(ec, "default_launcher");
+            v2::detail::throw_error(ec, "default_launcher");
 
         return proc;
     }
@@ -46,7 +46,7 @@ struct vfork_launcher :  default_launcher
                     Args && args,
                     Inits && ... inits ) -> basic_process<typename ExecutionContext::executor_type>
     {
-        return (*this)(context.get_executor(), executable, std::forward<Args>(args), std::forward<Inits>(inits)...);
+        return (*this)(context.get_executor(), ec, executable, std::forward<Args>(args), std::forward<Inits>(inits)...);
     }
 
     template<typename Executor, typename Args, typename ... Inits>
@@ -62,7 +62,7 @@ struct vfork_launcher :  default_launcher
         auto proc =  (*this)(std::move(exec), ec, executable, std::forward<Args>(args), std::forward<Inits>(inits)...);
 
         if (ec)
-            asio::detail::throw_error(ec, "default_launcher");
+            v2::detail::throw_error(ec, "default_launcher");
 
         return proc;
     }
@@ -101,7 +101,6 @@ struct vfork_launcher :  default_launcher
         }
         else if (pid == 0)
         {
-            ctx.notify_fork(BOOST_PROCESS_V2_ASIO_NAMESPACE::execution_context::fork_child);
             ec = detail::on_exec_setup(*this, executable, argv, inits...);
             if (!ec)
                 close_all_fds(ec);
@@ -110,7 +109,7 @@ struct vfork_launcher :  default_launcher
 
             BOOST_PROCESS_V2_ASSIGN_EC(ec, errno, system_category())
             detail::on_exec_error(*this, executable, argv, ec, inits...);
-            ::exit(EXIT_FAILURE);
+            ::_exit(EXIT_FAILURE);
             return basic_process<Executor>{exec};
         }
         ctx.notify_fork(BOOST_PROCESS_V2_ASIO_NAMESPACE::execution_context::fork_parent);

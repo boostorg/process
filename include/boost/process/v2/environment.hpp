@@ -13,9 +13,13 @@
 #include <boost/process/v2/detail/config.hpp>
 #include <boost/process/v2/cstring_ref.hpp>
 #include <boost/process/v2/detail/utf8.hpp>
+
+#include <boost/type_traits.hpp>
+
 #include <functional>
 #include <memory>
 #include <numeric>
+#include <vector>
 
 #if !defined(GENERATING_DOCUMENTATION)
 #if defined(BOOST_PROCESS_V2_WINDOWS)
@@ -501,8 +505,8 @@ struct key
 
     template< class Source >
     key( const Source& source,
-        decltype(source.data()) = nullptr,
-        decltype(source.size()) = 0u)
+        decltype(std::declval<Source>().data()) = nullptr,
+        decltype(std::declval<Source>().size()) = 0u)
         : value_(
              BOOST_PROCESS_V2_NAMESPACE::detail::conv_string<char_type, traits_type>(
                 source.data(), source.size()))
@@ -724,8 +728,8 @@ struct value
 
     template< class Source >
     value( const Source& source,
-           decltype(source.data()) = nullptr,
-    decltype(source.size()) = 0u)
+           decltype(std::declval<Source>().data()) = nullptr,
+    decltype(std::declval<Source>().size()) = 0u)
     : value_(BOOST_PROCESS_V2_NAMESPACE::detail::conv_string<char_type, traits_type>(
         source.data(), source.size()))
     {
@@ -974,8 +978,8 @@ struct key_value_pair
 
     template< class Source >
     key_value_pair( const Source& source,
-           decltype(source.data()) = nullptr,
-           decltype(source.size()) = 0u)
+           decltype(std::declval<Source>().data()) = nullptr,
+           decltype(std::declval<Source>().size()) = 0u)
             : value_(BOOST_PROCESS_V2_NAMESPACE::detail::conv_string<char_type, traits_type>(
                 source.data(), source.size()))
     {
@@ -1743,8 +1747,8 @@ struct process_environment
     return build_env(env_buffer);
   }
 
-  process_environment(std::initializer_list<string_view> sv)  : unicode_env{build_env(sv,  "")} {}
-  process_environment(std::initializer_list<wstring_view> sv) : unicode_env{build_env(sv, L"")} {}
+  process_environment(std::initializer_list<string_view> sv)  : unicode_env{build_env(sv)} {}
+  process_environment(std::initializer_list<wstring_view> sv) : unicode_env{build_env(sv)} {}
 
   template<typename Args>
   process_environment(Args && args) : unicode_env{build_env(std::forward<Args>(args))}
@@ -1756,6 +1760,7 @@ struct process_environment
   std::vector<environment::key_value_pair> env_buffer;
   std::vector<wchar_t> unicode_env;
 
+  BOOST_PROCESS_V2_DECL
   error_code on_setup(windows::default_launcher & launcher,
                       const filesystem::path &, const std::wstring &);
 
@@ -1804,6 +1809,7 @@ struct process_environment
   }
 
 
+  BOOST_PROCESS_V2_DECL
   error_code on_setup(posix::default_launcher & launcher, 
                       const filesystem::path &, const char * const *);
 
@@ -1881,12 +1887,5 @@ struct hash<BOOST_PROCESS_V2_NAMESPACE::environment::key_value_pair>
 
 }
 
-
-
-#if defined(BOOST_PROCESS_V2_HEADER_ONLY)
-
-#include <boost/process/v2/detail/impl/environment.ipp>
-
-#endif
 
 #endif //BOOST_PROCESS_V2_ENVIRONMENT_HPP

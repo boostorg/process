@@ -9,6 +9,8 @@
 #include <boost/process/v2/detail/config.hpp>
 #include <boost/process/v2/detail/throw_error.hpp>
 
+#include <vector>
+
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
 
 #if defined(GENERATING_DOCUMENTATION)
@@ -58,9 +60,6 @@ BOOST_PROCESS_V2_DECL std::vector<pid_type> child_pids(pid_type pid);
 
 BOOST_PROCESS_V2_END_NAMESPACE
 
-#if defined(BOOST_PROCESS_V2_HEADER_ONLY)
-#include <boost/process/v2/impl/pid.ipp>
-#endif
 
 #endif // BOOST_PROCESS_V2_PID_HPP
 

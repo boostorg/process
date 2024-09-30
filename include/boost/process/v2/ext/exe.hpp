@@ -16,6 +16,11 @@ BOOST_PROCESS_V2_BEGIN_NAMESPACE
 
 namespace ext {
 
+#if defined(BOOST_PROCESS_V2_WINDOWS)
+BOOST_PROCESS_V2_DECL filesystem::path exe(HANDLE handle, error_code & ec);
+BOOST_PROCESS_V2_DECL filesystem::path exe(HANDLE handle);
+#endif
+
 /// @{
 /// Return the executable of another process by pid or handle.
 BOOST_PROCESS_V2_DECL filesystem::path exe(pid_type pid, error_code & ec);
@@ -45,18 +50,9 @@ filesystem::path exe(basic_process_handle<Executor> & handle)
 
 ///@}
 
-#if defined(BOOST_PROCESS_V2_WINDOWS)
-BOOST_PROCESS_V2_DECL filesystem::path exe(HANDLE handle, error_code & ec);
-BOOST_PROCESS_V2_DECL filesystem::path exe(HANDLE handle);
-#endif
-
 } // namespace ext
 
 BOOST_PROCESS_V2_END_NAMESPACE
-
-#if defined(BOOST_PROCESS_V2_HEADER_ONLY)
-#include <boost/process/v2/ext/impl/exe.ipp>
-#endif
 
 #endif // BOOST_PROCESS_V2_EXE_HPP
 

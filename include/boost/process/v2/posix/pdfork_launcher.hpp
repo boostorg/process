@@ -34,7 +34,7 @@ struct pdfork_launcher : default_launcher
         auto proc =  (*this)(context, ec, executable, std::forward<Args>(args), std::forward<Inits>(inits)...);
 
         if (ec)
-            asio::detail::throw_error(ec, "pdfork_launcher");
+            v2::detail::throw_error(ec, "pdfork_launcher");
 
         return proc;
     }
@@ -49,7 +49,7 @@ struct pdfork_launcher : default_launcher
                     Args && args,
                     Inits && ... inits ) -> basic_process<typename ExecutionContext::executor_type>
     {
-        return (*this)(context.get_executor(), executable, std::forward<Args>(args), std::forward<Inits>(inits)...);
+        return (*this)(context.get_executor(), ec, executable, std::forward<Args>(args), std::forward<Inits>(inits)...);
     }
 
     template<typename Executor, typename Args, typename ... Inits>
@@ -65,7 +65,7 @@ struct pdfork_launcher : default_launcher
         auto proc =  (*this)(std::move(exec), ec, executable, std::forward<Args>(args), std::forward<Inits>(inits)...);
 
         if (ec)
-            asio::detail::throw_error(ec, "pdfork_launcher");
+            v2::detail::throw_error(ec, "pdfork_launcher");
 
         return proc;
     }
