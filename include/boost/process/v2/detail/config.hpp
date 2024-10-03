@@ -21,7 +21,7 @@
 #include <iomanip>
 #include <optional>
 
-#if defined(ASIO_WINDOWS)
+#if defined(BOOST_ASIO_WINDOWS)
 #define BOOST_PROCESS_V2_WINDOWS 1
 
 // Windows: suppress definition of "min" and "max" macros.
