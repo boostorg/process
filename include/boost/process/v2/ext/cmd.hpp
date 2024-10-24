@@ -36,7 +36,7 @@ BOOST_PROCESS_V2_DECL shell cmd(HANDLE handle);
 #endif
 
 template<typename Executor>
-BOOST_PROCESS_V2_DECL shell cmd(basic_process_handle<Executor> & handle, error_code & ec)
+inline shell cmd(basic_process_handle<Executor> & handle, error_code & ec)
 {
 #if defined(BOOST_PROCESS_V2_WINDOWS)
     return cmd(handle.native_handle(), ec);
@@ -46,7 +46,7 @@ BOOST_PROCESS_V2_DECL shell cmd(basic_process_handle<Executor> & handle, error_c
 }
 
 template<typename Executor>
-BOOST_PROCESS_V2_DECL shell cmd(basic_process_handle<Executor> & handle)
+inline shell cmd(basic_process_handle<Executor> & handle)
 {
 #if defined(BOOST_PROCESS_V2_WINDOWS)
     return cmd(handle.native_handle());
