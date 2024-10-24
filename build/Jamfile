@@ -52,6 +52,7 @@ lib boost_process
    : requirements <define>BOOST_PROCESS_SOURCE=1
      <link>shared:<define>BOOST_PROCESS_DYN_LINK=1
      <boost.process.fs>boost:<library>/boost/filesystem//boost_filesystem
+     <boost.process.disable-close-range>on:<define>BOOST_PROCESS_V2_POSIX_FORCE_DISABLE_CLOSE_RANGE=1
      <target-os>windows:<library>shell32
      <target-os>windows:<library>user32
      <target-os>windows:<library>ntdll
