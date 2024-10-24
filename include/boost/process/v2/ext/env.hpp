@@ -120,7 +120,7 @@ BOOST_PROCESS_V2_DECL env_view env(pid_type pid, error_code & ec);
 BOOST_PROCESS_V2_DECL env_view env(pid_type pid);
 
 template<typename Executor>
-BOOST_PROCESS_V2_DECL env_view env(basic_process_handle<Executor> & handle, error_code & ec)
+inline env_view env(basic_process_handle<Executor> & handle, error_code & ec)
 {
 #if defined(BOOST_PROCESS_V2_WINDOWS)
     return env(handle.native_handle(), ec);
@@ -130,7 +130,7 @@ BOOST_PROCESS_V2_DECL env_view env(basic_process_handle<Executor> & handle, erro
 }
 
 template<typename Executor>
-BOOST_PROCESS_V2_DECL env_view env(basic_process_handle<Executor> & handle)
+inline env_view env(basic_process_handle<Executor> & handle)
 {
 #if defined(BOOST_PROCESS_V2_WINDOWS)
   return env(handle.native_handle());
