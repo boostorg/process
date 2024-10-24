@@ -8,6 +8,7 @@ require-b2 5.2 ;
 import feature : feature ;
 
 feature boost.process.fs : boost std : optional propagated ;
+feature boost.process.disable-close-range : on off : optional ;
 
 constant boost_dependencies :
     /boost/algorithm//boost_algorithm
