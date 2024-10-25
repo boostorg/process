@@ -354,7 +354,6 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     }
     else
         BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
-    kvm_close(kd.get());
     return {};
 }
     
@@ -365,7 +364,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     char **cmd = nullptr;
     proc *proc_info = nullptr;
     user *proc_user = nullptr;
-    kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr);
+    kvm_t *kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr);
     if (!kd) {BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec) return {};}
     if ((proc_info = kvm_getproc(kd, pid))) 
     {

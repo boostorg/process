@@ -135,6 +135,22 @@ auto shell::args() const -> args_type
         return const_cast<const char**>(argv());
 }
 
+#else
+
+void shell::parse_()
+{
+    error_code ec;
+    BOOST_PROCESS_V2_ASSIGN_EC(ec, ENOTSUP, system_category())
+    throw system_error(ec, "shell::parse");
+}
+
+shell::~shell() = default;
+
+auto shell::args() const -> args_type
+{
+    return nullptr;
+}
+
 #endif
 
 BOOST_PROCESS_V2_END_NAMESPACE
