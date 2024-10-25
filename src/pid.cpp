@@ -727,7 +727,21 @@ std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec)
 }
 
 #else
-#error "Platform not supported"
+std::vector<pid_type> all_pids(boost::system::error_code & ec)
+{
+  BOOST_PROCESS_V2_ASSIGN_EC(ec, ENOTSUP, system_category());
+  return {};
+}
+pid_type parent_pid(pid_type pid, boost::system::error_code & ec)
+{
+  BOOST_PROCESS_V2_ASSIGN_EC(ec, ENOTSUP, system_category());
+  return pid;
+}
+std::vector<pid_type> child_pids(pid_type, boost::system::error_code & ec)
+{
+  BOOST_PROCESS_V2_ASSIGN_EC(ec, ENOTSUP, system_category());
+  return {};
+}
 #endif
 
 std::vector<pid_type> all_pids()
