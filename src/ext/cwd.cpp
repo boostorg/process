@@ -202,7 +202,7 @@ filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code
 #else
 filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
-  BOOST_PROCESS_V2_ASSIGN_EC(ec, ENOTSUP, boost::system::system_category())
+  BOOST_PROCESS_V2_ASSIGN_EC(ec, ENOTSUP, system_category())
   return "";
 }
 #endif

@@ -66,7 +66,7 @@ native_iterator find_end(native_handle_type nh)
     return nh;
 }
 
-BOOST_PROCESS_V2_DECL bool has_x_access(const char * pth)
+bool has_x_access(const char * pth)
 {
   return (::access(pth, X_OK) == 0);
 }

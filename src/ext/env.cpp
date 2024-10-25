@@ -174,7 +174,7 @@ env_view env(HANDLE proc, boost::system::error_code & ec)
 
     if (error)
     {
-        BOOST_PROCESS_V2_ASSIGN_EC(ec, error, boost::system::system_category())
+        BOOST_PROCESS_V2_ASSIGN_EC(ec, error, system_category())
         return {};
     }
 

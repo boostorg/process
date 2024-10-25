@@ -399,7 +399,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 #else
 filesystem::path cmd(boost::process::v2::pid_type, boost::system::error_code & ec)
 {
-  BOOST_PROCESS_V2_ASSIGN_EC(ec, ENOTSUP, boost::system::system_category())
+  BOOST_PROCESS_V2_ASSIGN_EC(ec, ENOTSUP, system_category())
   return "";
 }
 #endif
