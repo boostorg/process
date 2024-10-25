@@ -37,7 +37,6 @@ alias filesystem       : usage-requirements <library>/boost/filesystem//boost_fi
 alias iostreams        : usage-requirements <library>/boost/iostreams//boost_iostreams ;
 alias system           : usage-requirements <library>/boost/system//boost_system ;
 alias thread           : usage-requirements <library>/boost/thread//boost_thread ;
-alias coroutine        : usage-requirements <library>/boost/coroutine//boost_coroutine ;
 alias scope_exit       : usage-requirements <library>/boost/scope_exit//boost_scope_exit ;
 alias lambda           : usage-requirements <library>/boost/lambda//boost_lambda ;
 alias chrono           : usage-requirements <library>/boost/chrono//boost_chrono ;
@@ -123,13 +122,10 @@ test-suite with-valgrind :
    : <dependency>bare ;
 
 test-suite without-valgrind :
-    [ run async_system_future.cpp filesystem system coroutine           : [ test-options async_system_future ] : sparring_partner : <link>static <toolset>msvc:<cxxflags>/bigobj ]
-    [ run async_system_stackful.cpp filesystem system coroutine         : [ test-options async_system_stackful ] : sparring_partner : <link>static <toolset>msvc:<cxxflags>/bigobj ]
+    [ run async_system_future.cpp filesystem system                     : [ test-options async_system_future ] : sparring_partner : <link>static <toolset>msvc:<cxxflags>/bigobj ]
+#    [ run async_system_stackful.cpp filesystem system coroutine         : [ test-options async_system_stackful ] : sparring_partner : <link>static <toolset>msvc:<cxxflags>/bigobj ]
 #   [ run async_system_stackful_error.cpp filesystem system coroutine   : [ test-options async_system_stackful_error ] : sparring_partner : <link>static <toolset>msvc:<cxxflags>/bigobj ]
-    [ run async_system_stackful_except.cpp filesystem system coroutine  : [ test-options async_system_stackful_except ] : sparring_partner : <link>static <toolset>msvc:<cxxflags>/bigobj ]
-    [ run async_system_stackless.cpp filesystem system coroutine        : [ test-options async_system_stackless ] : sparring_partner : <link>static <toolset>msvc:<cxxflags>/bigobj ]
+#    [ run async_system_stackful_except.cpp filesystem system coroutine  : [ test-options async_system_stackful_except ] : sparring_partner : <link>static <toolset>msvc:<cxxflags>/bigobj ]
+    [ run async_system_stackless.cpp filesystem system                  : [ test-options async_system_stackless ] : sparring_partner : <link>static <toolset>msvc:<cxxflags>/bigobj ]
     [ run vfork.cpp     system filesystem                               : [ test-options vfork ] : sparring_partner : <build>no <target-os>linux:<build>yes ]
     ;
-
-
-alias v2-tests : v2//standalone v2//with_target ;
