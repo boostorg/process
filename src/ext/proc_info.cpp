@@ -43,7 +43,7 @@ std::wstring cwd_cmd_from_proc(HANDLE proc, int type, boost::system::error_code 
 
     if (error)
     {
-        BOOST_PROCESS_V2_ASSIGN_EC(ec, error, boost::system::system_category())
+        BOOST_PROCESS_V2_ASSIGN_EC(ec, error, system_category())
         return {};
     }
 

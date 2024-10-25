@@ -76,8 +76,6 @@ inline bool is_executable(const filesystem::path & pth, error_code & ec)
   return filesystem::is_regular_file(pth, ec) && has_x_access(pth.c_str());
 }
 
-BOOST_PROCESS_V2_DECL
-
 }
 
 }
