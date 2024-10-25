@@ -16,14 +16,6 @@
 
 #include <string>
 
-#if (defined(__APPLE__) && defined(__MACH__))
-#include <cstdlib>
-#include <sys/types.h>
-#include <sys/sysctl.h>
-#include <sys/proc_info.h>
-#include <libproc.h>
-#endif
-
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
 
 namespace detail
