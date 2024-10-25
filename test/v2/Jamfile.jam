@@ -21,9 +21,7 @@ project : requirements
   <target-os>windows:<define>_WIN32_WINNT=0x0601
   <target-os>linux:<linkflags>-lpthread
   <target-os>freebsd:<linkflags>-lutil
-  <target-os>freebsd:<linkflags>-lkvm
-  <target-os>freebsd:<linkflags>-lprocstat
-  <target-os>bsd:<linkflags>-lkvm
+  <target-os>freebsd:<linkflags>-lpthread
   <os>NT,<toolset>cw:<library>ws2_32
   <os>NT,<toolset>gcc:<library>ws2_32
   <os>NT,<toolset>gcc:<library>Bcrypt
