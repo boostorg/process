@@ -31,6 +31,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/connect_pipe.hpp>
+#include <boost/asio/cancel_after.hpp>
 #include <boost/asio/detached.hpp>
 #include <boost/asio/readable_pipe.hpp>
 #include <boost/asio/read.hpp>
@@ -637,6 +638,30 @@ BOOST_AUTO_TEST_CASE(async_request_exit)
 
     tim.async_wait([&](bpv::error_code ec) { sig.emit(asio::cancellation_type::partial); });
     ctx.run();
+}
+
+BOOST_AUTO_TEST_CASE(async_cancel_wait)
+{
+  asio::io_context ctx;
+  using boost::unit_test::framework::master_test_suite;
+  const auto pth = bpv::filesystem::absolute(master_test_suite().argv[1]);
+
+  bpv::process proc(ctx, pth, {"sleep", "1000"});
+
+  asio::steady_timer tim{ctx, std::chrono::milliseconds(250)};
+  asio::cancellation_signal sig;
+
+  // check that the async_wait gets properly cancelled
+  proc.async_wait(asio::cancel_after(std::chrono::milliseconds(100),
+                         [&](boost::system::error_code ec, int)
+                         {
+                           BOOST_CHECK(ec == asio::error::operation_aborted);
+                           BOOST_CHECK(proc.running());
+                           if (proc.running())
+                             proc.terminate();
+                         }));
+
+  ctx.run();
 }
 
 
