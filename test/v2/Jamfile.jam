@@ -36,24 +36,22 @@ import testing ;
 exe target : target.cpp :
     <warnings>off <target-os>windows:<source>shell32
                   <target-os>windows:<source>Ntdll
+
     ;
 
-lib test_impl : test_impl.cpp /boost/process//boost_process :
-        <define>BOOST_PROCESS_V2_SEPARATE_COMPILATION=1
-        <define>BOOST_TEST_IGNORE_SIGCHLD=1
-        ;
+local test_impl = test_impl.cpp /boost/process//boost_process /boost/test//boost_unit_test_framework ;
 
 test-suite standalone :
-    [ run utf8.cpp test_impl ]
-    [ run cstring_ref.cpp test_impl ]
-    [ run environment.cpp test_impl ]
-    [ run shell.cpp test_impl ]
+    [ run utf8.cpp        $(test_impl) ]
+    [ run cstring_ref.cpp $(test_impl) ]
+    [ run environment.cpp $(test_impl) ]
+    [ run shell.cpp       $(test_impl) ]
     ;
 
 test-suite with_target :
-    [ run pid.cpp     test_impl : --log_level=all --catch_system_errors=no -- : target ]
-    [ run process.cpp test_impl : --log_level=all --catch_system_errors=no -- : target ]
-    [ run windows.cpp test_impl : --log_level=all --catch_system_errors=no -- : target : <build>no <target-os>windows:<build>yes <target-os>windows:<source>Advapi32 ]
-    [ run ext.cpp     test_impl : --log_level=all --catch_system_errors=no -- : target : <target-os>darwin:<build>no ]
+    [ run pid.cpp     $(test_impl) : --log_level=all --catch_system_errors=no -- : target ]
+    [ run process.cpp $(test_impl) : --log_level=all --catch_system_errors=no -- : target ]
+    [ run windows.cpp $(test_impl) : --log_level=all --catch_system_errors=no -- : target : <build>no <target-os>windows:<build>yes <target-os>windows:<source>Advapi32 ]
+    [ run ext.cpp     $(test_impl) : --log_level=all --catch_system_errors=no -- : target : <target-os>darwin:<build>no ]
     ;
 
