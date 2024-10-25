@@ -292,6 +292,7 @@ struct basic_process_handle_signal
         template<typename Self>
         void operator()(Self &&self)
         {
+            self.reset_cancellation_state(asio::enable_total_cancellation());
             handle.async_wait(std::move(self));
             handle.cancel();
             // we cancel so we end up on the signal-sets executor 

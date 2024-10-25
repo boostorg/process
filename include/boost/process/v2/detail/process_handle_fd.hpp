@@ -299,6 +299,7 @@ struct basic_process_handle_fd
         template<typename Self>
         void operator()(Self &&self)
         {
+            self.reset_cancellation_state(asio::enable_total_cancellation());
             error_code ec;
             native_exit_code_type exit_code{};
             int wait_res = -1;
