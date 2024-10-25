@@ -125,9 +125,9 @@ native_iterator find_end(native_handle_type nh)
   return ++nh;
 }
 
-bool is_executable(const filesystem::path & pth, error_code & ec)
+bool is_exec_type(const wchar_t * pth)
 {
-    return filesystem::is_regular_file(pth, ec) && SHGetFileInfoW(pth.native().c_str(), 0,0,0, SHGFI_EXETYPE);
+    return SHGetFileInfoW(pth, 0,0,0, SHGFI_EXETYPE);
 }
 
 }
