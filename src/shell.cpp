@@ -38,7 +38,7 @@ struct shell_category_t final : public error_category
 
     const char* name() const noexcept
     {
-        return "process.v2.utf8";
+        return "process.v2.shell";
     }
     std::string message(int value) const
     {

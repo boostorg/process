@@ -17,8 +17,11 @@
 #endif
 
 #if (defined(__APPLE__) && defined(__MACH__))
-#include <sys/proc_info.h>
-#include <libproc.h>
+#include <TargetConditionals.h>
+#if !TARGET_OS_IOS
+  #include <sys/proc_info.h>
+  #include <libproc.h>
+#endif
 #endif
 
 #if (defined(__linux__) || defined(__ANDROID__))
@@ -140,7 +143,7 @@ std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec)
     return vec;
 }
 
-#elif (defined(__APPLE__) && defined(__MACH__))
+#elif (defined(__APPLE__) && defined(__MACH__)) && !TARGET_OS_IOS
 
 std::vector<pid_type> all_pids(boost::system::error_code & ec)
 {
@@ -727,7 +730,21 @@ std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec)
 }
 
 #else
-#error "Platform not supported"
+std::vector<pid_type> all_pids(boost::system::error_code & ec)
+{
+  BOOST_PROCESS_V2_ASSIGN_EC(ec, ENOTSUP, system_category());
+  return {};
+}
+pid_type parent_pid(pid_type pid, boost::system::error_code & ec)
+{
+  BOOST_PROCESS_V2_ASSIGN_EC(ec, ENOTSUP, system_category());
+  return pid;
+}
+std::vector<pid_type> child_pids(pid_type, boost::system::error_code & ec)
+{
+  BOOST_PROCESS_V2_ASSIGN_EC(ec, ENOTSUP, system_category());
+  return {};
+}
 #endif
 
 std::vector<pid_type> all_pids()

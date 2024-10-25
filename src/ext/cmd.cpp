@@ -23,9 +23,12 @@
 #endif
 
 #if (defined(__APPLE__) && defined(__MACH__))
-#include <sys/proc_info.h>
-#include <sys/sysctl.h>
-#include <libproc.h>
+#include <TargetConditionals.h>
+#if !TARGET_OS_IOS
+  #include <sys/proc_info.h>
+  #include <sys/sysctl.h>
+  #include <libproc.h>
+#endif
 #endif
 
 #if (defined(__linux__) || defined(__ANDROID__))
@@ -156,7 +159,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 
 }
     
-#elif (defined(__APPLE__) && defined(__MACH__))
+#elif (defined(__APPLE__) && defined(__MACH__)) && !TARGET_OS_IOS
 
 shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
@@ -393,7 +396,11 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 }
 
 #else
-#error "Platform not supported"
+filesystem::path cmd(boost::process::v2::pid_type, boost::system::error_code & ec)
+{
+  BOOST_PROCESS_V2_ASSIGN_EC(ec, ENOTSUP, system_category())
+  return "";
+}
 #endif
 
 shell cmd(boost::process::v2::pid_type pid)

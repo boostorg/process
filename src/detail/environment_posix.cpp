@@ -65,9 +65,10 @@ native_iterator find_end(native_handle_type nh)
         nh++;
     return nh;
 }
-bool is_executable(const filesystem::path & p, error_code & ec)
+
+bool has_x_access(const char * pth)
 {
-    return filesystem::is_regular_file(p, ec) && (::access(p.c_str(), X_OK) == 0);
+  return (::access(pth, X_OK) == 0);
 }
 
 }

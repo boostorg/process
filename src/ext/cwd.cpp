@@ -24,8 +24,11 @@
 #endif
 
 #if (defined(__APPLE__) && defined(__MACH__))
-#include <sys/proc_info.h>
-#include <libproc.h>
+#include <TargetConditionals.h>
+#if !TARGET_OS_IOS
+  #include <sys/proc_info.h>
+  #include <libproc.h>
+#endif
 #endif
 
 #if (defined(BOOST_PROCESS_V2_WINDOWS) || defined(__linux__) || defined(__ANDROID__) || defined(__sun))
@@ -46,8 +49,10 @@
 #endif
 
 #if defined(__DragonFly__)
+#include <climits>
 #include <cstring>
-#include <cstdio>
+#include <sys/types.h>
+#include <sys/sysctl.h>
 #endif
 
 #ifdef BOOST_PROCESS_USE_STD_FS
@@ -98,7 +103,7 @@ filesystem::path cwd(HANDLE proc)
     return res;
 }
 
-#elif (defined(__APPLE__) && defined(__MACH__))
+#elif (defined(__APPLE__) && defined(__MACH__)) && !TARGET_OS_IOS
 
 filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
@@ -152,53 +157,14 @@ filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code
 
 filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
-    /*
     filesystem::path path;
-    // Official API (broken OS-level) - including code from DragonFly's fstat(1) 
-    // command line interface utility currently requires way too much code FWIW.
-    std::size_t sz = 4, len = 0;
+    char buffer[PATH_MAX];
+    std::size_t sz = 4, len = sizeof(buffer);
     int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_CWD, pid};
-    if (sysctl(mib, sz, nullptr, &len, nullptr, 0) == 0)
+    if (sysctl(mib, sz, buffer, &len, nullptr, 0) == 0)
     {
-        std::vector<char> vecbuff;
-        vecbuff.resize(len);
-        if (sysctl(mib, sz, &vecbuff[0], &len, nullptr, 0) == 0)
-        {
-            path = filesystem::canonical(&vecbuff[0], ec);
-        }    
-        else
-            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
-    }
-    else
-        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
-    return path;
-    */
-
-    filesystem::path path;
-    /* Probably the hackiest thing ever we are doing here, because the official API is broken OS-level. */
-    FILE *fp = popen(("pos=`ans=\\`/usr/bin/fstat -w -p " + std::to_string(pid) + " | /usr/bin/sed -n 1p\\`; " +
-        "/usr/bin/awk -v ans=\"$ans\" 'BEGIN{print index(ans, \"INUM\")}'`; str=`/usr/bin/fstat -w -p " + 
-        std::to_string(pid) + " | /usr/bin/sed -n 3p`; /usr/bin/awk -v str=\"$str\" -v pos=\"$pos\" " +
-        "'BEGIN{print substr(str, 0, pos + 4)}' | /usr/bin/awk 'NF{NF--};1 {$1=$2=$3=$4=\"\"; print" +
-        " substr($0, 5)'}").c_str(), "r");
-    if (fp) 
-    {
-        char buffer[PATH_MAX];
-        if (fgets(buffer, sizeof(buffer), fp)) 
-        {
-            std::string str = buffer;
-            std::size_t pos = str.find("\n", strlen(buffer) - 1);
-            if (pos != std::string::npos) 
-            {
-                str.replace(pos, 1, "");
-            }
-            path = filesystem::canonical(str.c_str(), ec);
-        }
-        else
-            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
-        if (pclose(fp) == -1)
-            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
-    }
+        path = filesystem::canonical(buffer, ec);
+    }    
     else
         BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
     return path;
@@ -234,7 +200,11 @@ filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code
 }
 
 #else
-#error "Platform not supported"
+filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
+{
+  BOOST_PROCESS_V2_ASSIGN_EC(ec, ENOTSUP, system_category())
+  return "";
+}
 #endif
 
 filesystem::path cwd(boost::process::v2::pid_type pid)
