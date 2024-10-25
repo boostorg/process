@@ -66,6 +66,13 @@ BOOST_PROCESS_V2_DECL const error_category& get_shell_category()
     return instance;
 }
 
+#else
+
+BOOST_PROCESS_V2_DECL const error_category& get_shell_category()
+{
+    return system_category();
+}
+
 #endif
 
 #if defined (BOOST_PROCESS_V2_WINDOWS)
@@ -133,6 +140,22 @@ auto shell::args() const -> args_type
     }
     else
         return const_cast<const char**>(argv());
+}
+
+#else
+
+void shell::parse_()
+{
+    error_code ec;
+    BOOST_PROCESS_V2_ASSIGN_EC(ec, ENOTSUP, system_category())
+    throw system_error(ec, "shell::parse");
+}
+
+shell::~shell() = default;
+
+auto shell::args() const -> args_type
+{
+    return nullptr;
 }
 
 #endif
