@@ -66,6 +66,13 @@ BOOST_PROCESS_V2_DECL const error_category& get_shell_category()
     return instance;
 }
 
+#else
+
+BOOST_PROCESS_V2_DECL const error_category& get_shell_category()
+{
+    return system_category();
+}
+
 #endif
 
 #if defined (BOOST_PROCESS_V2_WINDOWS)
