@@ -288,6 +288,17 @@ struct basic_process_handle_win
         template<typename Self>
         void operator()(Self &&self)
         {
+
+            self.reset_cancellation_state(asio::enable_total_cancellation());
+            auto sl = self.get_cancellation_state().slot();
+            auto & h = handle;
+            if (sl.is_connected())
+                sl.assign(
+                    [&h](asio::cancellation_type ct)
+                    {
+                      boost::system::error_code ec;
+                      h.cancel(ec);
+                    });
             handle.async_wait(std::move(self));
         }
 
@@ -295,6 +306,9 @@ struct basic_process_handle_win
         void operator()(Self &&self, error_code ec)
         {
             native_exit_code_type exit_code{};
+            if (ec == asio::error::operation_aborted && !self.get_cancellation_state().cancelled())
+              return handle.async_wait(std::move(self));
+
             if (!ec)
                 detail::get_exit_code_(handle.native_handle(), exit_code, ec);
             std::move(self).complete(ec, exit_code);

@@ -329,8 +329,15 @@ struct basic_process_handle_fd_or_signal
         pid_type pid_;
         bool needs_post = true;
 
+        template<typename Self.
+        void operator()(Self && self)
+        {
+          self.reset_cancellation_state(asio::enable_total_cancellation());
+          (*this)(std::move(self), error_code{});
+        }
+
         template<typename Self>
-        void operator()(Self &&self, error_code ec = {}, int = 0)
+        void operator()(Self &&self, error_code ec, int = 0)
         {
             native_exit_code_type exit_code{};
             int wait_res = -1;
