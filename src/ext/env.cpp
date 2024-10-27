@@ -42,6 +42,13 @@
 #include <libprocstat.h>
 #endif
 
+#if defined(__OpenBSD__)
+#include <sys/param.h>
+#include <sys/sysctl.h>
+#include <fcntl.h>
+#include <kvm.h>
+#endif
+
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
 
 namespace detail {
@@ -98,7 +105,7 @@ const environment::char_type * dereference(native_env_iterator iterator)
     return iterator;
 }
 
-#elif (defined(__APPLE___) || defined(__MACH__))
+#elif (defined(__APPLE___) || defined(__MACH__)) || defined(__OpenBSD__)
 
 void native_env_handle_deleter::operator()(native_env_handle_type h) const
 {
@@ -393,7 +400,48 @@ env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
   return ev;
 }
+#elif defined(__OpenBSD__)
+env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
+{
 
+  std::vector<char> vec;
+  int cntp = 0;
+  kinfo_proc *proc_info = nullptr;
+
+  struct closer
+  {
+    void operator()(kvm_t * kd)
+    {
+      kvm_close(kd);
+    }
+  };
+
+  std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr)};
+  if (!kd.get()) {BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec) return {};}
+  if ((proc_info = kvm_getprocs(kd.get(), KERN_PROC_PID, pid, sizeof(struct kinfo_proc), &cntp)))
+  {
+    char **env = kvm_getenvv(kd.get(), proc_info, 0);
+    if (env)
+    {
+      for (int i = 0; env[i] != nullptr; i++) 
+      {
+        for (int j = 0; j < strlen(env[i]); j++)
+          vec.push_back(env[i][j]);
+        vec.push_back('\0');
+      }
+      vec.push_back('\0');
+    }
+    else
+      BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
+  }
+  else
+    BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
+
+  env_view ev;
+  ev.handle_.reset(new char[vec.size()]());
+  std::copy(vec.begin(), vec.end(), ev.handle_.get());
+  return ev;
+}
 #endif
 
 env_view env(boost::process::v2::pid_type pid)
