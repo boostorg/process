@@ -197,7 +197,7 @@ struct process_io_binding
     fd = p[1];
     if (::fcntl(p[0], F_SETFD, FD_CLOEXEC) == -1)
     {
-      BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+      BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
       return ;
     }
     fd_needs_closing = true;
@@ -223,7 +223,7 @@ struct process_io_binding
     fd = p[0];
     if (::fcntl(p[1], F_SETFD, FD_CLOEXEC) == -1)
     {
-      BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+      BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
       return ;
     }
     fd_needs_closing = true;
