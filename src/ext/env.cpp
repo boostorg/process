@@ -181,19 +181,19 @@ env_view env(HANDLE proc, boost::system::error_code & ec)
 
     if (error)
     {
-        BOOST_PROCESS_V2_ASSIGN_EC(ec, error, system_category())
+        BOOST_PROCESS_V2_ASSIGN_EC(ec, error, system_category());
         return {};
     }
 
     if (!ReadProcessMemory(proc, pbi.PebBaseAddress, &peb, sizeof(peb), &nRead))
     {
-        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
         return {};
     }
 
     if (!ReadProcessMemory(proc, peb.ProcessParameters, &upp, sizeof(upp), &nRead))
     {
-        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
         return {};
     }
 
@@ -204,7 +204,7 @@ env_view env(HANDLE proc, boost::system::error_code & ec)
 
     if (!ReadProcessMemory(proc, buf, ev.handle_.get(), len, &nRead))
     {
-        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
         return {};
     }
 
@@ -232,7 +232,7 @@ env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     };
     std::unique_ptr<void, del> proc{detail::ext::open_process_with_debug_privilege(pid, ec)};
     if (proc == nullptr)
-        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
     else
 	    return env(proc.get(), ec);
 
@@ -248,7 +248,7 @@ env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     auto size = sizeof(argmax);
     if (sysctl(mib, 2, &argmax, &size, nullptr, 0) == -1)
     {
-        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
         return {};
     }
 
@@ -261,7 +261,7 @@ env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 
     if (sysctl(mib, 3, &*procargs.begin(), &size, nullptr, 0) != 0)
     {
-        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
         return {};
     }
     std::uint32_t nargs;
@@ -319,7 +319,7 @@ env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
         auto r = ::read(f, buf.get() + size, 4096);
         if (r < 0)
         {
-            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
             ::close(f);
             return {};
         }
@@ -386,18 +386,18 @@ env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
           ev.handle_.reset(eeo);
         }
         else
-            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
 
       }
       procstat_freeprocs(proc_stat, proc_info);
 
     }
     else
-      BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+      BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
     procstat_close(proc_stat);
   }
   else
-    BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+    BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
   return ev;
 }
 #elif defined(__OpenBSD__)

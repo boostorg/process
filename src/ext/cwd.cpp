@@ -73,7 +73,7 @@ filesystem::path cwd(HANDLE proc, boost::system::error_code & ec)
     if (!buffer.empty())
       return filesystem::canonical(buffer, ec);
     else 
-        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
     return "";
 }
 
@@ -88,7 +88,7 @@ filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code
     };
     std::unique_ptr<void, del> proc{detail::ext::open_process_with_debug_privilege(pid, ec)};
     if (proc == nullptr)
-        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
     else
         return cwd(proc.get(), ec);
     return {};
@@ -111,7 +111,7 @@ filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code
     if (proc_pidinfo(pid, PROC_PIDVNODEPATHINFO, 0, &vpi, sizeof(vpi)) > 0)
         return filesystem::canonical(vpi.pvi_cdir.vip_path, ec);
     else
-      BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+      BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
     return "";
 }
 
@@ -146,10 +146,10 @@ filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code
             path = filesystem::canonical(kif.kf_path, ec);
         }
         else
-            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
     }
     else
-        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
     return path;
 }
 
@@ -166,7 +166,7 @@ filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code
         path = filesystem::canonical(buffer, ec);
     }    
     else
-        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
     return path;
 }
 
@@ -192,17 +192,17 @@ filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code
             path = filesystem::canonical(&vecbuff[0], ec);
         }
         else
-            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
     }
     else
-        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
     return path;
 }
 
 #else
 filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
-  BOOST_PROCESS_V2_ASSIGN_EC(ec, ENOTSUP, system_category())
+  BOOST_PROCESS_V2_ASSIGN_EC(ec, ENOTSUP, system_category());
   return "";
 }
 #endif
