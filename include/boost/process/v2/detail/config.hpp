@@ -7,7 +7,6 @@
 
 #if defined(BOOST_PROCESS_V2_STANDALONE)
 
-
 #define BOOST_PROCESS_V2_COMPLETION_TOKEN_FOR(Sig) ASIO_COMPLETION_TOKEN_FOR(Sig)
 
 #include <asio/detail/config.hpp>
@@ -20,10 +19,6 @@
 #if defined(ASIO_WINDOWS)
 #define BOOST_PROCESS_V2_WINDOWS 1
 
-// Windows: suppress definition of "min" and "max" macros.
-#if !defined(NOMINMAX)
-# define NOMINMAX 1
-#endif
 #endif
 
 #if defined(ASIO_HAS_UNISTD_H)
@@ -53,10 +48,6 @@ BOOST_PROCESS_V2_END_NAMESPACE
 #if defined(BOOST_WINDOWS_API)
 #define BOOST_PROCESS_V2_WINDOWS 1
 
-// Windows: suppress definition of "min" and "max" macros.
-#if !defined(NOMINMAX)
-# define NOMINMAX 1
-#endif
 
 #endif
 
