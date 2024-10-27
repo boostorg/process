@@ -100,9 +100,6 @@ namespace filesystem = std::filesystem;
 using std::quoted;
 using std::optional;
 
-#define BOOST_PROCESS_V2_RETURN_EC(ev)                                                                  \
-  return ::BOOST_PROCESS_V2_NAMESPACE::error_code(ev, ::BOOST_PROCESS_V2_NAMESPACE::system_category()); \
-
 #define BOOST_PROCESS_V2_ASSIGN_EC(ec, ...) ec.assign(__VA_ARGS__);
 #define BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)                         \
   ec.assign(::BOOST_PROCESS_V2_NAMESPACE::detail::get_last_error());   \
@@ -123,23 +120,21 @@ namespace filesystem = std::filesystem;
 namespace filesystem = boost::filesystem;
 #endif
 
-#define BOOST_PROCESS_V2_RETURN_EC(ev)                                                                     \
-{                                                                                                          \
-  static constexpr auto loc##__LINE__((BOOST_CURRENT_LOCATION));                                           \
-  return ::BOOST_PROCESS_V2_NAMESPACE::error_code(ev, ::BOOST_PROCESS_V2_NAMESPACE::system_category(), &loc##__LINE__);   \
-}
-
 #define BOOST_PROCESS_V2_ASSIGN_EC(ec, ...)                       \
+do                                                                \
 {                                                                 \
   static constexpr auto loc##__LINE__((BOOST_CURRENT_LOCATION));  \
   ec.assign(__VA_ARGS__,  &loc##__LINE__);                        \
-}
+}                                                                 \
+while (false)
 
 #define BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)                                         \
+do                                                                                     \
 {                                                                                      \
   static constexpr auto loc##__LINE__((BOOST_CURRENT_LOCATION));                       \
   ec.assign(::BOOST_PROCESS_V2_NAMESPACE::detail::get_last_error(), &loc##__LINE__);   \
-}
+}                                                                                      \
+while (false)
 
 
 #endif

@@ -45,7 +45,7 @@ std::basic_string<char_type, value_char_traits<char_type>> get(
   buf.resize(size);
 
   if (buf.size() == 0)
-    BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+    BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
 
   return buf;
 }
@@ -55,14 +55,14 @@ void set(basic_cstring_ref<char_type,   key_char_traits<char_type>>   key,
          error_code & ec)
 {
   if (!::SetEnvironmentVariableW(key.c_str(), value.c_str()))
-    BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+    BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
 }
 
 void unset(basic_cstring_ref<char_type, key_char_traits<char_type>> key,
            error_code & ec)
 {
   if (!::SetEnvironmentVariableW(key.c_str(), nullptr))
-    BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+    BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
 }
 
 
@@ -83,7 +83,7 @@ std::basic_string<char, value_char_traits<char>> get(
   buf.resize(size);
 
   if (buf.size() == 0)
-    BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+    BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
 
   return buf;
 }
@@ -93,14 +93,14 @@ void set(basic_cstring_ref<char,   key_char_traits<char>>   key,
          error_code & ec)
 {
   if (!::SetEnvironmentVariableA(key.c_str(), value.c_str()))
-    BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+    BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
 }
 
 void unset(basic_cstring_ref<char, key_char_traits<char>> key,
            error_code & ec)
 {
   if (!::SetEnvironmentVariableA(key.c_str(), nullptr))
-    BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+    BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
 }
 
 

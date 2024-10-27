@@ -365,12 +365,12 @@ struct default_launcher
             pipe_guard pg;
             if (::pipe(pg.p))
             {
-                BOOST_PROCESS_V2_ASSIGN_EC(ec, errno, system_category())
+                BOOST_PROCESS_V2_ASSIGN_EC(ec, errno, system_category());
                 return basic_process<Executor>{exec};
             }
             if (::fcntl(pg.p[1], F_SETFD, FD_CLOEXEC))
             {
-                BOOST_PROCESS_V2_ASSIGN_EC(ec, errno, system_category())
+                BOOST_PROCESS_V2_ASSIGN_EC(ec, errno, system_category());
                 return basic_process<Executor>{exec};
             }
             ec = detail::on_setup(*this, executable, argv, inits ...);
@@ -391,7 +391,7 @@ struct default_launcher
                 detail::on_fork_error(*this, executable, argv, ec, inits...);
                 detail::on_error(*this, executable, argv, ec, inits...);
 
-                BOOST_PROCESS_V2_ASSIGN_EC(ec, errno, system_category())
+                BOOST_PROCESS_V2_ASSIGN_EC(ec, errno, system_category());
                 return basic_process<Executor>{exec};
             }
             else if (pid == 0)
@@ -407,7 +407,7 @@ struct default_launcher
                     ::execve(executable.c_str(), const_cast<char * const *>(argv), const_cast<char * const *>(env));
 
                 ignore_unused(::write(pg.p[1], &errno, sizeof(int)));
-                BOOST_PROCESS_V2_ASSIGN_EC(ec, errno, system_category())
+                BOOST_PROCESS_V2_ASSIGN_EC(ec, errno, system_category());
                 detail::on_exec_error(*this, executable, argv, ec, inits...);
                 ::exit(EXIT_FAILURE);
                 return basic_process<Executor>{exec};
@@ -423,12 +423,12 @@ struct default_launcher
                 int err = errno;
                 if ((err != EAGAIN) && (err != EINTR))
                 {
-                    BOOST_PROCESS_V2_ASSIGN_EC(ec, err, system_category())
+                    BOOST_PROCESS_V2_ASSIGN_EC(ec, err, system_category());
                     break;
                 }
             }
             if (count != 0)
-                BOOST_PROCESS_V2_ASSIGN_EC(ec, child_error, system_category())
+                BOOST_PROCESS_V2_ASSIGN_EC(ec, child_error, system_category());
 
             if (ec)
             {

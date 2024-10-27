@@ -168,7 +168,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     auto size = sizeof(argmax);
     if (sysctl(mib, 2, &argmax, &size, nullptr, 0) == -1)
     {
-        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
         return {};
     }
 
@@ -181,7 +181,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 
     if (sysctl(mib, 3, &*procargs.begin(), &size, nullptr, 0) != 0)
     {
-        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
         return {};
     }
 
@@ -198,7 +198,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
         auto e = std::find(itr, end, '\0');
         if (e == end && n < argc) // something off
         {
-            BOOST_PROCESS_V2_ASSIGN_EC(ec, EINVAL, system_category())
+            BOOST_PROCESS_V2_ASSIGN_EC(ec, EINVAL, system_category());
             return {};
         }
         argv[n] = &*itr;
@@ -223,7 +223,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
         auto r = ::read(f, &*(procargs.end() - 4096), 4096);
         if (r < 0)
         {
-            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
             ::close(f);
             return {};
         }
@@ -254,7 +254,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
         auto e = std::find(itr, end, '\0');
         if (e == end && n < argc) // something off
         {
-            BOOST_PROCESS_V2_ASSIGN_EC(ec, EINVAL, system_category())
+            BOOST_PROCESS_V2_ASSIGN_EC(ec, EINVAL, system_category());
             return {};
         }
         argv[n] = &*itr;
@@ -290,10 +290,10 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
         if (cmd)
             return make_cmd_shell_::clone(cmd);
         else
-            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
     }
     else
-        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
     return {};
 }
     
@@ -322,10 +322,10 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
         if (cmd)
             return make_cmd_shell_::clone(cmd);
         else
-            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
     }
     else
-        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
     return vec;
 }
     
@@ -353,10 +353,10 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
         if (cmd)
             return make_cmd_shell_::clone(cmd);
         else
-            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
     }
     else
-        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
     kvm_close(kd);
     return {};
 }
@@ -384,13 +384,13 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
                         +[](int, char ** argv) {::free(argv);})
             }
             else
-                BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+                BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
         }
         else
-            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
     }
     else
-        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
     
     kvm_close(kd);
     return {};
@@ -399,7 +399,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 #else
 filesystem::path cmd(boost::process::v2::pid_type, boost::system::error_code & ec)
 {
-  BOOST_PROCESS_V2_ASSIGN_EC(ec, ENOTSUP, system_category())
+  BOOST_PROCESS_V2_ASSIGN_EC(ec, ENOTSUP, system_category());
   return "";
 }
 #endif
