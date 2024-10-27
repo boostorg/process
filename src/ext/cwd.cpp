@@ -187,7 +187,7 @@ filesystem::path cwd(boost::process::v2::pid_type pid, boost::system::error_code
     {
         std::vector<char> vecbuff;
         vecbuff.resize(len);
-        if (sysctl(mib, 4, &vecbuff[0], &len, nullptr, 0) == 0)
+        if (sysctl(mib, sz, &vecbuff[0], &len, nullptr, 0) == 0)
         {
             path = filesystem::canonical(&vecbuff[0], ec);
         }
