@@ -68,7 +68,7 @@ BOOST_PROCESS_V2_DECL const error_category& get_shell_category()
 
 #else
 
-BOOST_PROCESS_V2_DECL const error_category& get_shell_category()
+const error_category& get_shell_category()
 {
     return system_category();
 }
@@ -147,7 +147,7 @@ auto shell::args() const -> args_type
 void shell::parse_()
 {
     error_code ec;
-    BOOST_PROCESS_V2_ASSIGN_EC(ec, ENOTSUP, system_category())
+    BOOST_PROCESS_V2_ASSIGN_EC(ec, ENOTSUP, system_category());
     throw system_error(ec, "shell::parse");
 }
 

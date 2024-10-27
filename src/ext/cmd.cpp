@@ -356,7 +356,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
             BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
     }
     else
-        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
     return {};
 }
     

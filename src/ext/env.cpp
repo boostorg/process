@@ -403,7 +403,6 @@ env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 #elif defined(__OpenBSD__)
 env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
-
   std::vector<char> vec;
   int cntp = 0;
   kinfo_proc *proc_info = nullptr;
@@ -432,10 +431,10 @@ env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
       vec.push_back('\0');
     }
     else
-      BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+      BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
   }
   else
-    BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+    BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
 
   env_view ev;
   ev.handle_.reset(new char[vec.size()]());
