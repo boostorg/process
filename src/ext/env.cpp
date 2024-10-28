@@ -21,9 +21,12 @@
 #endif
 
 #if (defined(__APPLE__) && defined(__MACH__))
-#include <sys/proc_info.h>
-#include <sys/sysctl.h>
-#include <libproc.h>
+#include <TargetConditionals.h>
+#if !TARGET_OS_IOS
+  #include <sys/proc_info.h>
+  #include <sys/sysctl.h>
+  #include <libproc.h>
+#endif
 #endif
 
 #if (defined(__linux__) || defined(__ANDROID__))
@@ -37,6 +40,13 @@
 #include <sys/queue.h>
 #include <sys/user.h>
 #include <libprocstat.h>
+#endif
+
+#if defined(__OpenBSD__)
+#include <sys/param.h>
+#include <sys/sysctl.h>
+#include <fcntl.h>
+#include <kvm.h>
 #endif
 
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
@@ -95,7 +105,7 @@ const environment::char_type * dereference(native_env_iterator iterator)
     return iterator;
 }
 
-#elif (defined(__APPLE___) || defined(__MACH__))
+#elif (defined(__APPLE___) || defined(__MACH__)) || defined(__OpenBSD__)
 
 void native_env_handle_deleter::operator()(native_env_handle_type h) const
 {
@@ -171,19 +181,19 @@ env_view env(HANDLE proc, boost::system::error_code & ec)
 
     if (error)
     {
-        BOOST_PROCESS_V2_ASSIGN_EC(ec, error, boost::system::system_category())
+        BOOST_PROCESS_V2_ASSIGN_EC(ec, error, system_category());
         return {};
     }
 
     if (!ReadProcessMemory(proc, pbi.PebBaseAddress, &peb, sizeof(peb), &nRead))
     {
-        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
         return {};
     }
 
     if (!ReadProcessMemory(proc, peb.ProcessParameters, &upp, sizeof(upp), &nRead))
     {
-        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
         return {};
     }
 
@@ -194,7 +204,7 @@ env_view env(HANDLE proc, boost::system::error_code & ec)
 
     if (!ReadProcessMemory(proc, buf, ev.handle_.get(), len, &nRead))
     {
-        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
         return {};
     }
 
@@ -222,14 +232,14 @@ env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     };
     std::unique_ptr<void, del> proc{detail::ext::open_process_with_debug_privilege(pid, ec)};
     if (proc == nullptr)
-        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
     else
 	    return env(proc.get(), ec);
 
 	return {};
 }
 
-#elif (defined(__APPLE___) || defined(__MACH__))
+#elif (defined(__APPLE___) || defined(__MACH__)) && !TARGET_OS_IOS
 
 env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
@@ -238,7 +248,7 @@ env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     auto size = sizeof(argmax);
     if (sysctl(mib, 2, &argmax, &size, nullptr, 0) == -1)
     {
-        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
         return {};
     }
 
@@ -251,7 +261,7 @@ env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 
     if (sysctl(mib, 3, &*procargs.begin(), &size, nullptr, 0) != 0)
     {
-        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
         return {};
     }
     std::uint32_t nargs;
@@ -309,7 +319,7 @@ env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
         auto r = ::read(f, buf.get() + size, 4096);
         if (r < 0)
         {
-            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
             ::close(f);
             return {};
         }
@@ -376,21 +386,62 @@ env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
           ev.handle_.reset(eeo);
         }
         else
-            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
 
       }
       procstat_freeprocs(proc_stat, proc_info);
 
     }
     else
-      BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+      BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
     procstat_close(proc_stat);
   }
   else
-    BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)
+    BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
   return ev;
 }
+#elif defined(__OpenBSD__)
+env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
+{
 
+  std::vector<char> vec;
+  int cntp = 0;
+  kinfo_proc *proc_info = nullptr;
+
+  struct closer
+  {
+    void operator()(kvm_t * kd)
+    {
+      kvm_close(kd);
+    }
+  };
+
+  std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr)};
+  if (!kd.get()) {BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec) return {};}
+  if ((proc_info = kvm_getprocs(kd.get(), KERN_PROC_PID, pid, sizeof(struct kinfo_proc), &cntp)))
+  {
+    char **env = kvm_getenvv(kd.get(), proc_info, 0);
+    if (env)
+    {
+      for (int i = 0; env[i] != nullptr; i++) 
+      {
+        for (int j = 0; j < strlen(env[i]); j++)
+          vec.push_back(env[i][j]);
+        vec.push_back('\0');
+      }
+      vec.push_back('\0');
+    }
+    else
+      BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
+  }
+  else
+    BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
+
+  env_view ev;
+  ev.handle_.reset(new char[vec.size()]());
+  std::copy(vec.begin(), vec.end(), ev.handle_.get());
+  return ev;
+}
 #endif
 
 env_view env(boost::process::v2::pid_type pid)

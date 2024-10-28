@@ -45,16 +45,28 @@ lib shell32 ;
 lib advapi32 ;
 lib ntdll ;
 lib user32 ;
+lib ws2_32 ;
+
+lib kvm ;
+lib procstat ;
 
 lib boost_process
    : process_sources
    : requirements <define>BOOST_PROCESS_SOURCE=1
      <link>shared:<define>BOOST_PROCESS_DYN_LINK=1
      <boost.process.fs>boost:<library>/boost/filesystem//boost_filesystem
+     <boost.process.disable-close-range>on:<define>BOOST_PROCESS_V2_POSIX_FORCE_DISABLE_CLOSE_RANGE=1
      <target-os>windows:<library>shell32
      <target-os>windows:<library>user32
      <target-os>windows:<library>ntdll
      <target-os>windows:<library>advapi32
+     <target-os>windows:<library>ws2_32
+     <target-os>bsd:<library>kvm
+     <target-os>freebsd:<library>kvm
+     <target-os>freebsd:<library>procstat
+     <target-os>netbsd:<library>kvm
+     <target-os>openbsd:<library>kvm
+     <target-os>solaris:<library>kvm
    : usage-requirements
      <link>shared:<define>BOOST_PROCESS_DYN_LINK=1
      <boost.process.fs>boost:<library>/boost/filesystem//boost_filesystem
