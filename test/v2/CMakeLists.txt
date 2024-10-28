@@ -37,3 +37,13 @@ endfunction()
 
 boost_process_v2_test_with_target(process)
 boost_process_v2_test_with_target(ext)
+
+
+add_executable(boost_process_v2_test_experimental_pty_target experimental/pty_target.cpp)
+target_link_libraries(boost_process_v2_test_experimental_pty_target PUBLIC Boost::process Boost::system)
+
+add_executable(boost_process_v2_test_experimental_pty experimental/pty.cpp)
+target_link_libraries(boost_process_v2_test_experimental_pty Boost::process Boost::system Boost::filesystem boost_process_v2_test_impl)
+add_dependencies(boost_process_v2_test_experimental_pty boost_process_v2_test_experimental_pty_target)
+add_test(NAME boost_process_v2_test_experimental_pty COMMAND $<TARGET_FILE:boost_process_v2_test_experimental_pty>
+         -- $<TARGET_FILE:boost_process_v2_test_experimental_pty_target>)

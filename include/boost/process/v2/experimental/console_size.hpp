@@ -5,17 +5,21 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#ifndef BOOST_PROCESS_V2_EXPERIMENTAL_STREAM_INPUT_HPP
-#define BOOST_PROCESS_V2_EXPERIMENTAL_STREAM_INPUT_HPP
+#ifndef BOOST_PROCESS_V2_CONSOLE_SIZE_CONSOLE_SIZE_HPP
+#define BOOST_PROCESS_V2_CONSOLE_SIZE_CONSOLE_SIZE_HPP
 
 #include <boost/process/v2/detail/config.hpp>
-#include <boost/process/v2/experimental/basic_stream_input.hpp>
-
 
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
+namespace experimental
+{
 
-typedef basic_stream_input<> stream_input;
+struct console_size_t
+{
+  unsigned short columns, rows;
+};
 
+}
 BOOST_PROCESS_V2_END_NAMESPACE
 
-#endif //BOOST_PROCESS_V2_EXPERIMENTAL_STREAM_INPUT_HPP
+#endif //BOOST_PROCESS_V2_CONSOLE_SIZE_CONSOLE_SIZE_HPP
