@@ -417,7 +417,7 @@ env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
   };
 
   std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr)};
-  if (!kd.get()) {BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec) return {};}
+  if (!kd.get()) {BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec); return {};}
   if ((proc_info = kvm_getprocs(kd.get(), KERN_PROC_PID, pid, sizeof(struct kinfo_proc), &cntp)))
   {
     char **env = kvm_getenvv(kd.get(), proc_info, 0);
