@@ -207,7 +207,7 @@ struct basic_stream
   }
 
   /// Get the executor associated with the object.
-  const executor_type& get_executor() noexcept
+  executor_type get_executor() noexcept
   {
     return handle_.get_executor();
   }
@@ -390,7 +390,7 @@ struct basic_stream
     struct ::termios t;
     return !tcgetattr(handle_.native_handle(), &t);
 #else
-    return handle_.index() == 0u;
+    return handle_.object.is_open();
 #endif
   }
 
@@ -421,7 +421,7 @@ struct basic_stream
     else
       mode &= ~ENABLE_ECHO_INPUT;
 
-    if (!ec && SetConsoleMode(handle_.native_handle(), mode))
+    if (!ec && !SetConsoleMode(handle_.native_handle(), mode))
       BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
 #endif
   }
@@ -484,11 +484,11 @@ struct basic_stream
       BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
 
     if (enable)
-      mode |= ENABLE_LINE_INPUT;
+      mode |= ENABLE_LINE_INPUT | ENABLE_PROCESSED_INPUT ;
     else
-      mode &= ~ENABLE_LINE_INPUT;
+      mode &= ~(ENABLE_LINE_INPUT | ENABLE_PROCESSED_INPUT );
 
-    if (!ec && SetConsoleMode(handle_.native_handle(), mode))
+    if (!ec && !SetConsoleMode(handle_.native_handle(), mode))
       BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
 #endif
   }
@@ -561,24 +561,26 @@ struct basic_stream
     {
       if (!this_->is_pty())
       {
-        auto e = net::get_associated_immediate_executor(self, this_->sig_winch_.get_executor());
+        auto e = net::get_associated_immediate_executor(self, this_->handle_.object.get_executor());
         return net::dispatch(e, net::append(std::move(self), net::error::operation_not_supported));
       }
-      buf = this_->handle_.cs_buf_;
-      this_->handle_.trigger_size_.async_wait(std::move(self));
+      this_->async_wait(std::move(self));
     }
 
     template<typename Self>
     void operator()(Self && self, error_code ec)
     {
-      if (ec == net::error::operation_aborted
-        && !self.get_cancellation_state().cancelled()
-        && buf != this_->handle_.cs_buf_)
-        ec.clear();
-
-      if (this_->handle_.trigger_size_.expiry() == std::chrono::steady_clock::time_point::min())
-        BOOST_PROCESS_V2_ASSIGN_EC(ec, net::error::broken_pipe);
-
+      if (!ec)
+      {
+        CONSOLE_SCREEN_BUFFER_INFO bi;
+        if (::GetConsoleScreenBufferInfo(this_->handle_.object.native_handle(), &bi))
+        {
+          this_->handle_.cs_buf_.columns = bi.dwSize.X;
+          this_->handle_.cs_buf_.rows = bi.dwSize.Y;
+        }
+        else
+          BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
+      }
 
       self.complete(ec, this_->handle_.cs_buf_);
     }
@@ -600,7 +602,7 @@ struct basic_stream
                   async_wait_for_size_change_op_{this}, handler, handle_))
   {
     return net::async_compose<WaitHandler, void (error_code, console_size_t)>(
-        async_wait_for_size_change_op_{this}, handler, get_executor());
+        async_wait_for_size_change_op_{this}, handler, handle_);
   }
 
   /// Wait for the stream to become ready to read.
@@ -710,9 +712,9 @@ struct basic_stream
   auto async_wait(WaitToken&& token = net::default_completion_token_t<executor_type>())
   -> decltype(this->handle_.async_wait(
 #if defined(BOOST_PROCESS_V2_POSIX)
-      net::posix::descriptor_base::wait_read, std::declval<WaitToken&&>()
+      net::posix::descriptor_base::wait_read,
 #endif
-  ))
+      std::declval<WaitToken&&>()))
   {
     return this->handle_.async_wait(
 #if defined(BOOST_PROCESS_V2_POSIX)
@@ -836,11 +838,11 @@ struct basic_stream
    * @li @c cancellation_type::total
    */
   template <typename MutableBufferSequence,
-      BOOST_PROCESS_V2_COMPLETION_TOKEN_FOR(void (error_code, std::size_t)) ReadToken =
+            BOOST_PROCESS_V2_COMPLETION_TOKEN_FOR(void (error_code, std::size_t)) ReadToken =
                                       net::default_completion_token_t<executor_type>>
   auto async_read_some(const MutableBufferSequence& buffers,
                        ReadToken&& token = net::default_completion_token_t<executor_type>())
-  -> decltype(this->handle_.async_read_some(buffers, std::forward<ReadToken>(token)))
+      -> decltype(this->handle_.async_read_some(buffers, std::forward<ReadToken>(token)))
   {
     return this->handle_.async_read_some(buffers, std::forward<ReadToken>(token));
   }
@@ -975,11 +977,11 @@ basic_stream<Executor> open_stdin(Executor exec, bool duplicate, error_code & ec
   typename basic_stream<Executor>::native_handle_type handle;
 #if defined(BOOST_WINDOWS_API)
   if (!duplicate)
-    handle = GetStdHandle(STDIN_FILENO);
+    handle = GetStdHandle(STD_INPUT_HANDLE);
   else if (
       !DuplicateHandle(
           GetCurrentProcess(),
-          GetStdHandle(STDIN_FILENO),
+          GetStdHandle(STD_INPUT_HANDLE),
           GetCurrentProcess(),
           &handle,
           0u,
@@ -1000,11 +1002,11 @@ basic_stream<Executor> open_stdout(Executor exec, bool duplicate, error_code & e
   typename basic_stream<Executor>::native_handle_type handle;
 #if defined(BOOST_WINDOWS_API)
   if (!duplicate)
-    handle = GetStdHandle(STDOUT_FILENO);
+    handle = GetStdHandle(STD_OUTPUT_HANDLE);
   else if (
       !DuplicateHandle(
           GetCurrentProcess(),
-          GetStdHandle(STDOUT_FILENO),
+          GetStdHandle(STD_OUTPUT_HANDLE),
           GetCurrentProcess(),
           &handle,
           0u,
@@ -1025,11 +1027,11 @@ basic_stream<Executor> open_stderr(Executor exec, bool duplicate, error_code & e
   typename basic_stream<Executor>::native_handle_type handle;
 #if defined(BOOST_WINDOWS_API)
   if (!duplicate)
-    handle = GetStdHandle(STDERR_FILENO);
+    handle = GetStdHandle(STD_ERROR_HANDLE);
   else if (
       !DuplicateHandle(
           GetCurrentProcess(),
-          GetStdHandle(STDERR_FILENO),
+          GetStdHandle(STD_ERROR_HANDLE),
           GetCurrentProcess(),
           &handle,
           0u,

@@ -6,6 +6,8 @@
 //
 
 
+
+
 #include <boost/process/v2/experimental/pty.hpp>
 #include <boost/process/v2/process.hpp>
 
@@ -37,12 +39,12 @@ BOOST_AUTO_TEST_CASE(sync_plain)
   std::string l1 = "Hello", l2 = ", ", l3 = "World!", l4 = "\n";
 
   std::string read_buffer;
-  read_buffer.resize(64);
+  read_buffer.resize(128);
   auto rb = net::buffer(read_buffer);
 
   BOOST_CHECK_EQUAL(pt.write_some(net::buffer(l1)), 5);
   auto n = pt.read_some(rb);
-  BOOST_CHECK_EQUAL(n,  5); rb += n;
+  BOOST_CHECK_MESSAGE(n == 5, read_buffer.substr(0, n)); rb += n;
 
   BOOST_CHECK_EQUAL(pt.write_some(net::buffer(l2)), 2);
   BOOST_CHECK_EQUAL(n = pt.read_some(rb),  2); rb += n;
@@ -76,6 +78,8 @@ BOOST_AUTO_TEST_CASE(async_plain)
   {
     bp2::experimental::pty &pt;
     bp2::process &proc;
+
+    op(bp2::experimental::pty &pt, bp2::process &proc) : pt(pt), proc(proc) {}
 
     std::string read_buffer = std::string(64, ' ');
     net::mutable_buffer rb = net::buffer(read_buffer);
@@ -115,7 +119,7 @@ BOOST_AUTO_TEST_CASE(async_plain)
     }
   };
 
-  op{{}, pt, proc}({}, 0u);
+  op{pt, proc}({}, 0u);
   ctx.run();
 }
 
@@ -169,7 +173,6 @@ BOOST_AUTO_TEST_CASE(async_echo)
   bp2::experimental::pty pt{ctx};
   bp2::process proc(ctx, pth, {"--async", "--echo"}, pt);
 
-
   char buf[4];
   net::read(pt, net::buffer(buf));
 
@@ -178,6 +181,8 @@ BOOST_AUTO_TEST_CASE(async_echo)
   {
     bp2::experimental::pty &pt;
     bp2::process &proc;
+
+    op(bp2::experimental::pty &pt, bp2::process &proc) : pt(pt), proc(proc) {}
 
     std::string read_buffer = std::string(64, ' ');
     net::mutable_buffer rb = net::buffer(read_buffer);
@@ -217,7 +222,7 @@ BOOST_AUTO_TEST_CASE(async_echo)
     }
   };
 
-  op{{}, pt, proc}({}, 0u);
+  op{pt, proc}({}, 0u);
   ctx.run();
 }
 
@@ -252,6 +257,8 @@ BOOST_AUTO_TEST_CASE(async_line)
     bp2::experimental::pty &pt;
     std::size_t & read;
 
+    op(bp2::experimental::pty &pt, std::size_t & read) : pt(pt), read(read) {}
+
     std::string l1 = "Hello", l2 = ", ", l3 = "World!", l4 = "\n";
 
 
@@ -276,7 +283,7 @@ BOOST_AUTO_TEST_CASE(async_line)
     }
   };
 
-  op{{}, pt, read}({}, 0u);
+  op{pt, read}({}, 0u);
   ctx.run();
 }
 

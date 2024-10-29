@@ -26,6 +26,8 @@ struct async_op : net::coroutine
 {
   bp::experimental::basic_stream<net::io_context::executor_type> &in, &out;
 
+  async_op(bp::experimental::basic_stream<net::io_context::executor_type> &in,
+           bp::experimental::basic_stream<net::io_context::executor_type> &out) : in(in), out(out) {}
   void operator()(bp::error_code ec = {}, std::size_t n = {})
   {
     if (ec)
@@ -46,13 +48,14 @@ struct async_op : net::coroutine
 };
 
 int main(int argc, char * argv[])
+try
 {
   net::io_context ctx;
 
   auto in = bp::experimental::open_stdin(ctx.get_executor());
   assert(in.is_pty());
-  assert(in.echo());
-  assert(in.line());
+  //assert(in.echo());
+  //assert(in.line());
 
   std::vector<std::string> args{argv + 1, argv + argc};
 
@@ -64,8 +67,6 @@ int main(int argc, char * argv[])
 
   auto out = stder ? bp::experimental::open_stderr(ctx.get_executor())
                    : bp::experimental::open_stdout(ctx.get_executor());
-
-
   in.set_echo(echo);
   in.set_line(line);
 
@@ -92,7 +93,7 @@ int main(int argc, char * argv[])
   }
   else if (async)
   {
-    net::post(ctx, async_op{{}, in, out});
+    net::post(ctx, async_op{in, out});
     ctx.run();
   }
   else
@@ -110,4 +111,9 @@ int main(int argc, char * argv[])
   }
 
   return 0u;
+}
+catch(boost::system::system_error & se)
+{
+  fprintf(stderr, "Pty-Target exception: %s(%d): %s\n", se.code().location().file_name(), se.code().location().line(), se.what());
+  return 1;
 }

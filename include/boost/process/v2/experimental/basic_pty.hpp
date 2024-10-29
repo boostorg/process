@@ -58,7 +58,7 @@ class basic_pty
     template<typename Arg>
     handle_t_(Arg && arg) : rm{arg} {}
 
-    bool is_open() {return rm.is_open();}
+    bool is_open() const {return rm.is_open();}
   };
 
   handle_t_ handle_;
@@ -600,10 +600,10 @@ class basic_pty
       this->close(ec);
     }
 #else
-    net::connect_pipe(handle_.rm, handle_.ws, ec);
+    net::connect_pipe(handle_.rm, handle_.ws, ec); // output
     if (!ec)
     {
-      net::connect_pipe(handle_.wm, handle_.rs, ec);
+      net::connect_pipe(handle_.rs, handle_.wm, ec); // input
       if (ec)
         handle_.rm.close(ec);
     }
@@ -698,10 +698,14 @@ class basic_pty
   {
     error_code ec;
     if (!is_open())
-      open(ec);
+      open(console_size_t{80, 24}, ec);
 
     auto &si = launcher.startup_info;
-
+    launcher.startup_info.StartupInfo.dwFlags |= STARTF_USESTDHANDLES;
+    // https://github.com/microsoft/terminal/issues/11276
+    launcher.startup_info.StartupInfo.hStdOutput = NULL;
+    launcher.startup_info.StartupInfo.hStdError  = NULL;
+    launcher.startup_info.StartupInfo.hStdInput  = NULL;
     size_t bytes_required;
     InitializeProcThreadAttributeList(NULL, 1, 0, &bytes_required);
     si.lpAttributeList = (PPROC_THREAD_ATTRIBUTE_LIST)HeapAlloc(GetProcessHeap(), 0, bytes_required);

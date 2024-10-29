@@ -43,7 +43,6 @@ struct basic_stream_handle
 {
   net::windows::basic_object_handle<Executor> object;
   net::windows::basic_stream_handle<Executor> stream;
-  net::steady_timer trigger_size_{get_executor(), std::chrono::steady_clock::time_point::max()};
   v2::experimental::console_size_t cs_buf_{0u, 0u};
 
   template<typename Arg>
@@ -51,15 +50,17 @@ struct basic_stream_handle
 
   template<typename Executor1>
   basic_stream_handle(basic_stream_handle<Executor1> &&lhs)
-      : object(std::move(lhs.object)), stream(std::move(lhs.stream)), trigger_size_(std::move(lhs.trigger_size_)),
-        cs_buf_(lhs.cs_buf_) {}
+      : object(std::move(lhs.object)), stream(std::move(lhs.stream)), cs_buf_(lhs.cs_buf_) {}
 
-  Executor get_executor() noexcept { return object.get_executor(); }
+  using executor_type = Executor;
+  executor_type get_executor() noexcept { return object.get_executor(); }
 
 
   void assign(HANDLE h, error_code &ec)
   {
-    if (GetFileType(h) == FILE_TYPE_CHAR) {
+    assert(GetFileType(h) == FILE_TYPE_CHAR);
+    if (GetFileType(h) == FILE_TYPE_CHAR)
+    {
       stream.close(ec);
       object.assign(h, ec);
       DWORD flags;
@@ -68,15 +69,25 @@ struct basic_stream_handle
         return;
       }
 
-      flags |= ENABLE_VIRTUAL_TERMINAL_INPUT;
-
-      if (!::SetConsoleMode(h, flags) ||
-          !::SetConsoleCP(CP_UTF8) ||
-          !::SetConsoleOutputCP(CP_UTF8))
+      if (!::SetConsoleMode(h, flags | ENABLE_VIRTUAL_TERMINAL_INPUT)) // probably output!
+       if (!::SetConsoleMode(h, flags | ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING  ))
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
+      if (!::SetConsoleCP(CP_UTF8))
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
+      if (!::SetConsoleOutputCP(CP_UTF8))
         BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
 
-      trigger_size_.expires_at(std::chrono::steady_clock::time_point::max());
-    } else {
+
+      CONSOLE_SCREEN_BUFFER_INFO bi;
+      if (::GetConsoleScreenBufferInfo(h, &bi))
+      {
+        cs_buf_.columns = bi.dwSize.X;
+        cs_buf_.rows = bi.dwSize.Y;
+      }
+
+    }
+    else
+    {
       object.close(ec);
       stream.assign(h, ec);
     }
@@ -94,14 +105,12 @@ struct basic_stream_handle
   {
     object.close(ec);
     stream.close(ec);
-    trigger_size_.expires_at(std::chrono::steady_clock::time_point::min());
   }
 
   void close()
   {
     object.close();
     stream.close();
-    trigger_size_.expires_at(std::chrono::steady_clock::time_point::min());
   }
 
   HANDLE native_handle()
@@ -178,10 +187,13 @@ struct basic_stream_handle
     if (stream.is_open())
       return stream.read_some(mbs, ec);
 
-    net::mutable_buffer buf;
+
+    asio::mutable_buffer buf;
+
     for (auto itr = net::buffer_sequence_begin(mbs);
          itr != net::buffer_sequence_end(mbs); itr++)
-      if (itr->size() > 0) {
+      if (itr->size() > 0)
+      {
         buf = *itr;
         break;
       }
@@ -189,43 +201,16 @@ struct basic_stream_handle
     if (buf.size() == 0u)
       return 0u;
 
-    try_again:
-    INPUT_RECORD in_buffer[8092];
-    DWORD sz = buf.size(), read_size = 0u; //
-    if (!PeekConsoleInputW(object.native_handle(), in_buffer, sz, &read_size)) {
-      BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
-      return 0u;
-    }
-
-    auto begin = in_buffer,
-        end = in_buffer + read_size;
-
-    DWORD keys = 0u;
-    for (auto itr = begin; itr != end; itr++) {
-      if (itr->EventType == KEY_EVENT
-          && itr->Event.KeyEvent.bKeyDown)
-        keys += itr->Event.KeyEvent.wRepeatCount;
-      // not handling resize here: don't mix sync & async apis.
-    }
-
-    if (keys == 0u) {
-      // read all we just peeked
-      if (!::ReadConsoleW(object.native_handle(), in_buffer, read_size, sz)) {
-        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
-        return 0u;
-      }
-
-      goto try_again; // never read zero
-    }
-
-    read_size = 0u;
-    if (!ReadFile(object.native_handle(), buf.data(), keys, &read_size, NULL)) {
+    DWORD read_size = 0u;
+    if (!::ReadFile(object.native_handle(), buf.data(), buf.size(), &read_size, NULL))
+    {
       const DWORD last_error = ::GetLastError();
-      if (ERROR_MORE_DATA == last_error)
+      if (ERROR_END_OF_MEDIA == last_error)
         BOOST_PROCESS_V2_ASSIGN_EC(ec, net::error::eof);
       else
         BOOST_PROCESS_V2_ASSIGN_EC(ec, last_error, system_category());
     }
+
     return static_cast<std::size_t>(read_size);
   }
 
@@ -239,7 +224,7 @@ struct basic_stream_handle
     void operator()(Self &&self)
     {
       if (this_->stream.is_open())
-        return this_->stream.async_reasd_some(buffer, std::move(self));
+        return this_->stream.async_read_some(buffer, std::move(self));
 
       this_->async_wait(std::move(self));
     }
@@ -247,10 +232,12 @@ struct basic_stream_handle
     template<typename Self>
     void operator()(Self &&self, error_code ec)
     {
-      net::mutable_buffer buf;
+      asio::mutable_buffer buf;
+
       for (auto itr = net::buffer_sequence_begin(buffer);
            itr != net::buffer_sequence_end(buffer); itr++)
-        if (itr->size() > 0) {
+        if (itr->size() > 0)
+        {
           buf = *itr;
           break;
         }
@@ -258,50 +245,56 @@ struct basic_stream_handle
       if (buf.size() == 0u)
         return self.complete(error_code{}, 0u);
 
-      WINDOW_BUFFER_SIZE_RECORD *window_change = nullptr;
-      try_again:
-
       INPUT_RECORD in_buffer[8092];
-      DWORD sz = buf.size(), read_size = 0u; //
-      if (!PeekConsoleInputW(this_->object.native_handle(), in_buffer, sz, &read_size)) {
+      DWORD read_size = 0u;
+      if (!::PeekConsoleInputW(this_->object.native_handle(), in_buffer, 8092, &read_size))
+      {
         BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
         return self.complete(ec, 0u);
       }
-
       auto begin = in_buffer,
-          end = in_buffer + read_size;
+             end = in_buffer + read_size;
 
-      DWORD keys = 0u;
-
-      for (auto itr = begin; itr != end; itr++) {
-        if (itr->EventType == KEY_EVENT
-            && itr->Event.KeyEvent.bKeyDown)
+      std::size_t keys = 0u;
+      bool has_cr = false;
+      for (auto itr = begin; itr != end; itr++)
+      {
+        if (itr->EventType == KEY_EVENT)
+        {
           keys += itr->Event.KeyEvent.wRepeatCount;
-        else if (itr->EventType == WINDOW_BUFFER_SIZE_EVENT)
-          window_change = &itr->Event.WindowBufferSizeEvent;
+          has_cr |= itr->Event.KeyEvent.uChar.AsciiChar == '\r';
+        }
       }
 
-      if (keys == 0u) {
-        // read all we just peeked
-        if (!::ReadConsoleW(this_->object.native_handle(), in_buffer, read_size, sz)) {
+      if (keys == 0u)
+      {
+        if (!::FlushConsoleInputBuffer(this_->object.native_handle()))
+        {
           BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
           return self.complete(ec, 0u);
         }
-
-        goto try_again; // never read zero
+        else
+          return this_->async_wait(std::move(self));
       }
 
-      if (window_change) //
+      if (!has_cr)
       {
-        this_->cs_buf_.columns = window_change->dwSize.X;
-        this_->cs_buf_.rows = window_change->dwSize.Y;
-        this_->trigger_size_.cancel();
+        DWORD mode = 0;
+        if (!::GetConsoleMode(this_->object.native_handle(), &mode))
+          BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
+        else if ((mode & ENABLE_LINE_INPUT) != 0)
+          BOOST_PROCESS_V2_ASSIGN_EC(ec, net::error::would_block); // line mode would block on windows
       }
+      if (ec)
+        return self.complete(ec, 0u);
+
+      DWORD to_read = (std::min)(keys, buf.size());
 
       read_size = 0u;
-      if (!ReadFile(this_->object.native_handle(), buf.data(), keys, &read_size, NULL)) {
+      if (!ReadFile(this_->object.native_handle(), buf.data(), to_read, &read_size, NULL))
+      {
         const DWORD last_error = ::GetLastError();
-        if (ERROR_MORE_DATA == last_error)
+        if (ERROR_END_OF_MEDIA == last_error)
           BOOST_PROCESS_V2_ASSIGN_EC(ec, net::error::eof);
         else
           BOOST_PROCESS_V2_ASSIGN_EC(ec, last_error, system_category());
@@ -311,22 +304,22 @@ struct basic_stream_handle
     }
 
     template<typename Self>
-    void operator()(Self &&self, error_code ec, std::size_t n)
+    void operator()(Self &&self, error_code ec, std::size_t n_)
     {
-      self.complete(ec, n);
+      self.complete(ec, n_);
     }
 
   };
 
   template<typename MutableBuffer, typename CompletionToken>
   auto async_read_some(const MutableBuffer &buffer, CompletionToken &&token)
-  -> decltype(boost::asio::async_initiate<CompletionToken,
-      void(boost::system::error_code, std::size_t)>(
-      boost::asio::composed(async_read_some_op<MutableBuffer>{this, buffer}, socket), token))
-  {
-    return boost::asio::async_initiate<CompletionToken,
+    -> decltype(net::async_initiate<CompletionToken,
         void(boost::system::error_code, std::size_t)>(
-        boost::asio::composed(async_read_some_op<MutableBuffer>{this, buffer}, socket), token);
+        net::composed(async_read_some_op<MutableBuffer>{this, buffer}, stream), token))
+  {
+    return net::async_initiate<CompletionToken,
+        void(boost::system::error_code, std::size_t)>(
+        net::composed(async_read_some_op<MutableBuffer>{this, buffer}, stream), token);
   }
 
   template<typename ConstBufferSequence>
@@ -335,10 +328,11 @@ struct basic_stream_handle
     if (stream.is_open())
       return stream.write_some(cbs, ec);
 
-    net::mutable_buffer buf;
+    net::const_buffer buf;
     for (auto itr = net::buffer_sequence_begin(cbs);
          itr != net::buffer_sequence_end(cbs); itr++)
-      if (itr->size() > 0) {
+      if (itr->size() > 0)
+      {
         buf = *itr;
         break;
       }
@@ -347,9 +341,8 @@ struct basic_stream_handle
       return 0u;
 
     // get one screen size, that's how much we'll write
-
-    CONSOLE_SCREEN_BUFFER_INFOEX bi;
-    if (!GetConsoleScreenBufferInfoEx(object.native_handle(), &bi)) {
+    CONSOLE_SCREEN_BUFFER_INFO bi;
+    if (!GetConsoleScreenBufferInfo(object.native_handle(), &bi)) {
       BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
       return 0u;
     }
@@ -378,11 +371,23 @@ struct basic_stream_handle
       error_code ec;
       auto n = this_->write_some(buffer, ec);
       auto exec = net::get_associated_immediate_executor(
-          handler, this_->sig_winch_.get_executor());
+          handler, this_->object.get_executor());
       net::dispatch(exec, net::append(std::move(handler), ec, n));
 
     }
   };
+
+  template<typename ConstBufferSequence, typename CompletionToken>
+  auto async_write_some(const ConstBufferSequence & buffer, CompletionToken && token)
+    -> decltype(net::async_initiate<CompletionToken,
+        void(boost::system::error_code, std::size_t)>(
+        async_write_op<ConstBufferSequence>{this, buffer}, token))
+  {
+    return net::async_initiate<CompletionToken,
+        void(boost::system::error_code, std::size_t)>(
+        async_write_op<ConstBufferSequence>{this, buffer}, token);
+  }
+
 };
 }
 
