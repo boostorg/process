@@ -8,6 +8,7 @@
 #define BOOST_PROCESS_V2_ENV_HPP
 #include <string>
 #include <vector>
+#include <memory>
 
 #include <boost/process/v2/detail/config.hpp>
 #include <boost/process/v2/detail/throw_error.hpp>
@@ -26,9 +27,6 @@ namespace ext
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 using native_env_handle_type = wchar_t *;
 using native_env_iterator = wchar_t *;
-#elif defined(__FreeBSD__)
-using native_env_handle_type = char **;
-using native_env_iterator = char **;
 #else
 using native_env_handle_type = char *;
 using native_env_iterator = char *;
