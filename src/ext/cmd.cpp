@@ -274,6 +274,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     kinfo_proc *proc_info = nullptr;
     const char *nlistf, *memf;
     nlistf = memf = "/dev/null";
+  
     struct closer
     {
         void operator()(kvm_t * kd)
@@ -303,6 +304,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
     int cntp = 0;
     kinfo_proc2 *proc_info = nullptr;
+  
     struct closer
     {
         void operator()(kvm_t * kd)
