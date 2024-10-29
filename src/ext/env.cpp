@@ -343,7 +343,6 @@ env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
   std::vector<char> vec;
   int cntp = 0;
   kinfo_proc *proc_info = nullptr;
-
   const char *nlistf, *memf;
   nlistf = memf = "/dev/null";
 
