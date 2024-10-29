@@ -23,6 +23,7 @@
 #if (defined(__APPLE__) && defined(__MACH__))
 #include <TargetConditionals.h>
 #if !TARGET_OS_IOS
+  #include <algorithm>
   #include <sys/proc_info.h>
   #include <sys/sysctl.h>
   #include <libproc.h>
@@ -34,6 +35,7 @@
 #endif
 
 #if defined(__FreeBSD__)
+#include <algorithm>
 #include <cstring>
 #include <fcntl.h>
 #include <kvm.h>
@@ -43,12 +45,14 @@
 #endif
 
 #if defined(__DragonFly__)
+#include <algorithm>
 #include <cstring>
 #include <sys/types.h>
 #include <kvm.h>
 #endif
 
 #if defined(__NetBSD__)
+#include <algorithm>
 #include <cstring>
 #include <fcntl.h>
 #include <kvm.h>
@@ -57,6 +61,7 @@
 #endif
 
 #if defined(__OpenBSD__)
+#include <algorithm>
 #include <cstring>
 #include <sys/param.h>
 #include <sys/sysctl.h>
@@ -65,6 +70,7 @@
 #endif
 
 #if defined(__sun)
+#include <algorithm>
 #include <cstdlib>
 #include <cstring>
 #include <kvm.h>
