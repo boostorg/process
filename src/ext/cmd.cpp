@@ -283,7 +283,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     };
 
     std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr)};
-    if (!kd) {BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec) return {};}
+    if (!kd) {BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec); return {};}
     if ((proc_info = kvm_getprocs(kd.get(), KERN_PROC_PID, pid, &cntp))) 
     {
         char **cmd = kvm_getargv(kd.get(), proc_info, 0);
@@ -301,8 +301,6 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 
 shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
-
-    std::vector<std::string> vec;
     int cntp = 0;
     kinfo_proc2 *proc_info = nullptr;
     struct closer
@@ -315,7 +313,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 
     std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr)};
 
-    if (!kd) {BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec) return vec;}
+    if (!kd) {BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec); return {};}
     if ((proc_info = kvm_getproc2(kd.get(), KERN_PROC_PID, pid, sizeof(struct kinfo_proc2), &cntp))) 
     {
         char **cmd = kvm_getargv2(kd.get(), proc_info, 0);
@@ -326,14 +324,13 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     }
     else
         BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
-    return vec;
+    return {};
 }
     
 #elif defined(__OpenBSD__)
 
 shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
-    std::vector<std::string> vec;
     int cntp = 0;
     kinfo_proc *proc_info = nullptr;
 
@@ -346,7 +343,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     };
 
     std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr)};
-    if (!kd) {BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec) return vec;}
+    if (!kd) {BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec); return {};}
     if ((proc_info = kvm_getprocs(kd.get(), KERN_PROC_PID, pid, sizeof(struct kinfo_proc), &cntp))) 
     {
         char **cmd = kvm_getargv(kd.get(), proc_info, 0);
@@ -368,7 +365,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     proc *proc_info = nullptr;
     user *proc_user = nullptr;
     kvm_t *kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr);
-    if (!kd) {BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec) return {};}
+    if (!kd) {BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec); return {};}
     if ((proc_info = kvm_getproc(kd, pid))) 
     {
         if ((proc_user = kvm_getu(kd, proc_info))) 
