@@ -281,6 +281,7 @@ std::vector<pid_type> all_pids(boost::system::error_code & ec)
     kinfo_proc *proc_info = nullptr;
     const char *nlistf, *memf;
     nlistf = memf = "/dev/null";
+  
     struct closer
     {
         void operator()(kvm_t * kd)
@@ -313,6 +314,7 @@ pid_type parent_pid(pid_type pid, boost::system::error_code & ec)
     kinfo_proc *proc_info = nullptr;
     const char *nlistf, *memf;
     nlistf = memf = "/dev/null";
+  
     struct closer
     {
         void operator()(kvm_t * kd)
@@ -343,6 +345,7 @@ std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec)
     kinfo_proc *proc_info = nullptr;
     const char *nlistf, *memf;
     nlistf = memf = "/dev/null";
+  
     struct closer
     {
         void operator()(kvm_t * kd)
@@ -382,6 +385,7 @@ std::vector<pid_type> all_pids(boost::system::error_code & ec)
     kinfo_proc *proc_info = nullptr;
     const char *nlistf, *memf;
     nlistf = memf = "/dev/null";
+  
     struct closer
     {
         void operator()(kvm_t * kd)
@@ -415,6 +419,7 @@ pid_type parent_pid(pid_type pid, boost::system::error_code & ec)
     kinfo_proc *proc_info = nullptr;
     const char *nlistf, *memf;
     nlistf = memf = "/dev/null";
+  
     struct closer
     {
         void operator()(kvm_t * kd)
@@ -448,6 +453,7 @@ std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec)
     kinfo_proc *proc_info = nullptr;
     const char *nlistf, *memf;
     nlistf = memf = "/dev/null";
+  
     struct closer
     {
         void operator()(kvm_t * kd)
@@ -485,6 +491,7 @@ std::vector<pid_type> all_pids(boost::system::error_code & ec)
     std::vector<pid_type> vec;
     int cntp = 0;
     kinfo_proc2  *proc_info = nullptr;
+  
     struct closer
     {
         void operator()(kvm_t * kd)
@@ -517,6 +524,7 @@ pid_type parent_pid(pid_type pid, boost::system::error_code & ec)
     pid_type ppid = static_cast<pid_type>(-1);
     int cntp = 0;
     kinfo_proc2 *proc_info = nullptr;
+  
     struct closer
     {
         void operator()(kvm_t * kd)
@@ -545,6 +553,7 @@ std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec)
     std::vector<pid_type> vec;
     int cntp = 0;
     kinfo_proc2 *proc_info = nullptr;
+  
     struct closer
     {
         void operator()(kvm_t * kd)
@@ -582,6 +591,7 @@ std::vector<pid_type> all_pids(boost::system::error_code & ec)
     std::vector<pid_type> vec;
     int cntp = 0;
     kinfo_proc *proc_info = nullptr;
+  
     struct closer
     {
         void operator()(kvm_t * kd)
@@ -617,6 +627,7 @@ pid_type parent_pid(pid_type pid, boost::system::error_code & ec)
     pid_type ppid = static_cast<pid_type>(-1);
     int cntp = 0;
     kinfo_proc *proc_info = nullptr;
+  
     struct closer
     {
         void operator()(kvm_t * kd)
@@ -645,6 +656,7 @@ std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec)
     std::vector<pid_type> vec;
     int cntp = 0;
     kinfo_proc *proc_info = nullptr;
+  
     struct closer
     {
         void operator()(kvm_t * kd)
@@ -683,6 +695,7 @@ std::vector<pid_type> all_pids(boost::system::error_code & ec)
     std::vector<pid_type> vec;
     struct pid cur_pid;
     proc *proc_info = nullptr;
+  
     struct closer
     {
         void operator()(kvm_t * kd)
@@ -716,6 +729,7 @@ pid_type parent_pid(pid_type pid, boost::system::error_code & ec)
 {
     pid_type ppid = static_cast<pid_type>(-1);
     proc *proc_info = nullptr;
+  
     struct closer
     {
         void operator()(kvm_t * kd)
@@ -744,6 +758,7 @@ std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec)
     std::vector<pid_type> vec;
     struct pid cur_pid;
     proc *proc_info = nullptr;
+
     struct closer
     {
         void operator()(kvm_t * kd)
