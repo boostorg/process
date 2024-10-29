@@ -344,8 +344,7 @@ env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
   int cntp = 0;
   kinfo_proc *proc_info = nullptr;
 
-  const char *nlistf;
-  const char *memf;
+  const char *nlistf, *memf;
   nlistf = memf = "/dev/null";
 
   struct closer
