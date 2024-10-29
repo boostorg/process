@@ -66,6 +66,7 @@
 
 #if defined(__sun)
 #include <cstdlib>
+#include <cstring>
 #include <kvm.h>
 #include <fcntl.h>
 #include <sys/param.h>
