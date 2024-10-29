@@ -52,6 +52,7 @@
 #endif
 
 #if defined(__sun)
+#include <cstdlib>
 #include <sys/types.h>
 #include <kvm.h>
 #include <sys/param.h>
