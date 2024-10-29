@@ -364,22 +364,29 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     char **cmd = nullptr;
     proc *proc_info = nullptr;
     user *proc_user = nullptr;
-    kvm_t *kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr);
-    if (!kd) {BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec); return {};}
-    if ((proc_info = kvm_getproc(kd, pid))) 
+
+    struct closer
     {
-        if ((proc_user = kvm_getu(kd, proc_info))) 
+        void operator()(kvm_t * kd)
         {
-            if (!kvm_getcmd(kd, proc_info, proc_user, &cmd, nullptr)) 
+            kvm_close(kd);
+        }
+    };
+
+    std::unique_ptr<kvm_t, closer> kd{kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr)};
+    if (!kd) {BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec); return {};}
+    if ((proc_info = kvm_getproc(kd.get(), pid))) 
+    {
+        if ((proc_user = kvm_getu(kd.get(), proc_info))) 
+        {
+            if (!kvm_getcmd(kd.get(), proc_info, proc_user, &cmd, nullptr)) 
             {
                 int argc = 0;
                 for (int i = 0; cmd[i] != nullptr; i++)
-                    argc ++;
-                shell res = make_cmd_shell_::make(
+                    argc++;
+                return make_cmd_shell_::make(
                         {}, argc, cmd,
                         +[](int, char ** argv) {::free(argv);})
-                kvm_close(kd);
-                return res;
             }
             else
                 BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
@@ -389,8 +396,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     }
     else
         BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
-    
-    kvm_close(kd);
+
     return {};
 }
 

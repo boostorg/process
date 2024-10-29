@@ -34,19 +34,43 @@
 #endif
 
 #if defined(__FreeBSD__)
-#include <sys/socket.h>
-#include <sys/sysctl.h>
+#include <cstring>
+#include <fcntl.h>
+#include <kvm.h>
 #include <sys/param.h>
-#include <sys/queue.h>
+#include <sys/sysctl.h>
 #include <sys/user.h>
-#include <libprocstat.h>
+#endif
+
+#if defined(__DragonFly__)
+#include <cstring>
+#include <sys/types.h>
+#include <kvm.h>
+#endif
+
+#if defined(__NetBSD__)
+#include <cstring>
+#include <fcntl.h>
+#include <kvm.h>
+#include <sys/param.h>
+#include <sys/sysctl.h>
 #endif
 
 #if defined(__OpenBSD__)
+#include <cstring>
 #include <sys/param.h>
 #include <sys/sysctl.h>
 #include <fcntl.h>
 #include <kvm.h>
+#endif
+
+#if defined(__sun)
+#include <kvm.h>
+#include <fcntl.h>
+#include <sys/param.h>
+#include <sys/time.h>
+#include <sys/user.h>
+#include <sys/proc.h>
 #endif
 
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
@@ -105,7 +129,7 @@ const environment::char_type * dereference(native_env_iterator iterator)
     return iterator;
 }
 
-#elif (defined(__APPLE___) || defined(__MACH__)) || defined(__OpenBSD__)
+#elif (defined(__APPLE___) || defined(__MACH__)) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun)
 
 void native_env_handle_deleter::operator()(native_env_handle_type h) const
 {
@@ -128,31 +152,6 @@ native_env_iterator find_end(native_env_iterator nh)
 const environment::char_type * dereference(native_env_iterator iterator)
 {
     return iterator;
-}
-
-
-#elif defined(__FreeBSD__)
-
-void native_env_handle_deleter::operator()(native_env_handle_type h) const
-{
-    delete [] h;
-}
-
-native_env_iterator next(native_env_iterator nh)
-{
-    return ++nh ;
-}
-native_env_iterator find_end(native_env_iterator nh)
-{
-    while (*nh != nullptr)
-      nh++;
-
-    return nh ;
-}
-
-const environment::char_type * dereference(native_env_iterator iterator)
-{
-    return *iterator;
 }
 
 #endif
@@ -338,72 +337,91 @@ env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     return ev;
 }
 
-#elif defined(__FreeBSD__)
+#elif defined(__FreeBSD__) || defined(__DragonFly__)
 env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
-  env_view ev;
+  std::vector<char> vec;
+  int cntp = 0;
+  kinfo_proc *proc_info = nullptr;
 
-  unsigned cntp = 0;
-  procstat *proc_stat = procstat_open_sysctl();
-  if (proc_stat != nullptr)
+  const char *nlistf = "/dev/null";
+  const char *memf   = "/dev/null";
+
+  struct closer
   {
-    kinfo_proc *proc_info = procstat_getprocs(proc_stat, KERN_PROC_PID, pid, &cntp);
-    if (proc_info != nullptr)
+    void operator()(kvm_t * kd)
     {
-      char **env = procstat_getenvv(proc_stat, proc_info, 0);
-      if (env != nullptr)
+      kvm_close(kd);
+    }
+  };
+
+  std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr)};
+  if (!kd) {BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec); return {};}
+  if ((proc_info = kvm_getprocs(kd.get(), KERN_PROC_PID, proc_id, &cntp))) {
+    char **env = kvm_getenvv(kd.get(), proc_info, 0);
+    if (env) {
+      for (int i = 0; env[i] != nullptr; i++) 
       {
-        auto e = env;
-        std::size_t n = 0u, len = 0u;
-        while (e && *e != nullptr)
-        {
-          n ++;
-          len += std::strlen(*e);
-          e++;
-        }
-        std::size_t mem_needed =
-            // environ         -  nullptr       - strlen  + null terminators
-            (n * sizeof(char*)) + sizeof(char*) + len     + n;
-
-        char * out = new (std::nothrow) char[mem_needed];
-        if (out != nullptr)
-        {
-          auto eno = reinterpret_cast<char**>(out);
-          auto eeo = eno;
-            auto str = out +  (n * sizeof(char*)) + sizeof(char*);
-          e = env;
-          while (*e != nullptr)
-          {
-            auto len = std::strlen(*e) + 1u;
-            std::memcpy(str, *e, len);
-            *eno = str;
-            str += len;
-            eno ++;
-            e++;
-          }
-          *eno = nullptr;
-
-          ev.handle_.reset(eeo);
-        }
-        else
-            BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
-
+        for (int j = 0; j < strlen(env[i]); j++)
+          vec.push_back(env[i][j]);
+        vec.push_back('\0');
       }
-      procstat_freeprocs(proc_stat, proc_info);
-
+      vec.push_back('\0');
     }
     else
       BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
-    procstat_close(proc_stat);
   }
   else
     BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
+
+  env_view ev;
+  ev.handle_.reset(new char[vec.size()]());
+  std::copy(vec.begin(), vec.end(), ev.handle_.get());
+  return ev;
+}
+
+#elif defined(__NetBSD__)
+env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
+{
+  std::vector<char> vec;
+  int cntp = 0;
+  kinfo_proc2 *proc_info = nullptr;
+
+  struct closer
+  {
+    void operator()(kvm_t * kd)
+    {
+      kvm_close(kd);
+    }
+  };
+
+  std::unique_ptr<kvm_t, closer> kd{kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr)};
+  if (!kd) {BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec); return {};}
+  if ((proc_info = kvm_getproc2(kd, KERN_PROC_PID, proc_id, sizeof(struct kinfo_proc2), &cntp))) {
+    char **env = kvm_getenvv2(kd, proc_info, 0);
+    if (env) {
+      for (int i = 0; env[i] != nullptr; i++) 
+      {
+        for (int j = 0; j < strlen(env[i]); j++)
+          vec.push_back(env[i][j]);
+        vec.push_back('\0');
+      }
+      vec.push_back('\0');
+    }
+    else
+      BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
+  }
+  else
+    BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
+
+  env_view ev;
+  ev.handle_.reset(new char[vec.size()]());
+  std::copy(vec.begin(), vec.end(), ev.handle_.get());
   return ev;
 }
 #elif defined(__OpenBSD__)
 env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 {
-
   std::vector<char> vec;
   int cntp = 0;
   kinfo_proc *proc_info = nullptr;
@@ -430,6 +448,53 @@ env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
         vec.push_back('\0');
       }
       vec.push_back('\0');
+    }
+    else
+      BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
+  }
+  else
+    BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
+
+  env_view ev;
+  ev.handle_.reset(new char[vec.size()]());
+  std::copy(vec.begin(), vec.end(), ev.handle_.get());
+  return ev;
+}
+#elif defined(__sun)
+env_view env(boost::process::v2::pid_type pid, boost::system::error_code & ec)
+{
+  std::vector<char> vec;
+  char **env = nullptr;
+  proc *proc_info = nullptr;
+  user *proc_user = nullptr;
+
+  struct closer
+  {
+    void operator()(kvm_t * kd)
+    {
+      kvm_close(kd);
+    }
+  };
+
+  std::unique_ptr<kvm_t, closer> kd{kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr)};
+  if (!kd) {BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec); return {};}
+  if ((proc_info = kvm_getproc(kd.get(), pid))) 
+  {
+    if ((proc_user = kvm_getu(kd.get(), proc_info))) 
+    {
+      if (!kvm_getcmd(kd.get(), proc_info, proc_user, nullptr, &env)) 
+      {
+        for (int i = 0; env[i] != nullptr; i++) 
+        {
+          for (int j = 0; j < strlen(env[i]); j++)
+            vec.push_back(env[i][j]);
+          vec.push_back('\0');
+        }
+        vec.push_back('\0');
+        free(env);
+      }
+      else
+        BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
     }
     else
       BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
