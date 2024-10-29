@@ -8,6 +8,7 @@
 #define BOOST_PROCESS_V2_ENV_HPP
 #include <string>
 #include <vector>
+#include <memory>
 
 #include <boost/process/v2/detail/config.hpp>
 #include <boost/process/v2/detail/throw_error.hpp>
