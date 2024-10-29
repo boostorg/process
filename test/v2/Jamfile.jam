@@ -23,7 +23,6 @@ project : requirements
   <target-os>freebsd:<linkflags>-lpthread
   <target-os>freebsd:<linkflags>-lutil
   <target-os>freebsd:<linkflags>-lkvm
-  <target-os>freebsd:<linkflags>-lprocstat
   <target-os>bsd:<linkflags>-lpthread
   <target-os>bsd:<linkflags>-lkvm
   <target-os>netbsd:<linkflags>-lpthread
