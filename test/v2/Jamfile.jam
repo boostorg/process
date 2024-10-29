@@ -21,7 +21,6 @@ project : requirements
   <target-os>windows:<define>_WIN32_WINNT=0x0601
   <target-os>linux:<linkflags>-lpthread
   <target-os>freebsd:<linkflags>-lpthread
-  <target-os>freebsd:<linkflags>-lutil
   <target-os>freebsd:<linkflags>-lkvm
   <target-os>bsd:<linkflags>-lpthread
   <target-os>bsd:<linkflags>-lkvm
