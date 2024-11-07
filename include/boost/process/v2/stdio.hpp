@@ -305,12 +305,14 @@ struct process_stdio
 #if defined(BOOST_PROCESS_V2_WINDOWS)
   error_code on_setup(windows::default_launcher & launcher, const filesystem::path &, const std::wstring &)
   {
-
     launcher.startup_info.StartupInfo.dwFlags |= STARTF_USESTDHANDLES;
     launcher.startup_info.StartupInfo.hStdInput  = in.prepare();
     launcher.startup_info.StartupInfo.hStdOutput = out.prepare();
     launcher.startup_info.StartupInfo.hStdError  = err.prepare();
-    launcher.inherit_handles = true;
+    launcher.inherited_handles.reserve(launcher.inherited_handles.size() + 3);
+    launcher.inherited_handles.push_back(launcher.startup_info.StartupInfo.hStdInput);
+    launcher.inherited_handles.push_back(launcher.startup_info.StartupInfo.hStdOutput);
+    launcher.inherited_handles.push_back(launcher.startup_info.StartupInfo.hStdError);
     return error_code {};
   };
 #else
