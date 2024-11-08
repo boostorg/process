@@ -389,7 +389,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
                     argc++;
                 return make_cmd_shell_::make(
                         {}, argc, cmd,
-                        +[](int, char ** argv) {::free(argv);})
+                        +[](int, char ** argv) {::free(argv);});
             }
             else
                 BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);

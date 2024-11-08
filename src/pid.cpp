@@ -52,6 +52,7 @@
 #endif
 
 #if defined(__sun)
+#include <fcntl.h>
 #include <sys/types.h>
 #include <kvm.h>
 #include <sys/param.h>
@@ -710,9 +711,9 @@ std::vector<pid_type> all_pids(boost::system::error_code & ec)
         BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
         return vec;
     } 
-    while ((proc_info = kvm_nextproc(kd)))
+    while ((proc_info = kvm_nextproc(kd.get())))
     {
-        if (kvm_kread(kd, (std::uintptr_t)proc_info->p_pidp, &cur_pid, sizeof(cur_pid)) != -1)
+        if (kvm_kread(kd.get(), (std::uintptr_t)proc_info->p_pidp, &cur_pid, sizeof(cur_pid)) != -1)
         {
             vec.insert(vec.begin(), cur_pid.pid_id);
         }
@@ -744,7 +745,7 @@ pid_type parent_pid(pid_type pid, boost::system::error_code & ec)
         BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
         return ppid;
     }
-    if ((proc_info = kvm_getproc(kd, pid)))
+    if ((proc_info = kvm_getproc(kd.get(), pid)))
     {
         ppid = proc_info->p_ppid;
     }
@@ -767,17 +768,17 @@ std::vector<pid_type> child_pids(pid_type pid, boost::system::error_code & ec)
         }
     };
 
-    std::unique_ptr<kvm_t, closer> kd{kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr);
+    std::unique_ptr<kvm_t, closer> kd{kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr)};
     if (!kd)
     {
         BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
         return vec;
     }
-    while ((proc_info = kvm_nextproc(kd)))
+    while ((proc_info = kvm_nextproc(kd.get())))
     {
         if (proc_info->p_ppid == pid)
         {
-            if (kvm_kread(kd, (std::uintptr_t)proc_info->p_pidp, &cur_pid, sizeof(cur_pid)) != -1)
+            if (kvm_kread(kd.get(), (std::uintptr_t)proc_info->p_pidp, &cur_pid, sizeof(cur_pid)) != -1)
             {
                 vec.insert(vec.begin(), cur_pid.pid_id);
             }
