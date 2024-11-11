@@ -308,7 +308,7 @@ struct basic_process_handle_win
  public:
     template<BOOST_PROCESS_V2_COMPLETION_TOKEN_FOR(void(error_code, native_exit_code_type))
              WaitHandler = net::default_completion_token_t<executor_type>>
-    auto async_wait(WaitHandler &&handler = default_completion_token_t<executor_type>())
+    auto async_wait(WaitHandler &&handler = net::default_completion_token_t<executor_type>())
         -> decltype(net::async_compose<WaitHandler, void(error_code, native_exit_code_type)>(
                     async_wait_op_{handle_}, handler, handle_))
     {
