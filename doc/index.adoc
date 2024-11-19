@@ -1,0 +1,28 @@
+= boost.process
+Klemens Morgenstern <klemens.morgenstern@gmx.net>
+Version 2.0, 19.11.2024
+:source-highlighter: rouge
+:toc: left
+:toclevels: 4
+:icons: font
+:idprefix:
+:docinfo: private-footer
+:source-highlighter: rouge
+:source-language: c++
+:example-caption: Example
+
+:imagesdir: ./images
+
+:leveloffset: +1
+
+include::quickstart.adoc[]
+include::launcher.adoc[]
+
+= Initializers
+
+include::start_dir.adoc[]
+include::stdio.adoc[]
+include::env.adoc[]
+
+include::version2.adoc[]
+include::acknowledgements.adoc[]
