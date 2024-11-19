@@ -336,7 +336,7 @@ struct basic_popen : basic_process<Executor>
      * std::vector.
      */
     template <typename ConstBufferSequence,
-            BOOST_ASIO_COMPLETION_TOKEN_FOR(void (boost::system::error_code, std::size_t))
+            BOOST_PROCESS_V2_COMPLETION_TOKEN_FOR(void (boost::system::error_code, std::size_t))
             WriteToken = net::default_completion_token_t<executor_type>>
     auto async_write_some(const ConstBufferSequence& buffers,
                      WriteToken && token = net::default_completion_token_t<executor_type>())
@@ -448,7 +448,7 @@ struct basic_popen : basic_process<Executor>
      * std::vector.
      */
     template <typename MutableBufferSequence,
-            BOOST_ASIO_COMPLETION_TOKEN_FOR(void (boost::system::error_code, std::size_t))
+            BOOST_PROCESS_V2_COMPLETION_TOKEN_FOR(void (boost::system::error_code, std::size_t))
             ReadToken = net::default_completion_token_t<executor_type>>
     auto async_read_some(const MutableBufferSequence& buffers,
                     BOOST_ASIO_MOVE_ARG(ReadToken) token
