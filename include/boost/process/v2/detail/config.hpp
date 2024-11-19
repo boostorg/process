@@ -151,6 +151,14 @@ BOOST_PROCESS_V2_END_NAMESPACE
 #define BOOST_PROCESS_V2_DECL
 #endif
 
+#if !defined(BOOST_PROCESS_SOURCE) && !defined(BOOST_ALL_NO_LIB) && !defined(BOOST_PROCESS_NO_LIB)
+#define BOOST_LIB_NAME boost_process
+#if defined(BOOST_ALL_DYN_LINK) || defined(BOOST_PROCESS_DYN_LINK)
+#define BOOST_DYN_LINK
+#endif
+#include <boost/config/auto_link.hpp>
+#endif 
+
 #if defined(BOOST_PROCESS_V2_POSIX)
 
 #if defined(__linux__) && !defined(BOOST_PROCESS_V2_DISABLE_PIDFD_OPEN)
