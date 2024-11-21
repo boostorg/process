@@ -315,9 +315,13 @@ struct basic_process_handle_fd_or_signal
 
     struct async_wait_op_
     {
-        net::posix::basic_descriptor<Executor> &descriptor;
+        net::posix::basic_stream_descriptor<Executor> &descriptor;
         net::basic_signal_set<Executor> &handle;
         pid_type pid_;
+        async_wait_op_(net::posix::basic_stream_descriptor<Executor> &descriptor,
+                       net::basic_signal_set<Executor> &handle,
+                        pid_type pid_) : descriptor(descriptor), handle(handle), pid_(pid_) {}
+
         bool needs_post = true;
 
         template<typename Self>
@@ -343,10 +347,11 @@ struct basic_process_handle_fd_or_signal
 
             if (!ec && (wait_res == 0))
             {
+                static char dummy[128];
                 needs_post = false;
                 if (descriptor.is_open())
-                    descriptor.async_wait(
-                            net::posix::descriptor_base::wait_read,
+                    descriptor.async_read_some(
+                            asio::buffer(dummy),
                             std::move(self));
                 else
                     handle.async_wait(std::move(self));
@@ -379,10 +384,10 @@ struct basic_process_handle_fd_or_signal
              WaitHandler = net::default_completion_token_t<executor_type>>
     auto async_wait(WaitHandler &&handler = net::default_completion_token_t<executor_type>())
       -> decltype(net::async_compose<WaitHandler, void(error_code, native_exit_code_type)>(
-                  async_wait_op_{descriptor_, signal_set_, pid_}, handler, descriptor_))
+                  async_wait_op_(descriptor_, signal_set_, pid_), handler, descriptor_))
     {
         return net::async_compose<WaitHandler, void(error_code, native_exit_code_type)>(
-                async_wait_op_{descriptor_, signal_set_, pid_}, handler, descriptor_);
+                async_wait_op_(descriptor_, signal_set_, pid_), handler, descriptor_);
     }
 };
 }
