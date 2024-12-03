@@ -99,7 +99,10 @@ struct fork_and_forget_launcher : default_launcher
             }
             else if (pid == 0)
             {
-                ctx.notify_fork(net::execution_context::fork_child);
+                boost::asio::detail::signal_state *state = boost::asio::detail::get_signal_state();
+                state->mutex_.unlock();
+
+		ctx.notify_fork(net::execution_context::fork_child);
 
                 ec = detail::on_exec_setup(*this, executable, argv, inits...);
                 if (!ec)
