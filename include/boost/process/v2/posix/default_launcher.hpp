@@ -25,6 +25,8 @@
 #include <boost/asio/query.hpp>
 #endif
 
+#include <boost/core/ignore_unused.hpp>
+
 #include <fcntl.h>
 #include <unistd.h>
 
@@ -49,10 +51,11 @@ struct base {};
 struct derived : base {};
 
 template<typename Launcher, typename Init>
-inline error_code invoke_on_setup(Launcher & launcher, const filesystem::path &executable,
+inline error_code invoke_on_setup(Launcher &, const filesystem::path &executable,
                                   const char * const * (&cmd_line),
-                                  Init && init, base && )
+                                  Init &&, base && )
 {
+    boost::ignore_unused(executable, cmd_line);
     return error_code{};
 }
 
@@ -66,9 +69,10 @@ inline auto invoke_on_setup(Launcher & launcher, const filesystem::path &executa
 }
 
 template<typename Launcher>
-inline error_code on_setup(Launcher & launcher, const filesystem::path &executable,
+inline error_code on_setup(Launcher &, const filesystem::path &executable,
                            const char * const * (&cmd_line))
 {
+    boost::ignore_unused(executable, cmd_line);
     return error_code{};
 }
 
@@ -86,10 +90,11 @@ inline error_code on_setup(Launcher & launcher, const filesystem::path &executab
 
 
 template<typename Launcher, typename Init>
-inline void invoke_on_error(Launcher & launcher, const filesystem::path &executable,
+inline void invoke_on_error(Launcher &, const filesystem::path &executable,
                             const char * const * (&cmd_line),
-                            const error_code & ec, Init && init, base && )
+                            const error_code &, Init &&, base && )
 {
+    boost::ignore_unused(executable, cmd_line);
 }
 
 template<typename Launcher, typename Init>
@@ -102,10 +107,11 @@ inline auto invoke_on_error(Launcher & launcher, const filesystem::path &executa
 }
 
 template<typename Launcher>
-inline void on_error(Launcher & launcher, const filesystem::path &executable,
+inline void on_error(Launcher &, const filesystem::path &executable,
                      const char * const * (&cmd_line),
-                     const error_code & ec)
+                     const error_code &)
 {
+    boost::ignore_unused(executable, cmd_line);
 }
 
 template<typename Launcher, typename Init1, typename ... Inits>
@@ -119,10 +125,11 @@ inline void on_error(Launcher & launcher, const filesystem::path &executable,
 }
 
 template<typename Launcher, typename Init>
-inline void invoke_on_success(Launcher & launcher, const filesystem::path &executable,
+inline void invoke_on_success(Launcher &, const filesystem::path &executable,
                               const char * const * (&cmd_line),
-                              Init && init, base && )
+                              Init &&, base && )
 {
+    boost::ignore_unused(executable, cmd_line);
 }
 
 template<typename Launcher, typename Init>
@@ -135,9 +142,10 @@ inline auto invoke_on_success(Launcher & launcher, const filesystem::path &execu
 }
 
 template<typename Launcher>
-inline void on_success(Launcher & launcher, const filesystem::path &executable,
+inline void on_success(Launcher &, const filesystem::path &executable,
                        const char * const * (&cmd_line))
 {
+    boost::ignore_unused(executable, cmd_line);
 }
 
 template<typename Launcher, typename Init1, typename ... Inits>
@@ -150,10 +158,11 @@ inline void on_success(Launcher & launcher, const filesystem::path &executable,
 }
 
 template<typename Launcher, typename Init>
-inline void invoke_on_fork_error(Launcher & launcher, const filesystem::path &executable,
+inline void invoke_on_fork_error(Launcher &, const filesystem::path &executable,
                                  const char * const * (&cmd_line),
-                                 const error_code & ec, Init && init, base && )
+                                 const error_code &, Init &&, base && )
 {
+    boost::ignore_unused(executable, cmd_line);
 }
 
 template<typename Launcher, typename Init>
@@ -166,10 +175,11 @@ inline auto invoke_on_fork_error(Launcher & launcher, const filesystem::path &ex
 }
 
 template<typename Launcher>
-inline void on_fork_error(Launcher & launcher, const filesystem::path &executable,
+inline void on_fork_error(Launcher &, const filesystem::path &executable,
                           const char * const * (&cmd_line),
-                          const error_code & ec)
+                          const error_code &)
 {
+    boost::ignore_unused(executable, cmd_line);
 }
 
 template<typename Launcher, typename Init1, typename ... Inits>
@@ -185,11 +195,11 @@ inline void on_fork_error(Launcher & launcher, const filesystem::path &executabl
 
 
 template<typename Launcher, typename Init>
-inline void invoke_on_fork_success(Launcher & launcher, const filesystem::path &executable,
+inline void invoke_on_fork_success(Launcher &, const filesystem::path &executable,
                                    const char * const * (&cmd_line),
-                                   Init && init, base && )
+                                   Init &&, base && )
 {
-
+    boost::ignore_unused(executable, cmd_line);
 }
 
 template<typename Launcher, typename Init>
@@ -202,9 +212,10 @@ inline auto invoke_on_fork_success(Launcher & launcher, const filesystem::path &
 }
 
 template<typename Launcher>
-inline void on_fork_success(Launcher & launcher, const filesystem::path &executable,
+inline void on_fork_success(Launcher &, const filesystem::path &executable,
                             const char * const * (&cmd_line))
 {
+    boost::ignore_unused(executable, cmd_line);
 }
 
 template<typename Launcher, typename Init1, typename ... Inits>
@@ -218,10 +229,11 @@ inline void on_fork_success(Launcher & launcher, const filesystem::path &executa
 
 
 template<typename Launcher, typename Init>
-inline error_code invoke_on_exec_setup(Launcher & launcher, const filesystem::path &executable,
+inline error_code invoke_on_exec_setup(Launcher &, const filesystem::path &executable,
                                        const char * const * (&cmd_line),
-                                       Init && init, base && )
+                                       Init &&, base && )
 {
+    boost::ignore_unused(executable, cmd_line);
     return error_code{};
 }
 
@@ -235,9 +247,10 @@ inline auto invoke_on_exec_setup(Launcher & launcher, const filesystem::path &ex
 }
 
 template<typename Launcher>
-inline error_code on_exec_setup(Launcher & launcher, const filesystem::path &executable,
+inline error_code on_exec_setup(Launcher &, const filesystem::path &executable,
                                 const char * const * (&cmd_line))
 {
+    boost::ignore_unused(executable, cmd_line);
     return error_code{};
 }
 
@@ -256,10 +269,11 @@ inline error_code on_exec_setup(Launcher & launcher, const filesystem::path &exe
 
 
 template<typename Launcher, typename Init>
-inline void invoke_on_exec_error(Launcher & launcher, const filesystem::path &executable,
+inline void invoke_on_exec_error(Launcher &, const filesystem::path &executable,
                                  const char * const * (&cmd_line),
-                                 const error_code & ec, Init && init, base && )
+                                 const error_code &, Init &&, base && )
 {
+    boost::ignore_unused(executable, cmd_line);
 }
 
 template<typename Launcher, typename Init>
@@ -272,10 +286,11 @@ inline auto invoke_on_exec_error(Launcher & launcher, const filesystem::path &ex
 }
 
 template<typename Launcher>
-inline void on_exec_error(Launcher & launcher, const filesystem::path &executable,
+inline void on_exec_error(Launcher &, const filesystem::path &executable,
                           const char * const * (&cmd_line),
-                          const error_code & ec)
+                          const error_code &)
 {
+    boost::ignore_unused(executable, cmd_line);
 }
 
 template<typename Launcher, typename Init1, typename ... Inits>
@@ -406,7 +421,7 @@ struct default_launcher
                 if (!ec)
                     ::execve(executable.c_str(), const_cast<char * const *>(argv), const_cast<char * const *>(env));
 
-                ignore_unused(::write(pg.p[1], &errno, sizeof(int)));
+                boost::ignore_unused(::write(pg.p[1], &errno, sizeof(int)));
                 BOOST_PROCESS_V2_ASSIGN_EC(ec, errno, system_category());
                 detail::on_exec_error(*this, executable, argv, ec, inits...);
                 ::exit(EXIT_FAILURE);
@@ -443,7 +458,6 @@ struct default_launcher
     }
   protected:
 
-    void ignore_unused(std::size_t ) {}
     void close_all_fds(error_code & ec)
     {
         std::sort(fd_whitelist.begin(), fd_whitelist.end());
