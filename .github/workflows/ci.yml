@@ -23,7 +23,7 @@ jobs:
         include:
           - { toolset: gcc-5,                        cxxstd: "11,14,1z",       os: ubuntu-latest, container: 'ubuntu:18.04', install: g++-5 }
           - { toolset: gcc-6,                        cxxstd: "11,14,1z",       os: ubuntu-latest, container: 'ubuntu:18.04', install: g++-6 }
-          - { toolset: gcc-7,                        cxxstd: "11,14,17",       os: ubuntu-20.04 }
+          - { toolset: gcc-7,                        cxxstd: "11,14,17",       os: ubuntu-20.04, install: g++-7 }
           - { toolset: gcc-10,                       cxxstd: "11,14,17,2a",    os: ubuntu-22.04, install: g++-10 }
           - { toolset: gcc-12,                       cxxstd: "11,14,17,20,2b", os: ubuntu-22.04, install: g++-12 }
           - { toolset: clang, compiler: clang++-3.9, cxxstd: "11,14",          os: ubuntu-latest, container: 'ubuntu:18.04', install: clang-3.9 }
@@ -62,7 +62,7 @@ jobs:
 
       - name: Install packages
         if: matrix.install
-        run: sudo apt install ${{matrix.install}}
+        run: sudo apt-get -y install ${{matrix.install}}
 
       - name: Setup Boost
         run: |
@@ -82,7 +82,7 @@ jobs:
           cd boost-root
           cp -r $GITHUB_WORKSPACE/* libs/$LIBRARY
           git submodule update --init tools/boostdep
-          python tools/boostdep/depinst/depinst.py --git_args "--jobs 3" $LIBRARY
+          python3 tools/boostdep/depinst/depinst.py --git_args "--jobs 3" $LIBRARY
           ./bootstrap.sh
           ./b2 -d0 headers
 
