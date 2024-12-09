@@ -196,7 +196,7 @@ inline const wchar_t * get_octet1_modifier_table() noexcept
 }
 
 
-std::size_t size_as_utf8(const wchar_t * in, std::size_t size, error_code & ec)
+std::size_t size_as_utf8(const wchar_t * in, std::size_t size, error_code &)
 {
     std::size_t res = 0u;
     const auto from_end = in + size;
@@ -205,7 +205,7 @@ std::size_t size_as_utf8(const wchar_t * in, std::size_t size, error_code & ec)
     return res;
 }
 
-std::size_t size_as_wide(const  char   * in, std::size_t size, error_code & ec)
+std::size_t size_as_wide(const  char   * in, std::size_t size, error_code &)
 {
     const auto from = in;
     const auto from_end = from + size;
