@@ -26,12 +26,14 @@
 #include <unistd.h>
 #endif
 
+#if defined(BOOST_PROCESS_V2_WINDOWS)
+#include <io.h>
+#endif
+
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
 namespace detail
 {
 #if defined(BOOST_PROCESS_V2_WINDOWS)
-
-extern "C" intptr_t _get_osfhandle(int fd);
 
 struct handle_closer
 {
@@ -84,7 +86,7 @@ struct process_io_binding
       : process_io_binding(str.native_handle())
   {}
 
-  process_io_binding(FILE * f) : process_io_binding(_get_osfhandle(_fileno(f))) {}
+  process_io_binding(FILE * f) : process_io_binding(::_get_osfhandle(_fileno(f))) {}
   process_io_binding(HANDLE h) : h{h, get_flags(h)} {}
   process_io_binding(std::nullptr_t) : process_io_binding(filesystem::path("NUL")) {}
   template<typename T, typename = typename std::enable_if<std::is_same<T, filesystem::path>::value>::type>
