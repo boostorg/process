@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(exit_code_async)
     using boost::unit_test::framework::master_test_suite;
     printf("Running exit_code_async\n");
     auto & mm = master_test_suite();
-    printf("Running exit_code_async %p\n", &mm);
+    printf("Running exit_code_async %p\n", static_cast<void*>(&mm));
     printf("Args: '%d'\n", master_test_suite().argc);
     printf("Exe '%s'\n", master_test_suite().argv[0]);
     const auto pth =  master_test_suite().argv[1];
@@ -310,7 +310,7 @@ BOOST_AUTO_TEST_CASE(echo_file)
     BOOST_CHECK(ofs);
   }
 
-  bpv::process proc(ctx, pth, {"echo"}, bpv::process_stdio{/*.in=*/p, /*.out=*/wp});
+  bpv::process proc(ctx, pth, {"echo"}, bpv::process_stdio{/*.in=*/p, /*.out=*/wp, /*.err*/{}});
   wp.close();
 
   std::string out;
@@ -338,7 +338,7 @@ BOOST_AUTO_TEST_CASE(print_same_cwd)
   asio::readable_pipe rp{ctx};
 
   // default CWD
-  bpv::process proc(ctx, pth, {"print-cwd"}, bpv::process_stdio{/*.in=*/{},/*.out=*/rp});
+  bpv::process proc(ctx, pth, {"print-cwd"}, bpv::process_stdio{/*.in=*/{},/*.out=*/rp, /*.err*/{}});
 
   std::string out;
   bpv::error_code ec;
@@ -403,7 +403,7 @@ BOOST_AUTO_TEST_CASE(print_other_cwd)
 
   // default CWD
   bpv::process proc(ctx, pth, {"print-cwd"},
-                    bpv::process_stdio{/*.in=*/{}, /*.out=*/wp},
+                    bpv::process_stdio{/*.in=*/{}, /*.out=*/wp, /*.err=*/{}},
                     bpv::process_start_dir(target));
   wp.close();
 
@@ -442,7 +442,7 @@ std::string read_env(const char * name, Inits && ... inits)
   asio::writable_pipe wp{ctx};
   asio::connect_pipe(rp, wp);
 
-  bpv::process proc(ctx, pth, {"print-env", name}, bpv::process_stdio{/*.in-*/{}, /*.out*/{wp}}, std::forward<Inits>(inits)...);
+  bpv::process proc(ctx, pth, {"print-env", name}, bpv::process_stdio{/*.in-*/{}, /*.out*/{wp}, /*.err*/{}}, std::forward<Inits>(inits)...);
 
   wp.close();
 
@@ -556,7 +556,7 @@ BOOST_AUTO_TEST_CASE(bind_launcher)
   auto l = bpv::bind_default_launcher(bpv::process_start_dir(target));
   std::vector<std::string> args = {"print-cwd"};
   // default CWD
-  bpv::process proc = l(ctx, pth, args, bpv::process_stdio{/*.in=*/{}, /*.out=*/rp});
+  bpv::process proc = l(ctx, pth, args, bpv::process_stdio{/*.in=*/{}, /*.out=*/rp, /*.err=*/{}});
 
   std::string out;
   bpv::error_code ec;
@@ -607,7 +607,7 @@ BOOST_AUTO_TEST_CASE(async_interrupt)
                                   bpv::evaluate_exit_code(res) & ~SIGTERM, 0);
                             }));
 
-    tim.async_wait([&](bpv::error_code ec) { sig.emit(asio::cancellation_type::total); });
+    tim.async_wait([&](bpv::error_code) { sig.emit(asio::cancellation_type::total); });
     ctx.run();
 }
 
@@ -636,7 +636,7 @@ BOOST_AUTO_TEST_CASE(async_request_exit)
               BOOST_CHECK_EQUAL(bpv::evaluate_exit_code(res) & ~SIGTERM, 0);
             }));
 
-    tim.async_wait([&](bpv::error_code ec) { sig.emit(asio::cancellation_type::partial); });
+    tim.async_wait([&](bpv::error_code) { sig.emit(asio::cancellation_type::partial); });
     ctx.run();
 }
 

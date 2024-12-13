@@ -43,8 +43,8 @@ struct base {};
 struct derived : base {};
 
 template<typename Launcher, typename Init>
-inline error_code invoke_on_setup(Launcher & launcher, const filesystem::path &executable, std::wstring &cmd_line,
-                                  Init && init, base && )
+inline error_code invoke_on_setup(Launcher & /*launcher*/, const filesystem::path &executable, std::wstring &cmd_line,
+                                  Init && /*init*/, base && )
 {
   return error_code{};
 }
@@ -69,7 +69,7 @@ template<typename Launcher, typename Init>
 using has_on_setup = decltype(probe_on_setup(std::declval<Launcher&>(), std::declval<Init>(), derived{}));
 
 template<typename Launcher>
-inline error_code on_setup(Launcher & launcher, const filesystem::path &executable, std::wstring &cmd_line)
+inline error_code on_setup(Launcher & /*launcher*/, const filesystem::path &/*executable*/, std::wstring &/*cmd_line*/)
 {
   return error_code{};
 }
@@ -87,8 +87,8 @@ inline error_code on_setup(Launcher & launcher, const filesystem::path &executab
 
 
 template<typename Launcher, typename Init>
-inline void invoke_on_error(Launcher & launcher, const filesystem::path &executable, std::wstring &cmd_line,
-                            const error_code & ec, Init && init, base && )
+inline void invoke_on_error(Launcher & /*launcher*/, const filesystem::path &/*executable*/, std::wstring &/*cmd_line*/,
+                            const error_code & /*ec*/, Init && /*init*/, base && )
 {
 }
 
@@ -114,8 +114,8 @@ using has_on_error = decltype(probe_on_error(std::declval<Launcher&>(), std::dec
 
 
 template<typename Launcher>
-inline void on_error(Launcher & launcher, const filesystem::path &executable, std::wstring &cmd_line,
-                     const error_code & ec)
+inline void on_error(Launcher & /*launcher*/, const filesystem::path &/*executable*/, std::wstring &/*cmd_line*/,
+                     const error_code & /*ec*/)
 {
 }
 
@@ -130,8 +130,8 @@ inline void on_error(Launcher & launcher, const filesystem::path &executable, st
 }
 
 template<typename Launcher, typename Init>
-inline void invoke_on_success(Launcher & launcher, const filesystem::path &executable, std::wstring &cmd_line,
-                              Init && init, base && )
+inline void invoke_on_success(Launcher & /*launcher*/, const filesystem::path &/*executable*/, std::wstring &/*cmd_line*/,
+                              Init && /*init*/, base && )
 {
 }
 
@@ -155,7 +155,7 @@ template<typename Launcher, typename Init>
 using has_on_success = decltype(probe_on_success(std::declval<Launcher&>(), std::declval<Init>(), derived{}));
 
 template<typename Launcher>
-inline void on_success(Launcher & launcher, const filesystem::path &executable, std::wstring &cmd_line)
+inline void on_success(Launcher & /*launcher*/, const filesystem::path &/*executable*/, std::wstring &/*cmd_line*/)
 {
 }
 

@@ -158,7 +158,7 @@ struct basic_popen : basic_process<Executor>
                 default_process_launcher()(
                         this->get_executor(), exe, args,
                         std::forward<Inits>(inits)...,
-                        process_stdio{stdin_, stdout_}
+                        process_stdio{stdin_, stdout_, {}}
                 ));
     }
 
@@ -179,7 +179,7 @@ struct basic_popen : basic_process<Executor>
                 std::forward<Launcher>(launcher)(
                         this->get_executor(), exe, args,
                         std::forward<Inits>(inits)...,
-                        process_stdio{stdin_, stdout_}
+                        process_stdio{stdin_, stdout_, {}}
                 ));
     }
 

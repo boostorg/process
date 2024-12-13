@@ -100,7 +100,7 @@ struct make_cmd_shell_
         res.buffer_.resize(str_lengths);
 
         res.argv_ = new char*[res.argc_ + 1];
-        res.free_argv_ = +[](int argc, char ** argv) {delete[] argv;};
+        res.free_argv_ = +[](int /*argc*/, char ** argv) {delete[] argv;};
         res.argv_[res.argc_] = nullptr;
         auto p = &*res.buffer_.begin();
 
@@ -262,7 +262,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
         itr = e + 1; // start searching start
     }
 
-    auto fr_func = +[](int argc, char ** argv) {delete [] argv;};
+    auto fr_func = +[](int /*argc*/, char ** argv) {delete [] argv;};
 
     return make_cmd_shell_::make(std::move(procargs), argc, argv.release(), fr_func);
 }

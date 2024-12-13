@@ -312,7 +312,7 @@ struct process_stdio
     return error_code {};
   };
 #else
-  error_code on_exec_setup(posix::default_launcher & launcher, const filesystem::path &, const char * const *)
+  error_code on_exec_setup(posix::default_launcher & /*launcher*/, const filesystem::path &, const char * const *)
   {
     if (::dup2(in.fd, in.target) == -1)
       return error_code(errno, system_category());
