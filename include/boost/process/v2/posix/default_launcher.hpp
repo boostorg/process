@@ -383,11 +383,15 @@ struct default_launcher
 
             auto & ctx = net::query(
                     exec, net::execution::context);
+#if !defined(BOOST_PROCESS_V2_DISABLE_NOTIFY_FORK)
             ctx.notify_fork(net::execution_context::fork_prepare);
+#endif
             pid = ::fork();
             if (pid == -1)
             {
+#if !defined(BOOST_PROCESS_V2_DISABLE_NOTIFY_FORK)
                 ctx.notify_fork(net::execution_context::fork_parent);
+#endif
                 detail::on_fork_error(*this, executable, argv, ec, inits...);
                 detail::on_error(*this, executable, argv, ec, inits...);
 
@@ -397,7 +401,9 @@ struct default_launcher
             else if (pid == 0)
             {
                 ::close(pg.p[0]);
+#if !defined(BOOST_PROCESS_V2_DISABLE_NOTIFY_FORK)
                 ctx.notify_fork(net::execution_context::fork_child);
+#endif
                 ec = detail::on_exec_setup(*this, executable, argv, inits...);
                 if (!ec)
                 {
@@ -412,8 +418,9 @@ struct default_launcher
                 ::exit(EXIT_FAILURE);
                 return basic_process<Executor>{exec};
             }
-
+#if !defined(BOOST_PROCESS_V2_DISABLE_NOTIFY_FORK)
             ctx.notify_fork(net::execution_context::fork_parent);
+#endif
             ::close(pg.p[1]);
             pg.p[1] = -1;
             int child_error{0};
