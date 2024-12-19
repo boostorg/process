@@ -205,7 +205,7 @@ std::vector<std::string> read_outline(std::string & file)
     std::vector<std::string> data;
     std::string line;
     
-    while (c.child_running() && std::getline(is, line) && !line.empty())
+    while (std::getline(is, line) && !line.empty())
         data.push_back(line);    
         
     c.child_wait();
