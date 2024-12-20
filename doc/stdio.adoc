@@ -42,9 +42,11 @@ include::../example/stdio.cpp[tag=null]
 == `native_handle`
 
 A native handle can be used as well, which means an `int` on posix or a `HANDLE` on windows. 
-Furthermore, any object that has a `native_handle` returning that native handle type is valid, too.
+Furthermore, any object that has a `native_handle` function which returns a valid type for a stdio stream.
 
-.example/stdio.cpp:51-56
+E.g. a domain socket on linux.
+
+.example/stdio.cpp:52-57
 [source,cpp]
 ----
 include::../example/stdio.cpp[tag=native_handle]
@@ -55,7 +57,7 @@ include::../example/stdio.cpp[tag=native_handle]
 Additionally, process v2 provides a `popen` class. 
 It starts a process and connects pipes for stdin and stdout, so that the popen object can be used as a stream.
 
-.example/stdio.cpp:61-64
+.example/stdio.cpp:63-66
 [source,cpp]
 ----
 include::../example/stdio.cpp[tag=popen]
