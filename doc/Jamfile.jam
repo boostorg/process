@@ -16,10 +16,10 @@ explicit pdf_ ;
 
 install images
     :
-        images/posix_exec_err.png
-        images/posix_fork_err.png
-        images/posix_success.png
-        images/windows_exec.png
+        images/posix_exec_err.svg
+        images/posix_fork_err.svg
+        images/posix_success.svg
+        images/windows_exec.svg
     :
         <location>html/images
     ;
