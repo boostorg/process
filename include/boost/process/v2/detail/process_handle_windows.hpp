@@ -318,8 +318,6 @@ struct basic_process_handle_win
     }
 };
 
-extern template struct basic_process_handle_win<>;
-
 }
 
 BOOST_PROCESS_V2_END_NAMESPACE
