@@ -133,14 +133,14 @@ shell cmd(HANDLE proc, error_code & ec)
 
 shell cmd(HANDLE proc)
 {
-    boost::system::error_code ec;
+    error_code ec;
     auto res = cmd(proc, ec);
     if (ec)
         detail::throw_error(ec, "cmd");
     return res;
 }
 
-shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
+shell cmd(boost::process::v2::pid_type pid, error_code & ec)
 {
     struct del
     {
@@ -162,7 +162,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     
 #elif (defined(__APPLE__) && defined(__MACH__)) && !TARGET_OS_IOS
 
-shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
+shell cmd(boost::process::v2::pid_type pid, error_code & ec)
 {
     int mib[3] = {CTL_KERN, KERN_ARGMAX, 0};
     int argmax = 0;
@@ -213,7 +213,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     
 #elif (defined(__linux__) || defined(__ANDROID__))
 
-shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
+shell cmd(boost::process::v2::pid_type pid, error_code & ec)
 {
     std::string procargs;
     procargs.resize(4096);
@@ -269,7 +269,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     
 #elif (defined(__FreeBSD__) || defined(__DragonFly__))
 
-shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
+shell cmd(boost::process::v2::pid_type pid, error_code & ec)
 {
     int cntp = 0;
     kinfo_proc *proc_info = nullptr;
@@ -301,7 +301,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     
 #elif defined(__NetBSD__)
 
-shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
+shell cmd(boost::process::v2::pid_type pid, error_code & ec)
 {
     int cntp = 0;
     kinfo_proc2 *proc_info = nullptr;
@@ -332,7 +332,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     
 #elif defined(__OpenBSD__)
 
-shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
+shell cmd(boost::process::v2::pid_type pid, error_code & ec)
 {
     int cntp = 0;
     kinfo_proc *proc_info = nullptr;
@@ -362,7 +362,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
     
 #elif defined(__sun)
 
-shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
+shell cmd(boost::process::v2::pid_type pid, error_code & ec)
 {
     char **cmd = nullptr;
     proc *proc_info = nullptr;
@@ -403,7 +403,7 @@ shell cmd(boost::process::v2::pid_type pid, boost::system::error_code & ec)
 }
 
 #else
-filesystem::path cmd(boost::process::v2::pid_type, boost::system::error_code & ec)
+filesystem::path cmd(boost::process::v2::pid_type, error_code & ec)
 {
   BOOST_PROCESS_V2_ASSIGN_EC(ec, ENOTSUP, system_category());
   return "";
@@ -412,7 +412,7 @@ filesystem::path cmd(boost::process::v2::pid_type, boost::system::error_code & e
 
 shell cmd(boost::process::v2::pid_type pid)
 {
-    boost::system::error_code ec;
+    error_code ec;
     auto res = cmd(pid, ec);
     if (ec)
             detail::throw_error(ec, "cmd");
