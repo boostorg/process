@@ -32,7 +32,7 @@ For process v2, the interfaces is simple:
 ----
 extern std::unordered_map<std::string, std::string> my_env;
 extern asio::io_context ctx;
-process proc(ctx, "./test", {"--help"}, process_io{nullptr, {}, {}}, process_environment(my_env));
+process proc(ctx, "./test", {"--help"}, process_stdio{nullptr, {}, {}}, process_environment(my_env));
 ----
 
 Every initializer addresses one logical component (e.g. stdio) instead of multiple ones accumulating.
@@ -48,8 +48,6 @@ This is much more reliable since it is not as easy to miss as a `SIGCHLD`.
 Windows has provided `HANDLE`s for processes all along.
 Unless the OS doesn't support it, process v2 will use file descriptors and handles to implement waiting 
 for processes.
-
-
 
 == Full asio integration
 

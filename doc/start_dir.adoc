@@ -2,11 +2,10 @@
 
 The easier initializer to use is `process_start_dir`:
 
-[source,cpp]
+.example/start_dir.cpp:17-20
+[source,cpp,indent=0]
 ----
-asio::io_context ctx;
-process ls(ctx.get_executor(), "/ls", {}, process_start_dir("/home"));
-ls.wait();
+include::../example/start_dir.cpp[tag=start_dir]
 ----
 
 This will run `ls` in the folder `/home` instead of the current folder.
