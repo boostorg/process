@@ -82,7 +82,7 @@ struct process_io_binding
   process_io_binding() = default;
 
   template<typename Stream>
-  process_io_binding(Stream && str, decltype(std::declval<Stream>().native_handle()) = nullptr)
+  process_io_binding(Stream && str, decltype(std::declval<Stream>().native_handle()) = {})
       : process_io_binding(str.native_handle())
   {}
 
@@ -168,7 +168,7 @@ struct process_io_binding
   process_io_binding() = default;
 
   template<typename Stream>
-  process_io_binding(Stream && str, decltype(std::declval<Stream>().native_handle()) = -1)
+  process_io_binding(Stream && str, decltype(std::declval<Stream>().native_handle()) = {})
           : process_io_binding(str.native_handle())
   {}
 
