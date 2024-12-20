@@ -8,14 +8,14 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include <boost/process.hpp>
+#include <unordered_map>
 
 using namespace boost::process;
 namespace asio = boost::asio;
 
 int main()
 {
-  {
-    // tag::current_env[]
+  { // tag::current_env[]
     // search in the current environment
     auto exe = environment::find_executable("g++");
 
