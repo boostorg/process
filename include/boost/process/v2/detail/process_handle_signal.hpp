@@ -17,16 +17,24 @@
 
 #if defined(BOOST_PROCESS_V2_STANDALONE)
 #include <asio/any_io_executor.hpp>
+#include <asio/append.hpp>
+#include <asio/associated_immediate_executor.hpp>
 #include <asio/compose.hpp>
 #include <asio/dispatch.hpp>
 #include <asio/post.hpp>
+#if !defined(BOOST_PROCESS_V2_DISABLE_SIGNALSET)
 #include <asio/signal_set.hpp>
+#endif
 #else
 #include <boost/asio/any_io_executor.hpp>
+#include <boost/asio/append.hpp>
+#include <boost/asio/associated_immediate_executor.hpp>
 #include <boost/asio/compose.hpp>
 #include <boost/asio/dispatch.hpp>
 #include <boost/asio/post.hpp>
+#if !defined(BOOST_PROCESS_V2_DISABLE_SIGNALSET)
 #include <boost/asio/signal_set.hpp>
+#endif
 #endif
 
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
@@ -86,9 +94,14 @@ struct basic_process_handle_signal
     basic_process_handle_signal& operator=(basic_process_handle_signal && handle)
     {
         pid_ = handle.id();
+#if !defined(BOOST_PROCESS_V2_DISABLE_SIGNALSET)
+
         signal_set_.~basic_signal_set();
         using ss = net::basic_signal_set<Executor>;
         new (&signal_set_) ss(handle.get_executor(), SIGCHLD);
+#else
+        signal_set_.executor = handle.signal_set_.executor;
+#endif
         handle.pid_ = -1;
         return *this;
     }
@@ -244,11 +257,13 @@ struct basic_process_handle_signal
         int res = ::waitpid(pid_, &code, WNOHANG);
         if (res == -1)
             ec = get_last_error();
-        
-        if (res == 0)
+        else if (res == 0)
             return true;
         else
+        {
+            ec.clear();
             exit_code = code;
+        }
         return false;
     }
 
@@ -273,10 +288,24 @@ struct basic_process_handle_signal
     template<typename>
     friend struct basic_process_handle_signal;
     pid_type pid_ = -1;
+#if !defined(BOOST_PROCESS_V2_DISABLE_SIGNALSET)
     net::basic_signal_set<Executor> signal_set_;
-
+#else
+    struct signal_set_dummy_
+    {
+      signal_set_dummy_(signal_set_dummy_ &&) = default;
+      signal_set_dummy_(const signal_set_dummy_ &) = default;
+      Executor executor;
+      using executor_type = Executor;
+      executor_type get_executor() {return executor;}
+      signal_set_dummy_(Executor executor, int) : executor(std::move(executor)) {}
+    };
+    signal_set_dummy_ signal_set_;
+#endif
     struct async_wait_op_
     {
+#if !defined(BOOST_PROCESS_V2_DISABLE_SIGNALSET)
+
         net::basic_signal_set<Executor> &handle;
         pid_type pid_;
         
@@ -315,20 +344,25 @@ struct basic_process_handle_signal
                 return;
             }
 
-            struct completer
-            {
-                error_code ec;
-                native_exit_code_type code;
-                typename std::decay<Self>::type self;
-
-                void operator()()
-                {
-                    self.complete(ec, code);
-                }
-            };
-
             const auto exec = self.get_executor();
-            net::dispatch(exec, completer{ec, exit_code, std::move(self)});
+            net::dispatch(exec, net::append(std::move(self), exit_code, ec));
+        }
+#else
+        signal_set_dummy_ dummy_;
+        pid_t pid;
+        template<typename Self>
+        void operator()(Self &&self)
+        {
+          auto exec = net::get_associated_immediate_executor(self, dummy_.get_executor());
+          error_code ec;
+          BOOST_PROCESS_V2_ASSIGN_EC(ec, net::error::operation_not_supported);
+          net::dispatch(exec, net::append(std::move(self), native_exit_code_type(), ec));
+        }
+#endif
+        template<typename Self>
+        void operator()(Self &&self, native_exit_code_type code, error_code ec)
+        {
+          self.complete(ec, code);
         }
     };
  public:

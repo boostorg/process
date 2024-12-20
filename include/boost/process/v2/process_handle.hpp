@@ -107,9 +107,9 @@ struct basic_process_handle
     void request_exit()
 
     /// Unconditionally terminates the process and stores the exit code in exit_status.
-    void terminate(native_exit_code_type &exit_status, error_code &ec);\
+    void terminate(native_exit_code_type &exit_status, error_code &ec);
     /// Throwing @overload void terminate(native_exit_code_type &exit_code, error_code & ec)
-    void terminate(native_exit_code_type &exit_status);/
+    void terminate(native_exit_code_type &exit_status);
 
     /// Checks if the current process is running. 
     /**If it has already completed, it assigns the exit code to `exit_code`.

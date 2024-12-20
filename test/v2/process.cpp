@@ -725,7 +725,7 @@ BOOST_AUTO_TEST_CASE(async_cancel_wait)
   proc.async_wait(asio::cancel_after(std::chrono::milliseconds(100),
                          [&](boost::system::error_code ec, int)
                          {
-                           BOOST_CHECK(ec == asio::error::operation_aborted);
+                           BOOST_CHECK_EQUAL(ec, asio::error::operation_aborted);
                            BOOST_CHECK(proc.running());
                            if (proc.running())
                              proc.terminate();
