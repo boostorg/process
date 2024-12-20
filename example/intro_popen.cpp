@@ -3,8 +3,10 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
+#include <boost/core/ignore_unused.hpp>
+
 //[intro
-#include <boost/process/v2.hpp>
+#include <boost/process.hpp>
 
 #include <boost/asio/read.hpp>
 #include <boost/asio/readable_pipe.hpp>
@@ -13,7 +15,7 @@
 #include <string>
 #include <iostream>
 
-namespace proc   = boost::process::v2;
+namespace proc   = boost::process;
 namespace asio   = boost::asio;
 
 
@@ -29,8 +31,11 @@ int main()
     auto sz = asio::read(c, asio::dynamic_buffer(line), ec);
     assert(ec == asio::error::eof);
 
+    boost::ignore_unused(sz);
+
     std::cout << "Gcc version: '"  << line << "'" << std::endl;
 
     c.wait();
+    return c.exit_code();
 }
 //]
