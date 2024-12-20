@@ -137,7 +137,7 @@ using basic_process_handle = detail::basic_process_handle_win<Executor>;
 #if defined(BOOST_PROCESS_V2_PIDFD_OPEN)
 template<typename Executor = net::any_io_executor>
 using basic_process_handle = detail::basic_process_handle_fd<Executor>;
-#elif defined(BOOST_PROCESS_V2_PDFORK)
+#elif defined(BOOST_PROCESS_V2_PDFORK) || defined(BOOST_PROCESS_V2_PIPE_LAUNCHER)
 template<typename Executor = net::any_io_executor>
 using basic_process_handle = detail::basic_process_handle_fd_or_signal<Executor>;
 #else
