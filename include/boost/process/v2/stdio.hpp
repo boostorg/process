@@ -82,11 +82,11 @@ struct process_io_binding
   process_io_binding() = default;
 
   template<typename Stream>
-  process_io_binding(Stream && str, decltype(std::declval<Stream>().native_handle()) = {})
+  process_io_binding(Stream && str, decltype(std::declval<Stream>().native_handle())* = nullptr)
       : process_io_binding(str.native_handle())
   {}
 
-  process_io_binding(FILE * f) : process_io_binding(::_get_osfhandle(_fileno(f))) {}
+  process_io_binding(FILE * f) : process_io_binding(reinterpret_cast<HANDLE>(::_get_osfhandle(_fileno(f)))) {}
   process_io_binding(HANDLE h) : h{h, get_flags(h)} {}
   process_io_binding(std::nullptr_t) : process_io_binding(filesystem::path("NUL")) {}
   template<typename T, typename = typename std::enable_if<std::is_same<T, filesystem::path>::value>::type>
@@ -168,7 +168,7 @@ struct process_io_binding
   process_io_binding() = default;
 
   template<typename Stream>
-  process_io_binding(Stream && str, decltype(std::declval<Stream>().native_handle()) = {})
+  process_io_binding(Stream && str, decltype(std::declval<Stream>().native_handle()) * = nullptr)
           : process_io_binding(str.native_handle())
   {}
 

@@ -46,6 +46,7 @@ int main(int argc, char *argv[])
     proc.wait();
     //end::null[]
   }
+#if defined(BOOST_POSIX_API)
   {
     //tag::native_handle[]
     asio::io_context ctx;
@@ -56,6 +57,7 @@ int main(int argc, char *argv[])
     proc.wait();
     //end::native_handle[]
   }
+#endif
   {
     //tag::popen[]
     asio::io_context ctx;
