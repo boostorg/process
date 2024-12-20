@@ -72,7 +72,7 @@ BOOST_PROCESS_V2_END_NAMESPACE
 #endif
 
 
-#if BOOST_PROCESS_VERSION == 2
+#if BOOST_PROCESS_VERSION == 1
 #define BOOST_PROCESS_V2_BEGIN_NAMESPACE namespace boost { namespace process { namespace v2 {
 #else
 #define BOOST_PROCESS_V2_BEGIN_NAMESPACE namespace boost { namespace process { inline namespace v2 {
@@ -178,12 +178,5 @@ BOOST_PROCESS_V2_END_NAMESPACE
 #else
 #define BOOST_PROCESS_V2_HAS_PROCESS_HANDLE 1
 #endif
-
-#if BOOST_PROCESS_VERSION == 2
-#define BOOST_PROCESS_V2_INLINE inline
-#else
-#define BOOST_PROCESS_V2_INLINE
-#endif
-
 
 #endif //BOOST_PROCESS_V2_DETAIL_CONFIG_HPP
