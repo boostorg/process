@@ -75,6 +75,7 @@ filesystem::path exe(HANDLE process_handle)
 
 filesystem::path exe(HANDLE proc, boost::system::error_code & ec)
 {
+#if _WIN32_WINNT >= 0x0600
     wchar_t buffer[MAX_PATH];
     // On input, specifies the size of the lpExeName buffer, in characters.
     DWORD size = MAX_PATH;
@@ -84,7 +85,9 @@ filesystem::path exe(HANDLE proc, boost::system::error_code & ec)
     }
     else
         BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
-
+#else
+    BOOST_PROCESS_V2_ASSIGN_EC(ec, net::error::operation_not_supported);
+#endif
     return "";
 }
 
