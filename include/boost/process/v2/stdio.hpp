@@ -164,6 +164,31 @@ struct process_io_binding
   }
 
   process_io_binding() = default;
+  process_io_binding(const process_io_binding &) = delete;
+  process_io_binding & operator=(const process_io_binding &) = delete;
+
+  process_io_binding(process_io_binding && other) noexcept
+          : fd(other.fd), fd_needs_closing(other.fd), ec(other.ec)
+  {
+    other.fd = target;
+    other.fd_needs_closing = false;
+    other.ec = {};
+  }
+
+  process_io_binding & operator=(process_io_binding && other) noexcept
+  {
+    if (fd_needs_closing)
+      ::close(fd);
+
+    fd = other.fd;
+    fd_needs_closing = other.fd_needs_closing;
+    ec = other.ec;
+
+    other.fd = target;
+    other.fd_needs_closing = false;
+    other.ec = {};
+    return *this;
+  }
 
   template<typename Stream>
   process_io_binding(Stream && str, decltype(std::declval<Stream>().native_handle()) = -1)
