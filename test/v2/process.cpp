@@ -361,6 +361,43 @@ BOOST_AUTO_TEST_CASE(stdio_creates_complementary_pipes)
   BOOST_CHECK(proc.exit_code() == 0);
 }
 
+BOOST_AUTO_TEST_CASE(stdio_move_semantics)
+{
+  using boost::unit_test::framework::master_test_suite;
+  const auto pth =  master_test_suite().argv[1];
+
+  asio::io_context ctx;
+
+  asio::readable_pipe rp{ctx};
+  asio::writable_pipe wp{ctx};
+
+  auto make_stdio = [&]() -> bpv::process_stdio {
+      bpv::process_stdio stdio{};
+      stdio.in = wp;
+      stdio.out = rp;
+      stdio.err = nullptr;
+      // intentionally pessimizing move, preventing NRVO
+      return std::move(stdio);
+  };
+  bpv::process proc(ctx, pth, {"echo"}, make_stdio());
+
+  bpv::error_code ec;
+  asio::write(wp, asio::buffer("foobar", 6), ec);
+  BOOST_CHECK_MESSAGE(!ec, ec.message());
+  wp.close();
+
+  std::string out;
+  auto sz = asio::read(rp, asio::dynamic_buffer(out),  ec);
+  while (ec == asio::error::interrupted)
+      sz += asio::read(rp, asio::dynamic_buffer(out),  ec);
+  BOOST_CHECK_EQUAL(sz, 6u);
+  BOOST_CHECK_MESSAGE((ec == asio::error::broken_pipe) || (ec == asio::error::eof), ec.message());
+  BOOST_CHECK_EQUAL(out, "foobar");
+
+  proc.wait();
+  BOOST_CHECK(proc.exit_code() == 0);
+}
+
 BOOST_AUTO_TEST_CASE(print_same_cwd)
 {
   using boost::unit_test::framework::master_test_suite;
