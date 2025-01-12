@@ -30,9 +30,11 @@
 
 #include <boost/test/unit_test.hpp>
 #include <boost/asio/io_context.hpp>
+#include <boost/asio/buffer.hpp>
 #include <boost/asio/connect_pipe.hpp>
 #include <boost/asio/cancel_after.hpp>
 #include <boost/asio/detached.hpp>
+#include <boost/asio/error.hpp>
 #include <boost/asio/readable_pipe.hpp>
 #include <boost/asio/read.hpp>
 #include <boost/asio/streambuf.hpp>
@@ -326,6 +328,37 @@ BOOST_AUTO_TEST_CASE(echo_file)
 
   proc.wait();
   BOOST_CHECK_MESSAGE(proc.exit_code() == 0, proc.exit_code());
+}
+
+BOOST_AUTO_TEST_CASE(stdio_creates_complementary_pipes)
+{
+  using boost::unit_test::framework::master_test_suite;
+  const auto pth =  master_test_suite().argv[1];
+
+  asio::io_context ctx;
+
+  asio::readable_pipe rp{ctx};
+  asio::writable_pipe wp{ctx};
+  // Pipes intentionally not connected. `process_stdio` will create pipes
+  // complementing both of these and retains ownership of those pipes.
+
+  bpv::process proc(ctx, pth, {"echo"}, bpv::process_stdio{/*.in=*/wp, /*.out=*/rp, /*.err=*/nullptr});
+
+  asio::write(wp, asio::buffer("foo", 3));
+  asio::write(wp, asio::buffer("bar", 3));
+  wp.close();
+
+  bpv::error_code ec;
+  std::string out;
+  auto sz = asio::read(rp, asio::dynamic_buffer(out),  ec);
+  while (ec == asio::error::interrupted)
+      sz += asio::read(rp, asio::dynamic_buffer(out),  ec);
+  BOOST_CHECK_EQUAL(sz, 6u);
+  BOOST_CHECK_MESSAGE((ec == asio::error::broken_pipe) || (ec == asio::error::eof), ec.message());
+  BOOST_CHECK_EQUAL(out, "foobar");
+
+  proc.wait();
+  BOOST_CHECK(proc.exit_code() == 0);
 }
 
 BOOST_AUTO_TEST_CASE(print_same_cwd)
