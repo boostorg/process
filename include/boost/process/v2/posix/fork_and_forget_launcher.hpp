@@ -124,6 +124,7 @@ struct fork_and_forget_launcher : default_launcher
             if (ec)
             {
                 detail::on_error(*this, executable, argv, ec, inits...);
+                do { ::waitpid(pid, nullptr, 0); } while (errno == EINTR);
                 return basic_process<Executor>{exec};
             }
         }

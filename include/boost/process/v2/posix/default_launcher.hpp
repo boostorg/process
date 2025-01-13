@@ -26,6 +26,8 @@
 #endif
 
 #include <fcntl.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 
@@ -96,7 +98,7 @@ template<typename Launcher, typename Init>
 inline auto invoke_on_error(Launcher & launcher, const filesystem::path &executable,
                             const char * const * (&cmd_line),
                             const error_code & ec, Init && init, derived && )
--> decltype(init.on_error(launcher, ec, executable, cmd_line, ec))
+-> decltype(init.on_error(launcher, executable, cmd_line, ec))
 {
     init.on_error(launcher, executable, cmd_line, ec);
 }
@@ -160,7 +162,7 @@ template<typename Launcher, typename Init>
 inline auto invoke_on_fork_error(Launcher & launcher, const filesystem::path &executable,
                                  const char * const * (&cmd_line),
                                  const error_code & ec, Init && init, derived && )
--> decltype(init.on_fork_error(launcher, ec, executable, cmd_line, ec))
+-> decltype(init.on_fork_error(launcher, executable, cmd_line, ec))
 {
     init.on_fork_error(launcher, executable, cmd_line, ec);
 }
@@ -181,41 +183,6 @@ inline void on_fork_error(Launcher & launcher, const filesystem::path &executabl
     invoke_on_fork_error(launcher, executable, cmd_line, ec, init1, derived{});
     on_fork_error(launcher, executable, cmd_line, ec, inits...);
 }
-
-
-
-template<typename Launcher, typename Init>
-inline void invoke_on_fork_success(Launcher & /*launcher*/, const filesystem::path &/*executable*/,
-                                   const char * const * (&/*cmd_line*/),
-                                   Init && /*init*/, base && )
-{
-
-}
-
-template<typename Launcher, typename Init>
-inline auto invoke_on_fork_success(Launcher & launcher, const filesystem::path &executable,
-                                   const char * const * (&cmd_line),
-                                   Init && init, derived && )
--> decltype(init.on_fork_success(launcher, executable, cmd_line))
-{
-    init.on_fork_success(launcher, executable, cmd_line);
-}
-
-template<typename Launcher>
-inline void on_fork_success(Launcher & /*launcher*/, const filesystem::path &/*executable*/,
-                            const char * const * (&/*cmd_line*/))
-{
-}
-
-template<typename Launcher, typename Init1, typename ... Inits>
-inline void on_fork_success(Launcher & launcher, const filesystem::path &executable,
-                            const char * const * (&cmd_line),
-                            Init1 && init1, Inits && ... inits)
-{
-    invoke_on_fork_success(launcher, executable, cmd_line, init1, derived{});
-    on_fork_success(launcher, executable, cmd_line, inits...);
-}
-
 
 template<typename Launcher, typename Init>
 inline error_code invoke_on_exec_setup(Launcher & /*launcher*/, const filesystem::path &/*executable*/,
@@ -266,7 +233,7 @@ template<typename Launcher, typename Init>
 inline auto invoke_on_exec_error(Launcher & launcher, const filesystem::path &executable,
                                  const char * const * (&cmd_line),
                                  const error_code & ec, Init && init, derived && )
--> decltype(init.on_exec_error(launcher, ec, executable, cmd_line, ec))
+-> decltype(init.on_exec_error(launcher, executable, cmd_line, ec))
 {
     init.on_exec_error(launcher, executable, cmd_line, ec);
 }
@@ -440,6 +407,7 @@ struct default_launcher
             if (ec)
             {
                 detail::on_error(*this, executable, argv, ec, inits...);
+                do { ::waitpid(pid, nullptr, 0); } while (errno == EINTR);
                 return basic_process<Executor>{exec};
             }
         }

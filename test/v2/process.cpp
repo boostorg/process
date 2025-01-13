@@ -734,6 +734,42 @@ BOOST_AUTO_TEST_CASE(async_cancel_wait)
   ctx.run();
 }
 
+#if defined(BOOST_POSIX_API)
+
+struct capture_pid
+{
+  pid_t &pid;
+  template<typename Launcher>
+  void on_error(Launcher &launcher, const bpv::filesystem::path& executable,
+                const char * const * (&/*cmd_line*/), const bpv::error_code & ec)
+  {
+    BOOST_REQUIRE(!bpv::filesystem::exists(executable));
+    this->pid = launcher.pid;
+  }
+};
+
+BOOST_AUTO_TEST_CASE(no_zombie)
+{
+  asio::io_context ctx;
+  using boost::unit_test::framework::master_test_suite;
+  const auto pth = bpv::filesystem::absolute(master_test_suite().argv[1]);
+
+  pid_t res{-1};
+
+
+  boost::system::error_code ec;
+  bpv::default_process_launcher()(ctx, ec, "/send/more/cops", std::vector<std::string>{}, capture_pid{res});
+  BOOST_CHECK(ec == boost::system::errc::no_such_file_or_directory);
+
+  BOOST_REQUIRE(res != -1);
+  BOOST_CHECK(res != 0);
+  auto r = waitpid(res, nullptr, 0);
+  BOOST_CHECK(r < 0);
+  BOOST_CHECK_EQUAL(errno, ECHILD);
+}
+
+#endif
+
 
 BOOST_AUTO_TEST_SUITE_END();
 
