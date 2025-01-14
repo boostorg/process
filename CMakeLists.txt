@@ -35,7 +35,6 @@ target_link_libraries(boost_process
     Boost::asio
     Boost::config
     Boost::core
-    Boost::filesystem
     Boost::fusion
     Boost::iterator
     Boost::move
