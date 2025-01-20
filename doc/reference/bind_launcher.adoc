@@ -9,7 +9,7 @@ template<typename Launcher, typename ... Init>
 auto bind_launcher(Launcher && launcher, Init && ... init);
 
 // Calls bind_launcher with the default_launcher as the first parameter.
-// The new launcher with bound paramaters
+// The new launcher with bound parameters
 template<typename ... Init>
 auto bind_default_launcher(Init && ... init);
 ----
