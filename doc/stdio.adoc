@@ -16,7 +16,7 @@ automatically connected and the other side will get assigned to the child proces
 include::../example/stdio.cpp[tag=readable_pipe]
 ----
 
-readable pipes can be assigned to `out` an `err`, while writable_pipes can be assigned to `in`.
+readable pipes can be assigned to `out` and `err`, while writable_pipes can be assigned to `in`.
 
 == `FILE*`
 
