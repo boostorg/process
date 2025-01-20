@@ -124,7 +124,7 @@ struct handler
     template <class Executor>
     void on_setup(Executor&) const {}
 
-    /** This function is invoked if an error occured while trying to launch the process.
+    /** This function is invoked if an error occurred while trying to launch the process.
      * \note It is not required to be const.
      */
     template <class Executor>
@@ -136,7 +136,7 @@ struct handler
     template <class Executor>
     void on_success(Executor&) const {}
 
-    /**This function is invoked if an error occured during the call of `fork`.
+    /**This function is invoked if an error occurred during the call of `fork`.
      * \note This function will only be called on posix.
      */
     template<typename Executor>
@@ -335,7 +335,7 @@ struct windows_executor
     void set_startup_info_ex();
     ///This element is an instance or a reference (if \ref startup_info_ex exists) to the [startup-info](https://msdn.microsoft.com/en-us/library/windows/desktop/ms686331.aspx) for the process.
     startup_info_t startup_info;
-    ///This element is the instance of the  [extended startup-info](https://msdn.microsoft.com/de-de/library/windows/desktop/ms686329.aspx). It is only available with a winapi-version equal or highter than 6.
+    ///This element is the instance of the  [extended startup-info](https://msdn.microsoft.com/de-de/library/windows/desktop/ms686329.aspx). It is only available with a winapi-version equal or higher than 6.
     startup_info_ex_t  startup_info_ex;
 };
 

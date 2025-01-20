@@ -26,7 +26,7 @@ BOOST_PROCESS_V2_BEGIN_NAMESPACE
 
 #if defined(GENERATING_DOCUMENTATION)
 /** A process handle is an unmanaged version of a process.
- * This means it does not terminate the proces on destruction and
+ * This means it does not terminate the process on destruction and
  * will not keep track of the exit-code. 
  * 
  * Note that the exit code might be discovered early, during a call to `running`.

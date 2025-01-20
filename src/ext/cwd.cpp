@@ -124,7 +124,7 @@ filesystem::path cwd(boost::process::v2::pid_type pid, error_code & ec)
             filesystem::path("/proc") / std::to_string(pid) / "cwd", ec
             );
 #elif defined(__sun)
-    return fileystem::canonical(
+    return filesystem::canonical(
             filesystem::path("/proc") / std::to_string(pid) / "path/cwd", ec
             );
 #endif
