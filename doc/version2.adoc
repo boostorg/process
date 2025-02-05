@@ -64,7 +64,7 @@ This concerns especially the `wait_for` and `wait_until` functions on the proces
 The latter are easy to do on windows, but posix does not provide an API for this. 
 Thus the wait_for used signals or fork, which was all but safe. 
 Since process v2 is based on asio and thus supports cancellation, 
-a wait_for can not safely be implemented with an async_wait + timeout.
+a wait_for can now safely be implemented with an async_wait + timeout.
 
 == UTF-8
 
