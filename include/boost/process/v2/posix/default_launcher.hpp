@@ -30,9 +30,13 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-
-#if defined(__APPLE__) || defined(__MACH__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun)
-extern "C" { extern char **environ; }
+#if defined(__APPLE__)
+# include <crt_externs.h>
+# if !defined(environ)
+#  define environ (*_NSGetEnviron())
+# endif
+#elif defined(__MACH__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun)
+ extern "C" { extern char **environ; }
 #endif
 
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
@@ -260,7 +264,7 @@ inline void on_exec_error(Launcher & launcher, const filesystem::path &executabl
 struct default_launcher
 {
     /// The pointer to the environment forwarded to the subprocess.
-    const char * const * env = ::environ;
+    const char * const * env = environ;
     /// The pid of the subprocess - will be assigned after fork.
     int pid = -1;
 

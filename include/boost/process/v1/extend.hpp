@@ -249,7 +249,7 @@ struct posix_executor
      ///A pointer to the argument-vector.
      char *const* cmd_line = nullptr;
      ///A pointer to the environment variables, as default it is set to [environ](http://pubs.opengroup.org/onlinepubs/009695399/basedefs/xbd_chap08.html)
-     char **env      = ::environ;
+     char **env      = environ;
      ///The pid of the process - it will be -1 before invoking [fork](http://pubs.opengroup.org/onlinepubs/009695399/functions/fork.html), and after forking either 0 for the new process or a positive value if in the current process. */
      pid_t pid = -1;
      ///This shared-pointer holds the exit code. It's done this way, so it can be shared between an `asio::io_context` and \ref child.
