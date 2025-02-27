@@ -185,7 +185,7 @@ void close_all(const std::vector<int> & whitelist, error_code & ec)
         return ;
     }
 
-    auto dir_fd = ::dirfd(dir.get());
+    auto dir_fd = dirfd(dir.get());
     if (dir_fd == -1)
     {
         ec = BOOST_PROCESS_V2_NAMESPACE::detail::get_last_error();

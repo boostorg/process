@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE(leak_test, *boost::unit_test::timeout(5))
     BOOST_CHECK(!bt::is_stream_handle(event_fd , ec)); BOOST_CHECK_MESSAGE(!ec, ec.message());
 #endif
     auto od = ::opendir(".");
-    int dir_fd = ::dirfd(od);
+    int dir_fd = dirfd(od);
     BOOST_CHECK(!bt::is_stream_handle(dir_fd , ec)); BOOST_CHECK_MESSAGE(!ec, ec.message());
 #endif
 
