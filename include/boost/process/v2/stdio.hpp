@@ -31,8 +31,33 @@
 #endif
 
 BOOST_PROCESS_V2_BEGIN_NAMESPACE
+
+
+template<typename T>
+struct is_readable_pipe : std::false_type
+{
+};
+
+template<typename Executor>
+struct is_readable_pipe<asio::basic_readable_pipe<Executor>> : std::true_type
+{
+};
+
+
+template<typename T>
+struct is_writable_pipe : std::false_type
+{
+};
+
+template<typename Executor>
+struct is_writable_pipe<asio::basic_writable_pipe<Executor>> : std::true_type
+{
+};
+
 namespace detail
 {
+
+
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 
 struct handle_closer
@@ -104,16 +129,10 @@ struct process_io_binding
   }
 
 
-  template<typename Executor>
-  process_io_binding(net::basic_readable_pipe<Executor> & pipe)
+  template<typename ReadablePipe>
+  process_io_binding(ReadablePipe & readable_pipe,
+                     typename std::enable_if<is_readable_pipe<ReadablePipe>::value && Target != STDIN_FILENO>::type * = nullptr)
   {
-    if (Target == STD_INPUT_HANDLE)
-    {
-      auto h_ = pipe.native_handle();
-      h = std::unique_ptr<void, handle_closer>{h_, get_flags(h_)};
-      return ;
-    }
-
     net::detail::native_pipe_handle p[2];
     error_code ec;
     net::detail::create_pipe(p, ec);
@@ -125,15 +144,10 @@ struct process_io_binding
   }
 
 
-  template<typename Executor>
-  process_io_binding(net::basic_writable_pipe<Executor> & pipe)
+  template<typename WritablePipe>
+  process_io_binding(WritablePipe & writable_pipe,
+                     typename std::enable_if<is_writable_pipe<WritablePipe>::value && Target == STDIN_FILENO>::type * = nullptr)
   {
-    if (Target != STD_INPUT_HANDLE)
-    {
-      auto h_ = pipe.native_handle();
-      h = std::unique_ptr<void, handle_closer>{h_, get_flags(h_)};
-      return ;
-    }
     net::detail::native_pipe_handle p[2];
     error_code ec;
     net::detail::create_pipe(p, ec);
@@ -207,15 +221,10 @@ struct process_io_binding
   {
   }
 
-  template<typename Executor>
-  process_io_binding(net::basic_readable_pipe<Executor> & readable_pipe)
+  template<typename ReadablePipe>
+  process_io_binding(ReadablePipe & readable_pipe,
+                     typename std::enable_if<is_readable_pipe<ReadablePipe>::value && Target != STDIN_FILENO>::type * = nullptr)
   {
-    if (Target == STDIN_FILENO)
-    {
-      fd = readable_pipe.native_handle();
-      return ;
-    }
-
     net::detail::native_pipe_handle p[2];
     net::detail::create_pipe(p, ec);
     if (ec)
@@ -232,15 +241,10 @@ struct process_io_binding
   }
 
 
-  template<typename Executor>
-  process_io_binding(net::basic_writable_pipe<Executor> & writable_pipe)
+  template<typename WritablePipe>
+  process_io_binding(WritablePipe & writable_pipe,
+                     typename std::enable_if<is_writable_pipe<WritablePipe>::value && Target == STDIN_FILENO>::type * = nullptr)
   {
-
-    if (Target != STDIN_FILENO)
-    {
-      fd = writable_pipe.native_handle();
-      return ;
-    }
     net::detail::native_pipe_handle p[2];
     error_code ec;
     net::detail::create_pipe(p, ec);
