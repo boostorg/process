@@ -231,7 +231,7 @@ struct basic_process
   void resume()
   {
       error_code ec;
-      suspend(ec);
+      resume(ec);
       if (ec)
           detail::throw_error(ec, "resume");
   }
