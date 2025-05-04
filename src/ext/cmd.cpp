@@ -31,7 +31,7 @@
 #endif
 #endif
 
-#if (defined(__linux__) || defined(__ANDROID__))
+#if (defined(__linux__) || defined(__ANDROID__) || defined(__gnu_hurd__))
 #include <cstdio>
 #endif
 
@@ -211,7 +211,7 @@ shell cmd(boost::process::v2::pid_type pid, error_code & ec)
     return make_cmd_shell_::make(std::move(procargs), argc, argv.release(), fr_func);
 }
     
-#elif (defined(__linux__) || defined(__ANDROID__))
+#elif (defined(__linux__) || defined(__ANDROID__) || defined(__gnu_hurd__))
 
 shell cmd(boost::process::v2::pid_type pid, error_code & ec)
 {
