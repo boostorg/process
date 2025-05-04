@@ -403,10 +403,10 @@ shell cmd(boost::process::v2::pid_type pid, error_code & ec)
 }
 
 #else
-filesystem::path cmd(boost::process::v2::pid_type, error_code & ec)
+shell cmd(boost::process::v2::pid_type, error_code & ec)
 {
   BOOST_PROCESS_V2_ASSIGN_EC(ec, ENOTSUP, system_category());
-  return "";
+  return {};
 }
 #endif
 
