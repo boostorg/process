@@ -396,7 +396,7 @@ public:
     }
 
     ///Open a new named pipe
-    void open(const std::string & name)
+    void open(const std::string &)
     {
         if (_buf.open() == nullptr)
             this->setstate(std::ios_base::failbit);
@@ -504,7 +504,7 @@ public:
     }
 
     ///Open a new named pipe
-    void open(const std::string & name)
+    void open(const std::string &)
     {
         if (_buf.open() == nullptr)
             this->setstate(std::ios_base::failbit);
@@ -612,7 +612,7 @@ public:
     }
 
     ///Open a new named pipe
-    void open(const std::string & name)
+    void open(const std::string &)
     {
         if (_buf.open() == nullptr)
             this->setstate(std::ios_base::failbit);
