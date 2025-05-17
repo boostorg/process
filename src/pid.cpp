@@ -179,7 +179,6 @@ std::vector<pid_type> child_pids(pid_type pid, error_code & ec)
 {
     std::vector<pid_type> vec;
 #if defined(PROC_PPID_ONLY)
-
     vec.resize(proc_listpids(PROC_PPID_ONLY, (uint32_t)pid, nullptr, 0) / sizeof(pid_type));
     const auto sz = proc_listpids(PROC_PPID_ONLY, (uint32_t)pid, &vec[0], sizeof(pid_type) * vec.size());
     if (sz < 0)
@@ -189,7 +188,14 @@ std::vector<pid_type> child_pids(pid_type pid, error_code & ec)
     }
     vec.resize(sz);
 #else
-    BOOST_PROCESS_V2_ASSIGN_EC(ec, ENOTSUP, system_category());
+    std::vector<pid_type> pids = all_pids(ec);
+    for (std::size_t i = 0; i < pids.size(); i++)
+    {
+        if (pid == parent_pid(pids[i], ec))
+        {
+            vec.push_back(pids[i]);
+        }
+    }
 #endif
     return vec;
 }
