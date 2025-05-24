@@ -411,7 +411,8 @@ struct default_launcher
             if (ec)
             {
                 detail::on_error(*this, executable, argv, ec, inits...);
-                do { ::waitpid(pid, nullptr, 0); } while (errno == EINTR);
+                int res = 0;
+                do { res = ::waitpid(pid, nullptr, 0); } while ((res == -1) && (errno == EINTR));
                 return basic_process<Executor>{exec};
             }
         }
