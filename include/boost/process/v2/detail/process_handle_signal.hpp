@@ -319,7 +319,7 @@ struct basic_process_handle_signal
         }
 
         template<typename Self>
-        void operator()(Self &&self, error_code ec, int sig)
+        void operator()(Self &&self, error_code ec, int /* sig */)
         {
             if (ec == net::error::operation_aborted &&
                 self.get_cancellation_state().cancelled() 
