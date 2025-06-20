@@ -355,8 +355,7 @@ private:
             }
         };
 
-        net::post(handle.get_executor(),
-                                              completer{static_cast<int>(res), std::move(self)});
+        net::post(handle.get_executor(), completer{static_cast<int>(res), std::move(self)});
       }
       else
         handle.async_wait(std::move(self));
@@ -371,7 +370,10 @@ private:
       {
         if (!ec)
           res = code;
-        std::move(self).complete(ec, evaluate_exit_code(code));
+        else if (ec == boost::system::errc::no_child_process)
+          std::move(self).complete({}, evaluate_exit_code(res));
+        else
+          std::move(self).complete(ec, evaluate_exit_code(code));
       }
     }
   };
