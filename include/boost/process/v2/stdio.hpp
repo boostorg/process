@@ -131,7 +131,7 @@ struct process_io_binding
 
   template<typename ReadablePipe>
   process_io_binding(ReadablePipe & readable_pipe,
-                     typename std::enable_if<is_readable_pipe<ReadablePipe>::value && Target != STDIN_FILENO>::type * = nullptr)
+                     typename std::enable_if<is_readable_pipe<ReadablePipe>::value && Target != STD_INPUT_HANDLE>::type * = nullptr)
   {
     net::detail::native_pipe_handle p[2];
     error_code ec;
@@ -146,7 +146,7 @@ struct process_io_binding
 
   template<typename WritablePipe>
   process_io_binding(WritablePipe & writable_pipe,
-                     typename std::enable_if<is_writable_pipe<WritablePipe>::value && Target == STDIN_FILENO>::type * = nullptr)
+                     typename std::enable_if<is_writable_pipe<WritablePipe>::value && Target == STD_INPUT_HANDLE>::type * = nullptr)
   {
     net::detail::native_pipe_handle p[2];
     error_code ec;
