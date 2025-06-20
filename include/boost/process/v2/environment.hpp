@@ -1372,6 +1372,8 @@ struct current_view
         environment::native_iterator iterator_;
     };
 
+    using const_iterator = iterator;
+
     iterator begin() const {return iterator(handle_.get());}
     iterator   end() const {return iterator(detail::find_end(handle_.get()));}
 
