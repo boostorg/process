@@ -267,7 +267,7 @@ struct process_io_binding
       return ec;
   }
 
-  error_code on_exec_setup(posix::default_launcher & launcher,
+  error_code on_exec_setup(posix::default_launcher &,
                            const filesystem::path &, const char * const *)
   {
     if (::dup2(fd, target) == -1)
