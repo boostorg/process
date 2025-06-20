@@ -130,7 +130,7 @@ struct process_io_binding
 
 
   template<typename ReadablePipe>
-  process_io_binding(ReadablePipe & readable_pipe,
+  process_io_binding(ReadablePipe & pipe,
                      typename std::enable_if<is_readable_pipe<ReadablePipe>::value && Target != STD_INPUT_HANDLE>::type * = nullptr)
   {
     net::detail::native_pipe_handle p[2];
@@ -145,7 +145,7 @@ struct process_io_binding
 
 
   template<typename WritablePipe>
-  process_io_binding(WritablePipe & writable_pipe,
+  process_io_binding(WritablePipe & pipe,
                      typename std::enable_if<is_writable_pipe<WritablePipe>::value && Target == STD_INPUT_HANDLE>::type * = nullptr)
   {
     net::detail::native_pipe_handle p[2];
