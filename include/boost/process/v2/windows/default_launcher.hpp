@@ -235,6 +235,7 @@ struct default_launcher
 
   default_launcher() = default;
 
+  /// with ExecutionContext
   template<typename ExecutionContext, typename Args, typename ... Inits>
   auto operator()(ExecutionContext & context,
                   const typename std::enable_if<std::is_convertible<
@@ -244,7 +245,7 @@ struct default_launcher
                   Inits && ... inits ) -> enable_init<typename ExecutionContext::executor_type, Inits...>
   {
       error_code ec;
-      auto proc =  (*this)(context, ec, executable, std::forward<Args>(args), std::forward<Inits>(inits)...);
+      auto proc = create_process(context.get_executor(), ec, executable, std::forward<Args>(args), std::forward<Inits>(inits)...);
 
       if (ec)
           v2::detail::throw_error(ec, "default_launcher");
@@ -252,7 +253,25 @@ struct default_launcher
       return proc;
   }
 
+  /// with ExecutionContext and initializer_list
+  template<typename ExecutionContext, typename ... Inits>
+  auto operator()(ExecutionContext& context,
+      const typename std::enable_if<std::is_convertible<
+      ExecutionContext&, net::execution_context&>::value,
+      filesystem::path >::type& executable,
+      std::initializer_list<string_view> args,
+      Inits && ... inits) -> enable_init<typename ExecutionContext::executor_type, Inits...>
+  {
+      error_code ec;
+      auto proc = create_process(context.get_executor(), ec, executable, args, std::forward<Inits>(inits)...);
 
+      if (ec)
+          v2::detail::throw_error(ec, "default_launcher");
+
+      return proc;
+  }
+
+  /// with ExecutionContext and error_code
   template<typename ExecutionContext, typename Args, typename ... Inits>
   auto operator()(ExecutionContext & context,
                   error_code & ec,
@@ -262,9 +281,23 @@ struct default_launcher
                   Args && args,
                   Inits && ... inits ) -> enable_init<typename ExecutionContext::executor_type, Inits...>
   {
-      return (*this)(context.get_executor(), ec, executable, std::forward<Args>(args), std::forward<Inits>(inits)...);
+      return create_process(context.get_executor(), ec, executable, std::forward<Args>(args), std::forward<Inits>(inits)...);
   }
 
+  /// with ExecutionContext, error_code and initializer_list
+  template<typename ExecutionContext, typename ... Inits>
+  auto operator()(ExecutionContext& context,
+      error_code& ec,
+      const typename std::enable_if<std::is_convertible<
+      ExecutionContext&, net::execution_context&>::value,
+      filesystem::path >::type& executable,
+      std::initializer_list<string_view> args,
+      Inits && ... inits) -> enable_init<typename ExecutionContext::executor_type, Inits...>
+  {
+      return create_process(context.get_executor(), ec, executable, args, std::forward<Inits>(inits)...);
+  }
+
+  /// with Executor
   template<typename Executor, typename Args, typename ... Inits>
   auto operator()(Executor exec,
                   const typename std::enable_if<
@@ -275,7 +308,7 @@ struct default_launcher
                   Inits && ... inits ) -> enable_init<Executor, Inits...>
   {
       error_code ec;
-      auto proc =  (*this)(std::move(exec), ec, executable, std::forward<Args>(args), std::forward<Inits>(inits)...);
+      auto proc = create_process(std::move(exec), ec, executable, std::forward<Args>(args), std::forward<Inits>(inits)...);
 
       if (ec)
           detail::throw_error(ec, "default_launcher");
@@ -283,6 +316,26 @@ struct default_launcher
       return proc;
   }
 
+  /// with Executor and initializer_list
+  template<typename Executor, typename ... Inits>
+  auto operator()(Executor exec,
+      const typename std::enable_if<
+      net::execution::is_executor<Executor>::value
+      || net::is_executor<Executor>::value,
+      filesystem::path >::type& executable,
+      std::initializer_list<string_view> args,
+      Inits && ... inits) -> enable_init<Executor, Inits...>
+  {
+      error_code ec;
+      auto proc = create_process(std::move(exec), ec, executable, args, std::forward<Inits>(inits)...);
+
+      if (ec)
+          detail::throw_error(ec, "default_launcher");
+
+      return proc;
+  }
+
+  /// with Executor and error_code
   template<typename Executor, typename Args, typename ... Inits>
   auto operator()(Executor exec,
                   error_code & ec,
@@ -293,58 +346,21 @@ struct default_launcher
                   Args && args,
                   Inits && ... inits ) -> enable_init<Executor, Inits...>
   {
-    auto command_line = this->build_command_line(executable, std::forward<Args>(args));
+      return create_process(std::move(exec), ec, executable, std::forward<Args>(args), std::forward<Inits>(inits)...);
+  }
 
-    ec = detail::on_setup(*this, executable, command_line, inits...);
-
-    if (ec)
-    {
-      detail::on_error(*this, executable, command_line, ec, inits...);
-      return basic_process<Executor>(exec);
-    }
-
-    if (!inherited_handles.empty())
-    {
-      set_handle_list(ec);
-      if (ec)
-        return basic_process<Executor>(exec);
-    }
-
-    auto ok = ::CreateProcessW(
-        executable.empty() ? nullptr : executable.c_str(),
-        command_line.empty() ? nullptr : &command_line.front(),
-        process_attributes,
-        thread_attributes,
-        inherited_handles.empty() ? FALSE : TRUE,
-        creation_flags,
-        environment,
-        current_directory.empty() ? nullptr : current_directory.c_str(),
-        &startup_info.StartupInfo,
-        &process_information);
-
-    if (ok == 0)
-    {
-      BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
-      detail::on_error(*this, executable, command_line, ec, inits...);
-
-      if (process_information.hProcess != INVALID_HANDLE_VALUE)
-        ::CloseHandle(process_information.hProcess);
-      if (process_information.hThread != INVALID_HANDLE_VALUE)
-        ::CloseHandle(process_information.hThread);
-
-      return basic_process<Executor>(exec);
-    }
-    else
-    {
-      detail::on_success(*this, executable, command_line, inits...);
-
-      if (process_information.hThread != INVALID_HANDLE_VALUE)
-        ::CloseHandle(process_information.hThread);
-
-      return basic_process<Executor>(exec,
-                     this->process_information.dwProcessId,
-                     this->process_information.hProcess);
-    }
+  /// with Executor, error_code and initializer_list
+  template<typename Executor, typename ... Inits>
+  auto operator()(Executor exec,
+      error_code& ec,
+      const typename std::enable_if<
+      net::execution::is_executor<Executor>::value ||
+      net::is_executor<Executor>::value,
+      filesystem::path >::type& executable,
+      std::initializer_list<string_view> args,
+      Inits && ... inits) -> enable_init<Executor, Inits...>
+  {
+      return create_process(std::move(exec), ec, executable, args, std::forward<Inits>(inits)...);
   }
   
   BOOST_PROCESS_V2_DECL static 
@@ -425,6 +441,72 @@ struct default_launcher
 
   BOOST_PROCESS_V2_DECL LPPROC_THREAD_ATTRIBUTE_LIST get_thread_attribute_list(error_code & ec);
   BOOST_PROCESS_V2_DECL void set_handle_list(error_code & ec);
+
+private:
+  // actual process creation implementation
+  template<typename Executor, typename Args, typename ... Inits>
+  auto create_process(Executor exec,
+                      error_code& ec,
+                      const typename std::enable_if<
+                      net::execution::is_executor<Executor>::value ||
+                      net::is_executor<Executor>::value,
+                      filesystem::path >::type& executable,
+                      Args&& args,
+                      Inits && ... inits)
+  {
+      auto command_line = this->build_command_line(executable, std::forward<Args>(args));
+
+      ec = detail::on_setup(*this, executable, command_line, inits...);
+
+      if (ec)
+      {
+          detail::on_error(*this, executable, command_line, ec, inits...);
+          return basic_process<Executor>(exec);
+      }
+
+      if (!inherited_handles.empty())
+      {
+          set_handle_list(ec);
+          if (ec)
+              return basic_process<Executor>(exec);
+      }
+
+      auto ok = ::CreateProcessW(
+          executable.empty() ? nullptr : executable.c_str(),
+          command_line.empty() ? nullptr : &command_line.front(),
+          process_attributes,
+          thread_attributes,
+          inherited_handles.empty() ? FALSE : TRUE,
+          creation_flags,
+          environment,
+          current_directory.empty() ? nullptr : current_directory.c_str(),
+          &startup_info.StartupInfo,
+          &process_information);
+
+      if (ok == 0)
+      {
+          BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
+          detail::on_error(*this, executable, command_line, ec, inits...);
+
+          if (process_information.hProcess != INVALID_HANDLE_VALUE)
+              ::CloseHandle(process_information.hProcess);
+          if (process_information.hThread != INVALID_HANDLE_VALUE)
+              ::CloseHandle(process_information.hThread);
+
+          return basic_process<Executor>(exec);
+      }
+      else
+      {
+          detail::on_success(*this, executable, command_line, inits...);
+
+          if (process_information.hThread != INVALID_HANDLE_VALUE)
+              ::CloseHandle(process_information.hThread);
+
+          return basic_process<Executor>(exec,
+              this->process_information.dwProcessId,
+              this->process_information.hProcess);
+      }
+  }
 };
 
 
