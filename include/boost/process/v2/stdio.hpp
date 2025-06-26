@@ -308,7 +308,7 @@ typedef process_io_binding<STDERR_FILENO> process_error_binding;
  * * @code {.cpp}
  * asio::io_context ctx;
  * /// C++17
- * v2::process proc17(ctx, "/bin/bash", {}, v2::process_stdio{.stderr=nullptr});
+ * v2::process proc17(ctx, "/bin/bash", {}, v2::process_stdio{.err=nullptr});
  * /// C++11 & C++14
  * v2::process proc17(ctx, "/bin/bash", {}, v2::process_stdio{ {}, {}, nullptr});
  *                                                        stdin ^  ^ stderr
