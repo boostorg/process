@@ -403,7 +403,12 @@ struct default_launcher
   static std::wstring build_command_line(const filesystem::path & pt, const Args & args)
   {
     if (std::begin(args) == std::end(args))
-      return pt.native();
+    {
+      std::wstring buffer;
+      buffer.resize(escaped_argv_length(pt.native()));
+      escape_argv_string(&buffer.front(), buffer.size(), pt.native());
+      return buffer;
+    }
 
     return build_command_line_impl(pt, args, *std::begin(args));
   }
