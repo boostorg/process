@@ -300,6 +300,8 @@ struct basic_process
    */
   bool running()
   {
+    if (!process_is_running(exit_status_))
+      return false;
     error_code ec;
     native_exit_code_type exit_code{};
     auto r =  process_handle_.running(exit_code, ec);
@@ -314,6 +316,8 @@ struct basic_process
   /// Throwing @overload bool running(error_code & ec)
   bool running(error_code & ec) noexcept
   {
+    if (!process_is_running(exit_status_))
+      return false;
     native_exit_code_type exit_code{};
     auto r =  process_handle_.running(exit_code, ec);
     if (!ec && !r)
