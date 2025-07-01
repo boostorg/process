@@ -20,10 +20,12 @@
 
 #if defined(BOOST_PROCESS_V2_STANDALONE)
 #include <asio/any_io_executor.hpp>
+#include <boost/asio/dispatch.hpp>
 #include <asio/post.hpp>
 #include <utility>
 #else
 #include <boost/asio/any_io_executor.hpp>
+#include <boost/asio/dispatch.hpp>
 #include <boost/asio/post.hpp>
 #include <boost/core/exchange.hpp>
 #endif
@@ -359,23 +361,22 @@ private:
             }
         };
 
-        net::post(handle.get_executor(),
-                                              completer{static_cast<int>(res), std::move(self)});
+        net::dispatch(
+            net::get_associated_immediate_executor(handle, handle.get_executor()),
+            completer{static_cast<int>(res), std::move(self)});
       }
       else
-        handle.async_wait(std::move(self));
+        handle.async_wait(res, std::move(self));
     }
 
     template<typename Self>
-    void operator()(Self && self, error_code ec, native_exit_code_type code)
+    void operator()(Self && self, error_code ec)
     {
-      if (!ec && process_is_running(code))
-        handle.async_wait(std::move(self));
+      if (!ec && process_is_running(res))
+        handle.async_wait(res, std::move(self));
       else
       {
-        if (!ec)
-          res = code;
-        std::move(self).complete(ec, evaluate_exit_code(code));
+        std::move(self).complete(ec, evaluate_exit_code(res));
       }
     }
   };

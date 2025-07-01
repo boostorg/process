@@ -768,6 +768,26 @@ BOOST_AUTO_TEST_CASE(no_zombie)
   BOOST_CHECK_EQUAL(errno, ECHILD);
 }
 
+BOOST_AUTO_TEST_CASE(async_terminate_code)
+{
+  asio::io_context ctx;
+  using boost::unit_test::framework::master_test_suite;
+  const auto pth = bpv::filesystem::absolute(master_test_suite().argv[1]);
+
+  bpv::process proc(ctx, pth, {"sleep", "1000"});
+
+  proc.async_wait([&](boost::system::error_code ec, int code)
+                  {
+                    BOOST_CHECK_MESSAGE(!ec, ec.what());
+                    BOOST_CHECK_EQUAL(code, SIGKILL);
+                    BOOST_CHECK(!proc.running());
+                 });
+
+  asio::post(ctx, [&]{proc.terminate();});
+
+  ctx.run();
+}
+
 #endif
 
 

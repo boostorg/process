@@ -308,7 +308,8 @@ struct basic_process_handle_signal
 
         net::basic_signal_set<Executor> &handle;
         pid_type pid_;
-        
+        native_exit_code_type & exit_code;
+
         template<typename Self>
         void operator()(Self &&self)
         {
@@ -326,12 +327,11 @@ struct basic_process_handle_signal
                     == net::cancellation_type::none)
                 ec.clear();
 
-            native_exit_code_type exit_code = -1;
             int wait_res = -1;
 
             if (pid_ <= 0) // error, complete early
                 ec = net::error::bad_descriptor;
-            else if (!ec)
+            else if (!ec && process_is_running(exit_code))
             {
                 wait_res = ::waitpid(pid_, &exit_code, WNOHANG);
                 if (wait_res == -1)
@@ -345,7 +345,7 @@ struct basic_process_handle_signal
             }
 
             const auto exec = self.get_executor();
-            net::dispatch(exec, net::append(std::move(self), exit_code, ec));
+            net::dispatch(exec, net::append(std::move(self), ec));
         }
 #else
         signal_set_dummy_ dummy_;
@@ -360,20 +360,21 @@ struct basic_process_handle_signal
         }
 #endif
         template<typename Self>
-        void operator()(Self &&self, native_exit_code_type code, error_code ec)
+        void operator()(Self &&self, error_code ec)
         {
-          self.complete(ec, code);
+          self.complete(ec);
         }
     };
  public:
-    template<BOOST_PROCESS_V2_COMPLETION_TOKEN_FOR(void(error_code, int))
+    template<BOOST_PROCESS_V2_COMPLETION_TOKEN_FOR(void(error_code))
              WaitHandler = net::default_completion_token_t<executor_type>>
-    auto async_wait(WaitHandler &&handler = net::default_completion_token_t<executor_type>())
-      -> decltype(net::async_compose<WaitHandler, void(error_code, native_exit_code_type)>(
-                    async_wait_op_{signal_set_, pid_}, handler, signal_set_))
+    auto async_wait(native_exit_code_type & exit_code,
+                    WaitHandler &&handler = net::default_completion_token_t<executor_type>())
+      -> decltype(net::async_compose<WaitHandler, void(error_code)>(
+                    async_wait_op_{signal_set_, pid_, exit_code}, handler, signal_set_))
     {
-        return net::async_compose<WaitHandler, void(error_code, native_exit_code_type)>(
-                async_wait_op_{signal_set_, pid_}, handler, signal_set_);
+        return net::async_compose<WaitHandler, void(error_code)>(
+                async_wait_op_{signal_set_, pid_, exit_code}, handler, signal_set_);
     }
 };
 
