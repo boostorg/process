@@ -47,8 +47,8 @@ int main()
     // tag::vector_env[]
     asio::io_context ctx;
     auto c = environment::current();
-    // a view is fine since the value is our value is static.
-    std::vector<environment::key_value_pair_view> my_env{c.begin(), c.end()};
+    // we need to use a value, since windows needs wchar_t.
+    std::vector<environment::key_value_pair> my_env{c.begin(), c.end()};
     my_env.push_back("SECRET=THIS_IS_A_TEST");
     auto exe = environment::find_executable("g++", my_env);
     process proc(ctx, exe, {"main.cpp"}, process_environment(my_env));
@@ -61,7 +61,7 @@ int main()
     asio::io_context ctx;
     std::unordered_map<environment::key, environment::value> my_env;
     for (const auto & kv : environment::current())
-      if (kv.key() != "SECRET")
+      if (kv.key().string() != "SECRET")
         my_env[kv.key()] = kv.value();
 
     auto exe = environment::find_executable("g++", my_env);
