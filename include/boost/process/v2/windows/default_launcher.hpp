@@ -225,6 +225,9 @@ struct default_launcher
                               INVALID_HANDLE_VALUE,
                               INVALID_HANDLE_VALUE},
                               nullptr};
+  /// Allow batch files to be executed, which might pose a security threat.
+  bool allow_batch_files = false;
+                              
   /// The process_information that gets assigned after a call to CreateProcess
   PROCESS_INFORMATION process_information{nullptr, nullptr, 0,0};
 
@@ -293,6 +296,12 @@ struct default_launcher
                   Args && args,
                   Inits && ... inits ) -> enable_init<Executor, Inits...>
   {
+    if (!allow_batch_files && ((executable.extension() == ".bat") || (executable.extension() == ".cmd")))
+    {
+       BOOST_PROCESS_V2_ASSIGN_EC(ec, ERROR_ACCESS_DENIED, system_category());
+       return basic_process<Executor>(exec);
+    }
+  
     auto command_line = this->build_command_line(executable, std::forward<Args>(args));
 
     ec = detail::on_setup(*this, executable, command_line, inits...);
