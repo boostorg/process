@@ -352,9 +352,9 @@ struct default_launcher
             }
             fd_whitelist.push_back(pg.p[1]);
 
+#if !defined(BOOST_PROCESS_V2_DISABLE_NOTIFY_FORK)
             auto & ctx = net::query(
                     exec, net::execution::context);
-#if !defined(BOOST_PROCESS_V2_DISABLE_NOTIFY_FORK)
             ctx.notify_fork(net::execution_context::fork_prepare);
 #endif
             pid = ::fork();
