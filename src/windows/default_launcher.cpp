@@ -29,49 +29,59 @@ namespace windows
 
     const auto has_space = ws.find(space) != basic_string_view<wchar_t>::npos;
     const auto quoted = (ws.front() == quote) && (ws.back() == quote);
-    const auto needs_escape = has_space && !quoted ;
+    const auto has_inner_quote = std::find(std::next(ws.begin()), std::prev(ws.end()), quote) != std::prev(ws.end());
+    const auto needs_escape = (has_space && !quoted) || has_inner_quote;
 
     if (!needs_escape)
       return ws.size();
-    else
-      return ws.size() + std::count(ws.begin(), ws.end(), quote) + 2u;
+    else 
+      return ws.size() + std::count(ws.begin(), ws.end(), quote) + (quoted ? 2u : 0u);
   }
 
 
   std::size_t default_launcher::escape_argv_string(wchar_t * itr, std::size_t max_size, 
                                         basic_string_view<wchar_t> ws)
   { 
+    constexpr static auto space = L' ';
+    constexpr static auto quote = L'"';
+
     const auto sz = escaped_argv_length(ws);
     if (sz > max_size)
       return 0u;
     if (ws.empty())      
     {
-      itr[0] = L'"';
-      itr[1] = L'"';
+      itr[0] = quote;
+      itr[1] = quote;
       return 2u;
     }
 
-    const auto has_space = ws.find(L' ') != basic_string_view<wchar_t>::npos;
-    const auto quoted = (ws.front() == L'"') && (ws.back() ==  L'"');
-    const auto needs_escape = has_space && !quoted;
+
+    const auto has_space = ws.find(space) != basic_string_view<wchar_t>::npos;
+    const auto quoted = (ws.front() == quote) && (ws.back() == quote);
+    const auto has_inner_quote = std::find(std::next(ws.begin()), std::prev(ws.end()), quote) != std::prev(ws.end());
+    const auto needs_escape = (has_space && !quoted) || has_inner_quotes;
 
     if (!needs_escape)
       return std::copy(ws.begin(), ws.end(), itr) - itr;
 
     if (sz < (2u + ws.size()))
       return 0u;
-      
+
+
+
     const auto end = itr + sz; 
     const auto begin = itr;
-    *(itr ++) = L'"';
+    if (!quoted)
+      *(itr++) = quote;
+    
     for (auto wc : ws)
     {
-      if (wc == L'"')
+      if (wc == quote)
         *(itr++) = L'\\';
       *(itr++) = wc;
     }
-
-    *(itr ++) = L'"';
+    if (!quoted)
+      *(itr++) = quote;
     return itr - begin;
   }
 
@@ -118,3 +128,4 @@ namespace windows
 BOOST_PROCESS_V2_END_NAMESPACE
 
 #endif
+
