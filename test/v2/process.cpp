@@ -852,5 +852,70 @@ BOOST_AUTO_TEST_CASE(async_terminate_code)
 #endif
 
 
+BOOST_AUTO_TEST_CASE(print_args_combined)
+{
+  using boost::unit_test::framework::master_test_suite;
+  const auto pth =  master_test_suite().argv[1];
+
+  asio::io_context ctx;
+
+  asio::readable_pipe rp{ctx};
+  asio::writable_pipe wp{ctx};
+  asio::connect_pipe(rp, wp);
+
+  bpv::process proc(ctx, pth, {"print-args", "bar", "foo"}, bpv::process_stdio{/*in*/{}, /*.out= */ wp, /* .err=*/ wp});
+
+  wp.close();
+  asio::streambuf st;
+  std::istream is{&st};
+  bpv::error_code ec;
+
+  auto sz = asio::read(rp, st,  ec);
+  while (ec == asio::error::interrupted)
+      sz += asio::read(rp, st,  ec);
+
+  BOOST_CHECK_NE(sz , 0u);
+  BOOST_CHECK_MESSAGE((ec == asio::error::broken_pipe) || (ec == asio::error::eof), ec.message());
+
+  std::string line;
+  BOOST_CHECK(std::getline(is, line));
+  trim_end(line);
+  BOOST_CHECK_EQUAL(pth, line );
+
+  BOOST_CHECK(std::getline(is, line));
+  trim_end(line);
+  BOOST_CHECK_EQUAL(pth, line );
+
+
+  BOOST_CHECK(std::getline(is, line));
+  trim_end(line);
+  BOOST_CHECK_EQUAL("print-args", line);
+
+  BOOST_CHECK(std::getline(is, line));
+  trim_end(line);
+  BOOST_CHECK_EQUAL("print-args", line);
+
+
+  BOOST_CHECK(std::getline(is, line));
+  trim_end(line);
+  BOOST_CHECK_EQUAL("bar", line);
+
+  BOOST_CHECK(std::getline(is, line));
+  trim_end(line);
+  BOOST_CHECK_EQUAL("bar", line);
+
+  BOOST_CHECK(std::getline(is, line));
+  trim_end(line);
+  BOOST_CHECK_EQUAL("foo", line);
+
+  BOOST_CHECK(std::getline(is, line));
+  trim_end(line);
+  BOOST_CHECK_EQUAL("foo", line);
+
+
+  proc.wait();
+  BOOST_CHECK_EQUAL(proc.exit_code(), 0);
+}
+
 BOOST_AUTO_TEST_SUITE_END();
 
