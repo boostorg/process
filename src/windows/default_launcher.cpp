@@ -26,7 +26,23 @@ namespace windows
 
     constexpr static auto quote = L'"';
     const auto needs_quotes = ws.find_first_of(L" \t") != basic_string_view<wchar_t>::npos;
-    return ws.size() + std::count(ws.begin(), ws.end(), quote) + (needs_quotes ? 2u : 0u);
+
+    std::size_t needed_escapes = 0u;
+    for (auto itr = ws.begin(); itr != ws.end(); itr ++)
+    {
+      if (*itr == L' ')
+        needed_escapes++;
+      else if (*itr == L'\\')
+      {
+        auto nx = std::next(itr);
+        if (nx != ws.end() && (*nx == L' ' || *nx == L'\t'))
+          needed_escapes ++;
+        else if (nx == ws.end() && needs_quotes)
+          needed_escapes ++;      
+      }
+    }
+    
+    return ws.size() + needed_escapes + (needs_quotes ? 2u : 0u);
   }
 
 
@@ -53,12 +69,24 @@ namespace windows
     const auto begin = itr;
     if (needs_quotes)
       *(itr++) = quote;
-    
-    for (auto wc : ws)
+
+    for (auto it = ws.begin(); it != ws.end(); it ++)
     {
-      if (wc == quote)
+      if (*it == quote) // makes it \"
         *(itr++) = L'\\';
-      *(itr++) = wc;
+        
+      if (*it == L'\\') // \" needs to be come \\\"
+      {
+        auto nx = std::next(it);
+        if (nx != ws.end() && (*nx == L' ' || *nx == L'\t'))
+          *(itr++) = L'\\';
+        else if (nx == ws.end() && needs_quotes)
+        {
+          *(itr++) = L'\\';
+        }
+      }
+        
+      *(itr++) = *it;
     }
 
     if (needs_quotes)
