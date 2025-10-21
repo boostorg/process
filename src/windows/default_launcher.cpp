@@ -24,30 +24,24 @@ namespace windows
     if (ws.empty())
       return 2u; // just quotes
 
-    constexpr static auto space = L' ';
     constexpr static auto quote = L'"';
-
-    const auto has_space = ws.find(space) != basic_string_view<wchar_t>::npos;
-    const auto quoted = (ws.front() == quote) && (ws.back() == quote);
-    const auto has_inner_quote = std::find(std::next(ws.begin()), std::prev(ws.end()), quote) != std::prev(ws.end());
-    const auto needs_escape = (has_space && !quoted) || has_inner_quote;
-
-    if (!needs_escape)
-      return ws.size();
-    else 
-      return ws.size() + std::count(ws.begin(), ws.end(), quote) + (quoted ? 2u : 0u);
+    const auto needs_quotes = ws.find_first_of(L" \t") != basic_string_view<wchar_t>::npos;
+    return ws.size() + std::count(ws.begin(), ws.end(), quote) + (needs_quotes ? 2u : 0u);
   }
 
 
   std::size_t default_launcher::escape_argv_string(wchar_t * itr, std::size_t max_size, 
                                         basic_string_view<wchar_t> ws)
   { 
-    constexpr static auto space = L' ';
     constexpr static auto quote = L'"';
-
-    const auto sz = escaped_argv_length(ws);
+    const auto needs_quotes = ws.find_first_of(L" \t") != basic_string_view<wchar_t>::npos;
+    const auto needed_escapes = std::count(ws.begin(), ws.end(), quote);
+    
+    const auto sz = ws.size() + needed_escapes + (needs_quotes ? 2u : 0u);
+    
     if (sz > max_size)
       return 0u;
+
     if (ws.empty())      
     {
       itr[0] = quote;
@@ -55,23 +49,9 @@ namespace windows
       return 2u;
     }
 
-
-    const auto has_space = ws.find(space) != basic_string_view<wchar_t>::npos;
-    const auto quoted = (ws.front() == quote) && (ws.back() == quote);
-    const auto has_inner_quote = std::find(std::next(ws.begin()), std::prev(ws.end()), quote) != std::prev(ws.end());
-    const auto needs_escape = (has_space && !quoted) || has_inner_quotes;
-
-    if (!needs_escape)
-      return std::copy(ws.begin(), ws.end(), itr) - itr;
-
-    if (sz < (2u + ws.size()))
-      return 0u;
-
-
-
     const auto end = itr + sz; 
     const auto begin = itr;
-    if (!quoted)
+    if (needs_quotes)
       *(itr++) = quote;
     
     for (auto wc : ws)
@@ -80,7 +60,8 @@ namespace windows
         *(itr++) = L'\\';
       *(itr++) = wc;
     }
-    if (!quoted)
+
+    if (needs_quotes)
       *(itr++) = quote;
     return itr - begin;
   }

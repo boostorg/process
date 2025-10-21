@@ -257,7 +257,7 @@ BOOST_AUTO_TEST_CASE(print_args_spec_out)
     asio::connect_pipe(rp, wp);
 
 
-    bpv::process proc(ctx, pth, {"print-args", "&foo", "&", "|bar", "\"", "#foobar"}, bpv::process_stdio{/*in*/{},/*out*/wp, /*err*/ nullptr});
+    bpv::process proc(ctx, pth, {"print-args", "&foo", "&", "", "\"\"", "\\\"", "|bar", "\"", "#foobar"}, bpv::process_stdio{/*in*/{},/*out*/wp, /*err*/ nullptr});
 
     wp.close();
     asio::streambuf st;
@@ -290,11 +290,24 @@ BOOST_AUTO_TEST_CASE(print_args_spec_out)
 
     BOOST_CHECK(std::getline(is, line));
     trim_end(line);
+    BOOST_CHECK_EQUAL("", line);
+
+    BOOST_CHECK(std::getline(is, line));
+    trim_end(line);
+    BOOST_CHECK_EQUAL("\"\"", line);
+
+    BOOST_CHECK(std::getline(is, line));
+    trim_end(line);
+    BOOST_CHECK_EQUAL("\\\"", line);
+
+    BOOST_CHECK(std::getline(is, line));
+    trim_end(line);
     BOOST_CHECK_EQUAL("|bar", line);
 
     BOOST_CHECK(std::getline(is, line));
     trim_end(line);
     BOOST_CHECK_EQUAL("\"", line);
+
 
     BOOST_CHECK(std::getline(is, line));
     trim_end(line);
