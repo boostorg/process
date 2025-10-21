@@ -256,8 +256,11 @@ BOOST_AUTO_TEST_CASE(print_args_spec_out)
     asio::writable_pipe wp{ctx};
     asio::connect_pipe(rp, wp);
 
-
-    bpv::process proc(ctx, pth, {"print-args", "&foo", "&", "", "\"\"", "\\\"", "|bar", "\"", "#foobar"}, bpv::process_stdio{/*in*/{},/*out*/wp, /*err*/ nullptr});
+    fprintf(stderr, "print_args_spec_out\n"); 
+    
+    bpv::process proc(ctx, pth, {"print-args", "&foo", "&", "", "\"\"", "\\\"", "|bar", "\"", "#foobar"}, 
+                                 bpv::process_stdio{/*in*/{},/*out*/wp, /*err*/ nullptr});
+    BOOST_CHECK(proc.running());                             
 
     wp.close();
     asio::streambuf st;
@@ -877,8 +880,8 @@ BOOST_AUTO_TEST_CASE(print_args_combined)
   asio::connect_pipe(rp, wp);
 
   bpv::process proc(ctx, pth, {"print-args", "bar", "foo"}, bpv::process_stdio{/*in*/{}, /*.out= */ wp, /* .err=*/ wp});
-
   wp.close();
+
   asio::streambuf st;
   std::istream is{&st};
   bpv::error_code ec;

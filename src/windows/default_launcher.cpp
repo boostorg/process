@@ -30,14 +30,14 @@ namespace windows
     std::size_t needed_escapes = 0u;
     for (auto itr = ws.begin(); itr != ws.end(); itr ++)
     {
-      if (*itr == L' ')
+      if (*itr == quote)
         needed_escapes++;
       else if (*itr == L'\\')
       {
         auto nx = std::next(itr);
-        if (nx != ws.end() && (*nx == L' ' || *nx == L'\t'))
+        if (nx != ws.end() && *nx == L'"')
           needed_escapes ++;
-        else if (nx == ws.end() && needs_quotes)
+        else if (nx == ws.end())
           needed_escapes ++;      
       }
     }
@@ -75,17 +75,16 @@ namespace windows
       if (*it == quote) // makes it \"
         *(itr++) = L'\\';
         
-      if (*it == L'\\') // \" needs to be come \\\"
+      if (*it == L'\\') // \" needs to become \\\"
       {
         auto nx = std::next(it);
-        if (nx != ws.end() && (*nx == L' ' || *nx == L'\t'))
+        if (nx != ws.end() && *nx == L'"')
           *(itr++) = L'\\';
-        else if (nx == ws.end() && needs_quotes)
-        {
+        else if (nx == ws.end())
           *(itr++) = L'\\';
-        }
+
       }
-        
+
       *(itr++) = *it;
     }
 
@@ -127,9 +126,13 @@ namespace windows
     auto tl = get_thread_attribute_list(ec);
     if (ec)
       return;
+    
+    auto itr  = std::unique(inherited_handles.begin(), inherited_handles.end());
+    auto size = std::distance(inherited_handles.begin(), itr);
+      
     if (!::UpdateProcThreadAttribute(
         tl, 0, PROC_THREAD_ATTRIBUTE_HANDLE_LIST,
-        inherited_handles.data(), inherited_handles.size() * sizeof(HANDLE), nullptr, nullptr))
+        inherited_handles.data(), size * sizeof(HANDLE), nullptr, nullptr))
       BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec);
   }
 

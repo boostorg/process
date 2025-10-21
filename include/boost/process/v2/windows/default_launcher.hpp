@@ -352,7 +352,6 @@ struct default_launcher
   BOOST_PROCESS_V2_DECL static 
   std::size_t escape_argv_string(wchar_t * itr, std::size_t max_size, 
                                  basic_string_view<wchar_t> ws);
-                                        
 
 
 
@@ -395,6 +394,7 @@ struct default_launcher
                    {
                       return detail::conv_string<wchar_t>(arg.data(), arg.size());
                    });
+
     return build_command_line_impl(pt, argw, L"");
   }
 
@@ -406,10 +406,11 @@ struct default_launcher
     {
       std::wstring buffer;
       buffer.resize(escaped_argv_length(pt.native()));
-      escape_argv_string(&buffer.front(), buffer.size(), pt.native());
+      
+      if (!buffer.empty())
+        escape_argv_string(&buffer.front(), buffer.size(), pt.native());
       return buffer;
     }
-
     return build_command_line_impl(pt, args, *std::begin(args));
   }
 
