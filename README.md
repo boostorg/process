@@ -15,7 +15,7 @@ Boost.process is a library for comfortable management of processes, released wit
 
 [Open Issues](https://github.com/boostorg/process/issues)
 
-[Latest developer documentation](https://www.boost.org/doc/libs/develop/doc/html/process.html)
+[Latest developer documentation](https://www.boost.org/doc/libs/develop/libs/process/doc/html/index.html)
 
 ### About
 This C++11 library is the current result of a long attempt to get a boost.process library, which is going on since 2006.
