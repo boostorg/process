@@ -34,7 +34,7 @@ target_include_directories(boost_process PUBLIC include)
 target_link_libraries(boost_process
     PUBLIC
     Boost::algorithm
-    Boost::asio
+    Boost::asio_core
     Boost::config
     Boost::core
     Boost::fusion
