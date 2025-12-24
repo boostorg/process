@@ -12,7 +12,7 @@ feature boost.process.disable-close-range : on off : optional ;
 
 constant boost_dependencies :
     /boost/algorithm//boost_algorithm
-    /boost/asio//boost_asio
+    /boost/asio//boost_asio_core
     /boost/assert//boost_assert
     /boost/config//boost_config
     /boost/core//boost_core
