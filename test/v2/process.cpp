@@ -933,5 +933,56 @@ BOOST_AUTO_TEST_CASE(print_args_combined)
   BOOST_CHECK_EQUAL(proc.exit_code(), 0);
 }
 
+
+struct my_handler
+{
+    boost::process::filesystem::path pt;
+    bpv::error_code ec;
+
+    template<typename Launcher, typename CmdLine>
+    bpv::error_code on_setup(Launcher &launcher, const bpv::filesystem::path& executable,
+                  CmdLine (&/*cmd_line*/))
+    {
+      pt = executable;
+      if (executable == "/send/more/cops")
+        return asio::error::no_recovery;
+      else
+        return {};
+    }
+
+    template<typename Launcher, typename CmdLine>
+    void on_error(Launcher &launcher, const bpv::filesystem::path& executable,
+                  CmdLine (&/*cmd_line*/), const bpv::error_code & ec)
+    {
+      this->ec = ec;
+    }
+
+    template<typename Launcher, typename CmdLine>
+    void on_success(Launcher &launcher, const bpv::filesystem::path& executable,
+                  CmdLine (&/*cmd_line*/))
+    {
+      ec.clear();
+    }
+  };
+
+BOOST_AUTO_TEST_CASE(custom_handlers)
+{
+  my_handler mh;
+
+  asio::io_context ctx;
+  
+  BOOST_CHECK_THROW(bpv::process(ctx, "/send/more/cops", {}, mh), bpv::system_error);
+  BOOST_CHECK_EQUAL(mh.ec, asio::error::no_recovery);
+  
+  BOOST_CHECK_EQUAL(mh.pt, "/send/more/cops");
+
+  using boost::unit_test::framework::master_test_suite;
+  const auto pth = bpv::filesystem::absolute(master_test_suite().argv[1]);
+
+  bpv::process proc(ctx, pth, {}, mh);
+
+  BOOST_CHECK_EQUAL(mh.pt, pth);
+}
+
 BOOST_AUTO_TEST_SUITE_END();
 
