@@ -102,7 +102,11 @@ using std::optional;
 
 #define BOOST_PROCESS_V2_ASSIGN_EC(ec, ...) ec.assign(__VA_ARGS__);
 #define BOOST_PROCESS_V2_ASSIGN_LAST_ERROR(ec)                         \
-  ec.assign(::BOOST_PROCESS_V2_NAMESPACE::detail::get_last_error());   \
+do                                                                     \
+{                                                                      \
+  ec = ::BOOST_PROCESS_V2_NAMESPACE::detail::get_last_error();         \
+}                                                                      \
+while (false)
 
 
 #else
@@ -157,7 +161,7 @@ BOOST_PROCESS_V2_END_NAMESPACE
 #define BOOST_DYN_LINK
 #endif
 #include <boost/config/auto_link.hpp>
-#endif 
+#endif
 
 #if defined(BOOST_PROCESS_V2_POSIX)
 
