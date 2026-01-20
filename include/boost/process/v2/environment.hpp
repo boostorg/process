@@ -1253,19 +1253,17 @@ namespace std
 {
 
 template<>
-class tuple_size<BOOST_PROCESS_V2_NAMESPACE::environment::key_value_pair> : integral_constant<std::size_t, 2u> {};
+struct tuple_size<BOOST_PROCESS_V2_NAMESPACE::environment::key_value_pair> : integral_constant<std::size_t, 2u> {};
 
 template<>
-class tuple_element<0u, BOOST_PROCESS_V2_NAMESPACE::environment::key_value_pair> 
+struct tuple_element<0u, BOOST_PROCESS_V2_NAMESPACE::environment::key_value_pair> 
 {
-  public: 
     using type = BOOST_PROCESS_V2_NAMESPACE::environment::key_view;
 };
 
 template<>
-class tuple_element<1u, BOOST_PROCESS_V2_NAMESPACE::environment::key_value_pair> 
+struct tuple_element<1u, BOOST_PROCESS_V2_NAMESPACE::environment::key_value_pair> 
 {
-  public: 
     using type = BOOST_PROCESS_V2_NAMESPACE::environment::value_view;
 };
 
@@ -1277,19 +1275,17 @@ inline auto get(const BOOST_PROCESS_V2_NAMESPACE::environment::key_value_pair & 
 }
 
 template<>
-class tuple_size<BOOST_PROCESS_V2_NAMESPACE::environment::key_value_pair_view> : integral_constant<std::size_t, 2u> {};
+struct tuple_size<BOOST_PROCESS_V2_NAMESPACE::environment::key_value_pair_view> : integral_constant<std::size_t, 2u> {};
 
 template<>
-class tuple_element<0u, BOOST_PROCESS_V2_NAMESPACE::environment::key_value_pair_view>
+struct tuple_element<0u, BOOST_PROCESS_V2_NAMESPACE::environment::key_value_pair_view>
 {
-  public:
     using type = BOOST_PROCESS_V2_NAMESPACE::environment::key_view;
 };
 
 template<>
-class tuple_element<1u, BOOST_PROCESS_V2_NAMESPACE::environment::key_value_pair_view>
+struct tuple_element<1u, BOOST_PROCESS_V2_NAMESPACE::environment::key_value_pair_view>
 {
-  public:
     using type = BOOST_PROCESS_V2_NAMESPACE::environment::value_view;
 };
 
