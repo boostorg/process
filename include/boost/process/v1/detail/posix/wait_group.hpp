@@ -45,7 +45,7 @@ inline void wait(const group_handle &p, std::error_code &ec) noexcept
         ec.clear();
 }
 
-inline void wait(const group_handle &p) noexcept
+inline void wait(const group_handle &p)
 {
     std::error_code ec;
     wait(p, ec);
