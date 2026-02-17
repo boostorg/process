@@ -112,7 +112,7 @@ struct exit_code_category final : public error_category
 #            if defined(SIGKILL)
                     case SIGKILL: return "SIGKILL:   Kill signal";
 #            endif
-#            if defined(SIGLOST)
+#            if defined(SIGLOST) && SIGLOST != SIGPWR
                     case SIGLOST: return "SIGLOST:   File lock lost (unused)";
 #            endif
 #            if defined(SIGPIPE)
