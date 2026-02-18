@@ -15,6 +15,8 @@ The major changes are
 
 Version 2 is now the default. In order to discourage usage of the deprecated v1, it's documentation has been removed.
 
+The last version to include it was https://www.boost.org/doc/libs/1_87_0/doc/html/process.html[1.87].
+
 == Simplified Interface
 
 In process v1 one can define partial settings in the constructor of the process, 
@@ -38,6 +40,9 @@ process proc(ctx, "./test", {"--help"}, process_stdio{nullptr, {}, {}}, process_
 Every initializer addresses one logical component (e.g. stdio) instead of multiple ones accumulating.
 Furthermore, every process has a path and arguments, instead of a confusing mixture of cmd-style and 
 exe-args that can be randomly spread out.
+
+
+Likewise, the environvment is used explicitly as the second argument `find_executable`, which replaces `search_path`.
 
 
 == `pidfd_open`
@@ -78,4 +83,10 @@ posix systems create a problem with inheriting file handles by default.
 
 Process V2 will automatically close all non-whitelisted descriptors, 
 without needing any option to enable it.
+
+
+== Security issues
+
+Batch files on windows are insecure because they can be 
+https://learn.microsoft.com/en-us/security-updates/securitybulletins/2014/ms14-019[used for command injection].
 

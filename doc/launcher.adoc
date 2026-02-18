@@ -9,8 +9,6 @@ There are additional launcher available on most systems.
 |Name | Summary | Default on | Available on
 
 
-
-
 |`windows::default_launcher`    | `CreateProcessW`          | windows       |windows
 |`windows::as_user_launcher`    | `CreateProcessAsUserW`    |               |windows
 |`windows::with_logon_launcher` | `CreateProcessWithLogonW` |               |windows
@@ -119,6 +117,8 @@ struct custom_initializer
 ----
 
 NOTE: All the additional launchers for windows inherit `default_launcher`.
+
+WARNING: For security reasons, executing batch files is forbidden and needs to be explicitly enabled by setting `allow_batch_files` to `true`.
 
 The call sequence is as follows:
 

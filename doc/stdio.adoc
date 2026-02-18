@@ -52,6 +52,7 @@ E.g. a domain socket on linux.
 include::../example/stdio.cpp[tag=native_handle]
 ----
 
+[#stdio_popen]
 == popen
 
 Additionally, process v2 provides a `popen` class. 
