@@ -173,10 +173,18 @@ struct process_io_binding
   bool fd_needs_closing{false};
   error_code ec;
 
-  ~process_io_binding()
+  void close()
   {
     if (fd_needs_closing)
+    {
       ::close(fd);
+      fd = target;
+      fd_needs_closing = false;
+    }
+  }
+  ~process_io_binding()
+  {
+    close();
   }
 
   process_io_binding() = default;
@@ -193,8 +201,7 @@ struct process_io_binding
 
   process_io_binding & operator=(process_io_binding && other) noexcept
   {
-    if (fd_needs_closing)
-      ::close(fd);
+    close();
 
     fd = other.fd;
     fd_needs_closing = other.fd_needs_closing;
@@ -357,6 +364,22 @@ struct process_stdio
       return error_code(errno, system_category());
 
     return error_code {};
+  };
+
+  // weather fork succeeded or not, we should close the pipe properly in the parent
+  void close_pipes()
+  {
+    in.close();
+    out.close();
+    err.close();
+  };
+  void on_success(posix::default_launcher & /*launcher*/, const filesystem::path &, const char * const *)
+  {
+    close_pipes();
+  };
+  void on_error(posix::default_launcher & /*launcher*/, const filesystem::path &, const char * const *)
+  {
+    close_pipes();
   };
 #endif
 
