@@ -32,7 +32,7 @@
 #endif
 #endif
 
-#if (defined(BOOST_PROCESS_V2_WINDOWS) || defined(__linux__) || defined(__ANDROID__) || defined(__sun))
+#if (defined(BOOST_PROCESS_V2_WINDOWS) || defined(__linux__) || defined(__ANDROID__) || defined(__gnu_hurd__) || defined(__sun))
 #include <cstdlib>
 #endif
 
@@ -132,11 +132,11 @@ filesystem::path exe(boost::process::v2::pid_type pid, error_code & ec)
     return "";
 }
 
-#elif (defined(__linux__) || defined(__ANDROID__) || defined(__sun))
+#elif (defined(__linux__) || defined(__ANDROID__) || defined(__gnu_hurd__) || defined(__sun))
 
 filesystem::path exe(boost::process::v2::pid_type pid, error_code & ec)
 {
-#if (defined(__linux__) || defined(__ANDROID__))
+#if (defined(__linux__) || defined(__ANDROID__) || defined(__gnu_hurd__))
     return filesystem::canonical(
             filesystem::path("/proc") / std::to_string(pid) / "exe", ec
             );
