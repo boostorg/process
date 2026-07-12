@@ -37,6 +37,8 @@ inline void handle_error(error_code & ec)
 
 std::size_t size_as_utf8(const wchar_t * in, std::size_t size, error_code & ec)
 {
+    if (size == 0u)
+        return 0u;
     auto res = WideCharToMultiByte(
                           CP_UTF8,                // CodePage,
                           0,                      // dwFlags,
@@ -72,6 +74,8 @@ std::size_t size_as_wide(const char * in, std::size_t size, error_code & ec)
 std::size_t convert_to_utf8(const wchar_t *in, std::size_t size,  char * out, 
                             std::size_t max_size, error_code & ec)
 {
+    if (size == 0u)
+        return 0u;
     auto res = ::WideCharToMultiByte(
                     CP_UTF8,                    // CodePage
                     0,                          // dwFlags
