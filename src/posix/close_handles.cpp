@@ -181,8 +181,12 @@ void close_all(const std::vector<int> & whitelist, error_code & ec)
     std::unique_ptr<DIR, void(*)(DIR*)> dir{::opendir("/dev/fd"), +[](DIR* p){::closedir(p);}};
     if (dir.get() == nullptr)
     {
-        ec = BOOST_PROCESS_V2_NAMESPACE::detail::get_last_error();
-        return ;
+        dir = {::opendir("/proc/self/fd"), +[](DIR* p){::closedir(p);}};
+        if (dir.get() == nullptr)
+        {
+            ec = BOOST_PROCESS_V2_NAMESPACE::detail::get_last_error();
+            return ;
+        }
     }
 
     auto dir_fd = dirfd(dir.get());
