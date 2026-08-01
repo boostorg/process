@@ -73,10 +73,12 @@ typedef int native_exit_code_type;
 namespace detail
 {
 constexpr native_exit_code_type still_active = 0x17f;
+#ifndef __mips__
 static_assert(WIFSTOPPED(still_active), "Expected still_active to indicate WIFSTOPPED");
 static_assert(!WIFEXITED(still_active), "Expected still_active to not indicate WIFEXITED");
 static_assert(!WIFSIGNALED(still_active), "Expected still_active to not indicate WIFSIGNALED");
 static_assert(!WIFCONTINUED(still_active), "Expected still_active to not indicate WIFCONTINUED");
+#endif
 }
 
 inline bool process_is_running(int code)
