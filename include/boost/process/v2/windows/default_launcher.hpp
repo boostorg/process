@@ -97,7 +97,7 @@ inline void invoke_on_error(Launcher & /*launcher*/, const filesystem::path &/*e
 template<typename Launcher, typename Init>
 inline auto invoke_on_error(Launcher & launcher, const filesystem::path &executable, std::wstring &cmd_line,
                             const error_code & ec, Init && init, derived && )
--> decltype(init.on_error(launcher, executable, cmd_line, ec))
+    -> decltype(init.on_error(launcher, executable, cmd_line, ec))
 {
   init.on_error(launcher, executable, cmd_line, ec);
 }
@@ -109,7 +109,7 @@ inline std::false_type probe_on_error(
 
 template<typename Launcher, typename Init>
 inline auto probe_on_error(Launcher & launcher, Init && init, derived && )
-        -> std::is_same<error_code, decltype(init.on_error(launcher, std::declval<const filesystem::path &>(), std::declval<std::wstring &>(), std::declval<error_code&>()))>;
+        -> std::is_same<void, decltype(init.on_error(launcher, std::declval<const filesystem::path &>(), std::declval<std::wstring &>(), std::declval<error_code&>()))>;
 
 template<typename Launcher, typename Init>
 using has_on_error = decltype(probe_on_error(std::declval<Launcher&>(), std::declval<Init>(), derived{}));
