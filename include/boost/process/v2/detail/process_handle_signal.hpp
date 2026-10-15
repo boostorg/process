@@ -348,15 +348,17 @@ struct basic_process_handle_signal
             net::dispatch(exec, net::append(std::move(self), ec));
         }
 #else
-        signal_set_dummy_ dummy_;
-        pid_t pid;
+        signal_set_dummy_ &handle;
+        pid_type pid_;
+        native_exit_code_type & exit_code;
+
         template<typename Self>
         void operator()(Self &&self)
         {
-          auto exec = net::get_associated_immediate_executor(self, dummy_.get_executor());
+          auto exec = net::get_associated_immediate_executor(self, handle.get_executor());
           error_code ec;
           BOOST_PROCESS_V2_ASSIGN_EC(ec, net::error::operation_not_supported);
-          net::dispatch(exec, net::append(std::move(self), native_exit_code_type(), ec));
+          net::dispatch(exec, net::append(std::move(self), ec));
         }
 #endif
         template<typename Self>
