@@ -24,11 +24,19 @@
 // 
 // gives us
 //
-// int closefrom(int fd);
+// void closefrom(int lowfd);
 // int close_range(u_int lowfd, u_int highfd, int flags);
 
 #include <unistd.h>
 #define BOOST_PROCESS_V2_HAS_CLOSE_RANGE_AND_CLOSEFROM 1 
+
+#elif defined(__OpenBSD__)
+
+// https://man.openbsd.org/closefrom.2
+// int closefrom(int fd);
+
+#include <unistd.h>
+#define BOOST_PROCESS_V2_HAS_CLOSEFROM_WITH_ERRNO 1
 
 #elif defined(__sun)
 
@@ -111,6 +119,36 @@ void close_all(const std::vector<int> & whitelist, error_code & ec)
                     return 0;
            }, const_cast<void*>(static_cast<const void*>(&whitelist)) );
     ec = BOOST_PROCESS_V2_NAMESPACE::detail::get_last_error();
+}
+
+#elif defined(BOOST_PROCESS_V2_HAS_CLOSEFROM_WITH_ERRNO)
+
+// OpenBSD impl - whitelist must be ordered
+void close_all(const std::vector<int> & whitelist, error_code & /*ec*/)
+{
+    //the most common scenario is whitelist = {0,1,2}
+    if (!whitelist.empty())
+    {
+        if (whitelist.front() != 0) {
+            for (int fd = 0; fd < whitelist.front(); fd++)
+                while (::close(fd) == -1 && errno == EINTR);
+        }
+        for (std::size_t idx = 0u; 
+             idx < (whitelist.size() - 1u);
+             idx++)
+        {
+            const auto mine = whitelist[idx];
+            const auto next = whitelist[idx + 1];
+            if ((mine + 1) != next && (mine != next))
+            {
+                for (int fd = mine + 1; fd < next; fd++)
+                    while (::close(fd) == -1 && errno == EINTR);
+            }
+        }
+        while (::closefrom(whitelist.back() + 1) == -1 && errno == EINTR);
+    }
+    else
+        while (::closefrom(0) == -1 && errno == EINTR);
 }
 
 #elif defined(BOOST_PROCESS_V2_HAS_CLOSE_RANGE_AND_CLOSEFROM)
