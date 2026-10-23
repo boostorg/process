@@ -64,9 +64,7 @@ struct basic_process
     typedef basic_process<Executor1> other;
   };
 
-  /** An empty process is similar to a default constructed thread. It holds an empty
-  handle and is a place holder for a process that is to be launched later. */
-  basic_process() = default;
+  basic_process() = delete;
 
   basic_process(const basic_process&) = delete;
   basic_process& operator=(const basic_process&) = delete;
@@ -95,7 +93,7 @@ struct basic_process
       : basic_process(default_process_launcher()(std::move(executor), exe, args, std::forward<Inits>(inits)...))
   {
   }
-  
+
   /// Construct a child from a property list and launch it using the default launcher..
   template<typename Args, typename ... Inits>
   explicit basic_process(
@@ -112,7 +110,7 @@ struct basic_process
   explicit basic_process(
       ExecutionContext & context,
       typename std::enable_if<
-          std::is_convertible<ExecutionContext&, 
+          std::is_convertible<ExecutionContext&,
                               net::execution_context&>::value,
           const filesystem::path&>::type exe,
       std::initializer_list<string_view> args,
@@ -126,7 +124,7 @@ struct basic_process
   explicit basic_process(
       ExecutionContext & context,
       typename std::enable_if<
-          std::is_convertible<ExecutionContext&, 
+          std::is_convertible<ExecutionContext&,
                               net::execution_context&>::value,
           const filesystem::path&>::type exe,
       Args&& args, Inits&&... inits)
@@ -157,7 +155,7 @@ struct basic_process
   template <typename ExecutionContext>
   explicit basic_process(ExecutionContext & context, pid_type pid, native_handle_type native_handle,
                          typename std::enable_if<
-                            std::is_convertible<ExecutionContext&, 
+                            std::is_convertible<ExecutionContext&,
                                 net::execution_context&>::value, void *>::type = nullptr)
       : process_handle_(context.get_executor(), pid, native_handle) {}
 
@@ -165,7 +163,7 @@ struct basic_process
   template <typename ExecutionContext>
   explicit basic_process(ExecutionContext & context,
                          typename std::enable_if<
-                             std::is_convertible<ExecutionContext&, 
+                             std::is_convertible<ExecutionContext&,
                                 net::execution_context&>::value, void *>::type = nullptr)
      : process_handle_(context.get_executor()) {}
 
@@ -226,7 +224,7 @@ struct basic_process
   /// Send the process a signal requesting it to resume. This may rely on undocumented functions.
   void resume(error_code &ec)
   {
-    process_handle_.resume(ec);  
+    process_handle_.resume(ec);
   }
 
   /// Send the process a signal requesting it to resume. This may rely on undocumented functions.
@@ -290,14 +288,14 @@ struct basic_process
   /// Get the id of the process;
   pid_type id() const {return process_handle_.id();}
 
-  /// The native handle of the process. 
+  /// The native handle of the process.
   /** This might be undefined on posix systems that only support signals */
   native_exit_code_type native_exit_code() const
   {
     return exit_status_;
   }
-  /// Checks if the current process is running. 
-  /** If it has already completed the exit code will be stored internally 
+  /// Checks if the current process is running.
+  /** If it has already completed the exit code will be stored internally
    * and can be obtained by calling `exit_code.
    */
   bool running()
@@ -326,11 +324,11 @@ struct basic_process
       exit_status_ = exit_code;
     return r;
   }
-  
+
   /// Check if the process is referring to an existing process.
   /** Note that this might be a process that already exited.*/
   bool is_open() const { return process_handle_.is_open(); }
-  
+
 
 
 private:
@@ -340,7 +338,7 @@ private:
   basic_process_handle<Executor> process_handle_;
   native_exit_code_type exit_status_{detail::still_active};
 
-  
+
   struct async_wait_op_
   {
     basic_process_handle<Executor> & handle;

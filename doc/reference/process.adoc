@@ -35,9 +35,7 @@ struct basic_process
     typedef basic_process<Executor1> other;
   };
 
-  /** An empty process is similar to a default constructed thread. It holds an empty
-  handle and is a place holder for a process that is to be launched later. */
-  basic_process() = default;
+  basic_process() = delete;
 
   basic_process(const basic_process&) = delete;
   basic_process& operator=(const basic_process&) = delete;
@@ -59,7 +57,7 @@ struct basic_process
       const filesystem::path& exe,
       std::initializer_list<string_view> args,
       Inits&&... inits);
-  
+
   // Construct a child from a property list and launch it using the default launcher..
   template<typename Args, typename ... Inits>
   explicit basic_process(
@@ -147,11 +145,11 @@ struct basic_process
   // Get the id of the process;
   pid_type id() const;
 
-  // The native handle of the process. 
+  // The native handle of the process.
   /** This might be undefined on posix systems that only support signals */
   native_exit_code_type native_exit_code() const;
 
-  // Checks if the current process is running. 
+  // Checks if the current process is running.
   /* If it has already completed the exit code will be stored internally
    * and can be obtained by calling `exit_code.
    */
@@ -161,7 +159,7 @@ struct basic_process
   // Check if the process is referring to an existing process.
   /** Note that this might be a process that already exited.*/
   bool is_open() const;
-  
+
   // Asynchronously wait for the process to exit and deliver the native exit-code in the completion handler.
   template <BOOST_PROCESS_V2_COMPLETION_TOKEN_FOR(void (error_code, int))
   WaitHandler = net::default_completion_token_t<executor_type>>
