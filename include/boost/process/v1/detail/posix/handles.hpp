@@ -133,8 +133,9 @@ struct limit_handles_ : handler_base_ext
             if (std::find(used_handles.begin(), used_handles.end(), conv) != used_handles.end())
                 continue;
 
-            if (::close(conv) != 0)
+            if (::close(conv) == -1 && errno != EBADF)
             {
+                while (errno == EINTR && close(conv) == -1);
                 exec.set_error(::boost::process::v1::detail::get_last_error(), "close() failed");
                 return;
             }

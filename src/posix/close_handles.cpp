@@ -24,11 +24,19 @@
 // 
 // gives us
 //
-// int closefrom(int fd);
+// void closefrom(int lowfd);
 // int close_range(u_int lowfd, u_int highfd, int flags);
 
 #include <unistd.h>
 #define BOOST_PROCESS_V2_HAS_CLOSE_RANGE_AND_CLOSEFROM 1 
+
+#elif defined(__OpenBSD__)
+
+// https://man.openbsd.org/closefrom.2
+// int closefrom(int fd);
+
+#include <unistd.h>
+#define BOOST_PROCESS_V2_HAS_CLOSEFROM 1
 
 #elif defined(__sun)
 
@@ -113,16 +121,25 @@ void close_all(const std::vector<int> & whitelist, error_code & ec)
     ec = BOOST_PROCESS_V2_NAMESPACE::detail::get_last_error();
 }
 
-#elif defined(BOOST_PROCESS_V2_HAS_CLOSE_RANGE_AND_CLOSEFROM)
+#elif defined(BOOST_PROCESS_V2_HAS_CLOSEFROM) || \
+    defined(BOOST_PROCESS_V2_HAS_CLOSE_RANGE_AND_CLOSEFROM)
 
-// freeBSD impl - whitelist must be ordered
-void close_all(const std::vector<int> & whitelist, error_code & ec)
+/* FreeBSD and OpenBSD implementation - whitelist must be ordered.
+ * closefrom() differ, handle both implementation : reset errno and check EINTR.
+ */
+void close_all(const std::vector<int> & whitelist, error_code & /*ec*/)
 {
     //the most common scenario is whitelist = {0,1,2}
     if (!whitelist.empty())
     {
-        if (whitelist.front() != 0)
+        if (whitelist.front() != 0) {
+#if defined(BOOST_PROCESS_V2_HAS_CLOSE_RANGE_AND_CLOSEFROM)
             ::close_range(0, whitelist.front() - 1, 0);
+#else
+            for (int fd = 0; fd < whitelist.front(); fd++)
+                while (::close(fd) == -1 && errno == EINTR);
+#endif
+        }
 
         for (std::size_t idx = 0u; 
              idx < (whitelist.size() - 1u);
@@ -132,14 +149,29 @@ void close_all(const std::vector<int> & whitelist, error_code & ec)
             const auto next = whitelist[idx + 1];
             if ((mine + 1) != next && (mine != next))
             {
+#if defined(BOOST_PROCESS_V2_HAS_CLOSE_RANGE_AND_CLOSEFROM)
                 ::close_range(mine + 1, next - 1, 0);
+#else
+                for (int fd = mine + 1; fd < next; fd++)
+                    while (::close(fd) == -1 && errno == EINTR);
+#endif
             }
         }
 
-        ::closefrom(whitelist.back() + 1);
+        do
+        {
+            errno = 0;
+            ::closefrom(whitelist.back() + 1);
+        } while (errno == EINTR);
     }
     else
-        ::closefrom(0);
+    {
+        do
+        {
+            errno = 0;
+            ::closefrom(0);
+        } while (errno == EINTR);
+    }
 }
 
 #elif defined(BOOST_PROCESS_V2_HAS_CLOSE_RANGE)
