@@ -48,7 +48,6 @@ lib user32 ;
 lib ws2_32 ;
 
 lib kvm ;
-lib procstat ;
 
 lib boost_process
    : process_sources
@@ -63,7 +62,6 @@ lib boost_process
      <target-os>windows:<library>ws2_32
      <target-os>bsd:<library>kvm
      <target-os>freebsd:<library>kvm
-     <target-os>freebsd:<library>procstat
      <target-os>netbsd:<library>kvm
      <target-os>openbsd:<library>kvm
      <target-os>solaris:<library>kvm
