@@ -27,8 +27,12 @@ inline std::vector<native_handle_type> get_handles(std::error_code & ec)
     std::unique_ptr<DIR, void(*)(DIR*)> dir{::opendir("/dev/fd"), +[](DIR* p){::closedir(p);}};
     if (!dir)
     {
-        ec = ::boost::process::v1::detail::get_last_error();
-        return {};
+        dir = {::opendir("/proc/self/fd"), +[](DIR* p){::closedir(p);}};
+        if (!dir)
+        {
+            ec = ::boost::process::v1::detail::get_last_error();
+            return {};
+        }
     }
     else
         ec.clear();
@@ -60,7 +64,7 @@ inline std::vector<native_handle_type> get_handles()
 
     auto res = get_handles(ec);
     if (ec)
-        boost::process::v1::detail::throw_error(ec, "open_dir(\"/dev/fd\") failed");
+        boost::process::v1::detail::throw_error(ec, "open_dir(\"/dev/fd\") and open_dir(\"/proc/self/fd\") failed");
 
     return res;
 }
@@ -113,8 +117,12 @@ struct limit_handles_ : handler_base_ext
         auto dir = ::opendir("/dev/fd");
         if (!dir)
         {
-            exec.set_error(::boost::process::v1::detail::get_last_error(), "opendir(\"/dev/fd\")");
-            return;
+            dir = ::opendir("/proc/self/fd");
+            if (!dir)
+            {
+                exec.set_error(::boost::process::v1::detail::get_last_error(), "opendir(\"/proc/self/fd\")");
+                return;
+            }
         }
 
         auto my_fd = dirfd(dir);
