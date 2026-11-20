@@ -16,10 +16,14 @@
 #include <boost/process/v2/error.hpp>
 #include <boost/process/v2/shell.hpp>
 
+#if defined(__APPLE__)
+#include <TargetConditionals.h>
+#endif
+
 #if defined(BOOST_PROCESS_V2_WINDOWS)
 #include <windows.h>
 #include <shellapi.h>
-#elif !defined(__OpenBSD__) && !defined(__ANDROID__)
+#elif !defined(__OpenBSD__) && !defined(__ANDROID__) && !(defined(__APPLE__) && !TARGET_OS_OSX)
 #include <wordexp.h>
 #endif
 
@@ -30,7 +34,7 @@ BOOST_PROCESS_V2_DECL const error_category& get_shell_category()
 {
     return system_category();
 }
-#elif !defined(__OpenBSD__) && !defined(__ANDROID__)
+#elif !defined(__OpenBSD__) && !defined(__ANDROID__) && !(defined(__APPLE__) && !TARGET_OS_OSX)
 
 struct shell_category_t final : public error_category
 {
@@ -99,7 +103,7 @@ auto shell::args() const-> args_type
     return input_.c_str();
 }
 
-#elif !defined(__OpenBSD__) && !defined(__ANDROID__)
+#elif !defined(__OpenBSD__) && !defined(__ANDROID__) && !(defined(__APPLE__) && !TARGET_OS_OSX)
 
 void shell::parse_()
 {
