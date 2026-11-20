@@ -137,7 +137,7 @@ const environment::char_type * dereference(native_env_iterator iterator)
     return iterator;
 }
 
-#elif (defined(__APPLE___) || defined(__MACH__)) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun)
+#elif (defined(__APPLE___) || defined(__MACH__)) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun) || defined(__CYGWIN__)
 
 void native_env_handle_deleter::operator()(native_env_handle_type h) const
 {
@@ -309,7 +309,7 @@ env_view env(boost::process::v2::pid_type pid, error_code & ec)
     return ev;
 }
 
-#elif (defined(__linux__) || defined(__ANDROID__)) || defined(__gnu_hurd__)
+#elif (defined(__linux__) || defined(__ANDROID__)) || defined(__gnu_hurd__) || defined(__CYGWIN__)
 
 env_view env(boost::process::v2::pid_type pid, error_code & ec)
 {

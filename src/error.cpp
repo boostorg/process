@@ -124,7 +124,7 @@ struct exit_code_category final : public error_category
 #            if defined(SIGPROF)
                     case SIGPROF: return "SIGPROF:   Profiling timer expired";
 #            endif
-#            if defined(SIGPWR)
+#            if defined(SIGPWR) && !defined(__CYGWIN__) // cygwin defines it as SIGLOST
                     case SIGPWR: return "SIGPWR:    Power failure (System V)";
 #            endif
 #            if defined(SIGQUIT)
